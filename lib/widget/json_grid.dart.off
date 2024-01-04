@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+import 'package:pluto_grid/pluto_grid.dart';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:go_router/go_router.dart';
+
+class JsonGrid extends StatefulWidget {
+  const JsonGrid({super.key, this.id});
+
+  final String? id;
+
+  @override
+  State<JsonGrid> createState() => _JsonGridState();
+}
+
+class _JsonGridState extends State<JsonGrid> {
+  Future<Map<String, dynamic>> getTableView(String id) async {
+    final response =
+        await http.get(Uri.http('127.0.0.1:8080', "/v1/ui/tableview/$id"));
+    return json.decode(response.body);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    FutureBuilder(
+        future: getTableView(widget.id!),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            var listview = snapshot.data!;
+
+            var columns = json2columns(listview);
+            var rows = json2rows(listview);
+
+            return PlutoGrid(
+              columns: columns,
+              rows: rows,
+              onChanged: (PlutoGridOnChangedEvent event) {
+                print(event);
+/*                            context.go('/form/' '|tableview|'+widget.id!.toString()+'/'+
+                          listview["form_id"].toString() +
+                          "/" +
+                          listview["items"][index]['id'].toString())*/
+              },
+              configuration: const PlutoGridConfiguration(),
+            );
+          } else if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else {
+            return const SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(),
+            );
+          }
+        });
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Text('Error: NULL case'),
+    );
+  }
+/*
+  List<PlutoColumn> json2columns(Map<String, dynamic> data) {
+    List<PlutoColumn> cols;
+    
+    return cols;
+  }
+
+  List<PlutoRow> json2rows(Map<String, dynamic> data) {
+    List<PlutoRow> rows;
+
+    return rows;
+  }
+  */
+}
