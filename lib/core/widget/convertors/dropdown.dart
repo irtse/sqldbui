@@ -94,7 +94,7 @@ class _DropDownState extends State<DropDownWidget> {
     }
     developer.log('LOG DROPDOWN ${widget.label} ${widget.url}', name: 'my.app.category');
     return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.url!, firstAPI, null), 
+        future: APIService().get(widget.url!, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
           String? initialValue;

@@ -9,18 +9,18 @@ import 'package:sqldbui2/core/services/api_service.dart';
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 List<GlobalKey<FormState>> globalFormsKey = <GlobalKey<FormState>>[];
-Map<String, List<Map<String, dynamic>>> cacheForm = <String, List<Map<String, dynamic>>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
+  List<Map<String, dynamic>> cacheForm = [];
   List<DataFormWidget>wrappers = <DataFormWidget>[];
   final model.View? view;
   bool scroll;
   String superFormSchemaName;
   bool subForm;
   Map<String, String> wrappersURL = <String, String>{};
-  Map<String, List<DataFormWidget>> existingOneToManiesForm = <String, List<DataFormWidget>>{};
-  Map<String, List<DataFormWidget>> oneToManiesForm = <String, List<DataFormWidget>>{};
-  Map<String, List<DataFormWidget>> oneToManiesFormDelete = <String, List<DataFormWidget>>{};
+  List<DataFormWidget> existingOneToManiesForm = <DataFormWidget>[];
+  List<DataFormWidget> oneToManiesForm = <DataFormWidget>[];
+  List<DataFormWidget> oneToManiesFormDelete = <DataFormWidget>[];
   final formKey = GlobalKey<FormState>();
   DataFormWidget ({ Key? key, this.view, this.scroll = true, this.subForm = false, this.superFormSchemaName = "" }): super(key: key);
   @override FormWidgetState createState() => FormWidgetState();
@@ -67,7 +67,7 @@ class FormWidgetState extends State<DataFormWidget> {
             margin: const EdgeInsets.only(top: 15),
             width: MediaQuery.of(context).size.width - 200,
             child: FutureBuilder<APIResponse<model.View>>(
-              future: APIService().get<model.View>(url, false, null), 
+              future: APIService().get<model.View>(url, firstAPI, null), 
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
@@ -87,9 +87,6 @@ class FormWidgetState extends State<DataFormWidget> {
           )));
         } 
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
-        if (!cacheForm.containsKey(widget.view!.schemaName)) {
-            cacheForm[widget.view!.schemaName]=[];
-        } 
         for (var fieldName in widget.view!.order) {
           if (schema[fieldName] == null || (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { continue; }
           var field = schema[fieldName]!; 
@@ -98,7 +95,7 @@ class FormWidgetState extends State<DataFormWidget> {
             var v = refItem.valuesShallow[fieldName]!;
             value = v.label ?? v.name ?? v.id;
           }
-          if (refItem.valuesMany.containsKey(fieldName)) {  value = refItem.valuesMany[fieldName]!; }
+          if (refItem.valuesMany.containsKey(fieldName)) { value = refItem.valuesMany[fieldName]!; }
           if (refItem.valuesManyPath.containsKey(fieldName)) { value = refItem.valuesManyPath[fieldName]!; }
           var readOnly = (field.readonly || mainForm.currentState!.widget.view!.readOnly) && !widget.view!.isEmpty;
           if (newCacheEntry[fieldName] == null) { newCacheEntry[fieldName]=value; } 
@@ -129,7 +126,7 @@ class FormWidgetState extends State<DataFormWidget> {
             }
           } 
         }
-         cacheForm[widget.view!.schemaName]!.add(newCacheEntry);
+        widget.cacheForm.add(newCacheEntry);
       }
       globalFormsKey.add(widget.formKey);
       var form = Form( key: widget.formKey, 

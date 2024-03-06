@@ -2,11 +2,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'dart:developer' as developer;
 import 'package:alert_banner/exports.dart';
-import 'package:flutter/material.dart';
 
 var firstAPI = true;
 
@@ -43,52 +43,34 @@ class APIService {
       default : return await get(url, force, context);
     }
   }
-  Future<APIResponse<T>> get<T extends SerializerDeserializer>(String url, bool force, BuildContext? context) async {
+
+  Future<Response> request<T extends SerializerDeserializer>(String url, String method, Map<String, dynamic>? body) async {
+    switch (method.toLowerCase()) {
+      case 'get' : return await dio.get(url);
+      case 'post' : return await dio.post(url, data:body);
+      case 'put' : return await dio.put(url, data:body!);
+      case 'delete' : return await dio.delete(url);
+      default : return await dio.get(url);
+    }
+  }
+
+  Future<APIResponse<T>> main<T extends SerializerDeserializer>(String url, Map<String, dynamic>? body, 
+                                                                String method, String succeed, bool force, BuildContext? context) async {
     var err = ""; 
     // developer.log('LOG URL ${url}', name: 'my.app.category');
     if (url != "") {
       if (cache.containsKey(url) && !force) { return cache[url]! as APIResponse<T>; }
       try {
         dio.options.headers["authorization"] = auth;
-        var response = await dio.get(url);
+        var response = await request(url, method, body);
         if (response.statusCode != null && response.statusCode! < 400) {
-          APIResponse<T> resp = APIResponse<T>().deserialize(response.data);
+          APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>);
           if (resp.error == "") { 
-            cache[url]=resp;
-            return resp; 
-          }
-          err = resp.error ?? "internal error";
-        } 
-        if (response.statusCode == 401) { err = "not authorized"; }
-      } catch(e) { err = e.toString(); }
-    } else { err = "no url"; }
-    if (context != null) {
-      showAlertBanner( // <-- The function!
-                context,
-                () {},
-                AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
-    } 
-    throw Exception(err);
-  }
-
-  Future<APIResponse<T>> post<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
-    var err = ""; 
-    if (url != "") {
-      try {
-        dio.options.headers["authorization"] = auth;
-        var response = await dio.post(url, data: values);
-        if (response.statusCode != null &&  response.statusCode! < 400) {
-          APIResponse<T> resp = APIResponse<T>().deserialize(response.data);
-          if (resp.error == "") { 
-            if (context != null) {
-              showAlertBanner( // <-- The function!
-                context,
-                () {},
-                InfoAlertBannerChild(text: "send succeed"), // <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
+            if (method == "get") { cache[url]=resp; }
+            if (context != null && succeed != "") {
+              // ignore: use_build_context_synchronously
+              showAlertBanner(context, () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
+                alertBannerLocation:  AlertBannerLocation.bottom,);
             }
             return resp; 
           }
@@ -98,147 +80,27 @@ class APIService {
       } catch(e) { err = e.toString(); }
     } else { err = "no url"; }
     if (context != null) {
+      // ignore: use_build_context_synchronously
       showAlertBanner( // <-- The function!
-                context,
-                () {},
-                AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
+                context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
+                alertBannerLocation:  AlertBannerLocation.bottom,);
     } 
     throw Exception(err);
+  }
+
+  Future<APIResponse<T>> get<T extends SerializerDeserializer>(String url, bool force, BuildContext? context) async {
+    return main(url, null, "get", "", force, context);
+  }
+
+  Future<APIResponse<T>> post<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
+    return main(url, values, "post", "send succeed", true, context);
   }
 
   Future<APIResponse<T>> put<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
-    var err = ""; 
-    if (url != "") {
-      try {
-        dio.options.headers["authorization"] = auth;
-        var response = await dio.put(url, data: values);
-        if (response.statusCode != null && response.statusCode! < 400) {
-          APIResponse<T> resp = APIResponse<T>().deserialize(response.data);
-          if (resp.error == "") { 
-            if (context != null) {
-              showAlertBanner( // <-- The function!
-                context,
-                () {},
-                InfoAlertBannerChild(text: "save succeed"), // <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
-            } 
-            return resp; 
-          }
-          err = resp.error ?? "internal error";
-        } 
-        if (response.statusCode == 401) { err = "not authorized"; }
-      } catch(e) { err = e.toString(); }
-    } else { err = "no url"; }
-    if (context != null) {
-      showAlertBanner( // <-- The function!
-                context,
-                () {},
-                AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
-    } 
-    throw Exception(err);
+    return main(url, values, "put", "save succeed", true, context);
   }
 
   Future<APIResponse<T>> delete<T extends SerializerDeserializer>(String url, BuildContext? context) async {
-    var err = ""; 
-    if (url != "") {
-      try {
-        dio.options.headers["authorization"] = auth;
-        var response = await dio.delete(url);
-        if (response.statusCode != null && response.statusCode! < 400) {
-          APIResponse<T> resp = APIResponse<T>().deserialize(response.data);
-          if (resp.error == "") { 
-            if (context != null) {
-              showAlertBanner( // <-- The function!
-                context,
-                () {},
-                InfoAlertBannerChild(text: "deletion succeed"), // <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
-              } 
-            cache.remove(url);
-            return resp; 
-          }
-          err = resp.error ?? "internal error";
-        } 
-        if (response.statusCode == 401) { err = "not authorized"; }
-      } catch(e) { err = e.toString(); }
-    } else { err = "no url"; }
-    if (context != null) {
-      showAlertBanner( // <-- The function!
-                context,
-                () {},
-                AlertAlertBannerChild(text: err), // <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,
-              );
-    } 
-    throw Exception(err);
-  }
-}
-
-
-class InfoAlertBannerChild extends StatelessWidget {
-  final String text;
-  const InfoAlertBannerChild({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-      decoration: const BoxDecoration(
-        color: Colors.greenAccent,
-        borderRadius: BorderRadius.all(
-          Radius.circular(5),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Material(
-          color: Colors.transparent,
-          child: Text(text,
-            style: TextStyle(color: Colors.white, fontSize: 18),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class AlertAlertBannerChild extends StatelessWidget {
-  final String text;
-  const AlertAlertBannerChild({super.key, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
-      decoration: const BoxDecoration(
-        color: Colors.redAccent,
-        borderRadius: BorderRadius.all(
-          Radius.circular(5),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(10),
-        child: Material(
-          color: Colors.transparent,
-          child: Text( text,
-            style: TextStyle(color: Colors.white, fontSize: 18),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
+    return main(url, null, "delete", "deletion succeed", true, context);
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 abstract class SerializerDeserializer<T> {
   T deserialize(Map<String, dynamic> json);
@@ -7,13 +8,17 @@ abstract class SerializerDeserializer<T> {
 
 Map<String, List<T>> fromMapListJson<T extends SerializerDeserializer>(Map<String, dynamic> j, SerializerDeserializer ref) {
     var map = <String, List<T>>{};
-    for (var key in j.keys) {  map[key] = fromListJson(j[key]!, ref); }
+    for (var key in j.keys) {  
+      if(j[key] != null) { map[key] = fromListJson(j[key], ref); }
+    }
     return map;
 }
 
 Map<String, T> fromMapJson<T extends SerializerDeserializer>(Map<String, dynamic> j, SerializerDeserializer ref) {
     var map = <String, T>{};
-    for (var key in j.keys) {  map[key] = ref.deserialize(json.decode(json.encode(j[key]!))); }
+    for (var key in j.keys) {  
+      if(j[key] != null) { map[key] = ref.deserialize(json.decode(json.encode(j[key]))); }
+    }
     return map;
 }
 

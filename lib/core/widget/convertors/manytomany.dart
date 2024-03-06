@@ -49,7 +49,7 @@ class _ManyToManyState extends State<ManyToManyWidget> {
       return Padding(child: Column(children: [
         Row(children: [Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}:", style: TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags,)]) ]), 
-      padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),);
+      padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),);
     } else {
       String? url;
       for (var fieldName in scheme.schema.keys) {
@@ -58,33 +58,34 @@ class _ManyToManyState extends State<ManyToManyWidget> {
         }
       }
       return FutureBuilder<APIResponse<model.Shallowed>>(
-      future: APIService().get(url ?? "", firstAPI, null), 
+      future: APIService().get(url ?? "", true, null), 
       builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
         List<MultiSelectItem> items = <MultiSelectItem>[];
         widget.form[widget.name] = <dynamic>[];
         if (snap.hasData && snap.data!.data != null) {
+          developer.log('LOG D ${widget.label} ${widget.value}', name: 'my.app.category');
           for (var item in snap.data!.data!) {
             var v = item.label ?? item.name ?? "${item.id}";
             var ser = item.serialize();
             items.add(MultiSelectItem(ser, v.toLowerCase()));
-            if (!widget.component.widget.view!.isEmpty && widget.value != null) { 
+            if (widget.value != null) { 
               for (var val in widget.value as List<model.Shallowed>) {
                 if (val.id == item.id) { widget.form[widget.name].add(ser); }
               }
             }
           }
         }
-        return Padding( child: MultiSelectDialogField(
+        return Padding( padding: const EdgeInsets.only(left: 25, right: 25, bottom: 15), child: MultiSelectDialogField(
                                 initialValue: widget.form[widget.name],
                                 validator: (value) => (value == null || value.isEmpty) && widget.require ? 'do not leave empty' : null,
-                                title: Padding(child: Text( "${widget.label.toUpperCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Theme.of(context).primaryColor ), ), padding: const EdgeInsets.only(left: 30)),
+                                title: Padding(padding: const EdgeInsets.only(left: 30), child: Text( "${widget.label.toUpperCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Theme.of(context).primaryColor ), )),
                                 buttonText: Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Colors.black, fontSize: 14, ), ),
                                 items: items,
                                 listType: MultiSelectListType.CHIP,
                                 onConfirm: (values) { widget.form[widget.name]=values; },
                                 onSaved: (values) { widget.form[widget.name]=values; },
                                 onSelectionChanged: (values) { widget.form[widget.name]=values; },
-                            ), padding: const EdgeInsets.only(left: 25, right: 25, bottom: 15));
+                            ));
         });
       }
     }
