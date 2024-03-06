@@ -15,8 +15,9 @@ class DataFormWidget extends StatefulWidget {
   List<DataFormWidget>wrappers = <DataFormWidget>[];
   final model.View? view;
   bool scroll;
-  String superFormSchemaName;
   bool subForm;
+  bool detectChange = false;
+  String superFormSchemaName;
   Map<String, String> wrappersURL = <String, String>{};
   List<DataFormWidget> existingOneToManiesForm = <DataFormWidget>[];
   List<DataFormWidget> oneToManiesForm = <DataFormWidget>[];
@@ -28,6 +29,7 @@ class DataFormWidget extends StatefulWidget {
 class FormWidgetState extends State<DataFormWidget> {
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
+      widget.detectChange = false;
       additionnal = [];
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];

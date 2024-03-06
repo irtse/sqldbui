@@ -59,12 +59,12 @@ class APIService {
     var err = ""; 
     // developer.log('LOG URL ${url}', name: 'my.app.category');
     if (url != "") {
-      if (cache.containsKey(url) && !force) { return cache[url]! as APIResponse<T>; }
+      if (cache.containsKey(url) && !force && cache[url] != null) { return cache[url]! as APIResponse<T>; }
       try {
         dio.options.headers["authorization"] = auth;
         var response = await request(url, method, body);
         if (response.statusCode != null && response.statusCode! < 400) {
-          APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>);
+          APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
             if (method == "get") { cache[url]=resp; }
             if (context != null && succeed != "") {
@@ -77,13 +77,12 @@ class APIService {
           err = resp.error ?? "internal error";
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
-      } catch(e) { err = e.toString(); }
+      } catch(e) {  err = e.toString(); }
     } else { err = "no url"; }
     if (context != null) {
       // ignore: use_build_context_synchronously
-      showAlertBanner( // <-- The function!
-                context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
-                alertBannerLocation:  AlertBannerLocation.bottom,);
+      showAlertBanner( context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
+                       alertBannerLocation:  AlertBannerLocation.bottom,);
     } 
     throw Exception(err);
   }

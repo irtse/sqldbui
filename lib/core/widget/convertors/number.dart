@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
+import 'package:sqldbui2/core/widget/form.dart';
+
 class NumberWidget extends StatefulWidget {
+  final FormWidgetState component;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
@@ -13,7 +16,7 @@ class NumberWidget extends StatefulWidget {
   final String label;
   NumberWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
-                      required this.require, required this.type}): super(key: key);
+                      required this.require, required this.type, required this.component}): super(key: key);
   @override
   _NumberState createState() => _NumberState();
 }
@@ -22,14 +25,14 @@ class _NumberState extends State<NumberWidget> {
     if (widget.form[widget.name] != null) { 
       widget.value = widget.form[widget.name]; 
     }
-    var func = (String? value) {
+    func(String? value) {
       try {
         if (value == null) { widget.form[widget.name]=null;
         } else if (widget.type.contains("int")) { 
           widget.form[widget.name]=int.parse(value);
         } else { widget.form[widget.name]=double.parse(value); }
-      } catch (e) {}
-    };
+      } catch (e) { /* empty and proud to be */}
+    }
     return SizedBox(width: 300, height: 30, child: TextFormField(
           readOnly: widget.readOnly,
           initialValue: widget.value != null ? "${widget.value}" : "", 
@@ -47,7 +50,15 @@ class _NumberState extends State<NumberWidget> {
             errorStyle: const TextStyle(fontSize: 0,),
           ),
           onSaved: func,
-          onChanged: func,
+          onChanged: (String? value) {
+            widget.component.widget.detectChange = true;
+            try {
+              if (value == null) { widget.form[widget.name]=null;
+              } else if (widget.type.contains("int")) { 
+                widget.form[widget.name]=int.parse(value);
+              } else { widget.form[widget.name]=double.parse(value); }
+            } catch (e) { /* empty and proud to be */}
+          },
           keyboardType: TextInputType.numberWithOptions(
               signed: false,
               decimal: widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("money"),

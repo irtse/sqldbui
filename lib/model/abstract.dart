@@ -30,7 +30,9 @@ List<T> fromListJson<T extends SerializerDeserializer>(List<dynamic> jss, Serial
 
 Map<String, Map<String, dynamic>> toMapJson<T extends SerializerDeserializer>(Map<String, T> json) {
     var map = <String, Map<String, dynamic>>{};
-    for (var key in json.keys) { map[key] = json[key]!.serialize(); }
+    for (var key in json.keys) { 
+      if(json[key] != null) { map[key] = json[key]!.serialize(); }
+    }
     return map;
 }
 

@@ -1,16 +1,21 @@
 import 'dart:developer' as developer;
+import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/actionbar.dart';
+import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 
+List<String> errors = <String>[];
 @lazySingleton
 class ActionService {
   static void Function() pressed(ActionBarWidget widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, String method, BuildContext context) {
+      errors = [];
       if (!isList && widget.form != null) { return pressedForm(widget, mainForm, schemaName, url, schema, method, context); }
       if (isList && widget.grid != null) { return pressedList(widget, schemaName, url, schema, method, context); }
       return () {};
@@ -20,13 +25,16 @@ class ActionService {
   static void Function() pressedForm(ActionBarWidget widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context,) { 
       return () async {
+        globalActionBar.currentState!.loading(method);
         if (mainForm.currentState != null) {
           await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, {});
         }
+        globalActionBar.currentState!.loaded(method);
       };
   }
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
-                                                    Map<String,model.SchemaField> schema, String method, BuildContext context, Map<String, dynamic> add) async {  
+                                                    Map<String,model.SchemaField> schema, String method, 
+                                                    BuildContext context, Map<String, dynamic> add) async {  
     if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) {  return []; 
     } else { form.formKey.currentState!.save(); }
     var body = <String, dynamic>{};
@@ -35,6 +43,21 @@ class ActionService {
     if (resp.isNotEmpty) {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
       body["dbschema_id"]=resp.first.schemaID;
+    }
+    if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
+        form.detectChange = true;
+        for (var values in form.cacheForm) {
+          // ignore: use_build_context_synchronously
+          formSubForms(form.existingOneToManiesForm, values, method, schemaName, context, false, false);
+        }
+    }
+    if (!form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty) {
+      if (form.view!.id == mainForm.currentState!.widget.view!.id) {
+        // ignore: use_build_context_synchronously
+        showAlertBanner(context, () {}, const InfoAlertBannerChild(text: "Nothing has change :)"), // <-- Put any widget here you want!
+                      alertBannerLocation:  AlertBannerLocation.bottom,);
+      }
+      return views; 
     }
     var path = url;
     for (var values in form.cacheForm) {
@@ -46,21 +69,27 @@ class ActionService {
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
           && values[fieldName] is! List) { body[fieldName]=values[fieldName]; }
         }
+        for (var k in add.keys) { body[k] = add[k]; }
       }
-      developer.log('LOG URL ${form.view!.actions.contains(method.toLowerCase())} $path $body', name: 'my.app.category');
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
-        await APIService().call<model.View>(path, method, body, true, context).then((value) async {
-          formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.oneToManiesFormDelete, {}, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
+        await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 
             values["id"]=value.data![0].items[0].values["id"];
             listSubForms(schema, values, method, schemaName, context);
           } 
+          formSubForms(form.oneToManiesForm, values, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+          formSubForms(form.existingOneToManiesForm, values, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+          formSubForms(form.oneToManiesFormDelete, values, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
+          if (form.view!.id == mainForm.currentState!.widget.view!.id) {
+            showAlertBanner(context, () {}, 
+              InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (method == "put" ? "save" : method)} datas suceed :)"), // <-- Put any widget here you want!
+                                   alertBannerLocation:  AlertBannerLocation.bottom,);
+          }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
+          errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}");
           listSubForms(schema, values, method, schemaName, context);
           formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
@@ -69,8 +98,16 @@ class ActionService {
         });      
       }
       if (form.view!.id == mainForm.currentState!.widget.view!.id) {
+        Future.delayed(const Duration(seconds: 1), () { globalActionBar.currentState!.refresh(); });
         mainForm.currentState!.additionnal = [];
-        firstAPI=true;
+        APIService.cache = {};
+        var errorStr = "";
+        for (var error in errors) { errorStr += "- $error \n"; }
+        if (errorStr != "") {
+          // ignore: use_build_context_synchronously
+          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
+                          alertBannerLocation:  AlertBannerLocation.top,);
+        }
       }
     }
     return views;
@@ -78,7 +115,8 @@ class ActionService {
   static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, BuildContext context) async {
     for (var fieldName in schema.keys) {
       if (values[fieldName] is List) {
-        await APIService().delete("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", context).catchError( (e) => APIResponse<model.View>(data: null));
+        await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", null
+                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
         for (var item in values[fieldName] as List) {
           var newBody = <String, dynamic> {};
           for (var f in schema[fieldName]!.schema.keys) {
@@ -86,7 +124,8 @@ class ActionService {
             } else if (f.contains("_id")) { newBody[f]=item["id"];  }
           } 
           // ignore: use_build_context_synchronously
-          await APIService().call<model.View>(schema[fieldName]!.actionPath, method, newBody, true, context).catchError( (e) => APIResponse<model.View>(data: null));
+          await APIService().call<model.View>(schema[fieldName]!.actionPath, method, newBody, true, null
+                                             ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
         }
       }
     }
@@ -97,10 +136,10 @@ class ActionService {
     for (var many in widgets) { 
       if (delete && many.view != null && many.view!.actions.contains("delete") 
       && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
-        // ignore: use_build_context_synchronously
-        await APIService().delete("${many.view!.actionPath}&id=${many.view!.items[0].values["id"]}", context).catchError( (e) => APIResponse<model.View>(data: null));
+        developer.log('LOG URL ${many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}")}', name: 'my.app.category');
+        await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null
+                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
       } else if (many.view != null && many.view!.actions.contains(method)) {
-        // ignore: use_build_context_synchronously
         if (add) { views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}));
         } else { await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
@@ -111,4 +150,4 @@ class ActionService {
     return views;
   }
 }
-// detect change + debug manyto oneto + loader
+// debug oneto + loader main

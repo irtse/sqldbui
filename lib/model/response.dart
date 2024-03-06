@@ -29,6 +29,7 @@ class APIResponse<T extends SerializerDeserializer> {
   }
 
   APIResponse<T> deserialize(Map<String, dynamic> j) {
+    developer.log('LOG URL ${T}', name: 'my.app.category');
     return APIResponse<T>(
       data: fromListJson<T>(j["data"], refs[T]!), 
       error: j.containsKey("error") && j["error"] != null ? j["error"] : "",

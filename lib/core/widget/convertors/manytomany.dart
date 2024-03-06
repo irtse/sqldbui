@@ -46,10 +46,10 @@ class _ManyToManyState extends State<ManyToManyWidget> {
           child: Text(val.label ?? val.name ?? "${val.id}", style: const TextStyle(color: Colors.white)), )));
         }
       }
-      return Padding(child: Column(children: [
-        Row(children: [Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}:", style: TextStyle( color: Colors.black, fontSize: 14, ), )]),
-        Row(children: [Wrap(children: tags,)]) ]), 
-      padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),);
+      return Padding(padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),child: Column(children: [
+        Row(children: [Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}:", 
+            style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
+        Row(children: [Wrap(children: tags,)]) ]),);
     } else {
       String? url;
       for (var fieldName in scheme.schema.keys) {
@@ -63,7 +63,6 @@ class _ManyToManyState extends State<ManyToManyWidget> {
         List<MultiSelectItem> items = <MultiSelectItem>[];
         widget.form[widget.name] = <dynamic>[];
         if (snap.hasData && snap.data!.data != null) {
-          developer.log('LOG D ${widget.label} ${widget.value}', name: 'my.app.category');
           for (var item in snap.data!.data!) {
             var v = item.label ?? item.name ?? "${item.id}";
             var ser = item.serialize();
@@ -84,7 +83,10 @@ class _ManyToManyState extends State<ManyToManyWidget> {
                                 listType: MultiSelectListType.CHIP,
                                 onConfirm: (values) { widget.form[widget.name]=values; },
                                 onSaved: (values) { widget.form[widget.name]=values; },
-                                onSelectionChanged: (values) { widget.form[widget.name]=values; },
+                                onSelectionChanged: (values) { 
+                                  widget.component.widget.detectChange = true;
+                                  widget.form[widget.name]=values; 
+                                },
                             ));
         });
       }

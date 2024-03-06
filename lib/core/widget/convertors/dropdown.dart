@@ -5,14 +5,15 @@ import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
+// ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
+  final FormWidgetState component;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
   final bool readOnly;
   final bool require;
   dynamic value;
-  final FormWidgetState component;
   final String? url;
   final String type;
   final String label;
@@ -46,13 +47,14 @@ class _DropDownState extends State<DropDownWidget> {
       var values = widget.type.replaceAll("enum:", "").split(",");
       for (var item in values) { 
         if (item == widget.value) { items.insert(0, DropdownMenuItem<String>(child: Text(item), value: item,)); 
-        } else { items.add(DropdownMenuItem<String>(child: Text(item), value: item,));  }
+        } else { items.add(DropdownMenuItem<String>(value: item,child: Text(item),));  }
         
       }
       return DropdownButtonFormField<String>( items: items, 
         value: widget.value ?? ( values.isNotEmpty ? values[0] : null),
         style: const TextStyle(fontSize: 14, color: Colors.black),
         onChanged: (value) {
+          widget.component.widget.detectChange = true;
           if (value == null) { widget.form[widget.name]=null;
           } else { widget.form[widget.name]=value; }
         },
@@ -92,7 +94,6 @@ class _DropDownState extends State<DropDownWidget> {
                         labelText: widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' '),
                       ) ));
     }
-    developer.log('LOG DROPDOWN ${widget.label} ${widget.url}', name: 'my.app.category');
     return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.url!, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
@@ -123,7 +124,7 @@ class _DropDownState extends State<DropDownWidget> {
               if (!mapped.containsKey(v)) {
                 mapped[v]=item;
                 if(widget.component.widget.view!.isEmpty || !(widget.component.widget.view!.isEmpty && !item.actions.contains("post"))) {
-                  items.add(DropdownMenuItem<String>( child: Text(v), value: v,));
+                  items.add(DropdownMenuItem<String>(value: v, child: Text(v),));
                 }
               }
             }
@@ -133,6 +134,7 @@ class _DropDownState extends State<DropDownWidget> {
               items: items, 
               style: const TextStyle(fontSize: 14, color: Colors.black),
               onChanged: (value) {
+                widget.component.widget.detectChange = true;
                 if (value == null) { widget.form[widget.name]=null;
                 } else { widget.form[widget.name]=mapped[value]!.id; }
                 var item = mapped[value];

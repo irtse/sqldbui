@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -14,6 +15,7 @@ class MenuWidget extends StatefulWidget{
   @override MenuWidgetState createState() => MenuWidgetState();
 }
 class MenuWidgetState extends State<MenuWidget> {
+  bool loading = true;
   @override Widget build(BuildContext context) {
     var additionnalContent = <Widget>[];
     var id = homeKey.currentState!.widget.viewID;
@@ -24,6 +26,7 @@ class MenuWidgetState extends State<MenuWidget> {
       }
       if (view == null && widget.views != null && widget.views!.isNotEmpty) { view = widget.views![0]; }
       if (view != null) {
+        if (APIService.cache.containsKey(view.linkPath) && !firstAPI) { loading = false; }
         additionnalContent.add(FutureBuilder<APIResponse<model.View>>(
         future: APIService().get<model.View>(view.linkPath, firstAPI, context), // a previously-obtained Future<String> or null
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
@@ -42,11 +45,13 @@ class MenuWidgetState extends State<MenuWidget> {
                     if (sn.hasData && sn.data!.data != null && sn.data!.data!.isNotEmpty) {
                        currentView=sn.data!.data![0];
                     }
+                    if (loading) { Future.delayed(const Duration(seconds: 1), () { setState(() { loading = false; }); }); }
                     return ViewWidget(key: currentView != null ? globalViewKey : null);
                   });
                 }
               }   
             }
+            if (loading) { Future.delayed(const Duration(seconds: 1), () { setState(() { loading = false; }); }); }
             return ViewWidget(key: currentView != null ? globalViewKey : null);
         }));
       }
@@ -71,7 +76,8 @@ class MenuWidgetState extends State<MenuWidget> {
           child: ExpansionTile(
             initiallyExpanded: true,
             backgroundColor: Theme.of(context).primaryColor,
-            title: Row( children: [Padding(child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,), padding: EdgeInsets.only(right: 10),), 
+            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10),
+                                           child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
               Text(cat.toUpperCase(), style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11,),) ]), 
             iconColor: Theme.of(context).highlightColor, 
             collapsedIconColor: Theme.of(context).highlightColor,
@@ -95,6 +101,7 @@ class MenuWidgetState extends State<MenuWidget> {
                         selected: "${catIndex.id}" == homeKey.currentState!.widget.viewID,
                         onTap: () async {
                           setState(() {
+                            loading = true;
                             currentView = null;
                             homeKey.currentState!.widget.subViewID=null;
                             homeKey.currentState!.widget.viewID='${catIndex.id}';
@@ -102,7 +109,7 @@ class MenuWidgetState extends State<MenuWidget> {
                         },
                         tileColor: Theme.of(context).secondaryHeaderColor,
                         iconColor: Colors.white,
-                        title: Padding( child: Text(catIndex.name, style: const TextStyle(fontSize: 13.0,)), padding: EdgeInsets.only(left: 10, right: 10)),
+                        title: Padding( padding: const EdgeInsets.only(left: 10, right: 10), child: Text(catIndex.name, style: const TextStyle(fontSize: 13.0,))),
                         visualDensity: const VisualDensity(vertical: -4), // to compact
                         textColor: Colors.white,
                         hoverColor: Theme.of(context).selectedRowColor,
@@ -116,14 +123,21 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     firstAPI = false;
+    List<Widget> content = [];
+    if (loading) {
+      content.add(Stack(children: additionnalContent..add(
+                    Container(width: MediaQuery.of(context).size.width - 250, height: MediaQuery.of(context).size.height - 40,
+                              color: Theme.of(context).secondaryHeaderColor.withOpacity(0.5),
+                              child: const SpinKitCircle(color: Colors.white, size: 100.0,))
+                    ),));
+    } else { content = additionnalContent; }
     return Row(children: [ 
-      Container( child: SingleChildScrollView(
+      Container( color: Theme.of(context).secondaryHeaderColor,
+      height: MediaQuery.of(context).size.height - 40, child: SingleChildScrollView(
         child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: comps
-      ),), 
-      color: Theme.of(context).secondaryHeaderColor,
-      height: MediaQuery.of(context).size.height - 40,)
-    ]..addAll(additionnalContent));
+      ),),)
+    ]..addAll(content));
   }
 }

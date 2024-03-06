@@ -17,11 +17,11 @@ class ViewWidgetState extends State<ViewWidget> {
     if (currentView != null) {
       if (currentView!.isList == true && homeKey.currentState!.widget.subViewID == null) { 
         DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: currentView, viewKey: globalViewKey,);
-        return Column( children: [ ActionBarWidget(view: currentView, grid: w, gridKey: globalGridKey, viewKey: globalViewKey), w]);
+        return Column( children: [ ActionBarWidget(key: globalActionBar, view: currentView, grid: w, gridKey: globalGridKey, viewKey: globalViewKey), w]);
       } else { 
         DataFormWidget w =  DataFormWidget(key: mainForm, view: currentView);
-        return Column( children: [ ActionBarWidget(view: currentView, viewKey: globalViewKey, form: w ), w ] ); }
+        return Column( children: [ ActionBarWidget(key: globalActionBar, view: currentView, viewKey: globalViewKey, form: w ), w ] ); }
     }
-    return Column( children: [ ActionBarWidget(view: currentView, ) ], );
+    return Column( children: [ ActionBarWidget(key: globalActionBar, view: currentView, ) ], );
   }
 }

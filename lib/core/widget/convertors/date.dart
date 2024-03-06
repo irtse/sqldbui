@@ -1,7 +1,9 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/form.dart';
 
 class DateWidget extends StatefulWidget {
+  final FormWidgetState component;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
@@ -10,7 +12,8 @@ class DateWidget extends StatefulWidget {
   final String label;
   final String type;
   DateWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
-                      required this.readOnly, required this.type, required this.value, required this.label}): super(key: key);
+                      required this.readOnly, required this.type, required this.value, required this.label,
+                      required this.component}): super(key: key);
   @override
   _DateState createState() => _DateState();
 }
@@ -39,6 +42,7 @@ class _DateState extends State<DateWidget> {
         value: dateValue,
         lastDate: DateTime(date.year + 1, date.month, date.day),
         onChanged: (DateTime? value) { 
+          widget.component.widget.detectChange = true;
           setState(() {
             dateValue=value!; 
             widget.form[widget.name]=value.toIso8601String(); 

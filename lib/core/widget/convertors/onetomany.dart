@@ -13,11 +13,11 @@ class OneToManyWidget extends StatefulWidget {
   bool canPost = false;
   final bool require;
   dynamic value;
-  final FormWidgetState component;
   final String? url;
   final String type;
   final String label;
   var isFilled = true;
+  final FormWidgetState component;
   OneToManyWidget ({ Key? key, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
                       required this.require, required this.type, required this.url, required this.component}): super(key: key);
@@ -33,31 +33,28 @@ class _OneToManyState extends State<OneToManyWidget> {
     var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
     if (widget.value != null) {
       return FutureBuilder<APIResponse<model.View>>(
-        future: APIService().get(widget.value, true, null), 
+        future: APIService().get(widget.value, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
           List<Widget> items = <Widget>[];
           if (snap.data != null) {
             for (var data in snap.data!.data!) {
-              var isDeleted = false; var isFounded = false;
-              var w = widget.component.widget.oneToManiesFormDelete;
-              for (var deleted in w) {
-                if (deleted.view!.id == data.id) { isDeleted = true; break; }
-              }
-              var of = widget.component.widget.oneToManiesForm;
-              for (var setted in of) {
-                if (setted.view!.items.isNotEmpty && setted.view!.items[0].values["id"] == data.id) { isFounded = true; break; }
-              }
-              if (isDeleted || isFounded) { continue; }
               widget.readOnly = (!data.actions.contains("put") || mainForm.currentState!.widget.view!.readOnly);
               widget.canPost = data.actions.contains("post");
               for (var item in data.items) {
-                var view = model.View(name: data.name, readOnly: widget.readOnly,
+                var isDeleted = false;
+                var w = widget.component.widget.oneToManiesFormDelete;
+                for (var deleted in w) {
+                  if ("${deleted.view!.id}" == "${item.values["id"]}") { isDeleted = true; break; }
+                }
+                if (isDeleted) { continue; }
+                var view = model.View(id: int.parse(item.values["id"]), name: data.name, readOnly: widget.readOnly,
                                   actions: data.actions, actionPath: data.actionPath, schemaName: data.schemaName,
                                   schema: data.schema, order: data.order, isEmpty: false, items: <model.Item>[item]);
                 var dataForm = DataFormWidget(view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName,);
                 if (!widget.readOnly && data.actions.contains("delete")) {
                   var w = Stack(children: [dataForm,
                             Positioned(top: 50, left: MediaQuery.of(context).size.width - 450, child: IconButton(onPressed: () {
+                              widget.component.widget.detectChange = true;
                               setState(() {
                                 var w = widget.component.widget.oneToManiesFormDelete;
                                 w.add(dataForm);
@@ -82,6 +79,7 @@ class _OneToManyState extends State<OneToManyWidget> {
     if (!readOnly && canPost) {
         var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
+          widget.component.widget.detectChange = true;
           var mapped = <String, dynamic>{};
           List<String> order = <String>[];
           for (var fieldName in scheme.schema.keys) { 
@@ -96,12 +94,13 @@ class _OneToManyState extends State<OneToManyWidget> {
         },));
         if (filtered.isNotEmpty) {
           rows.add(IconButton(icon: const Icon(Icons.remove), onPressed: (){ 
-          setState(() { 
-            var val = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
-            if (val.isNotEmpty) {
-              widget.component.widget.oneToManiesForm.remove(val.last); 
-            }
-          }); },));
+            widget.component.widget.detectChange = true;
+            setState(() { 
+              var val = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
+              if (val.isNotEmpty) {
+                widget.component.widget.oneToManiesForm.remove(val.last); 
+              }
+            }); },));
         }
     }
     return rows;

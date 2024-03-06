@@ -100,7 +100,6 @@ class View extends SerializerDeserializer<View> {
     this.readOnly = false,
     this.wrapperSchema,
     this.wrapper,
-    this.parameters,
     this.actionPath = "",
     this.order = emptyStr, 
     this.schemaID,
@@ -124,7 +123,6 @@ class View extends SerializerDeserializer<View> {
   int? schemaID;
   Map<String, SchemaField> schema;
   Map<String, SchemaField>? wrapperSchema;
-  List<String>? parameters;
   List<dynamic> order;
 
   @override deserialize(Map<String, dynamic> json) {
@@ -144,7 +142,6 @@ class View extends SerializerDeserializer<View> {
     wrapper: json.containsKey("wrapper") && json["wrapper"] != null ? View().deserialize(json["wrapper"]) : null,
     schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{},
     schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
-    parameters: json.containsKey("parameters") && json["parameters"] != null ? json["parameters"] : <String>[],  
     order: json.containsKey("order") && json["order"] != null ? json["order"] : <String>[],  
     label: json.containsKey("label") ? json["label"] : null,
     linkPath: json.containsKey("link_path") && json["link_path"] != null ? json["link_path"] : "", );
