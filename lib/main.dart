@@ -1,6 +1,6 @@
-import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/page/login.dart';
@@ -58,6 +58,7 @@ class HomeScreenState extends State<HomeScreen> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     if (!AuthService().isLoggedIn) { return const LoginScreen(); }
+    APIService.cache = {};
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,

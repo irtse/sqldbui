@@ -8,10 +8,10 @@ import 'package:sqldbui2/core/widget/convertors/convertor.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
-List<GlobalKey<FormState>> globalFormsKey = <GlobalKey<FormState>>[];
+Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
-  List<Map<String, dynamic>> cacheForm = [];
+  Map<String, dynamic> cacheForm = {};
   List<DataFormWidget>wrappers = <DataFormWidget>[];
   final model.View? view;
   bool scroll;
@@ -20,6 +20,7 @@ class DataFormWidget extends StatefulWidget {
   String superFormSchemaName;
   Map<String, String> wrappersURL = <String, String>{};
   List<DataFormWidget> existingOneToManiesForm = <DataFormWidget>[];
+  Map<DataFormWidget, OneToManyState> oneToManiesStateForm = <DataFormWidget, OneToManyState>{};
   List<DataFormWidget> oneToManiesForm = <DataFormWidget>[];
   List<DataFormWidget> oneToManiesFormDelete = <DataFormWidget>[];
   final formKey = GlobalKey<FormState>();
@@ -128,9 +129,8 @@ class FormWidgetState extends State<DataFormWidget> {
             }
           } 
         }
-        widget.cacheForm.add(newCacheEntry);
+        widget.cacheForm = newCacheEntry;
       }
-      globalFormsKey.add(widget.formKey);
       var form = Form( key: widget.formKey, 
         autovalidateMode: AutovalidateMode.always,
         child: Wrap(
@@ -151,5 +151,8 @@ class FormWidgetState extends State<DataFormWidget> {
                 width: MediaQuery.of(context).size.width - 260,
                 child: form,
               );
+    }
+    void refresh() {
+
     }
 }

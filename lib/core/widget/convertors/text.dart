@@ -23,11 +23,11 @@ class _TextState extends State<TextWidget> {
   @override Widget build(BuildContext context) {
     if (widget.form[widget.name] != null) { widget.value = widget.form[widget.name]; }
           if ((widget.type.contains("time") || widget.type.contains("date")) && widget.value != null) {
-            widget.value = '${widget.value}'.substring(1,10);
+            widget.value = '${widget.value}'.substring(0,10);
           }
           return TextFormField(
               readOnly: widget.readOnly,
-              initialValue: widget.value != null ? widget.value : "",
+              initialValue: widget.value ?? "",
               maxLines: widget.type.contains("text") ? 100 : null,
               style: const TextStyle(fontSize: 14,),
               enabled: true,
@@ -40,7 +40,7 @@ class _TextState extends State<TextWidget> {
                 filled: true,
                 fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
                 contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                suffixIcon: const Icon(Icons.text_fields),
+                suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month) : const Icon(Icons.text_fields),
                 hintText: "enter your ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
                 labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
                 errorStyle: const TextStyle(fontSize: 0,),

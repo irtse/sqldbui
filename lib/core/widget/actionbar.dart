@@ -26,27 +26,16 @@ class ActionBarWidget extends StatefulWidget {
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
-  final Map<String, bool> states = {};
+  Map<String, bool> states = {};
   void loading(String method) { setState(() { states[method]= true; });}
   void loaded(String method) { setState(() { states[method]= false; });}
 
   void refresh() {
-    if (currentView!.linkPath == "") { 
-      globalMenuKey.currentState!.setState(() { 
-        firstAPI = true; 
-        APIService.cache = {};
-      });
-    } else {
-      APIService().get<model.View>(currentView!.linkPath, true, context).then((value) {
-        if (value.data != null && value.data!.isNotEmpty){
-          globalMenuKey.currentState!.setState(() { 
-            firstAPI = true; 
-            APIService.cache = {};
-            currentView = value.data![0]; 
-          });
-        }
-      },); 
-    }
+    globalMenuKey.currentState!.setState(() { 
+      firstAPI = true; 
+      APIService.cache = {};
+      states = {};
+    });
   }
 
   @override Widget build(BuildContext context) {

@@ -33,6 +33,7 @@ class _DropDownState extends State<DropDownWidget> {
                       style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         filled: true,
+                        suffixIcon: widget.type.contains("enum") ? const Icon(Icons.format_list_numbered) : const Icon(Icons.link),
                         errorStyle: const TextStyle(height: -2),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
@@ -46,7 +47,7 @@ class _DropDownState extends State<DropDownWidget> {
       var items = <DropdownMenuItem<String>>[];
       var values = widget.type.replaceAll("enum:", "").split(",");
       for (var item in values) { 
-        if (item == widget.value) { items.insert(0, DropdownMenuItem<String>(child: Text(item), value: item,)); 
+        if (item == widget.value) { items.insert(0, DropdownMenuItem<String>( value: item, child: Text(item),)); 
         } else { items.add(DropdownMenuItem<String>(value: item,child: Text(item),));  }
         
       }
@@ -112,7 +113,6 @@ class _DropDownState extends State<DropDownWidget> {
                 Future.delayed(const Duration(microseconds: 100), () {
                   if (!widget.component.widget.wrappersURL.containsKey(widget.name)) {
                     widget.component.setState( () { 
-                      globalFormsKey = <GlobalKey<FormState>>[];
                         widget.component.widget.wrappersURL[widget.name] = "${widget.url!.replaceAll("rows=all", "rows=${first!.id}")}";
                     }); 
                   }
@@ -138,9 +138,8 @@ class _DropDownState extends State<DropDownWidget> {
                 if (value == null) { widget.form[widget.name]=null;
                 } else { widget.form[widget.name]=mapped[value]!.id; }
                 var item = mapped[value];
-                if (item != null && item.linkPath != "") {
+                if (item != null && item.linkPath != "" && !widget.component.widget.wrappersURL.containsKey(widget.name)) {
                   widget.component.setState( () { 
-                    globalFormsKey = <GlobalKey<FormState>>[];
                     widget.component.widget.wrappersURL[widget.name] = "${widget.url!.replaceAll("rows=all", "rows=${item.id}")}";
                   }); 
                 }

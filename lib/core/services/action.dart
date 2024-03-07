@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
@@ -46,10 +47,8 @@ class ActionService {
     }
     if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
         form.detectChange = true;
-        for (var values in form.cacheForm) {
-          // ignore: use_build_context_synchronously
-          formSubForms(form.existingOneToManiesForm, values, method, schemaName, context, false, false);
-        }
+        // ignore: use_build_context_synchronously
+        formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false);
     }
     if (!form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty) {
       if (form.view!.id == mainForm.currentState!.widget.view!.id) {
@@ -60,28 +59,28 @@ class ActionService {
       return views; 
     }
     var path = url;
-    for (var values in form.cacheForm) {
-      if (values["id"] != null) { body["id"]=int.parse(values["id"]); }
+      if (form.cacheForm["id"] != null) { body["id"]=int.parse(form.cacheForm["id"]); }
       if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var fieldName in schema.keys) {
-          if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
+          if (form.cacheForm[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
           if (!["dbschema_id", "dbdest_table_id"].contains(fieldName) 
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
-          && values[fieldName] is! List) { body[fieldName]=values[fieldName]; }
+          && form.cacheForm[fieldName] is! List) { body[fieldName]=form.cacheForm[fieldName]; }
         }
         for (var k in add.keys) { body[k] = add[k]; }
       }
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
+        developer.log('LOG LURK ${form.view!.schemaName} ${form.cacheForm} ${form.cacheForm} $body', name: 'my.app.category');
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 
-            values["id"]=value.data![0].items[0].values["id"];
-            listSubForms(schema, values, method, schemaName, context);
+            form.cacheForm["id"]=value.data![0].items[0].values["id"];
+            listSubForms(schema, form.cacheForm, method, schemaName, context);
           } 
-          formSubForms(form.oneToManiesForm, values, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.existingOneToManiesForm, values, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.oneToManiesFormDelete, values, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
+          formSubForms(form.oneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+          formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+          formSubForms(form.oneToManiesFormDelete, form.cacheForm, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
           if (form.view!.id == mainForm.currentState!.widget.view!.id) {
             showAlertBanner(context, () {}, 
               InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (method == "put" ? "save" : method)} datas suceed :)"), // <-- Put any widget here you want!
@@ -90,17 +89,22 @@ class ActionService {
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
           errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}");
-          listSubForms(schema, values, method, schemaName, context);
+          listSubForms(schema, form.cacheForm, method, schemaName, context);
           formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.oneToManiesFormDelete, {}, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
           APIResponse<model.View>(data: null);
         });      
       }
-      if (form.view!.id == mainForm.currentState!.widget.view!.id) {
-        Future.delayed(const Duration(seconds: 1), () { globalActionBar.currentState!.refresh(); });
-        mainForm.currentState!.additionnal = [];
-        APIService.cache = {};
+      
+      if (form.view!.id == mainForm.currentState!.widget.view!.id) { APIService.cache = {}; }
+      Future.delayed(const Duration(seconds: 1), () {
+        for (var state in form.oneToManiesStateForm.values) { state.setState(() { 
+          form.oneToManiesForm = [];
+        }); }
+        form.oneToManiesStateForm = {};
+    });
+    if (form.view!.id == mainForm.currentState!.widget.view!.id) {
         var errorStr = "";
         for (var error in errors) { errorStr += "- $error \n"; }
         if (errorStr != "") {
@@ -108,7 +112,7 @@ class ActionService {
           showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
-      }
+        if (form.view != null && form.view!.isEmpty) { globalActionBar.currentState!.refresh(); }
     }
     return views;
   }
@@ -136,7 +140,6 @@ class ActionService {
     for (var many in widgets) { 
       if (delete && many.view != null && many.view!.actions.contains("delete") 
       && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
-        developer.log('LOG URL ${many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}")}', name: 'my.app.category');
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null
                                  ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
       } else if (many.view != null && many.view!.actions.contains(method)) {

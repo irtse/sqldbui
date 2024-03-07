@@ -44,7 +44,7 @@ class _NumberState extends State<NumberWidget> {
             fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-            suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro) : const Icon(Icons.onetwothree),
+            suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro) : ( widget.value is int ? const Icon(Icons.onetwothree) : const Icon(Icons.link)),
             hintText: "enter your ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
             labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
             errorStyle: const TextStyle(fontSize: 0,),
