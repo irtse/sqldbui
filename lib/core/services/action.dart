@@ -45,6 +45,16 @@ class ActionService {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
       body["dbschema_id"]=resp.first.schemaID;
     }
+    if (errors.isNotEmpty) {
+      var errorStr = "";
+        for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
+        if (errorStr != "") {
+          // ignore: use_build_context_synchronously
+          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
+                          alertBannerLocation:  AlertBannerLocation.top,);
+        }
+      return views;
+    }
     if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
         form.detectChange = true;
         // ignore: use_build_context_synchronously
@@ -71,7 +81,6 @@ class ActionService {
       }
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
-        developer.log('LOG LURK ${form.view!.schemaName} ${form.cacheForm} ${form.cacheForm} $body', name: 'my.app.category');
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 
@@ -88,7 +97,7 @@ class ActionService {
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
-          errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}");
+          errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}");
           listSubForms(schema, form.cacheForm, method, schemaName, context);
           formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
@@ -106,13 +115,13 @@ class ActionService {
     });
     if (form.view!.id == mainForm.currentState!.widget.view!.id) {
         var errorStr = "";
-        for (var error in errors) { errorStr += "- $error \n"; }
+        for (var error in errors) { errorStr += "- ${error.replaceAll("Exception: ", "")} \n"; }
         if (errorStr != "") {
           // ignore: use_build_context_synchronously
           showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
-        if (form.view != null && form.view!.isEmpty) { globalActionBar.currentState!.refresh(); }
+        if (form.view != null && form.view!.isEmpty && errorStr == "") { globalActionBar.currentState!.refresh(); }
     }
     return views;
   }
@@ -120,7 +129,7 @@ class ActionService {
     for (var fieldName in schema.keys) {
       if (values[fieldName] is List) {
         await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", null
-                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
+                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
         for (var item in values[fieldName] as List) {
           var newBody = <String, dynamic> {};
           for (var f in schema[fieldName]!.schema.keys) {
@@ -129,7 +138,7 @@ class ActionService {
           } 
           // ignore: use_build_context_synchronously
           await APIService().call<model.View>(schema[fieldName]!.actionPath, method, newBody, true, null
-                                             ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
+                                             ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
         }
       }
     }
@@ -141,7 +150,7 @@ class ActionService {
       if (delete && many.view != null && many.view!.actions.contains("delete") 
       && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null
-                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : <$method> ${e.toString()}"); return APIResponse<model.View>(data: null); });
+                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
       } else if (many.view != null && many.view!.actions.contains(method)) {
         if (add) { views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}));
