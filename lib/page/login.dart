@@ -51,6 +51,12 @@ class _LoginWidgetState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return FlutterLogin(
       title: '',
+      userValidator: (value) {
+        if (value == null || value == "") { return "Must not be empty";}
+        return null;
+      },
+      messages: LoginMessages(userHint: "Username/Email"),
+      userType: LoginUserType.name,
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
       onSignup: _signupUser,
