@@ -38,11 +38,11 @@ class _DateState extends State<DateWidget> {
             hintStyle: const TextStyle(fontSize: 12, ),
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: "enter your ${widget.label.toLowerCase()}",
+            hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase()}",
             labelText: widget.label.toLowerCase(),
           ),
         value: dateValue,
-        lastDate: DateTime(date.year + 1, date.month, date.day),
+        lastDate: DateTime(date.year + 10, date.month, date.day),
         onChanged: (DateTime? value) { 
           widget.component.widget.detectChange = true;
           setState(() {

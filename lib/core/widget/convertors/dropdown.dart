@@ -40,7 +40,7 @@ class _DropDownState extends State<DropDownWidget> {
                         hintStyle: const TextStyle(fontSize: 12, ),
                         border: const OutlineInputBorder(),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                        hintText: "enter your ${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}",
+                        hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}",
                         labelText: "${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}",
                       ) ));
       }
@@ -113,7 +113,7 @@ class _DropDownState extends State<DropDownWidget> {
                 Future.delayed(const Duration(microseconds: 100), () {
                   if (!widget.component.widget.wrappersURL.containsKey(widget.name)) {
                     widget.component.setState( () { 
-                        widget.component.widget.wrappersURL[widget.name] = "${widget.url!.replaceAll("rows=all", "rows=${first!.id}")}";
+                        widget.component.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${first!.id}");
                     }); 
                   }
                    
@@ -138,9 +138,9 @@ class _DropDownState extends State<DropDownWidget> {
                 if (value == null) { widget.form[widget.name]=null;
                 } else { widget.form[widget.name]=mapped[value]!.id; }
                 var item = mapped[value];
-                if (item != null && item.linkPath != "" && !widget.component.widget.wrappersURL.containsKey(widget.name)) {
+                if (item != null && item.linkPath != "") {
                   widget.component.setState( () { 
-                    widget.component.widget.wrappersURL[widget.name] = "${widget.url!.replaceAll("rows=all", "rows=${item.id}")}";
+                    widget.component.widget.wrappersURL[widget.name] = item.linkPath.replaceAll("rows=all", "rows=${item.id}");
                   }); 
                 }
               },

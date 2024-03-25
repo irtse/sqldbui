@@ -104,6 +104,9 @@ class View extends SerializerDeserializer<View> {
     this.order = emptyStr, 
     this.schemaID,
     this.isEmpty = false,
+    this.viewID,
+    this.newIds = emptyStr,
+    this.max = 0,
   });
 
   String actionPath;
@@ -121,14 +124,20 @@ class View extends SerializerDeserializer<View> {
   String schemaName;
   View? wrapper;
   int? schemaID;
+  int? viewID;
   Map<String, SchemaField> schema;
   Map<String, SchemaField>? wrapperSchema;
   List<dynamic> order;
+  List<dynamic> newIds;
+  int max;
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
     id: json.containsKey("id") && json["id"] != null ? json["id"] : -1, 
+    max: json.containsKey("max") && json["max"] != null ? json["max"] : 0, 
+    newIds: json.containsKey("new") && json["new"] != null ? json["new"] : <String>[], 
     schemaID: json.containsKey("schema_id") && json["schema_id"] != null ? json["schema_id"] : null, 
+    viewID: json.containsKey("redirect_id") && json["redirect_id"] != null ? json["redirect_id"] : null, 
     isEmpty: json.containsKey("is_empty") && json["is_empty"] != null ? json["is_empty"] : false, 
     readOnly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,  
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
@@ -139,7 +148,6 @@ class View extends SerializerDeserializer<View> {
     description: json.containsKey("description") && json["description"] != null ? json["description"] : "no description...", 
     isList: json.containsKey("is_list") && json["is_list"] != null ? json["is_list"] : false, 
     wrapperSchema: json.containsKey("wrapper_schema") && json["wrapper_schema"] != null ? fromMapJson(json["wrapper_schema"], SchemaField()) : null,
-    wrapper: json.containsKey("wrapper") && json["wrapper"] != null ? View().deserialize(json["wrapper"]) : null,
     schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{},
     schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
     order: json.containsKey("order") && json["order"] != null ? json["order"] : <String>[],  

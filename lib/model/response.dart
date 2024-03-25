@@ -16,8 +16,9 @@ class APIResponse<T extends SerializerDeserializer> {
   APIResponse({
     this.data,
     this.error = "",
+    this.offset = 0,
   });
-
+  int offset = 0;
   List<T>? data ;
   String? error = "";
 

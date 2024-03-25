@@ -57,6 +57,7 @@ class _ManyToManyState extends State<ManyToManyWidget> {
           url = scheme.schema[fieldName]!.valuesPath;  break;
         }
       }
+      developer.log('LOG MTM URL ${widget.label} ${url}', name: 'my.app.category');
       return FutureBuilder<APIResponse<model.Shallowed>>(
       future: APIService().get(url ?? "", true, null), 
       builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {

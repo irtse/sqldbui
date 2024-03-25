@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'dart:developer' as developer;
@@ -46,6 +48,7 @@ class AuthService extends ChangeNotifier {
     _isAuthenticated = false; 
     user = null;
     error = null;
+    resetAllFilter();
     homeKey.currentState!.setState(() { 
       APIService.cache = <String, APIResponse<dynamic>>{};
       currentView = null;

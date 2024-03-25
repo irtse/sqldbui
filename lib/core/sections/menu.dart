@@ -1,13 +1,15 @@
+import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'dart:developer' as developer;
 
-import 'package:sqldbui2/main.dart';
-
+Map<String, List<model.View>> categories = <String, List<model.View>>{};
 GlobalKey<MenuWidgetState> globalMenuKey = GlobalKey<MenuWidgetState>();
 class MenuWidget extends StatefulWidget{
   final List<model.View>? views;
@@ -16,6 +18,8 @@ class MenuWidget extends StatefulWidget{
 }
 class MenuWidgetState extends State<MenuWidget> {
   bool loading = true;
+  TextEditingController controller = TextEditingController();
+  Map<String, bool> initiallyExpanded = {};
   @override Widget build(BuildContext context) {
     var additionnalContent = <Widget>[];
     var id = homeKey.currentState!.widget.viewID;
@@ -27,8 +31,10 @@ class MenuWidgetState extends State<MenuWidget> {
       if (view == null && widget.views != null && widget.views!.isNotEmpty) { view = widget.views![0]; }
       if (view != null) {
         if (APIService.cache.containsKey(view.linkPath) && !firstAPI) { loading = false; }
+        if (firstAPI) { globalOffset = 0; }
         additionnalContent.add(FutureBuilder<APIResponse<model.View>>(
-        future: APIService().get<model.View>(view.linkPath, firstAPI, context), // a previously-obtained Future<String> or null
+        future: view.isList ? APIService().getWithOffset<model.View>(view.linkPath, firstAPI, context)
+        : APIService().get<model.View>(view.linkPath, firstAPI, context), // a previously-obtained Future<String> or null
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0];
@@ -42,39 +48,79 @@ class MenuWidgetState extends State<MenuWidget> {
                   return FutureBuilder<APIResponse<model.View>>(
                     future: APIService().get<model.View>(item.linkPath, firstAPI, null), // a previously-obtained Future<String> or null
                     builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> sn) {
-                    if (sn.hasData && sn.data!.data != null && sn.data!.data!.isNotEmpty) {
-                       currentView=sn.data!.data![0];
-                    }
-                    if (loading) { Future.delayed(const Duration(seconds: 1), () { setState(() { loading = false; }); }); }
-                    return ViewWidget(key: currentView != null ? globalViewKey : null);
+                    if (sn.hasData && sn.data!.data != null && sn.data!.data!.isNotEmpty) { currentView=sn.data!.data![0]; }
+                    return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this,);
                   });
                 }
               }   
             }
-            if (loading) { Future.delayed(const Duration(seconds: 1), () { setState(() { loading = false; }); }); }
-            return ViewWidget(key: currentView != null ? globalViewKey : null);
+            homeKey.currentState!.widget.viewID = currentView != null ? "${currentView!.id}" : "";
+            homeKey.currentState!.widget.subViewID = null;
+            return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this);
         }));
       }
     }
-    Map<String, List<model.View>> categories = <String, List<model.View>>{};
+    var eldestCat = categories;
+    categories = <String, List<model.View>>{};
     if (widget.views != null) {
       for (var view in widget.views!) {
+        if (controller.text != "" && !view.name.toLowerCase().contains(controller.text.toLowerCase())) { continue; }
         var cat = view.category == "" ? "general" : view.category;
         if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
+        if (eldestCat.containsKey(cat)) {
+          for (var v in eldestCat[cat]!) {
+            if (v.id == view.id || v.name == view.name) { 
+              if (view.newIds.length < v.newIds.length -1) { view.newIds = v.newIds; }
+              break; 
+            }
+          }
+        }
         categories[cat]!.add(view);
       }
     }
-    List<Widget> comps = <Widget>[Container(height: 40, width: 250, 
-      margin: const EdgeInsets.only(bottom: 0.3), color:Theme.of(context).primaryColor, 
-        child: Center(child: Text("VIEWS", style: TextStyle(color: Theme.of(context).splashColor)))),];
-    for (var cat in categories.keys) {
-      if (categories[cat]!.isNotEmpty) {
-        comps.add(Container(
+    List<Widget> comps = <Widget>[Container(
+        color: Theme.of(context).selectedRowColor,
+        child: Padding( padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10), child : Container(height: 30, width: 230, child:TextFormField(
+                        cursorHeight: 15,
+                        style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
+                        controller: controller,
+                        onChanged: (value) => setState(() {}),
+                        decoration: InputDecoration(
+                        filled: true,
+                        labelStyle: TextStyle(color: Theme.of(context).highlightColor),
+                        hintStyle: TextStyle(color: Theme.of(context).splashColor),
+                        contentPadding: const EdgeInsets.all(1),
+                        fillColor: Theme.of(context).secondaryHeaderColor,
+                        iconColor: Theme.of(context).highlightColor,
+                        prefixIcon: Icon(Icons.filter_alt, size: 20, color: Theme.of(context).splashColor,),
+                        hintText: 'filter menu...',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                                                   borderSide: BorderSide(color: Theme.of(context).primaryColor))
+                      )
+        ),
+      )))];
+      var first = true;
+      for (var cat in categories.keys) {
+        if (categories[cat]!.isNotEmpty) {
+          var count = 0;
+          if (!initiallyExpanded.containsKey(cat)) { initiallyExpanded[cat] = first; }
+          first = false;
+          for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
+          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 180, top: 13, child: Container(
+            decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
+                                                      color: Theme.of(context).secondaryHeaderColor),
+            child: Padding(padding: const EdgeInsets.all(5), child: Text("$count", 
+              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))
+          ))] : [];
+          comps.add(Container(
           width: 250,
           color: Theme.of(context).primaryColor,
           margin: const EdgeInsets.only(bottom: 0.3),
-          child: ExpansionTile(
-            initiallyExpanded: true,
+          child: Stack( children: [ ExpansionTile(
+            onExpansionChanged: (value) => setState(() {
+              initiallyExpanded[cat] = value;
+            }),
+            initiallyExpanded: initiallyExpanded[cat]!,
             backgroundColor: Theme.of(context).primaryColor,
             title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10),
                                            child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
@@ -97,12 +143,21 @@ class MenuWidgetState extends State<MenuWidget> {
                       var category = categories[cat]!;
                       if (category.length <= index) { return null; }
                       var catIndex = category[index];
-                      return Material( child: ListTile(
+                      List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220, top: 8, child: Container(
+                          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
+                                                    color: Theme.of(context).primaryColor),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
+                            style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))
+                        ))] : [];
+                      return Material( child: Stack( children: [ListTile(
                         selected: "${catIndex.id}" == homeKey.currentState!.widget.viewID,
                         onTap: () async {
                           setState(() {
                             loading = true;
+                            resetAllFilter();
                             currentView = null;
+                            homeKey.currentState!.widget.category=cat;
                             homeKey.currentState!.widget.subViewID=null;
                             homeKey.currentState!.widget.viewID='${catIndex.id}';
                           });
@@ -114,12 +169,12 @@ class MenuWidgetState extends State<MenuWidget> {
                         textColor: Colors.white,
                         hoverColor: Theme.of(context).selectedRowColor,
                         leading: catIndex.isList ? const Icon(Icons.list) : const Icon(Icons.edit_document),
-                      )); 
+                      )]..addAll(badge) )); 
                   },
                 ),
               )
-          ],),
-          ));
+          ],)]..addAll(badgeCat),
+          )));
       }
     }
     firstAPI = false;

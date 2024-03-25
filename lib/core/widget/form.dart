@@ -74,7 +74,7 @@ class FormWidgetState extends State<DataFormWidget> {
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
-                    var newView = model.View(name: "Form",
+                    var newView = model.View(name: "${data.schemaName.replaceAll("_", " ").replaceAll("db", "")} form",
                       linkPath: data.linkPath, schema: data.schema, order: data.order, 
                       actionPath: data.actionPath.contains(data.schemaName) ? data.actionPath : data.linkPath,
                       actions: data.actions, readOnly: data.readOnly, schemaName: data.schemaName, 
@@ -151,8 +151,5 @@ class FormWidgetState extends State<DataFormWidget> {
                 width: MediaQuery.of(context).size.width - 260,
                 child: form,
               );
-    }
-    void refresh() {
-
     }
 }

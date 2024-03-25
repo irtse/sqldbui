@@ -41,7 +41,7 @@ class _TextState extends State<TextWidget> {
                 fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
                 contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
                 suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month) : const Icon(Icons.text_fields),
-                hintText: "enter your ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
+                hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
                 labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
                 errorStyle: const TextStyle(fontSize: 0,),
               ),

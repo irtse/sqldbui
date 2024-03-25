@@ -5,16 +5,16 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'dart:developer' as developer;
 /// Flutter code sample for [FutureBuilder].
-
+GlobalKey<PageWidgetState> globalPageKey = GlobalKey<PageWidgetState>();
 class PageWidget extends StatefulWidget {
   const PageWidget({super.key});
 
   @override
-  State<PageWidget> createState() => _PageWidgetState();
+  State<PageWidget> createState() => PageWidgetState();
 }
-class _PageWidgetState extends State<PageWidget> {
+class PageWidgetState extends State<PageWidget> {
   Future<APIResponse<model.View>> _items() async {
-    return APIService().get<model.View>(APIConstants.mainEndpost, false, null);    
+    return APIService().get<model.View>(APIConstants.mainEndpost, true, null);    
   }
 
   @override Widget build(BuildContext context) {

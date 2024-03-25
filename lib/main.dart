@@ -35,6 +35,7 @@ GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 class HomeScreen extends StatefulWidget {
   String? viewID;
   String? subViewID;
+  String? category;
   HomeScreen({ Key? key, this.viewID, this.subViewID }): super(key: homeKey);
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -68,14 +69,12 @@ class HomeScreenState extends State<HomeScreen> {
         // the App.build method, and use it to set our appbar title.
         title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
                        child: SizedBox(
-                        width: 700,
                         child: Row(children: [
                           const Image(image: AssetImage('assets/images/logo.png'), width: 60,),
                           Padding(
                             padding: const EdgeInsets.only(left: 30), 
                             child: Text("SOFTWARE NAME", 
                             style: TextStyle( color: Theme.of(context).highlightColor,),)),
-                            
                             Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
                               child: Icon(Icons.verified_user, color: Theme.of(context).splashColor),
                             ),
@@ -87,14 +86,41 @@ class HomeScreenState extends State<HomeScreen> {
                        )),         
         toolbarHeight: 40,
         actions: <Widget>[
-
-          Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
+          Stack( children: [
+            const Icon(Icons.notifications,
+              color: Colors.white,
+              size: 25,
+            ),
+            Positioned( left: 10, child: Container(
+              height: 20,
+              alignment: Alignment.bottomRight,
+              child: Container(
+                width: 15,
+                height: 20,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xffc32c37),
+                    border: Border.all(color: Colors.white, width: 1)),
+                child: Padding(
+                  padding: const EdgeInsets.all(0.0),
+                  child: Center(
+                    child: Text(
+                      AuthService.user!.notifications.length > 9 ? "+" : AuthService.user!.notifications.length.toString(),
+                      style: const TextStyle(fontSize: 9, color: Colors.white),
+                    ),
+                  ),
+                ),
+              )),
+            ),
+          ],),
+          
+          Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
                   child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
                                     onPressed: () async { await _authProvider.logOut(context); }, )
           )
         ],
       ),
-      body: const PageWidget(),
+      body: PageWidget(key: globalPageKey),
     );
   }
 }

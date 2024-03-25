@@ -12,9 +12,7 @@ class InfoAlertBannerChild extends StatelessWidget {
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
       decoration: const BoxDecoration(
         color: Colors.greenAccent,
-        borderRadius: BorderRadius.all(
-          Radius.circular(5),
-        ),
+        borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(10),

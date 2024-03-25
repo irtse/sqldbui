@@ -112,7 +112,7 @@ class ActionService {
           form.oneToManiesForm = [];
         }); }
         form.oneToManiesStateForm = {};
-    });
+      });
     if (form.view!.id == mainForm.currentState!.widget.view!.id) {
         var errorStr = "";
         for (var error in errors) { errorStr += "- ${error.replaceAll("Exception: ", "")} \n"; }
@@ -121,7 +121,9 @@ class ActionService {
           showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
-        if (form.view != null && form.view!.isEmpty && errorStr == "") { globalActionBar.currentState!.refresh(); }
+        if (form.view != null && form.view!.isEmpty && errorStr == "") { 
+          globalActionBar.currentState!.refresh(form.view!.viewID); 
+        }
     }
     return views;
   }

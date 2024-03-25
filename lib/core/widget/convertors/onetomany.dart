@@ -79,7 +79,7 @@ class OneToManyState extends State<OneToManyWidget> {
 
   List<Widget> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) {
     List<Widget> rows = [Padding( padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
-                                  child: Text("${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} related ${widget.require ? '*' : ''}:")),]; 
+                                  child: Text("related ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")),]; 
     
     if (!readOnly && canPost || widget.component.widget.view != null && widget.component.widget.view!.isEmpty) {
         var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
