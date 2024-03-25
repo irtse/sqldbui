@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -15,17 +16,12 @@ class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   final service = APIService();
   factory AuthService() { return _instance; }
-  AuthService._internal() {/* todo */}
+  AuthService._internal() { refresh(); }
 
-  bool _isAuthenticated = false;
+  static bool _isAuthenticated = false;
   static User? user;
   String? error;
-  bool get isLoggedIn => _isAuthenticated;
-
-  Future<void> logCheck() async {
-    await service.get<User>("/auth/logcheck", true, null).then((value) { authenticateShallow(value.data![0]); }
-                      ).catchError( (e) { return err(e.toString()); }); 
-  }
+  static bool get isLoggedIn => _isAuthenticated;
 
   Future<void> login(String name, String password) async {
     await service.post<User>("/auth/login", User(name: name.trim(), password: password.trim()).serialize(), null
@@ -66,5 +62,21 @@ class AuthService extends ChangeNotifier {
     user = logUser;
     error = null;
     APIService.auth = logUser.token;
+    refresh();
+  }
+
+  Future<void> refresh() async {
+    if(AuthService.isLoggedIn) {
+      await service.get<User>("/auth/refresh", true, null).then((value) { 
+        if (value.data != null && value.data!.isNotEmpty) {
+          developer.log('LOG URL ${value.data![0].notifications}', name: 'my.app.category');
+          appBarKey.currentState!.setState(() {
+            user!.token = value.data![0].token;
+            user!.notifications = value.data![0].notifications;
+          });
+        }
+      }).catchError( (e) { return err(e.toString()); }); 
+      await Future.delayed(const Duration(seconds: 30), () => refresh());
+    }
   }
 }

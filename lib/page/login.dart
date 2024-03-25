@@ -62,7 +62,7 @@ class _LoginWidgetState extends State<LoginScreen> {
       onSignup: _signupUser,
       onSubmitAnimationCompleted: () {
         setState(() {
-          if (service.isLoggedIn) {  context.go("/"); } 
+          if (AuthService.isLoggedIn) {  context.go("/"); } 
         });    
       },
       onRecoverPassword: _recoverPassword,

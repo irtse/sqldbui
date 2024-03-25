@@ -48,7 +48,6 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => HomeScreenState();
 }
-
 class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
@@ -58,7 +57,8 @@ class HomeScreenState extends State<HomeScreen> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    if (!AuthService().isLoggedIn) { return const LoginScreen(); }
+    AuthService();
+    if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     APIService.cache = {};
     return Scaffold(
       appBar: AppBar(
@@ -91,7 +91,39 @@ class HomeScreenState extends State<HomeScreen> {
               color: Colors.white,
               size: 25,
             ),
-            Positioned( left: 10, child: Container(
+            NotificationWidget(key: appBarKey,),
+          ],),
+          
+          Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
+                  child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
+                                    onPressed: () async { await _authProvider.logOut(context); }, )
+          )
+        ],
+      ),
+      body: PageWidget(key: globalPageKey),
+    );
+  }
+}
+
+class NotificationWidget extends StatefulWidget {
+  NotificationWidget({ Key? key }): super(key: key);
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+  @override
+  NotificationWidgetState createState() => NotificationWidgetState();
+}
+GlobalKey<NotificationWidgetState> appBarKey = GlobalKey<NotificationWidgetState>();
+class NotificationWidgetState extends State<NotificationWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Positioned( left: 10, child: Container(
+
               height: 20,
               alignment: Alignment.bottomRight,
               child: Container(
@@ -111,16 +143,6 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               )),
-            ),
-          ],),
-          
-          Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
-                  child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
-                                    onPressed: () async { await _authProvider.logOut(context); }, )
-          )
-        ],
-      ),
-      body: PageWidget(key: globalPageKey),
-    );
+            );
   }
 }
