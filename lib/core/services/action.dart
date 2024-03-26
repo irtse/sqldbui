@@ -3,6 +3,7 @@ import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
@@ -85,8 +86,12 @@ class ActionService {
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 
             form.cacheForm["id"]=value.data![0].items[0].values["id"];
+            
             listSubForms(schema, form.cacheForm, method, schemaName, context);
           } 
+          if (form.view!.isEmpty) {
+              isNew = value.data![0].items[0].values["id"];
+          }
           formSubForms(form.oneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.oneToManiesFormDelete, form.cacheForm, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
@@ -122,7 +127,9 @@ class ActionService {
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
         if (form.view != null && form.view!.isEmpty && errorStr == "") { 
-          globalActionBar.currentState!.refresh(form.view!.viewID); 
+          Future.delayed(const Duration(seconds: 1), () { 
+            globalActionBar.currentState!.refresh(form.view!.viewID); 
+          });
         }
     }
     return views;

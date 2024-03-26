@@ -56,6 +56,7 @@ class MenuWidgetState extends State<MenuWidget> {
             }
             homeKey.currentState!.widget.viewID = currentView != null ? "${currentView!.id}" : "";
             homeKey.currentState!.widget.subViewID = null;
+            if (currentView != null) { currentCat = currentView!.category; }
             return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this);
         }));
       }
@@ -152,16 +153,7 @@ class MenuWidgetState extends State<MenuWidget> {
                         ))] : [];
                       return Material( child: Stack( children: [ListTile(
                         selected: "${catIndex.id}" == homeKey.currentState!.widget.viewID,
-                        onTap: () async {
-                          setState(() {
-                            loading = true;
-                            resetAllFilter();
-                            currentView = null;
-                            homeKey.currentState!.widget.category=cat;
-                            homeKey.currentState!.widget.subViewID=null;
-                            homeKey.currentState!.widget.viewID='${catIndex.id}';
-                          });
-                        },
+                        onTap: () async { refresh(catIndex.id, cat); },
                         tileColor: Theme.of(context).secondaryHeaderColor,
                         iconColor: Colors.white,
                         title: Padding( padding: const EdgeInsets.only(left: 10, right: 10), child: Text(catIndex.name, style: const TextStyle(fontSize: 13.0,))),
@@ -174,7 +166,7 @@ class MenuWidgetState extends State<MenuWidget> {
                 ),
               )
           ],)]..addAll(badgeCat),
-          )));
+        )));
       }
     }
     firstAPI = false;
@@ -194,5 +186,16 @@ class MenuWidgetState extends State<MenuWidget> {
         children: comps
       ),),)
     ]..addAll(content));
+  }
+  void refresh(int id, String? cat) {
+    setState(() {
+      loading = true;
+      resetAllFilter();
+      currentView = null;
+      currentCat = cat;
+      homeKey.currentState!.widget.category=cat;
+      homeKey.currentState!.widget.subViewID=null;
+      homeKey.currentState!.widget.viewID=id.toString();
+    });
   }
 }

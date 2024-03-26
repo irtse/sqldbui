@@ -33,12 +33,8 @@ class ActionBarState extends State<ActionBarWidget> {
           currentView = null;
           homeKey.currentState!.widget.viewID="$viewID";
           homeKey.currentState!.widget.subViewID=null;
+          globalMenuKey.currentState!.refresh(viewID, currentCat);
     }
-    globalMenuKey.currentState!.setState(() { 
-        firstAPI = true; 
-        APIService.cache = {};
-        states = {};
-    });
   }
 
   @override Widget build(BuildContext context) {

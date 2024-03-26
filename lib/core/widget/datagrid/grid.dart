@@ -10,6 +10,8 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
 import 'package:sqldbui2/page/page.dart';
 
+String? isNew;
+
 class Filter {
   dynamic value;
   String? connector;
@@ -187,6 +189,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           APIService().get<model.View>(widget.links[cellID]!, firstAPI, null).then((resp) { 
             if (widget.viewKey != null && widget.viewKey!.currentState != null && resp.data != null) {
               globalPageKey.currentState!.setState(() {
+                isNew = null;
                 beforeView = currentView;
                 currentView = resp.data![0];
                 currentView!.readOnly = beforeView!.readOnly;
@@ -199,7 +202,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
       ) : Padding(padding: const EdgeInsets.only(top: 4,), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
                   icon: const Icon(Icons.info,), onPressed: () {},));
       List<Widget> badges = [];
-      if (ids.contains(cellID) && first) {
+      if (ids.contains(cellID) && first || isNew == cellID && first) {
         first = false;
         badges.add(Positioned(left: 10, top: 5, child: Container(
                           decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
@@ -211,7 +214,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
       }
       widgets.add(Stack(
         children: [Container( alignment: Alignment.center,
-          decoration: BoxDecoration(color: ids.contains(cellID) ? Theme.of(context).splashColor : Colors.white,
+          decoration: BoxDecoration(color: ids.contains(cellID) || isNew == cellID ? Theme.of(context).splashColor : Colors.white,
           border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth),)),
           width: e.width.isNaN ? 300 : e.width, 
           height: maxheight,

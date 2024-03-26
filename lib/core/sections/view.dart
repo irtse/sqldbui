@@ -8,6 +8,7 @@ import 'package:sqldbui2/main.dart';
 
 model.View? beforeView;
 model.View? currentView;
+String? currentCat;
 GlobalKey<ViewWidgetState> globalViewKey = GlobalKey<ViewWidgetState>();
 // ignore: must_be_immutable
 class ViewWidget extends StatefulWidget{
