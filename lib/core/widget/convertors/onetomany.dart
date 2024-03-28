@@ -63,7 +63,7 @@ class OneToManyState extends State<OneToManyWidget> {
                                 var w = widget.component.widget.oneToManiesFormDelete;
                                 w.add(dataForm);
                               });
-                            }, icon: const Icon(Icons.delete))),],);
+                            }, icon: const Icon(Icons.delete)))],);
                   items.add(w);
                 } else {  items.add(dataForm); }
                 var e = widget.component.widget.existingOneToManiesForm;

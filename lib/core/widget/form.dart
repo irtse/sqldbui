@@ -113,7 +113,7 @@ class FormWidgetState extends State<DataFormWidget> {
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget) {
               var w = Padding(padding: EdgeInsets.only(left: 50.0, right: 50.0, 
               top: field.type.contains("bool") ? 0 : 11.0 , bottom: 11.0),
-              child: SizedBox(width:  field.type.contains("bool") ? 150 : 500, height: 30, child: f));
+              child: SizedBox(width:  field.type.contains("bool") ? 150 : 500, height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);
             }
             if ((f.runtimeType == OneToManyWidget || f.runtimeType == ManyToManyWidget) 

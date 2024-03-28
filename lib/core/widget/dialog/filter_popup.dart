@@ -1,9 +1,11 @@
 import 'dart:developer' as developer;
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/page/page.dart';
 
 // ignore: must_be_immutable
 class FilterPopUpWidget extends StatefulWidget{
@@ -29,9 +31,11 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
       icon: const Icon(size: 18, Icons.filter_alt, color: Colors.grey),
       onSelected: (value) { },
       itemBuilder: (BuildContext bc) {
-        if (globalOrder.containsKey(widget.columnName)) {
-          if(globalOrder[widget.columnName] == "asc") { widget.ascOrder = true; }
-          if(globalOrder[widget.columnName] == "desc") { widget.descOrder = true; }
+        if (currentView != null && globalOrder.containsKey(currentView!.id)) {
+          if (globalOrder[currentView!.id]!.containsKey(widget.columnName)) {
+            if(globalOrder[currentView!.id]![widget.columnName] == "asc") { widget.ascOrder = true; }
+            if(globalOrder[currentView!.id]![widget.columnName] == "desc") { widget.descOrder = true; }
+          }
         }
         widget.isNew = globalNew; 
         return [
@@ -72,12 +76,15 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                 Divider(color: Theme.of(context).splashColor,)
               ]); }),)),
           PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
-            if (globalFilter.containsKey(widget.columnName) && advancedSearch.isEmpty) { 
-              for (var filter in globalFilter[widget.columnName]!) {
-                advancedSearch.add(FilterSearchWidget(innerIndex: advancedSearch.length, state: setState,
-                  filter: this, columnName: widget.columnName, label: widget.label, searchValue: filter.value, connector: filter.connector));
+            if (currentView != null && globalFilter.containsKey(currentView!.id)) {
+              if (globalFilter[currentView!.id]!.containsKey(widget.columnName) && advancedSearch.isEmpty) { 
+                for (var filter in globalFilter[currentView!.id]![widget.columnName]!) {
+                  advancedSearch.add(FilterSearchWidget(innerIndex: advancedSearch.length, state: setState,
+                    filter: this, columnName: widget.columnName, label: widget.label, searchValue: filter.value, connector: filter.connector));
+                }
               }
             }
+            
             if (advancedSearch.isEmpty) {
               advancedSearch.add(FilterSearchWidget(filter: this, innerIndex: 0, state: setState,
                 columnName: widget.columnName, label: widget.label));
@@ -112,23 +119,26 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                 return Padding( padding: const EdgeInsets.only(bottom: 30, top: 10), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Padding( padding: const EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
                     homeKey.currentState!.setState(() {
-                      if (widget.ascOrder != null) { globalOrder[widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
-                      if (widget.descOrder != null) { globalOrder[widget.columnName]=widget.descOrder! ? "desc" : "asc"; }
-                      globalNew = widget.isNew;
-                      if (widget.ascOrder == null && widget.descOrder == null) { globalOrder.remove(widget.columnName); }
-                      globalFilter[widget.columnName] = [];
-                      for (var search in advancedSearch) { search.globalKey.currentState!.save(); }
-                      stateSort!(() {});
-                      stateKind!(() {});
-                      stateFilter!(() {});
+                      if (currentView != null) { 
+                        if (widget.ascOrder != null) { globalOrder[currentView!.id]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
+                        if (widget.descOrder != null) { globalOrder[currentView!.id]![widget.columnName]=widget.descOrder! ? "desc" : "asc"; }
+                        globalNew = widget.isNew;
+                        if (widget.ascOrder == null && widget.descOrder == null) { 
+                          globalOrder[currentView!.id]!.remove(widget.columnName); 
+                        }
+                        globalFilter[currentView!.id]!.remove(widget.columnName);
+                        for (var search in advancedSearch) { search.globalKey.currentState!.save(); }
+                        stateSort!(() {});
+                        stateKind!(() {});
+                        stateFilter!(() {});
+                      }
                     });
                   },
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("SUBMIT", style: TextStyle(color: Colors.white, fontSize: 12))),)),
                   TextButton(onPressed: () {
-                    homeKey.currentState!.setState(() {
+                    globalMenuKey.currentState!.setState(() {
                       firstAPI= true; 
-                      APIService.cache = {};
                       resetFilter(widget.columnName); 
                     });
                     stateSort!(() { widget.ascOrder=null;  widget.descOrder=null; });
@@ -174,7 +184,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                     child: Text("DELETE",  style: TextStyle(color: Colors.grey, fontSize: 11
                   )))));
     }
-    developer.log('LOG URL ${widget.innerIndex} ${widget.connector}', name: 'my.app.category');
+    
     if (widget.searchValue != null && widget.searchValue != "") { widget.fieldText.text = widget.searchValue!; }
     return Column(children: [ Padding(padding: const EdgeInsets.only(left: 20, right: 20 , bottom: 20.0),
               child: TextFormField(
@@ -200,9 +210,13 @@ class FilterSearchState extends State<FilterSearchWidget> {
                 onChanged: (String? value) {  widget.searchValue = value; },
                 onSaved: (String? value) { 
                   widget.searchValue = value;
-                  if (!globalFilter.containsKey(widget.columnName) ) { globalFilter[widget.columnName] = []; }
-                  widget.index = globalFilter.length;
-                  globalFilter[widget.columnName]!.add(Filter(value: widget.searchValue, connector: widget.connector)); 
+                  if (currentView != null) {
+                    if (!globalFilter[currentView!.id]!.containsKey(widget.columnName) ) { 
+                      globalFilter[currentView!.id]![widget.columnName] = []; 
+                    }
+                    widget.index = globalFilter[currentView!.id]!.length;
+                    globalFilter[currentView!.id]![widget.columnName]!.add(Filter(value: widget.searchValue, connector: widget.connector)); 
+                  }
                 },
                 validator: (String? value) { return null; },
               )), 

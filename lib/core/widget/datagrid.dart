@@ -50,7 +50,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         }
       }
       schema = widget.view!.schema;
-      columns.add(GridColumnWidget( key: GlobalKey<State<StatefulWidget>>(),
+      columns.add(GridColumnWidget(context: context,
               width: columnWidths.containsKey("id") ? columnWidths["id"]! : double.nan,
               allowSorting: !(datas.isEmpty && !isFilter()),
               allowFiltering: !(datas.isEmpty && !isFilter()),
@@ -62,7 +62,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
               label: GridValueWidget(fontSize: 15, icon: Icons.tag)
           ));
       if (schema.keys.contains("description")) {
-        columns.add(GridColumnWidget( key: GlobalKey<State<StatefulWidget>>(),
+        columns.add(GridColumnWidget(context: context,
           type: "varchar", 
           maxLength: maxCount(schema),
           contextWidth: MediaQuery.of(context).size.width  - 250,
@@ -75,7 +75,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         ));
       }
       if (schema.keys.contains("name")) {
-            columns.add(GridColumnWidget( key: GlobalKey<State<StatefulWidget>>(),
+            columns.add(GridColumnWidget(context: context,
               maxLength: maxCount(schema),
               type: "varchar",
               borderColor: Theme.of(context).splashColor,
@@ -90,7 +90,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
       
       for (var fieldName in schema.keys) {
         if (fieldName == "description" || fieldName == "name" || schema[fieldName]!.type.contains("many")) { continue; }
-        columns.add(GridColumnWidget( key: GlobalKey<State<StatefulWidget>>(),
+        columns.add(GridColumnWidget(context: context,
               type: schema[fieldName]!.type,
               contextWidth: MediaQuery.of(context).size.width - 250,
               width: columnWidths.containsKey(fieldName) ? columnWidths[fieldName]! : double.nan,
@@ -103,8 +103,8 @@ class DatagridWidgetState extends State<DatagridWidget> {
           ));
       }
     }
-    if (globalOrder.isEmpty) {
-      datas.sort( (a, b) => int.parse( b["id"]) - int.parse(a["id"]) );
+    if (globalOrder[currentView!.id] == null || globalOrder[currentView!.id]!.isEmpty ) {
+      datas.sort( (a, b) =>  (b["id"] != null ? int.parse( b["id"]) : 0) -  (a["id"] != null ? int.parse(a["id"]) : 0) );
     } 
     return Column( children: [Container( 
       height: MediaQuery.of(context).size.height - 80,

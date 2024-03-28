@@ -69,7 +69,6 @@ class AuthService extends ChangeNotifier {
     if(AuthService.isLoggedIn) {
       await service.get<User>("/auth/refresh", true, null).then((value) { 
         if (value.data != null && value.data!.isNotEmpty) {
-          developer.log('LOG URL ${value.data![0].notifications}', name: 'my.app.category');
           appBarKey.currentState!.setState(() {
             user!.token = value.data![0].token;
             user!.notifications = value.data![0].notifications;

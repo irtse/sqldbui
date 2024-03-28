@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/main.dart';
@@ -16,8 +17,8 @@ class MenuWidget extends StatefulWidget{
   const MenuWidget ({ Key? key, this.views}): super(key: key);
   @override MenuWidgetState createState() => MenuWidgetState();
 }
+bool globalLoading = true;
 class MenuWidgetState extends State<MenuWidget> {
-  bool loading = true;
   TextEditingController controller = TextEditingController();
   Map<String, bool> initiallyExpanded = {};
   @override Widget build(BuildContext context) {
@@ -30,35 +31,44 @@ class MenuWidgetState extends State<MenuWidget> {
       }
       if (view == null && widget.views != null && widget.views!.isNotEmpty) { view = widget.views![0]; }
       if (view != null) {
-        if (APIService.cache.containsKey(view.linkPath) && !firstAPI) { loading = false; }
+        if (APIService.cache.containsKey(view.linkPath) && !firstAPI) { globalLoading = false; }
         if (firstAPI) { globalOffset = 0; }
-        additionnalContent.add(FutureBuilder<APIResponse<model.View>>(
-        future: view.isList ? APIService().getWithOffset<model.View>(view.linkPath, firstAPI, context)
-        : APIService().get<model.View>(view.linkPath, firstAPI, context), // a previously-obtained Future<String> or null
-        builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
-            if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
-              currentView = snap.data!.data![0];
-              if (homeKey.currentState!.widget.subViewID != null ) {
-                var subID = homeKey.currentState!.widget.subViewID!;
-                model.Item? item;
-                for (var v2 in currentView!.items) {
-                  if (v2.values['id'] == subID) { item = v2; break; }
-                }
-                if (item != null && item.linkPath != "") {
-                  return FutureBuilder<APIResponse<model.View>>(
-                    future: APIService().get<model.View>(item.linkPath, firstAPI, null), // a previously-obtained Future<String> or null
-                    builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> sn) {
-                    if (sn.hasData && sn.data!.data != null && sn.data!.data!.isNotEmpty) { currentView=sn.data!.data![0]; }
-                    return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this,);
-                  });
-                }
-              }   
-            }
-            homeKey.currentState!.widget.viewID = currentView != null ? "${currentView!.id}" : "";
-            homeKey.currentState!.widget.subViewID = null;
-            if (currentView != null) { currentCat = currentView!.category; }
-            return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this);
-        }));
+        if (homeKey.currentState!.widget.subViewID == null || AppRouter.routedSubID != null) {
+          developer.log('LOG URL ${view.linkPath}${AppRouter.routedSubID != null ? "&id=${AppRouter.routedSubID}" : ""}', name: 'my.app.category');
+          additionnalContent.add(FutureBuilder<APIResponse<model.View>>(
+          future: view.isList ? APIService().getWithOffset<model.View>("${view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
+          : APIService().get<model.View>(view.linkPath, firstAPI, context), // a previously-obtained Future<String> or null
+          builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
+              if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
+                currentView = snap.data!.data![0];
+                developer.log('LOG SUB ${AppRouter.routedSubID }', name: 'my.app.category');
+                if (homeKey.currentState!.widget.subViewID != null || AppRouter.routedSubID != null) {
+                  var subID = AppRouter.routedSubID ?? homeKey.currentState!.widget.subViewID!;
+                  model.Item? item;
+                  for (var v2 in currentView!.items) {
+                     developer.log('LOG SUB ${AppRouter.routedSubID } ${v2.values}', name: 'my.app.category');
+                    if (v2.values['id'] == subID) { item = v2; break; }
+                  }
+                  if (item != null && item.linkPath != "") {
+                    homeKey.currentState!.widget.subViewID = subID;
+                    // AppRouter.routedSubID = null;
+                    return FutureBuilder<APIResponse<model.View>>(
+                      future: APIService().get<model.View>(item.linkPath, firstAPI, null), // a previously-obtained Future<String> or null
+                      builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> sn) {
+                      if (sn.hasData && sn.data!.data != null && sn.data!.data!.isNotEmpty) { currentView=sn.data!.data![0]; }
+                      return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this,);
+                    });
+                  }
+                }   
+              }
+              if (homeKey.currentState!.widget.viewID == null) {
+                homeKey.currentState!.widget.viewID = currentView != null ? "${currentView!.id}" : "";
+                homeKey.currentState!.widget.subViewID = null;
+              }
+              if (currentView != null) { currentCat = currentView!.category; }
+              return ViewWidget(key: currentView != null ? globalViewKey : null, menu: this);
+          }));
+        } else { additionnalContent.add(ViewWidget(key: globalViewKey, menu: this)); }
       }
     }
     var eldestCat = categories;
@@ -134,7 +144,7 @@ class MenuWidgetState extends State<MenuWidget> {
                 color: Theme.of(context).secondaryHeaderColor,
                 child: ListView.builder(
                   itemBuilder: (builder, index) {
-                      if (index == 0 && homeKey.currentState!.widget.viewID == null) { 
+                      if (index == 0 && homeKey.currentState!.widget.viewID == null && homeKey.currentState!.widget.subViewID == null) { 
                         homeKey.currentState!.widget.viewID = '${categories[cat]![index].id}';
                         if (homeKey.currentState!.widget.subViewID != null && currentView != null) {
                           homeKey.currentState!.widget.subViewID = "${currentView!.id}";
@@ -171,7 +181,7 @@ class MenuWidgetState extends State<MenuWidget> {
     }
     firstAPI = false;
     List<Widget> content = [];
-    if (loading) {
+    if (globalLoading) {
       content.add(Stack(children: additionnalContent..add(
                     Container(width: MediaQuery.of(context).size.width - 250, height: MediaQuery.of(context).size.height - 40,
                               color: Theme.of(context).secondaryHeaderColor.withOpacity(0.5),
@@ -189,10 +199,12 @@ class MenuWidgetState extends State<MenuWidget> {
   }
   void refresh(int id, String? cat) {
     setState(() {
-      loading = true;
-      resetAllFilter();
+      AppRouter.routedSubID = null;
+      globalLoading =  globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
+      firstAPI =  globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
       currentView = null;
       currentCat = cat;
+      globalOffset = 0;
       homeKey.currentState!.widget.category=cat;
       homeKey.currentState!.widget.subViewID=null;
       homeKey.currentState!.widget.viewID=id.toString();

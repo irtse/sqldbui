@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:alert_banner/exports.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/model/abstract.dart';
@@ -59,7 +61,8 @@ class APIService {
     var err = ""; 
     // developer.log('LOG URL ${url}', name: 'my.app.category');
     if (url != "") {
-      if (cache.containsKey(url) && !force && cache[url] != null && globalOrder.isEmpty) { 
+      if (cache.containsKey(url) && !force && cache[url] != null 
+      && (globalOrder.isEmpty || (currentView != null && !globalOrder.containsKey(currentView!.id)))) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
         } else { return cache[url]! as APIResponse<T>; }
       }
@@ -68,36 +71,47 @@ class APIService {
         var orderBy = "";
         var filter = "";
         var dir = "";
-        if (url.contains("?")) {
-          for (var order in globalOrder.keys) {
-            if (orderBy.isEmpty) { orderBy += "&orderby=$order"; 
-            } else { orderBy += ",$order";  }
-            if (dir.isEmpty) { dir += "&dir=${globalOrder[order]}"; 
-            } else { dir += ",${globalOrder[order]}";  }
+        if (url.contains("?") && AppRouter.routedSubID == null) {
+          if (currentView != null && globalOrder.containsKey(currentView!.id)) {
+            for (var order in globalOrder[currentView!.id]!.keys) {
+              if (orderBy.isEmpty) { orderBy += "&orderby=$order"; 
+              } else { orderBy += ",$order";  }
+              if (dir.isEmpty) { dir += "&dir=${globalOrder[currentView!.id]![order]}"; 
+              } else { dir += ",${globalOrder[currentView!.id]![order]}";  }
+            }
           }
           if (isFilter) {
-            for (var f in globalFilter.keys) {  
-              if (globalFilter[f] != null && globalFilter[f]!.isNotEmpty) { 
-                filter += "&$f=";
-                for (var f in globalFilter[f]!) {
-                  filter += "%${f.value}%${f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "")}"; 
+            if (currentView != null && globalFilter.containsKey(currentView!.id)) {
+              for (var f in globalFilter[currentView!.id]!.keys) {  
+                if (globalFilter[currentView!.id]![f] != null && "${globalFilter[currentView!.id]![f]}" != "") { 
+                  filter += "&$f=";
+                  for (var f in globalFilter[currentView!.id]![f]!) {
+                    filter += "%25${f.value}%25${f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "")}"; 
+                  }
                 }
               }
             }
             if (globalNew) { filter += "&new=enable"; }
           }
         }
+        if (currentView != null && offset != null && currentView!.max < offset) { 
+          offset = 0; 
+          globalOffset = 0; 
+        }
+        developer.log('$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}${orderBy.isNotEmpty ? orderBy : ""}${ dir.isNotEmpty ? dir : ""}$filter', name: 'my.app.category');
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}${orderBy.isNotEmpty ? orderBy : ""}${ dir.isNotEmpty ? dir : ""}$filter", method, body);
         if (response.statusCode != null && response.statusCode! < 400) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
             if (method == "get") { 
               if (limit != null && cache.containsKey(url)) { 
-                if (offset != null) { 
+                if (offset != null && offset > 0) { 
                   cache[url]!.data!.addAll(resp.data!);
                   cache[url]!.offset = offset; 
+                  return cache[url]! as APIResponse<T>;
                 }
-              } else { cache[url]=resp; } }
+              } else { cache[url]=resp; } 
+            }
             if (context != null && succeed != "") {
               // ignore: use_build_context_synchronously
               showAlertBanner(context, () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
@@ -108,8 +122,7 @@ class APIService {
           err = resp.error ?? "internal error";
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
-      } catch(e, s) {  
-        err = e.toString(); }
+      } catch(e, s) {  err = e.toString(); }
     } else { err = "no url"; }
     if (context != null) {
       // ignore: use_build_context_synchronously

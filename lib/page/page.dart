@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';

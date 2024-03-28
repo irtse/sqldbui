@@ -14,7 +14,7 @@ class Notification extends SerializerDeserializer<Notification> {
   @override deserialize(Map<String, dynamic> json) => Notification(
     name: json.containsKey("name") ? json["name"] : "unknown user", 
     description: json.containsKey("description") ? json["description"] : "", 
-    ref: json.containsKey("token") ? json["token"] : "",  );
+    ref: json.containsKey("data_ref") ? json["data_ref"] : "",  );
   
   @override Map<String, dynamic> serialize() => {};
 }

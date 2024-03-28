@@ -29,12 +29,9 @@ class ActionBarState extends State<ActionBarWidget> {
   void loaded(String method) { setState(() { states[method]= false; });}
 
   void refresh(int? viewID) {
-    if (viewID != null) {
-          currentView = null;
-          homeKey.currentState!.widget.viewID="$viewID";
-          homeKey.currentState!.widget.subViewID=null;
-          globalMenuKey.currentState!.refresh(viewID, currentCat);
-    }
+    firstAPI = true;
+    globalLoading = true;
+    globalMenuKey.currentState!.setState(() {});
   }
 
   @override Widget build(BuildContext context) {
@@ -63,12 +60,33 @@ class ActionBarState extends State<ActionBarWidget> {
                       }), ),
                 icon: Icon( Icons.filter_alt_off, color: Theme.of(context).highlightColor, size: 20 ), 
                 onPressed: () async { 
-                  homeKey.currentState!.setState(() { resetAllFilter(); });
+                  homeKey.currentState!.setState(() { 
+                    globalOrder.remove(currentView!.id);
+                    globalFilter.remove(currentView!.id);
+                    globalNew = false;
+                    globalOffset = 0;  
+                  });
                 },
               ),],
           )
         );
       }
+      actions.add(
+          Column(
+            children: [IconButton(
+                tooltip: "reset ui change",
+                style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                        return Theme.of(context).primaryColor;
+                      }), ),
+                icon: Icon( Icons.auto_fix_off, color: Theme.of(context).highlightColor, size: 20 ), 
+                onPressed: () async { 
+                  homeKey.currentState!.setState(() { 
+                    globalOffset = 0; 
+                    rects.remove(currentView!.id);
+                  });
+                },
+              ),]));
         
 
         /*actions.add(
@@ -163,7 +181,7 @@ class ActionBarState extends State<ActionBarWidget> {
         }
       }
       var row = <Widget>[];
-      if (homeKey.currentState!.widget.subViewID != null) {
+      if (homeKey.currentState!.widget.subViewID != null && AppRouter.routedSubID == null) {
         row.add(Padding( padding: const EdgeInsets.only(left: 24.0), child: IconButton(
                 tooltip: "back to list",
                 style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
@@ -183,22 +201,22 @@ class ActionBarState extends State<ActionBarWidget> {
         Padding( padding: const EdgeInsets.only(left: 30.0, right: 5.0),child: SizedBox(
                   width: (MediaQuery.of(context).size.width - 250) / (homeKey.currentState!.widget.subViewID != null ? 3.49 : 3),
                   child: Row( children: [Text(
-                    widget.view == null ? (globalMenuKey.currentState!.loading ? "LOADING" : "HOME") : widget.view!.name.replaceAll("_", " ").replaceAll("db", "").toUpperCase(), 
+                    widget.view == null ? (globalLoading ? "LOADING" : "HOME") : widget.view!.name.replaceAll("_", " ").replaceAll("db", "").toUpperCase(), 
                     style: TextStyle( color: Theme.of(context).highlightColor )),
                   Padding(padding: const EdgeInsets.only(left: 10), child: Icon(widget.view == null || !widget.view!.isList ? Icons.edit_document : Icons.list, 
                   color: Theme.of(context).splashColor, size: widget.view == null || !widget.view!.isList ? 20 : 25, )),
                   Text(widget.view == null || widget.view!.max == 0 ? "" : "   ${widget.view!.max} items founded",
                     style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor )),]))),
       );
-      if (widget.view != null) {
-        if (widget.menu.loading) { Future.delayed(const Duration(milliseconds: 100), () { widget.menu.setState(() { widget.menu.loading = false; }); }); }
-      }
       String path = "";
       if (homeKey.currentState!.widget.viewID != null) {
         path += "#${homeKey.currentState!.widget.viewID}";
         if (homeKey.currentState!.widget.subViewID != null) { path += ":${homeKey.currentState!.widget.subViewID}"; }
       }
       var controller = TextEditingController(text: path);
+      if (widget.view != null) {
+        if (globalLoading) { Future.delayed(const Duration(seconds: 1), () { widget.menu.setState(() { globalLoading = false; }); }); }
+      }
       return Row( children: [ 
             Container(
                 color: Theme.of(context).selectedRowColor,

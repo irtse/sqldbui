@@ -68,29 +68,46 @@ class HomeScreenState extends State<HomeScreen> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
-                       child: SizedBox(
-                        child: Row(children: [
-                          const Image(image: AssetImage('assets/images/logo.png'), width: 60,),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 30), 
-                            child: Text("SOFTWARE NAME", 
-                            style: TextStyle( color: Theme.of(context).highlightColor,),)),
-                            Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
-                              child: Icon(Icons.verified_user, color: Theme.of(context).splashColor),
-                            ),
-                            Padding(padding: const EdgeInsets.only(left: 0, right: 50), 
-                              child: Text("${AuthService.user != null ? AuthService.user!.name : "unknown"} - ${AuthService.user != null ? AuthService.user!.email : ""}",
-                                style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)),
-                            ),
-                        ],)
-                       )),         
+          child: SizedBox(child: Row(children: [
+            const Image(image: AssetImage('assets/images/logo.png'), width: 60,),
+            Padding(padding: const EdgeInsets.only(left: 30), 
+              child: Text("SOFTWARE NAME", 
+                style: TextStyle( color: Theme.of(context).highlightColor,),)),
+                Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
+                child: Icon(Icons.verified_user, color: Theme.of(context).splashColor),),
+                Padding(padding: const EdgeInsets.only(left: 0, right: 50), 
+                  child: Text("${AuthService.user != null ? AuthService.user!.name : "unknown"} - ${AuthService.user != null ? AuthService.user!.email : ""}",
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)),
+                  ),
+              ],)
+        )),         
         toolbarHeight: 40,
         actions: <Widget>[
           Stack( children: [
-            const Icon(Icons.notifications,
+            PopupMenuButton(
               color: Colors.white,
-              size: 25,
-            ),
+              icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
+              onSelected: (value) { },
+              itemBuilder: (BuildContext bc) {
+                List<Widget> rows = [];
+                for ( var notif in AuthService.user!.notifications ) {
+                  rows.add(Padding( padding: const EdgeInsets.all(10), child: Stack( children: [ Column(children: [
+                      SizedBox( width: 235, child: TextButton( 
+                        onPressed: () { AppRouter.navigateTo(notif.ref); }, child:  Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [const Icon(Icons.message), Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.name, style: TextStyle(color: Theme.of(context).primaryColor)),),
+                        Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.ref, style: TextStyle(color: Theme.of(context).splashColor)),)],))),
+                      SizedBox( width: 200, child: Row(children: [Text(notif.description.toLowerCase())],)),
+                      Container( margin: const EdgeInsets.only(top: 10), height: 1, width: 236, color: Theme.of(context).splashColor)
+                    ]), Positioned(top: -5, left: 190, child: IconButton(focusColor: Colors.transparent, hoverColor: Colors.transparent, icon: const Icon(Icons.close, size: 20,), onPressed: () {},) ) ]) ));
+                }
+                return [
+                  PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
+                    return Container( 
+                    width: 300, constraints: const BoxConstraints(maxHeight: 300),
+                    child: SingleChildScrollView( child:  Row(children:  rows ),)
+                  ); }))
+                ]; 
+            }),
             NotificationWidget(key: appBarKey,),
           ],),
           
@@ -106,7 +123,7 @@ class HomeScreenState extends State<HomeScreen> {
 }
 
 class NotificationWidget extends StatefulWidget {
-  NotificationWidget({ Key? key }): super(key: key);
+  const NotificationWidget({ Key? key }): super(key: key);
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -122,8 +139,8 @@ GlobalKey<NotificationWidgetState> appBarKey = GlobalKey<NotificationWidgetState
 class NotificationWidgetState extends State<NotificationWidget> {
   @override
   Widget build(BuildContext context) {
+    
     return Positioned( left: 10, child: Container(
-
               height: 20,
               alignment: Alignment.bottomRight,
               child: Container(

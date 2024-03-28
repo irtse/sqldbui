@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -8,6 +9,7 @@ import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/page.dart';
 
 class AppRouter { 
+  static String? routedSubID;
   static final AppRouter _instance = AppRouter._internal();
   factory AppRouter() { return _instance; }
   AppRouter._internal() { /* logic*/}    
@@ -42,11 +44,13 @@ class AppRouter {
     ),
   ];  
   static void navigateTo(String path) {
-    globalMenuKey.currentState!.setState(() {
+    homeKey.currentState!.setState(() {
       var splitted = path.replaceAll("#", "/").replaceAll(":", "/").split("/");
       currentView = null;
+      globalOffset = 0;
       homeKey.currentState!.widget.viewID= splitted.length > 1 ? splitted[1] : null;
-      homeKey.currentState!.widget.subViewID=splitted.length > 2 ? splitted[2] : null;
+      // homeKey.currentState!.widget.subViewID=splitted.length > 2 ? splitted[2] : null; 
+      routedSubID=splitted.length > 2 ? splitted[2] : null;
     });
   }
 }   
