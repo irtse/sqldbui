@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter_box_transform/flutter_box_transform.dart';
+import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
@@ -10,9 +11,10 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
+import 'package:sqldbui2/page/page.dart';
 
 String? isNew;
-
+Map<int, List<String>> notNew = {};
 class Filter {
   dynamic value;
   String? connector;
@@ -69,6 +71,7 @@ class GridWidgetState extends State<GridWidget> {
   final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
   @override Widget build(BuildContext context) { 
     List<Widget> additionnalContent = [];
+    if (currentView != null) { notNew[currentView!.id] = []; }
     var rows = buildRows(widget.columns, widget.source);
     if (widget.showCheckboxColumn) {
       additionnalContent.add(
@@ -89,6 +92,7 @@ class GridWidgetState extends State<GridWidget> {
       }
       if (count == widget.columns.length - 1) {  col.last = true;  }
       col.prefetch();
+      
       count++; 
     }
     return Scrollbar(
@@ -193,7 +197,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
     for (var e in widget.cells) {
       if (currentView != null && rects.containsKey(currentView!.id)) {
         double? h = rects[currentView!.id]![e.columnName] != null && ("${e.value}".length * 55) > (rects[currentView!.id]![e.columnName]!.width) 
-        && e.columnName != "description" ? 500 : null;
+         ? 500 : null;
         if (h != null && (maxheight == null || maxheight < h)) { 
           maxheight = h; 
           if (( 48 - maxheight) < 20 ) { maxheight = 48; }
@@ -210,22 +214,27 @@ class GridRowWidgetState extends State<GridRowWidget> {
         }
       }
       var child = e.columnName != "description" ? ListTile(
-        onTap: () { 
+        onTap: () async { 
           APIService().get<model.View>(widget.links[cellID]!, firstAPI, null).then((resp) { 
             if (widget.viewKey != null && widget.viewKey!.currentState != null && resp.data != null) {
-              globalMenuKey.currentState!.setState(() {
-                isNew = null;
-                beforeView = currentView;
-                currentView = resp.data![0];
-                currentView!.readOnly = beforeView!.readOnly;
-                homeKey.currentState!.widget.subViewID=cellID;
-              }); } }); },
+              if (currentView != null) { notNew[currentView!.id]!.add(cellID); }
+              APIService().get<model.View>(APIConstants.mainEndpost, true, null).then( (data) {
+                globalMenuKey.currentState!.setState(() {
+                  views = data.data!;
+                  isNew = null;
+                  beforeView = currentView;
+                  currentView = resp.data![0];
+                  currentView!.readOnly = beforeView!.readOnly;
+                  homeKey.currentState!.widget.subViewID=cellID;
+              });
+            }); } }); },
         title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).selectedRowColor))))
       ) : Padding(padding: const EdgeInsets.only(top: 4,), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
                   icon: const Icon(Icons.info), onPressed: () {},));
       List<Widget> badges = [];
+      if (currentView != null && notNew[currentView!.id]!.contains(cellID)) { first = false; }
       if (ids.contains(cellID) && first || isNew == cellID && first) {
         first = false;
         badges.add(Positioned(left: 10, top: 5, child: Container(
@@ -279,28 +288,29 @@ class GridColumnWidget extends StatefulWidget {
   double getWidth(bool avoid) {
     var width = (label.value.length * label.fontSize) + (20 * 2);
     if ((width * maxLength) <= (contextWidth) && !avoid) { 
-      width = columnName != "description" ? (getTotal() /  maxLength) : 50; 
+      width = (getTotal() /  maxLength); 
     }
     return width + 20;
   }
 
   bool isLower() {
     var width = (label.value.length * label.fontSize) + (20 * 2);
-    developer.log('LOG URL ${(width * maxLength)} ${(contextWidth - (81.5 * maxLength))}', name: 'my.app.category');
     return (width * maxLength) <= (contextWidth - (81.5 * maxLength));
   }
 
   double getTotal() {
-    return (contextWidth - (81.5 * maxLength)) - (borderWidth * maxLength);
+    var ratio = 100 + ((maxLength - 1) * 20);
+    return (contextWidth - ((ratio / maxLength)  * (maxLength)));
   }
 
   void prefetch() {
     if (currentView != null && !rects.containsKey(currentView!.id)) { rects[currentView!.id] = {}; }
     if (!rects[currentView!.id]!.containsKey(columnName)) {
       var width = getWidth(false);
+      
       late Rect rect = rects[currentView!.id]!.containsKey(columnName) && !rects[currentView!.id]![columnName]!.width.isNaN ? rects[currentView!.id]![columnName]! : Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
-        width: width.isNaN ? 300 : width + 42,
+        width: width.isNaN ? 300 : width,
         height: 55,
       );
       rects[currentView!.id]![columnName] = rect;
@@ -414,7 +424,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             }
             setState(() {});
             Future.delayed(const Duration(milliseconds: 500), () => setState(() { delayed = false; }));
-        }); }
+        }); } 
       },
       contentBuilder: (context, rect, flip) {
         return MouseRegion(

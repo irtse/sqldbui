@@ -127,8 +127,9 @@ class ActionService {
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
         if (form.view != null && form.view!.isEmpty && errorStr == "") { 
+          developer.log('LOG SUB ${form.view!.viewID}', name: 'my.app.category');
           Future.delayed(const Duration(seconds: 1), () { 
-            globalActionBar.currentState!.refresh(form.view!.viewID); 
+            globalMenuKey.currentState!.refresh(form.view!.viewID!, null, true); 
           });
         }
     }

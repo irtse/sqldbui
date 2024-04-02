@@ -45,6 +45,9 @@ class AuthService extends ChangeNotifier {
     user = null;
     error = null;
     resetAllFilter();
+    notNew = {};
+    homeKey.currentState!.widget.viewID = null;
+    homeKey.currentState!.widget.subViewID = null;
     homeKey.currentState!.setState(() { 
       APIService.cache = <String, APIResponse<dynamic>>{};
       currentView = null;

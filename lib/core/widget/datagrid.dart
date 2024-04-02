@@ -122,23 +122,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
           showCheckboxColumn: true,
           // controller: widget.dataGridController,
           showColumnHeaderIconOnHover: true,
-          /* onColumnDragging: (DataGridColumnDragDetails details) {
-          if (details.action == DataGridColumnDragAction.dropped &&
-              details.to != null) {
-              final GridColumn rearrangeColumn = columns[details.from];
-              columns.removeAt(details.from);
-              columns.insert(details.to!, rearrangeColumn);
-              dataSource.buildDataGridRows(columns, datas);
-              dataSource.refreshDataGrid();
-            }
-            return true;
-          },*/
-          // allowColumnsResizing: true,
-          // columnResizeMode: ColumnResizeMode.onResizeEnd,
-          /* onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-            setState(() { columnWidths[details.column.columnName] = details.width; });
-            return true;
-          },*/
           source: datas,
           //columnWidthMode: ColumnWidthMode.fill,
           columns: columns,

@@ -60,6 +60,37 @@ class HomeScreenState extends State<HomeScreen> {
     AuthService();
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     APIService.cache = {};
+    List<Widget> notifs = [];
+    if (AuthService.user!.notifications.isNotEmpty) {
+      notifs.addAll([
+            PopupMenuButton(
+              constraints: const BoxConstraints(maxWidth: 600, minWidth: 300),
+              color: Colors.white,
+              icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
+              onSelected: (value) { },
+              itemBuilder: (BuildContext bc) {
+                List<Widget> rows = [];
+                for ( var notif in AuthService.user!.notifications ) {
+                  rows.add(Padding( padding: const EdgeInsets.all(10), child: Stack( children: [ Column(children: [
+                      SizedBox( width: 540, child: TextButton( 
+                        onPressed: () { AppRouter.navigateTo(notif.ref); }, child:  Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [const Icon(Icons.message), Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.name, style: TextStyle(color: Theme.of(context).primaryColor)),),
+                        Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.ref, style: TextStyle(color: Theme.of(context).splashColor)),)],))),
+                      SizedBox( width: 510, child: Row(children: [Text(notif.description.toLowerCase())],)),
+                      Container( margin: const EdgeInsets.only(top: 10), height: 1, width: 556, color: Theme.of(context).splashColor)
+                    ])])));
+                }
+                return [
+                  PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
+                    return Container( width: 1000,
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: SingleChildScrollView( child:  Row(children:  rows ),)
+                  ); }))
+                ]; 
+            }),
+            NotificationWidget(key: appBarKey,),
+          ]);
+    } else { notifs.add(const Icon(Icons.notifications, color: Colors.white, size: 25,)); }
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -83,33 +114,7 @@ class HomeScreenState extends State<HomeScreen> {
         )),         
         toolbarHeight: 40,
         actions: <Widget>[
-          Stack( children: [
-            PopupMenuButton(
-              color: Colors.white,
-              icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
-              onSelected: (value) { },
-              itemBuilder: (BuildContext bc) {
-                List<Widget> rows = [];
-                for ( var notif in AuthService.user!.notifications ) {
-                  rows.add(Padding( padding: const EdgeInsets.all(10), child: Stack( children: [ Column(children: [
-                      SizedBox( width: 235, child: TextButton( 
-                        onPressed: () { AppRouter.navigateTo(notif.ref); }, child:  Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [const Icon(Icons.message), Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.name, style: TextStyle(color: Theme.of(context).primaryColor)),),
-                        Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.ref, style: TextStyle(color: Theme.of(context).splashColor)),)],))),
-                      SizedBox( width: 200, child: Row(children: [Text(notif.description.toLowerCase())],)),
-                      Container( margin: const EdgeInsets.only(top: 10), height: 1, width: 236, color: Theme.of(context).splashColor)
-                    ]), Positioned(top: -5, left: 190, child: IconButton(focusColor: Colors.transparent, hoverColor: Colors.transparent, icon: const Icon(Icons.close, size: 20,), onPressed: () {},) ) ]) ));
-                }
-                return [
-                  PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
-                    return Container( 
-                    width: 300, constraints: const BoxConstraints(maxHeight: 300),
-                    child: SingleChildScrollView( child:  Row(children:  rows ),)
-                  ); }))
-                ]; 
-            }),
-            NotificationWidget(key: appBarKey,),
-          ],),
+          Stack( children: notifs,),
           
           Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
                   child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",

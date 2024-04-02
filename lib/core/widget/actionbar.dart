@@ -191,7 +191,8 @@ class ActionBarState extends State<ActionBarWidget> {
                 icon: Icon( Icons.arrow_back, color: Theme.of(context).highlightColor, ),
                 onPressed: () {
                   widget.viewKey!.currentState!.setState(() {
-                    currentView = beforeView; 
+                    currentView = beforeView;
+                    firstAPI = true; 
                     homeKey.currentState!.widget.subViewID=null;
                   });
                 },

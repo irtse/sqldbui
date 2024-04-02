@@ -7,6 +7,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'dart:developer' as developer;
 /// Flutter code sample for [FutureBuilder].
 GlobalKey<PageWidgetState> globalPageKey = GlobalKey<PageWidgetState>();
+List<model.View>? views;
 class PageWidget extends StatefulWidget {
   const PageWidget({super.key});
 
@@ -22,7 +23,9 @@ class PageWidgetState extends State<PageWidget> {
     return FutureBuilder<APIResponse<model.View>>(
           future: _items(), // a previously-obtained Future<String> or null
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
-          if (snapshot.hasData && snapshot.data!.data != null) { return MenuWidget(key: globalMenuKey, views: snapshot.data!.data); }
+          if (snapshot.hasData && snapshot.data!.data != null) { 
+            views = snapshot.data!.data;
+            return MenuWidget(key: globalMenuKey); }
           return MenuWidget(key: globalMenuKey);
       }
     );
