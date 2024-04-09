@@ -62,27 +62,100 @@ class Item extends SerializerDeserializer<Item> {
     this.valuesManyPath = emptyDyn,
     this.values = emptyDyn,
     this.valuesMany = emptyManyValues,
+    this.workflow,
   });
   Map<String,dynamic> valuesManyPath;
   Map<String,dynamic> values;
   String linkPath = "";
   String dataPath = "";
+  Workflow? workflow;
   Map<String,Shallowed> valuesShallow;
   Map<String,List<Shallowed>>valuesMany;
 
   @override Map<String, dynamic> serialize() => {};
 
   @override deserialize(Map<String, dynamic> json) {
+    // developer.log('LOG ITEM ${json["workflow"]}', name: 'my.app.category');
     return  Item(
       valuesShallow: json.containsKey("values_shallow") && json["values_shallow"] != null ? fromMapJson<Shallowed>(json["values_shallow"], Shallowed()) : <String, Shallowed>{}, 
       dataPath: json.containsKey("data_path") && json["data_path"] != null ? json["data_path"] : "", 
       valuesMany: json.containsKey("values_many") && json["values_many"] != null ? fromMapListJson<Shallowed>(json["values_many"], Shallowed()) : <String, List<Shallowed>>{}, 
       linkPath: json.containsKey("link_path") && json["link_path"] != null ? json["link_path"] : "",  
       values: json.containsKey("values") && json["values"] != null ? json["values"] : <String,dynamic>{}, 
+      workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
       valuesManyPath: json.containsKey("values_path_many") && json["values_path_many"] != null ? json["values_path_many"] : <String,dynamic>{},
     );
 } }
 
+class Step extends SerializerDeserializer<Step> {
+  Step({
+    this.id = "",
+    this.name = "",
+    this.optionnal = false,
+    this.workflow,
+    this.isClose = false,
+    this.isCurrent = false,
+    this.isDismiss = false,
+    this.isSet = false,
+  });
+  String id = "";
+  String name = "";
+  bool optionnal = false;
+  Workflow? workflow;
+  bool isClose = false;
+  bool isDismiss = false; 
+  bool isCurrent = false;
+  bool isSet = false;
+  @override Map<String, dynamic> serialize() => {};
+
+  @override deserialize(Map<String, dynamic> json) {
+    return  Step(
+      id: json.containsKey("id") && json["id"] != null ? json["id"] : "", 
+      name: json.containsKey("name") && json["name"] != null ? json["name"] : "", 
+      isClose: json.containsKey("is_close") && json["is_close"] != null ? json["is_close"] : false,
+      isCurrent: json.containsKey("is_current") && json["is_current"] != null ? json["is_current"] : false,
+      isDismiss: json.containsKey("is_dismiss") && json["is_dismiss"] != null ? json["is_dismiss"] : false,
+      optionnal: json.containsKey("optionnal") && json["optionnal"] != null ? json["optionnal"] : false,
+      isSet: json.containsKey("is_set") && json["is_set"] != null ? json["is_set"] : true,
+      workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
+    );
+} }
+const Map<String,List<Step>> emptyMapList = {};
+class Workflow extends SerializerDeserializer<Workflow> {
+  Workflow({
+    this.id = "",
+    this.current = "",
+    this.currentHub = false,
+    this.isClose = false,
+    this.currentClose = false,
+    this.steps=emptyMapList,
+    this.currentDismiss = false,
+    this.isDismiss = false,
+  });
+  String id = "";
+  bool isClose = false;
+  bool isDismiss = false;
+  String current = "";
+  bool currentHub = false;
+  bool currentClose = false;
+  bool currentDismiss = false;
+
+  Map<String,List<Step>> steps;
+
+  @override Map<String, dynamic> serialize() => {};
+
+  @override deserialize(Map<String, dynamic> json) {
+    return  Workflow(
+      id :json.containsKey("id") && json["id"] != null ? json["id"] : "", 
+      current: json.containsKey("current") && json["current"] != null ? json["current"] : "", 
+      currentDismiss: json.containsKey("current_dismiss") && json["current_dismiss"] != null ? json["current_dismiss"] : false, 
+      currentClose: json.containsKey("current_close") && json["current_close"] != null ? json["current_close"] : false, 
+      isClose: json.containsKey("is_close") && json["is_close"] != null ? json["is_close"] : false, 
+      isDismiss: json.containsKey("is_dismiss") && json["is_dismiss"] != null ? json["is_dismiss"] : false, 
+      currentHub: json.containsKey("current_hub") && json["current_hub"] != null ? json["current_hub"] : false, 
+      steps: json.containsKey("steps") && json["steps"] != null ? fromMapListJson<Step>(json["steps"], Step()) : <String, List<Step>>{}, 
+    );
+} }
 const emptyitem = <Item>[];
 class View extends SerializerDeserializer<View> {
   View({
@@ -107,6 +180,7 @@ class View extends SerializerDeserializer<View> {
     this.viewID,
     this.newIds = emptyStr,
     this.max = 0,
+    this.workflow,
   });
 
   String actionPath;
@@ -130,9 +204,11 @@ class View extends SerializerDeserializer<View> {
   List<dynamic> order;
   List<dynamic> newIds;
   int max;
+  Workflow? workflow;
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
     id: json.containsKey("id") && json["id"] != null ? json["id"] : -1, 
     max: json.containsKey("max") && json["max"] != null ? json["max"] : 0, 
     newIds: json.containsKey("new") && json["new"] != null ? json["new"] : <String>[], 
@@ -169,6 +245,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.linkPath = "",
     this.schemaName = "",
     this.order = emptyStr, 
+    this.workflow,
   });
   String? label;
   String? name;
@@ -180,12 +257,14 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   String actionPath;
   List<dynamic> actions;
   Map<String, SchemaField> schema;
+  Workflow? workflow;
 
   @override deserialize(Map<String, dynamic> json) {
     return Shallowed(
     id: json.containsKey("id") ? json["id"] : null, 
     name: json.containsKey("name") ? json["name"] : null,
     label: json.containsKey("label") ? json["label"] : null,
+    workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
     readOnly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,  
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
     actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 

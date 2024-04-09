@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -11,7 +13,9 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'dart:developer' as developer;
 
 import 'package:sqldbui2/page/page.dart';
-
+bool isMenu = true;
+double menuSize = 250;
+bool done = true;
 Map<String, List<model.View>> categories = <String, List<model.View>>{};
 GlobalKey<MenuWidgetState> globalMenuKey = GlobalKey<MenuWidgetState>();
 class MenuWidget extends StatefulWidget{
@@ -60,7 +64,7 @@ class MenuWidgetState extends State<MenuWidget> {
                 }   
               }
               if (homeKey.currentState!.widget.viewID == null) {
-                homeKey.currentState!.widget.viewID = currentView != null ? "${currentView!.id}" : "";
+                homeKey.currentState!.widget.viewID = view!.id.toString();
                 homeKey.currentState!.widget.subViewID = null;
               }
               if (currentView != null) { currentCat = currentView!.category; }
@@ -79,7 +83,9 @@ class MenuWidgetState extends State<MenuWidget> {
         if (eldestCat.containsKey(cat)) {
           for (var v in eldestCat[cat]!) {
             if (v.id == view.id || v.name == view.name) { 
-              if (view.newIds.length < v.newIds.length -1) { view.newIds = v.newIds; }
+              if (view.newIds.length < v.newIds.length - 1 && view.items.isNotEmpty) { 
+                view.newIds = v.newIds; 
+              }
               break; 
             }
           }
@@ -88,18 +94,21 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     List<Widget> comps = <Widget>[Container(
-        color: Theme.of(context).selectedRowColor,
+        decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          border: const Border(bottom: BorderSide(color: Colors.black, width: 0.5))
+        ),
         child: Padding( padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10), child : Container(height: 30, width: 230, child:TextFormField(
                         cursorHeight: 15,
-                        style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
+                        style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
                         controller: controller,
-                        onChanged: (value) => setState(() {}),
+                        onChanged: (value) => setState(() { }),
                         decoration: InputDecoration(
                         filled: true,
                         labelStyle: TextStyle(color: Theme.of(context).highlightColor),
                         hintStyle: TextStyle(color: Theme.of(context).splashColor),
-                        contentPadding: const EdgeInsets.all(1),
-                        fillColor: Theme.of(context).secondaryHeaderColor,
+                        contentPadding: const EdgeInsets.all(2),
+                        fillColor: Theme.of(context).selectedRowColor,
                         iconColor: Theme.of(context).highlightColor,
                         prefixIcon: Icon(Icons.filter_alt, size: 20, color: Theme.of(context).splashColor,),
                         hintText: 'filter menu...',
@@ -110,34 +119,38 @@ class MenuWidgetState extends State<MenuWidget> {
       )))];
       var first = true;
       for (var cat in categories.keys) {
+        var count = 0;
         if (categories[cat]!.isNotEmpty) {
-          var count = 0;
           if (!initiallyExpanded.containsKey(cat)) { initiallyExpanded[cat] = first; }
           first = false;
           for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
           List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 180, top: 13, child: Container(
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
-                                                      color: Theme.of(context).secondaryHeaderColor),
+                                                      color: Theme.of(context).primaryColor),
             child: Padding(padding: const EdgeInsets.all(5), child: Text("$count", 
               style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))
           ))] : [];
           comps.add(Container(
-          width: 250,
-          color: Theme.of(context).primaryColor,
+          width: menuSize,
+          decoration: BoxDecoration(
+            color: Theme.of(context).secondaryHeaderColor,
+            border: Border(bottom: BorderSide(color: Colors.black, width: 0.4))
+          ),
           margin: const EdgeInsets.only(bottom: 0.3),
           child: Stack( children: [ ExpansionTile(
+            shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
             onExpansionChanged: (value) => setState(() {
               initiallyExpanded[cat] = value;
             }),
             initiallyExpanded: initiallyExpanded[cat]!,
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme.of(context).secondaryHeaderColor,
             title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10),
                                            child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
               Text(cat.toUpperCase(), style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11,),) ]), 
-            iconColor: Theme.of(context).highlightColor, 
-            collapsedIconColor: Theme.of(context).highlightColor,
+            iconColor: isMenu ? Theme.of(context).highlightColor : Colors.transparent, 
+            collapsedIconColor: isMenu ? Theme.of(context).highlightColor : Colors.transparent,
             children: [ Container(
-                width: 250,
+                width: menuSize,
                 height: categories[cat]!.length * 40,
                 color: Theme.of(context).secondaryHeaderColor,
                 child: ListView.builder(
@@ -159,17 +172,31 @@ class MenuWidgetState extends State<MenuWidget> {
                             padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
                             style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))
                         ))] : [];
-                      return Material( child: Stack( children: [ListTile(
-                        selected: "${catIndex.id}" == homeKey.currentState!.widget.viewID,
-                        onTap: () async { refresh(catIndex.id, cat, false); },
-                        tileColor: Theme.of(context).secondaryHeaderColor,
-                        iconColor: Colors.white,
-                        title: Padding( padding: const EdgeInsets.only(left: 10, right: 10), child: Text(catIndex.name, style: const TextStyle(fontSize: 13.0,))),
-                        visualDensity: const VisualDensity(vertical: -4), // to compact
-                        textColor: Colors.white,
-                        hoverColor: Theme.of(context).selectedRowColor,
-                        leading: catIndex.isList ? const Icon(Icons.list) : const Icon(Icons.edit_document),
-                      )]..addAll(badge) )); 
+                      return Stack( alignment: Alignment.topRight,
+                        children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border(top: BorderSide(color: Colors.black, width: index == 0 ? .5 : .25), bottom: BorderSide(color: Colors.black, width: .25)),
+                            color: "${catIndex.id}" == homeKey.currentState!.widget.viewID ? Theme.of(context).selectedRowColor : Colors.transparent,
+                          ),
+                          child:  Container(
+                          decoration: BoxDecoration(
+                            border: Border(left: BorderSide(color: Theme.of(context).primaryColor, width: 10)),
+                            color: "${catIndex.id}" == homeKey.currentState!.widget.viewID ? Theme.of(context).selectedRowColor : Colors.transparent,
+                          ), child: Material(
+                            type: MaterialType.transparency,
+                            child: ListTile(
+                          selected: "${catIndex.id}" == homeKey.currentState!.widget.viewID,
+                          onTap: () async { refresh(catIndex.id, cat, false); },
+                          tileColor: Theme.of(context).secondaryHeaderColor,
+                          iconColor: Theme.of(context).splashColor,
+                          title: Text(catIndex.name, style: const TextStyle(fontSize: 13.0,)),
+                          visualDensity: const VisualDensity(vertical: -4), // to compact
+                          textColor: Colors.white,
+                          selectedColor: Colors.white,
+                          hoverColor: Theme.of(context).selectedRowColor,
+                          leading: catIndex.isList ? const Icon(Icons.list) : const Icon(Icons.edit_document),
+                      )))), ...badge] ); 
                   },
                 ),
               )
@@ -181,19 +208,23 @@ class MenuWidgetState extends State<MenuWidget> {
     List<Widget> content = [];
     if (globalLoading) {
       content.add(Stack(children: additionnalContent..add(
-                    Container(width: MediaQuery.of(context).size.width - 250, height: MediaQuery.of(context).size.height - 40,
+                    Container( width: MediaQuery.of(context).size.width - menuSize, height: MediaQuery.of(context).size.height - 40,
                               color: Theme.of(context).secondaryHeaderColor.withOpacity(0.5),
                               child: const SpinKitCircle(color: Colors.white, size: 100.0,))
                     ),));
     } else { content = additionnalContent; }
-    return Row(children: [ 
-      Container( color: Theme.of(context).secondaryHeaderColor,
-      height: MediaQuery.of(context).size.height - 40, child: SingleChildScrollView(
-        child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: comps
-      ),),)
-    ]..addAll(content));
+    if ((homeKey.currentState!.widget.viewID == null || homeKey.currentState!.widget.viewID == "") && done) {
+      done = false;
+    }
+    menuSize = isMenu ? 250 : 0;
+    content = [ 
+      FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
+      builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+        return Container( color: Theme.of(context).secondaryHeaderColor,
+          width: menuSize, height: MediaQuery.of(context).size.height - 40, child: SingleChildScrollView(
+          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),); }), ...content];
+    if (!isMenu) { return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content); }
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content);
   }
   void refresh(int id, String? cat, bool forceFirstAPI) {
     setState(() {

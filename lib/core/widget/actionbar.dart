@@ -142,7 +142,9 @@ class ActionBarState extends State<ActionBarWidget> {
           if ( action.toLowerCase() == "post" && !widget.view!.isList ) {
             actions.add(Column(
               children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
-                    style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                    style: ButtonStyle( 
+                      backgroundColor: MaterialStateColor.resolveWith((states) => Theme.of(context).splashColor) ,
+                      overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
                       }), ),
@@ -198,17 +200,14 @@ class ActionBarState extends State<ActionBarWidget> {
                 },
               )));
       }
-      row.add(
-        Padding( padding: const EdgeInsets.only(left: 30.0, right: 5.0),child: SizedBox(
-                  width: (MediaQuery.of(context).size.width - 250) / (homeKey.currentState!.widget.subViewID != null ? 3.49 : 3),
-                  child: Row( children: [Text(
+      row.addAll([Flexible(child: Text(overflow: TextOverflow.ellipsis,
                     widget.view == null ? (globalLoading ? "LOADING" : "HOME") : widget.view!.name.replaceAll("_", " ").replaceAll("db", "").toUpperCase(), 
-                    style: TextStyle( color: Theme.of(context).highlightColor )),
+                    style: TextStyle( color: Theme.of(context).highlightColor ))),
                   Padding(padding: const EdgeInsets.only(left: 10), child: Icon(widget.view == null || !widget.view!.isList ? Icons.edit_document : Icons.list, 
                   color: Theme.of(context).splashColor, size: widget.view == null || !widget.view!.isList ? 20 : 25, )),
-                  Text(widget.view == null || widget.view!.max == 0 ? "" : "   ${widget.view!.max} items founded",
-                    style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor )),]))),
-      );
+                  Flexible(child: Text(widget.view == null || widget.view!.max == 0 ? "" : "   ${widget.view!.max} items founded",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ))),],);
       String path = "";
       if (homeKey.currentState!.widget.viewID != null) {
         path += "#${homeKey.currentState!.widget.viewID}";
@@ -218,17 +217,17 @@ class ActionBarState extends State<ActionBarWidget> {
       if (widget.view != null) {
         if (globalLoading) { Future.delayed(const Duration(seconds: 1), () { widget.menu.setState(() { globalLoading = false; }); }); }
       }
-      return Row( children: [ 
-            Container(
-                color: Theme.of(context).selectedRowColor,
-                height: 40,
-                width: MediaQuery.of(context).size.width - 250,
-                child: Row(children: row..addAll([ 
-                  Stack( children: [ SizedBox (
-                    width: (MediaQuery.of(context).size.width - 250 - 100) / 3,
-                    height: 30,
+      return Container( height: 40, padding: const EdgeInsets.symmetric(horizontal: 30),
+        width: MediaQuery.of(context).size.width - menuSize,
+        decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          boxShadow: [ BoxShadow(color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3)) ]),
+        child:  Row(children: [ 
+                  Flexible(flex: 1, child: Row( children: row,)),
+                  Flexible( flex: 1, child: Row( children:  [ Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 50.0),
+                      padding: const EdgeInsets.only(right: 10.0, top: 5, bottom: 5),
                       child: TextFormField(
                         cursorHeight: 15,
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
@@ -252,27 +251,17 @@ class ActionBarState extends State<ActionBarWidget> {
                         hintText: 'actual url...',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
                                                    borderSide: BorderSide(color: Theme.of(context).primaryColor))
-                      )
-                    ), 
-                    ),
+                    ))),
                   ),
-                  Positioned(left: ((MediaQuery.of(context).size.width - 250 - 100) / 3) / 1.1, top: -5, child: IconButton(
+                  IconButton(
                     tooltip: "go to data(s)",
-                    style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                            return Colors.transparent;
-                          }), ),
+                    style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) { return Colors.transparent; }), ),
                     icon: Icon( Icons.send, color: Theme.of(context).splashColor, size: 20,),
-                    onPressed: () {
-                      AppRouter.navigateTo(controller.text);
-                    },
-                  ))
-                ]),
-                SizedBox ( // ACTIONS
-                  width: (MediaQuery.of(context).size.width - 250) / 3.2,
-                  child:Row ( mainAxisAlignment: MainAxisAlignment.end, children: actions, ),
-                )
-              ]))
-            ),
-        ],);
+                    onPressed: () { AppRouter.navigateTo(controller.text); },
+                  )])
+                ),
+                Flexible( flex: 1, child: Row ( mainAxisAlignment: MainAxisAlignment.end, children: actions, )
+              )])
+            );
   }
 }

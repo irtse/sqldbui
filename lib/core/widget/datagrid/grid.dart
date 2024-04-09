@@ -95,7 +95,7 @@ class GridWidgetState extends State<GridWidget> {
       
       count++; 
     }
-    return Scrollbar(
+    return  Padding( padding: EdgeInsets.only(left: rows.isEmpty ? 0 : 3), child:  Scrollbar(
       controller: _horizontal,
       thumbVisibility: true,
       trackVisibility: true,
@@ -145,7 +145,7 @@ class GridWidgetState extends State<GridWidget> {
           ],
         ),
         child: Row(children:additionnalContent..addAll(widget.columns))),
-    ],)));
+    ],))));
   }
 
   List<GridRowWidget> buildRows(List<GridColumnWidget> columns, List<Map<String, dynamic>> datas) {
@@ -221,13 +221,16 @@ class GridRowWidgetState extends State<GridRowWidget> {
               APIService().get<model.View>(APIConstants.mainEndpost, true, null).then( (data) {
                 globalMenuKey.currentState!.setState(() {
                   views = data.data!;
+                  developer.log('LOG WF ${resp.data![0].items[0].workflow}', name: 'my.app.category');
                   isNew = null;
                   beforeView = currentView;
                   currentView = resp.data![0];
+                  workflow =  resp.data![0].items[0].workflow;
                   currentView!.readOnly = beforeView!.readOnly;
                   homeKey.currentState!.widget.subViewID=cellID;
               });
-            }); } }); },
+            }); 
+          } }); },
         title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).selectedRowColor))))
@@ -300,7 +303,7 @@ class GridColumnWidget extends StatefulWidget {
 
   double getTotal() {
     var ratio = 100 + ((maxLength - 1) * 20);
-    return (contextWidth - ((ratio / maxLength)  * (maxLength)));
+    return (contextWidth - ((ratio / maxLength)  * (maxLength)) - 3);
   }
 
   void prefetch() {
@@ -372,7 +375,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
       allowFlippingWhileResizing: false,
       draggable: false,
       flip: null,
-      constraints:  BoxConstraints(maxHeight: 55, minWidth: ((buttons.length + 1) * 40) + 60),
+      constraints:  BoxConstraints(maxHeight: 55, minWidth: (((buttons.length + 1) * 40) + 60) > 0 ? (((buttons.length + 1) * 40) + 60) : 0),
       resizeModeResolver: () => ResizeMode.symmetric,
       visibleHandles: const {HandlePosition.right},
       enabledHandles: delayed || (widget.last && widget.isLower()) ? {} : const {HandlePosition.right},

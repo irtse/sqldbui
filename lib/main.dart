@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
   }
 }
 GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
+// ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
   String? viewID;
   String? subViewID;
@@ -60,39 +62,13 @@ class HomeScreenState extends State<HomeScreen> {
     AuthService();
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     APIService.cache = {};
-    List<Widget> notifs = [];
-    if (AuthService.user!.notifications.isNotEmpty) {
-      notifs.addAll([
-            PopupMenuButton(
-              constraints: const BoxConstraints(maxWidth: 600, minWidth: 300),
-              color: Colors.white,
-              icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
-              onSelected: (value) { },
-              itemBuilder: (BuildContext bc) {
-                List<Widget> rows = [];
-                for ( var notif in AuthService.user!.notifications ) {
-                  rows.add(Padding( padding: const EdgeInsets.all(10), child: Stack( children: [ Column(children: [
-                      SizedBox( width: 540, child: TextButton( 
-                        onPressed: () { AppRouter.navigateTo(notif.ref); }, child:  Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [const Icon(Icons.message), Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.name, style: TextStyle(color: Theme.of(context).primaryColor)),),
-                        Padding( padding: const EdgeInsets.only(left: 10), child: Text(notif.ref, style: TextStyle(color: Theme.of(context).splashColor)),)],))),
-                      SizedBox( width: 510, child: Row(children: [Text(notif.description.toLowerCase())],)),
-                      Container( margin: const EdgeInsets.only(top: 10), height: 1, width: 556, color: Theme.of(context).splashColor)
-                    ])])));
-                }
-                return [
-                  PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
-                    return Container( width: 1000,
-                    constraints: const BoxConstraints(maxHeight: 300),
-                    child: SingleChildScrollView( child:  Row(children:  rows ),)
-                  ); }))
-                ]; 
-            }),
-            NotificationWidget(key: appBarKey,),
-          ]);
-    } else { notifs.add(const Icon(Icons.notifications, color: Colors.white, size: 25,)); }
+    
+    var _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: _scaffoldKey,
+      endDrawer: const NotificationDrawerWidget(),
       appBar: AppBar(
+        elevation: 3,
         automaticallyImplyLeading: false,
         shadowColor: Theme.of(context).secondaryHeaderColor,
         backgroundColor: Theme.of(context).secondaryHeaderColor,
@@ -101,28 +77,31 @@ class HomeScreenState extends State<HomeScreen> {
         title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
           child: SizedBox(child: Row(children: [
             const Image(image: AssetImage('assets/images/logo.png'), width: 60,),
-            Padding(padding: const EdgeInsets.only(left: 30), 
-              child: Text("SOFTWARE NAME", 
-                style: TextStyle( color: Theme.of(context).highlightColor,),)),
+            Flexible( child: Container(padding: const EdgeInsets.only(left: 30), 
+              child: Text("SOFTWARE NAME", softWrap: true, overflow: TextOverflow.ellipsis,
+                style: TextStyle( color: Theme.of(context).highlightColor,),))),
                 Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
                 child: Icon(Icons.verified_user, color: Theme.of(context).splashColor),),
-                Padding(padding: const EdgeInsets.only(left: 0, right: 50), 
+                Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
                   child: Text("${AuthService.user != null ? AuthService.user!.name : "unknown"} - ${AuthService.user != null ? AuthService.user!.email : ""}",
-                    style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)),
-                  ),
+                  overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)))),
               ],)
         )),         
         toolbarHeight: 40,
         actions: <Widget>[
-          Stack( children: notifs,),
-          
+          Stack( children: [
+             IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
+             onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),),
+             NotificationWidget(key: appBarKey,),
+          ],),
           Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
-                  child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
-                                    onPressed: () async { await _authProvider.logOut(context); }, )
+            child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
+                              onPressed: () async { await _authProvider.logOut(context); }, )
           )
         ],
       ),
       body: PageWidget(key: globalPageKey),
+      backgroundColor: Theme.of(context).secondaryHeaderColor,
     );
   }
 }
@@ -144,27 +123,16 @@ GlobalKey<NotificationWidgetState> appBarKey = GlobalKey<NotificationWidgetState
 class NotificationWidgetState extends State<NotificationWidget> {
   @override
   Widget build(BuildContext context) {
-    
     return Positioned( left: 10, child: Container(
-              height: 20,
-              alignment: Alignment.bottomRight,
-              child: Container(
-                width: 15,
-                height: 20,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xffc32c37),
-                    border: Border.all(color: Colors.white, width: 1)),
-                child: Padding(
-                  padding: const EdgeInsets.all(0.0),
-                  child: Center(
-                    child: Text(
-                      AuthService.user!.notifications.length > 9 ? "+" : AuthService.user!.notifications.length.toString(),
-                      style: const TextStyle(fontSize: 9, color: Colors.white),
-                    ),
-                  ),
-                ),
-              )),
-            );
+      height: 20, alignment: Alignment.bottomRight,
+      child: Container( width: 15, height: 20,
+        decoration: BoxDecoration( shape: BoxShape.circle,
+          color: const Color(0xffc32c37),
+          border: Border.all(color: Colors.white, width: 1)),
+        child: Padding( padding: const EdgeInsets.all(0.0),
+          child: Center( child: Text( overflow: TextOverflow.ellipsis,
+            AuthService.user!.notifications.length > 9 ? "+" : AuthService.user!.notifications.length.toString(),
+            style: const TextStyle(fontSize: 9, color: Colors.white),
+    ))))));
   }
 }

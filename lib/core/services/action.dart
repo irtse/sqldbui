@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/workflowPanel.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
@@ -61,7 +62,8 @@ class ActionService {
         // ignore: use_build_context_synchronously
         formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false);
     }
-    if (!form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty) {
+    if (!form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
+    && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) {
       if (form.view!.id == mainForm.currentState!.widget.view!.id) {
         // ignore: use_build_context_synchronously
         showAlertBanner(context, () {}, const InfoAlertBannerChild(text: "Nothing has change :)"), // <-- Put any widget here you want!
@@ -79,6 +81,14 @@ class ActionService {
           && form.cacheForm[fieldName] is! List) { body[fieldName]=form.cacheForm[fieldName]; }
         }
         for (var k in add.keys) { body[k] = add[k]; }
+        if (globalWorkflowPanelWidgetKey.currentState != null) {
+            List<String> nexts = [];
+            for (var hub in globalWorkflowPanelWidgetKey.currentState!.hubs.keys) {
+              if (globalWorkflowPanelWidgetKey.currentState!.hubs[hub]!.value) { nexts.add(hub); }
+            }
+            body["nexts"]=nexts.join(",");
+            developer.log('LOG ERR $nexts', name: 'my.app.category');
+        }
       }
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
@@ -89,9 +99,7 @@ class ActionService {
             
             listSubForms(schema, form.cacheForm, method, schemaName, context);
           } 
-          if (form.view!.isEmpty) {
-              isNew = value.data![0].items[0].values["id"];
-          }
+          if (form.view!.isEmpty) { isNew = value.data![0].items[0].values["id"]; }
           formSubForms(form.oneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
           formSubForms(form.oneToManiesFormDelete, form.cacheForm, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
@@ -127,7 +135,6 @@ class ActionService {
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
         if (form.view != null && form.view!.isEmpty && errorStr == "") { 
-          developer.log('LOG SUB ${form.view!.viewID}', name: 'my.app.category');
           Future.delayed(const Duration(seconds: 1), () { 
             globalMenuKey.currentState!.refresh(form.view!.viewID!, null, true); 
           });

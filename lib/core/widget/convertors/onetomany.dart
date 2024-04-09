@@ -49,6 +49,7 @@ class OneToManyState extends State<OneToManyWidget> {
                 }
                 if (isDeleted) { continue; }
                 var view = model.View(id: int.parse(item.values["id"]), name: data.name, readOnly: widget.readOnly,
+                                  workflow: data.workflow,
                                   actions: data.actions, actionPath: data.actionPath, schemaName: data.schemaName,
                                   schema: data.schema, order: data.order, isEmpty: false, items: <model.Item>[item]);
                 var dataForm = widget.flashed.containsKey(int.parse(item.values["id"])) ? widget.flashed[int.parse(item.values["id"])]! 

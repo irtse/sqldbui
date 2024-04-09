@@ -39,6 +39,7 @@ class _DropDownState extends State<DropDownWidget> {
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
                         hintStyle: const TextStyle(fontSize: 12, ),
                         border: const OutlineInputBorder(),
+                        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                         hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}",
                         labelText: "${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}",
@@ -47,9 +48,8 @@ class _DropDownState extends State<DropDownWidget> {
       var items = <DropdownMenuItem<String>>[];
       var values = widget.type.replaceAll("enum:", "").split(",");
       for (var item in values) { 
-        if (item == widget.value) { items.insert(0, DropdownMenuItem<String>( value: item, child: Text(item),)); 
-        } else { items.add(DropdownMenuItem<String>(value: item,child: Text(item),));  }
-        
+        if (item == widget.value) { items.insert(0, DropdownMenuItem<String>( value: item, child: Text(item, overflow: TextOverflow.ellipsis,),)); 
+        } else { items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));  }  
       }
       return DropdownButtonFormField<String>( items: items, 
         value: widget.value ?? ( values.isNotEmpty ? values[0] : null),
@@ -64,9 +64,11 @@ class _DropDownState extends State<DropDownWidget> {
           } else { widget.form[widget.name]=value; }
         },
         decoration: InputDecoration(
+          suffixIconColor: Theme.of(context).primaryColor,
           errorStyle: const TextStyle(height: -2),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           filled: true,
+          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
           fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
           hintStyle: const TextStyle(fontSize: 12, ),
           border: const OutlineInputBorder(),
@@ -85,6 +87,7 @@ class _DropDownState extends State<DropDownWidget> {
                       style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         filled: true,
+                        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                         errorStyle: const TextStyle(height: -2),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
@@ -124,7 +127,7 @@ class _DropDownState extends State<DropDownWidget> {
               if (!mapped.containsKey(v)) {
                 mapped[v]=item;
                 if(widget.component.widget.view!.isEmpty || !(widget.component.widget.view!.isEmpty && !item.actions.contains("post"))) {
-                  items.add(DropdownMenuItem<String>(value: v, child: Text(v),));
+                  items.add(DropdownMenuItem<String>(value: v, child: Text(v, overflow: TextOverflow.ellipsis,),));
                 }
               }
             }
@@ -138,9 +141,9 @@ class _DropDownState extends State<DropDownWidget> {
                 if (value == null) { widget.form[widget.name]=null;
                 } else { widget.form[widget.name]=mapped[value]!.id; }
                 var item = mapped[value];
-                if (item != null && item.linkPath != "") {
+                if (widget.url != null && item != null && item.linkPath != "") {
                   widget.component.setState( () { 
-                    widget.component.widget.wrappersURL[widget.name] = item.linkPath.replaceAll("rows=all", "rows=${item.id}");
+                    widget.component.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                   }); 
                 }
               },
@@ -150,6 +153,7 @@ class _DropDownState extends State<DropDownWidget> {
               },
               decoration: InputDecoration(
                 filled: true,
+                enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                 border: const OutlineInputBorder(),
                 errorStyle: const TextStyle(height: -2),
                 hintStyle: const TextStyle(fontSize: 12),

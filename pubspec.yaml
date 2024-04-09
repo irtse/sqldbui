@@ -65,6 +65,7 @@ dependencies:
   flutter_box_transform: ^0.4.2
   hovering: ^1.0.4
   info_popup: ^4.3.1
+  flutter_advanced_switch: ^3.1.0
 
 dev_dependencies:
   flutter_test:

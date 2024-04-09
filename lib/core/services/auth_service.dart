@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -10,6 +11,7 @@ import 'package:sqldbui2/model/user.dart';
 import 'dart:developer' as developer;
 
 import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/page/page.dart';
 
 @lazySingleton
 class AuthService extends ChangeNotifier {
@@ -46,6 +48,8 @@ class AuthService extends ChangeNotifier {
     error = null;
     resetAllFilter();
     notNew = {};
+    done = true;
+    views = [];
     homeKey.currentState!.widget.viewID = null;
     homeKey.currentState!.widget.subViewID = null;
     homeKey.currentState!.setState(() { 

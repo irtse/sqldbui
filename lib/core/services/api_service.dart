@@ -99,6 +99,7 @@ class APIService {
           globalOffset = 0; 
         }
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}${orderBy.isNotEmpty ? orderBy : ""}${ dir.isNotEmpty ? dir : ""}$filter", method, body);
+        developer.log('LOG ERR $response', name: 'my.app.category');
         if (response.statusCode != null && response.statusCode! < 400) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
@@ -121,7 +122,9 @@ class APIService {
           err = resp.error ?? "internal error";
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
-      } catch(e, s) {  err = e.toString(); }
+      } catch(e, s) {  
+        developer.log('LOG ERR $e $s', name: 'my.app.category');
+        err = e.toString(); }
     } else { err = "no url"; }
     if (context != null) {
       // ignore: use_build_context_synchronously

@@ -33,8 +33,10 @@ class _TextState extends State<TextWidget> {
               enabled: true,
               autocorrect: true,
               decoration: InputDecoration(
+                enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                 border: const OutlineInputBorder(),
                 isDense: true,
+                suffixIconColor: Theme.of(context).primaryColor,
                 hintStyle: const TextStyle(fontSize: 12), // you need this
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
@@ -42,8 +44,8 @@ class _TextState extends State<TextWidget> {
                 contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
                   top: widget.type.contains("text") ? 20 : 0,
                   bottom: widget.type.contains("text") ? 20 : 0),
-                suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month) : const Icon(Icons.text_fields),
-                hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
+                suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) : const Icon(Icons.text_fields,),
+                hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}...",
                 labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
                 errorStyle: const TextStyle(fontSize: 0,),
               ),

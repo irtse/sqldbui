@@ -31,6 +31,9 @@ class _DateState extends State<DateWidget> {
         mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
         style: const TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
+            suffixIcon: const Icon(Icons.calendar_month, size: 20,),
+            suffixIconColor: Theme.of(context).primaryColor,
+            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
             helperStyle: const TextStyle(height: -2),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,

@@ -2,20 +2,24 @@ import 'package:sqldbui2/model/abstract.dart';
 
 class Notification extends SerializerDeserializer<Notification> {
   Notification({
+    this.id = "",
     this.name = "",
     this.description = "",
     this.ref = "", // todo something at least protected
+    this.linkPath = "",
   });
-
+  String id;
   String name;
   String description;
   String ref;
+  String linkPath;
 
   @override deserialize(Map<String, dynamic> json) => Notification(
+    id: json.containsKey("id") ? json["id"] : "", 
     name: json.containsKey("name") ? json["name"] : "unknown user", 
     description: json.containsKey("description") ? json["description"] : "", 
-    ref: json.containsKey("data_ref") ? json["data_ref"] : "",  );
-  
+    ref: json.containsKey("data_ref") ? json["data_ref"] : "", 
+    linkPath: json.containsKey("link_path") ? json["link_path"] : "",  );
   @override Map<String, dynamic> serialize() => {};
 }
 

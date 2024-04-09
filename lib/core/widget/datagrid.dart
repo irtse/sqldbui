@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -56,7 +57,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
               allowFiltering: !(datas.isEmpty && !isFilter()),
               columnName: "id",
               type: "integer",
-              contextWidth: MediaQuery.of(context).size.width - 250,
+              contextWidth: MediaQuery.of(context).size.width - menuSize,
               maxLength: maxCount(schema),
               borderColor: Theme.of(context).splashColor,
               label: GridValueWidget(fontSize: 15, icon: Icons.tag)
@@ -65,7 +66,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         columns.add(GridColumnWidget(context: context,
           type: "varchar", 
           maxLength: maxCount(schema),
-          contextWidth: MediaQuery.of(context).size.width  - 250,
+          contextWidth: MediaQuery.of(context).size.width  - menuSize,
           width: columnWidths.containsKey("description") ? columnWidths["id"]! : 70,
           allowSorting: false,
           allowFiltering: false,
@@ -80,7 +81,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
               type: "varchar",
               borderColor: Theme.of(context).splashColor,
               width: columnWidths.containsKey("name") ? columnWidths["name"]! : 300,
-              contextWidth: MediaQuery.of(context).size.width  - 250,
+              contextWidth: MediaQuery.of(context).size.width  - menuSize,
               columnName: "name",
               allowFiltering: !(datas.isEmpty && !isFilter()),
               allowSorting: !(datas.isEmpty && !isFilter()),
@@ -92,7 +93,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         if (fieldName == "description" || fieldName == "name" || schema[fieldName]!.type.contains("many")) { continue; }
         columns.add(GridColumnWidget(context: context,
               type: schema[fieldName]!.type,
-              contextWidth: MediaQuery.of(context).size.width - 250,
+              contextWidth: MediaQuery.of(context).size.width - menuSize,
               width: columnWidths.containsKey(fieldName) ? columnWidths[fieldName]! : double.nan,
               borderColor: Theme.of(context).splashColor,
               allowSorting: !(datas.isEmpty && !isFilter()),
@@ -107,13 +108,16 @@ class DatagridWidgetState extends State<DatagridWidget> {
       datas.sort( (a, b) =>  (b["id"] != null ? int.parse( b["id"]) : 0) -  (a["id"] != null ? int.parse(a["id"]) : 0) );
     } 
     return Column( children: [Container( 
-      height: MediaQuery.of(context).size.height - 80,
-      width: MediaQuery.of(context).size.width - 250,
-      color: Theme.of(context).highlightColor,
+      height: MediaQuery.of(context).size.height - 110,
+      width: MediaQuery.of(context).size.width - menuSize,
+      decoration: BoxDecoration(
+                  color:  Theme.of(context).highlightColor,
+                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),),
+                ),
       child : GridWidget(
           key: globalGridKey,
           links: links, 
-          contextWidth: MediaQuery.of(context).size.width - 250,
+          contextWidth: MediaQuery.of(context).size.width - menuSize,
           maxLength: maxCount(schema),
           contentShallowed: contentShallowed, 
           borderColor: Theme.of(context).splashColor,
@@ -126,8 +130,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
           //columnWidthMode: ColumnWidthMode.fill,
           columns: columns,
           // defaultColumnWidth: 300,
-      ),
-    ),]);
+      ) ),]);
   }
 
   List<String> order(List<String>mainOrder, int index, String fieldName) {
