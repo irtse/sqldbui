@@ -50,6 +50,6 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
         width: length,
         height: MediaQuery.of(context).size.height,
         color: Theme.of(context).secondaryHeaderColor,
-        child: Column(children: notifs));
+        child: SingleChildScrollView( child: Column(children: notifs) ));
   }
 }
