@@ -1,6 +1,5 @@
 import 'dart:developer' as developer;
 import 'package:flutter_box_transform/flutter_box_transform.dart';
-import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
@@ -11,10 +10,10 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
-import 'package:sqldbui2/page/page.dart';
 
+double maxWidth = 0;
 String? isNew;
-Map<int, List<String>> notNew = {};
+Map<String, List<String>> notNew = {};
 class Filter {
   dynamic value;
   String? connector;
@@ -22,30 +21,30 @@ class Filter {
 }
 
 bool globalNew = false;
-Map<int, Map<String,List<Filter>>> globalFilter = <int, Map<String,List<Filter>>>{};
-Map<int, Map<String,String>> globalOrder = <int, Map<String,String>>{};
+Map<String, Map<String,List<Filter>>> globalFilter = <String, Map<String,List<Filter>>>{};
+Map<String, Map<String,String>> globalOrder = <String, Map<String,String>>{};
 void resetFilter(String columnName) {
-  globalOrder[currentView!.id]!.remove(columnName); 
-  globalFilter[currentView!.id]!.remove(columnName);  
+  globalOrder[viewID]!.remove(columnName); 
+  globalFilter[viewID]!.remove(columnName);  
   globalNew = false;
   globalOffset = 0;
 }
 bool isFilter() {
-  return currentView != null && globalOrder.containsKey(currentView!.id) && globalFilter.containsKey(currentView!.id)
-  && (globalOrder[currentView!.id]!.isNotEmpty || globalFilter[currentView!.id]!.isNotEmpty || globalNew);
+  return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
+  && (globalOrder[viewID]!.isNotEmpty || globalFilter[viewID]!.isNotEmpty || globalNew);
 }
 void resetAllFilter() {
-  if (currentView != null && globalFilter.containsKey(currentView!.id) 
-      && globalOrder.containsKey(currentView!.id)) {
-    globalOrder = {}; 
-    globalFilter = {}; 
-    rects = {}; 
+  if (currentView != null && globalFilter.containsKey(viewID) 
+      && globalOrder.containsKey(viewID)) {
+    globalOrder.clear();
+    globalFilter.clear();
+    rects.clear(); 
   }
   globalNew = false;
   globalOffset = 0;
-  rects[currentView!.id] = {};
 }
-Map<int, Map<String, Rect>> rects = {};
+double refWidth = 0;
+Map<String, Map<String, Rect>> rects = {};
 // ignore: must_be_immutable
 class GridWidget extends StatefulWidget {
   GlobalKey<ViewWidgetState>? viewKey; 
@@ -71,7 +70,11 @@ class GridWidgetState extends State<GridWidget> {
   final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
   @override Widget build(BuildContext context) { 
     List<Widget> additionnalContent = [];
-    if (currentView != null) { notNew[currentView!.id] = []; }
+    if (currentView != null) { notNew[viewID!] = []; }
+    if (refWidth != MediaQuery.of(context).size.width) { 
+      rects = {};
+      refWidth = MediaQuery.of(context).size.width; 
+    }
     var rows = buildRows(widget.columns, widget.source);
     if (widget.showCheckboxColumn) {
       additionnalContent.add(
@@ -85,14 +88,14 @@ class GridWidgetState extends State<GridWidget> {
         ))); 
     }
     var count = 0;
+    maxWidth = 0;
     for (var col in widget.columns) { 
       col.grid = this; 
       if (count < widget.columns.length - 1) {
         col.nextColumn = (widget.columns[count + 1].key! as GlobalKey<GridColumnWidgetState>);
       }
       if (count == widget.columns.length - 1) {  col.last = true;  }
-      col.prefetch();
-      
+      col.prefetch();  
       count++; 
     }
     return  Padding( padding: EdgeInsets.only(left: rows.isEmpty ? 0 : 3), child:  Scrollbar(
@@ -102,7 +105,7 @@ class GridWidgetState extends State<GridWidget> {
       child: SingleChildScrollView(
         controller: _horizontal,
         scrollDirection: Axis.horizontal, 
-        child: Stack(children: [
+        child: Stack(fit: StackFit.loose, children: [
         Container( margin: const EdgeInsets.only(top: 55),
         child: Scrollbar(
             controller: _vertical,
@@ -115,12 +118,16 @@ class GridWidgetState extends State<GridWidget> {
                     if (currentView != null && (globalOffset + globalLimit) < currentView!.max) {
                       globalOffset += globalOffset + globalLimit;
                       APIService().get<model.View>(currentView!.linkPath, true, context).then((value) {
-                        if (value.data != null && value.data!.isNotEmpty) { globalMenuKey.currentState!.setState(() {}); }
+                        if (value.data != null && value.data!.isNotEmpty) { 
+                          globalMainViewKey.currentState!.setState(() {}); 
+                        }
                       });
                     } else {
                       globalOffset = 0;
                       APIService().get<model.View>(currentView!.linkPath, true, context).then((value) {
-                        if (value.data != null && value.data!.isNotEmpty) { globalMenuKey.currentState!.setState(() {}); }
+                        if (value.data != null && value.data!.isNotEmpty) { 
+                          globalMainViewKey.currentState!.setState(() {}); 
+                        }
                       });
                     }
                   }
@@ -130,9 +137,11 @@ class GridWidgetState extends State<GridWidget> {
                   controller: _vertical,
                   scrollDirection: Axis.vertical,
                   child: rows.isEmpty ? 
-                  Container(width: MediaQuery.of(context).size.width - 250, height: MediaQuery.of(context).size.height - 135, 
-                  color: Theme.of(context).splashColor, child: Center(child: Text("EMPTY DATAS", style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor),))) 
-                  : Column(children: []..addAll(rows)..add(const SizedBox(height: 10, child: null)))),),)),
+                  Container(decoration: BoxDecoration( color: Theme.of(context).splashColor, borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7))),
+                    width: maxWidth + 81.5, 
+                    height: MediaQuery.of(context).size.height - 165 > 0 ? MediaQuery.of(context).size.height - 165 : 0, 
+                   child: Center(child: Text("EMPTY DATAS", style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor),)))
+                  : Column(children: [...rows,const SizedBox(height: 10, child: null)])),),)),
       Container(  
         decoration: BoxDecoration(
           color: Theme.of(context).highlightColor,
@@ -195,8 +204,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
     List<Widget> widgets = [];
     double? maxheight;
     for (var e in widget.cells) {
-      if (currentView != null && rects.containsKey(currentView!.id)) {
-        double? h = rects[currentView!.id]![e.columnName] != null && ("${e.value}".length * 55) > (rects[currentView!.id]![e.columnName]!.width) 
+      if (currentView != null && rects.containsKey(viewID)) {
+        double? h = rects[viewID]![e.columnName] != null && ("${e.value}".length * 55) > (rects[viewID]![e.columnName]!.width) 
          ? 500 : null;
         if (h != null && (maxheight == null || maxheight < h)) { 
           maxheight = h; 
@@ -208,36 +217,20 @@ class GridRowWidgetState extends State<GridRowWidget> {
     for (var e in widget.cells) {
       var shal = widget.contentShallowed["${e.columnName}:$cellID"];
       List<dynamic> ids = [];
-      if (categories[homeKey.currentState!.widget.category] != null) {
-        for( var v in categories[homeKey.currentState!.widget.category]!) {
-          if (homeKey.currentState != null && "${v.id}" == homeKey.currentState!.widget.viewID) { ids=v.newIds; break; }
+      if (categories[category] != null) {
+        for( var v in categories[category]!) {
+          if (homeKey.currentState != null && "${v.id}" == viewID) { ids=v.newIds; break; }
         }
       }
       var child = e.columnName != "description" ? ListTile(
-        onTap: () async { 
-          APIService().get<model.View>(widget.links[cellID]!, firstAPI, null).then((resp) { 
-            if (widget.viewKey != null && widget.viewKey!.currentState != null && resp.data != null) {
-              if (currentView != null) { notNew[currentView!.id]!.add(cellID); }
-              APIService().get<model.View>(APIConstants.mainEndpost, true, null).then( (data) {
-                globalMenuKey.currentState!.setState(() {
-                  views = data.data!;
-                  developer.log('LOG WF ${resp.data![0].items[0].workflow}', name: 'my.app.category');
-                  isNew = null;
-                  beforeView = currentView;
-                  currentView = resp.data![0];
-                  workflow =  resp.data![0].items[0].workflow;
-                  currentView!.readOnly = beforeView!.readOnly;
-                  homeKey.currentState!.widget.subViewID=cellID;
-              });
-            }); 
-          } }); },
+        onTap: () => globalMenuKey.currentState!.refreshUrl(widget.links[cellID], cellID),
         title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).selectedRowColor))))
       ) : Padding(padding: const EdgeInsets.only(top: 4,), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
                   icon: const Icon(Icons.info), onPressed: () {},));
       List<Widget> badges = [];
-      if (currentView != null && notNew[currentView!.id]!.contains(cellID)) { first = false; }
+      if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
       if (ids.contains(cellID) && first || isNew == cellID && first) {
         first = false;
         badges.add(Positioned(left: 10, top: 5, child: Container(
@@ -252,9 +245,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
         children: [Container( alignment: Alignment.center,
           decoration: BoxDecoration(color: ids.contains(cellID) || isNew == cellID ? (widget.isHovered ? Colors.grey : Theme.of(context).splashColor  ) : (widget.isHovered ? Colors.grey : Colors.white),
           border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth),)),
-          width: currentView != null && rects.containsKey(currentView!.id) && rects[currentView!.id]!.containsKey(e.columnName) ? rects[currentView!.id]![e.columnName]!.width : 300, 
+          width: currentView != null && rects.containsKey(viewID) && rects[viewID]!.containsKey(e.columnName) ? rects[viewID]![e.columnName]!.width : 300, 
           height: maxheight,
-          child: child)]..addAll(badges) ));
+          child: child), ...badges] ));
     }  
     return widgets;
   }
@@ -267,8 +260,8 @@ class GridCell {
      this.borderWidth = 1, this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent});
   
   double getWidth(int maxLength, double contextWidth) {
-    double width = ("$value".length * fontSize);
-    if ((width * maxLength) < contextWidth) { 
+    double width = ("$value".length * 20);
+    if ((width * maxLength) < contextWidth && maxLength < 7) { 
       width = (((contextWidth  - (81.5 * maxLength)) - (42 * maxLength) - (borderWidth * maxLength)) /  maxLength); 
     }
     return width;
@@ -289,35 +282,33 @@ class GridColumnWidget extends StatefulWidget {
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
-    var width = (label.value.length * label.fontSize) + (20 * 2);
-    if ((width * maxLength) <= (contextWidth) && !avoid) { 
-      width = (getTotal() /  maxLength); 
-    }
-    return width + 20;
+    double width = (label.value.length * 20) + (20 * 2);
+    if ((width * maxLength) <= getTotal() && !avoid && maxLength < 7) { width = (getTotal() /  maxLength); }
+    return width;
   }
 
   bool isLower() {
-    var width = (label.value.length * label.fontSize) + (20 * 2);
-    return (width * maxLength) <= (contextWidth - (81.5 * maxLength));
+    var width = (label.value.length * 20) + (20 * 2);
+    return (width * maxLength) <= getTotal();
   }
 
   double getTotal() {
-    var ratio = 100 + ((maxLength - 1) * 20);
-    return (contextWidth - ((ratio / maxLength)  * (maxLength)) - 3);
+    return contextWidth - 82;
   }
 
   void prefetch() {
-    if (currentView != null && !rects.containsKey(currentView!.id)) { rects[currentView!.id] = {}; }
-    if (!rects[currentView!.id]!.containsKey(columnName)) {
-      var width = getWidth(false);
-      
-      late Rect rect = rects[currentView!.id]!.containsKey(columnName) && !rects[currentView!.id]![columnName]!.width.isNaN ? rects[currentView!.id]![columnName]! : Rect.fromCenter(
+    if (currentView != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
+    if (!rects[viewID]!.containsKey(columnName)) {
+      double width = getWidth(false);
+      late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
         width: width.isNaN ? 300 : width,
         height: 55,
       );
-      rects[currentView!.id]![columnName] = rect;
+      rects[viewID]![columnName] = rect;
+      
     }
+    maxWidth += rects[viewID]![columnName]!.width;
   }
 }
 class GridColumnWidgetState extends State<GridColumnWidget> {
@@ -326,48 +317,49 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     var width = widget.getWidth(false);
     List<Widget> buttons = [];
     if (currentView !=  null) {
-      if (!globalFilter.containsKey(currentView!.id)) { globalFilter[currentView!.id] = {}; }
-      if (!globalOrder.containsKey(currentView!.id)) { globalOrder[currentView!.id] = {}; }
+      if (!globalFilter.containsKey(viewID)) { globalFilter[viewID!] = {}; }
+      if (!globalOrder.containsKey(viewID)) { globalOrder[viewID!] = {}; }
     }
     if (widget.allowSorting) { 
       buttons.add(IconButton(onPressed: () async { 
         if (currentView !=  null) {
           globalOffset = 0;
-          globalOrder[currentView!.id]![widget.columnName] = globalOrder[currentView!.id]![widget.columnName] == "desc" || globalOrder[currentView!.id]![widget.columnName] == null  ? "asc" : "desc";
+          globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "desc" || globalOrder[viewID]![widget.columnName] == null  ? "asc" : "desc";
           APIService().get<model.View>(currentView!.linkPath, true, context).then((value){
             if (value.data != null && value.data!.isNotEmpty) {
-              homeKey.currentState!.setState(() { 
-                currentView = value.data![0];
-              });
+              globalMainViewKey.currentState?.refresh(viewID, subViewID, category, value.data![0], false);
             }
           },);
         }
       }, 
-      icon: Icon( currentView != null && globalOrder.containsKey(currentView!.id) && (
-        (globalOrder[currentView!.id]![widget.columnName] == "desc")
-        || globalOrder[currentView!.id]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,)));
+      icon: Icon( currentView != null && globalOrder.containsKey(viewID) && (
+        (globalOrder[viewID]![widget.columnName] == "desc")
+        || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,)));
     } 
     if (widget.allowFiltering) { 
       buttons.add(FilterPopUpWidget( 
       label: widget.label.value, columnName: widget.columnName, component: this,)); }
-    if (currentView !=  null && (globalOrder.containsKey(currentView!.id) || globalFilter.containsKey(currentView!.id))) {
-      if (((widget.allowSorting && globalOrder[currentView!.id]!.containsKey(widget.columnName))
-      || (widget.allowFiltering && (globalFilter[currentView!.id]!.containsKey(widget.columnName)) || globalNew))) { 
+    if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
+      if (((widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
+      || (widget.allowFiltering && (globalFilter[viewID]!.containsKey(widget.columnName)) || globalNew))) { 
         buttons.add(IconButton(onPressed: () async { 
-          homeKey.currentState!.setState(() { resetFilter(widget.columnName); });
+          resetFilter(widget.columnName);
+          globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
         },
         icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 18,)));
       } 
     }
     widget.width = width + 42;
-    if (currentView != null && !rects.containsKey(currentView!.id)) { rects[currentView!.id] = {}; }
-    late Rect rect = rects[currentView!.id]!.containsKey(widget.columnName) ? rects[currentView!.id]![widget.columnName]! : Rect.fromCenter(
+    if (viewID != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
+    late Rect rect = rects[viewID]!.containsKey(widget.columnName) ? rects[viewID]![widget.columnName]! : Rect.fromCenter(
       center: MediaQuery.of(context).size.center(Offset.zero),
       width: width.isNaN ? 300 : width + 42,
       height: 55,
     );
-    rects[currentView!.id]![widget.columnName] = rect;
-    return Container(width: rects[currentView!.id]![widget.columnName]!.width.isNaN ? 300 : rects[currentView!.id]![widget.columnName]!.width, height: 55,
+    if (currentView != null && rects.containsKey(viewID)) {
+      rects[viewID]![widget.columnName] = rect;
+    }
+    return Container(width: rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
     decoration: BoxDecoration( color: widget.backgroundColor, 
             border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
     child: fork.TransformableBox(
@@ -375,7 +367,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
       allowFlippingWhileResizing: false,
       draggable: false,
       flip: null,
-      constraints:  BoxConstraints(maxHeight: 55, minWidth: (((buttons.length + 1) * 40) + 60) > 0 ? (((buttons.length + 1) * 40) + 60) : 0),
+      constraints: widget.show ? BoxConstraints(maxHeight: 55, minWidth: (((buttons.length + 1) * 40) + 60) > 0 ? (((buttons.length + 1) * 40) + 60) : 0) : null,
       resizeModeResolver: () => ResizeMode.symmetric,
       visibleHandles: const {HandlePosition.right},
       enabledHandles: delayed || (widget.last && widget.isLower()) ? {} : const {HandlePosition.right},
@@ -387,39 +379,39 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             double newWidth = result.rect.width > ((buttons.length + 1) * 40) + 60 ? result.rect.width : ((buttons.length + 1) * 40) + 60;
             if (newWidth < 0) { newWidth = ((buttons.length + 1) * 40) + 60; }
             if (result.rect.width <= ((buttons.length + 1) * 40) + 60) { delayed = true; }
-            rects[currentView!.id]![widget.columnName] = Rect.fromCenter(
+            rects[viewID]![widget.columnName] = Rect.fromCenter(
               center: MediaQuery.of(context).size.center(Offset.zero),
               width: newWidth,
               height: 55,
             );
             widget.width = newWidth;
-            var total = rects[currentView!.id]!.values.fold<double>(0, (previousValue, element) => previousValue + element.width);
+            var total = rects[viewID]!.values.fold<double>(0, (previousValue, element) => previousValue + element.width);
             if (widget.nextColumn != null && widget.contextWidth > total) {
               var diff = widget.contextWidth - 81.4 - total;
               var last = widget.nextColumn!.currentState!;
-              if (rects[currentView!.id]![last.widget.columnName]!.width + diff < (((buttons.length + 1) * 40) + 60)) { 
-                rects[currentView!.id]![last.widget.columnName] = Rect.fromCenter(
+              if (rects[viewID]![last.widget.columnName]!.width + diff < (((buttons.length + 1) * 40) + 60)) { 
+                rects[viewID]![last.widget.columnName] = Rect.fromCenter(
                   center: MediaQuery.of(context).size.center(Offset.zero),
                   width: (((buttons.length + 1) * 40) + 60),
                   height: 55,
                 );
                 last.setState(() {});
-                total = rects[currentView!.id]!.values.fold<double>(0, (previousValue, element) => previousValue + element.width);
+                total = rects[viewID]!.values.fold<double>(0, (previousValue, element) => previousValue + element.width);
                 var diff = widget.contextWidth - 81.4 - total;
-                newWidth = (rects[currentView!.id]![widget.columnName]!.width < 0 ? (((buttons.length + 1) * 40) + 60) : rects[currentView!.id]![widget.columnName]!.width) + diff;
+                newWidth = (rects[viewID]![widget.columnName]!.width < 0 ? (((buttons.length + 1) * 40) + 60) : rects[viewID]![widget.columnName]!.width) + diff;
                 if (newWidth < 0) { newWidth = ((buttons.length + 1) * 40) + 60; }
-                rects[currentView!.id]![widget.columnName] = Rect.fromCenter(
+                rects[viewID]![widget.columnName] = Rect.fromCenter(
                   center: MediaQuery.of(context).size.center(Offset.zero),
                   width: newWidth,
                   height: 55,
                 );
                 widget.width = newWidth;
               } else {
-                newWidth = rects[currentView!.id]![last.widget.columnName]!.width + diff;
+                newWidth = rects[viewID]![last.widget.columnName]!.width + diff;
                 if (newWidth < 0) { newWidth = ((buttons.length + 1) * 40) + 60; }
-                rects[currentView!.id]![last.widget.columnName] = Rect.fromCenter(
+                rects[viewID]![last.widget.columnName] = Rect.fromCenter(
                   center: MediaQuery.of(context).size.center(Offset.zero),
-                  width: rects[currentView!.id]![last.widget.columnName]!.width + diff,
+                  width: rects[viewID]![last.widget.columnName]!.width + diff,
                   height: 55,
                 );
                 last.setState(() {});
@@ -435,7 +427,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         onExit: (b) { setState(() { widget.show = false; });}, // todo if datas lenght == 0
         child: Padding(padding: const EdgeInsets.symmetric(horizontal: 20,), 
             child: Row( children: [SizedBox( 
-              width: rects[currentView!.id]![widget.columnName]!.width - 42 - (widget.show ? (buttons.length) * 40 : 0), 
+              width: rects[viewID]![widget.columnName]!.width - 40 - (widget.show ? (buttons.length) * 40 : 0), 
               child: Center(child: widget.label),), Row(children:  widget.show ? buttons : [] )])));
     }));
   }
@@ -453,7 +445,7 @@ class GridValueWidgetState extends State<GridValueWidget> {
     return widget.value == " " && widget.icon != null ? FittedBox(fit: BoxFit.fitWidth, 
       child: Icon(widget.icon, size: widget.fontSize * 1.5, color: Theme.of(context).primaryColor,))
     : Container(padding: const EdgeInsets.all(16.0), alignment: Alignment.center,
-                  child: Text( widget.value.toUpperCase(), softWrap: true, 
+                  child: Text( widget.value.toUpperCase(), overflow: TextOverflow.ellipsis, 
                                style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.fontSize)));
   }
 }

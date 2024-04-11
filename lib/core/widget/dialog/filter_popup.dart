@@ -31,10 +31,10 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
       icon: const Icon(size: 18, Icons.filter_alt, color: Colors.grey),
       onSelected: (value) { },
       itemBuilder: (BuildContext bc) {
-        if (currentView != null && globalOrder.containsKey(currentView!.id)) {
-          if (globalOrder[currentView!.id]!.containsKey(widget.columnName)) {
-            if(globalOrder[currentView!.id]![widget.columnName] == "asc") { widget.ascOrder = true; }
-            if(globalOrder[currentView!.id]![widget.columnName] == "desc") { widget.descOrder = true; }
+        if (viewID != null && globalOrder.containsKey(viewID)) {
+          if (globalOrder[viewID]!.containsKey(widget.columnName)) {
+            if(globalOrder[viewID]![widget.columnName] == "asc") { widget.ascOrder = true; }
+            if(globalOrder[viewID]![widget.columnName] == "desc") { widget.descOrder = true; }
           }
         }
         widget.isNew = globalNew; 
@@ -76,9 +76,9 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                 Divider(color: Theme.of(context).splashColor,)
               ]); }),)),
           PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
-            if (currentView != null && globalFilter.containsKey(currentView!.id)) {
-              if (globalFilter[currentView!.id]!.containsKey(widget.columnName) && advancedSearch.isEmpty) { 
-                for (var filter in globalFilter[currentView!.id]![widget.columnName]!) {
+            if (currentView != null && globalFilter.containsKey(viewID)) {
+              if (globalFilter[viewID]!.containsKey(widget.columnName) && advancedSearch.isEmpty) { 
+                for (var filter in globalFilter[viewID]![widget.columnName]!) {
                   advancedSearch.add(FilterSearchWidget(innerIndex: advancedSearch.length, state: setState,
                     filter: this, columnName: widget.columnName, label: widget.label, searchValue: filter.value, connector: filter.connector));
                 }
@@ -118,29 +118,24 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
               builder: (BuildContext context, StateSetter setState) {
                 return Padding( padding: const EdgeInsets.only(bottom: 30, top: 10), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Padding( padding: const EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
-                    homeKey.currentState!.setState(() {
-                      if (currentView != null) { 
-                        if (widget.ascOrder != null) { globalOrder[currentView!.id]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
-                        if (widget.descOrder != null) { globalOrder[currentView!.id]![widget.columnName]=widget.descOrder! ? "desc" : "asc"; }
-                        globalNew = widget.isNew;
-                        if (widget.ascOrder == null && widget.descOrder == null) { 
-                          globalOrder[currentView!.id]!.remove(widget.columnName); 
-                        }
-                        globalFilter[currentView!.id]!.remove(widget.columnName);
-                        for (var search in advancedSearch) { search.globalKey.currentState!.save(); }
-                        stateSort!(() {});
-                        stateKind!(() {});
-                        stateFilter!(() {});
+                    if (viewID != null) { 
+                      if (widget.ascOrder != null) { globalOrder[viewID]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
+                      if (widget.descOrder != null) { globalOrder[viewID]![widget.columnName]=widget.descOrder! ? "desc" : "asc"; }
+                      globalNew = widget.isNew;
+                      if (widget.ascOrder == null && widget.descOrder == null) { 
+                        globalOrder[viewID]!.remove(widget.columnName); 
                       }
-                    });
+                      globalFilter[viewID]!.remove(widget.columnName);
+                      for (var search in advancedSearch) { search.globalKey.currentState!.save(); }
+                      stateSort!(() {}); stateKind!(() {}); stateFilter!(() {});
+                    }
+                    globalMenuKey.currentState?.refreshView(viewID, subViewID, true, true);
                   },
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("SUBMIT", style: TextStyle(color: Colors.white, fontSize: 12))),)),
                   TextButton(onPressed: () {
-                    globalMenuKey.currentState!.setState(() {
-                      firstAPI= true; 
-                      resetFilter(widget.columnName); 
-                    });
+                    resetFilter(widget.columnName);
+                    globalMainViewKey.currentState?.refresh(viewID!, subViewID, category, null, true);
                     stateSort!(() { widget.ascOrder=null;  widget.descOrder=null; });
                     stateKind!(() { widget.isNew=false; });
                     stateFilter!(() { advancedSearch = []; });
@@ -210,13 +205,12 @@ class FilterSearchState extends State<FilterSearchWidget> {
                 onChanged: (String? value) {  widget.searchValue = value; },
                 onSaved: (String? value) { 
                   widget.searchValue = value;
-                  if (currentView != null) {
-                    if (!globalFilter[currentView!.id]!.containsKey(widget.columnName) ) { 
-                      globalFilter[currentView!.id]![widget.columnName] = []; 
-                    }
-                    widget.index = globalFilter[currentView!.id]!.length;
-                    globalFilter[currentView!.id]![widget.columnName]!.add(Filter(value: widget.searchValue, connector: widget.connector)); 
+                  if (!globalFilter.containsKey(viewID)) {  globalFilter[viewID!] = {}; }
+                  if (!globalFilter[viewID]!.containsKey(widget.columnName) ) { 
+                    globalFilter[viewID]![widget.columnName] = []; 
                   }
+                  widget.index = globalFilter[viewID]!.length;
+                  globalFilter[viewID]![widget.columnName]!.add(Filter(value: widget.searchValue, connector: widget.connector)); 
                 },
                 validator: (String? value) { return null; },
               )), 

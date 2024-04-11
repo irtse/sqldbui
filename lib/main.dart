@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
+import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:sqldbui2/page/page.dart';
 
@@ -32,13 +36,14 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+String? viewID;
+String? subViewID;
+String? category;
 GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
-  String? viewID;
-  String? subViewID;
-  String? category;
-  HomeScreen({ Key? key, this.viewID, this.subViewID }): super(key: homeKey);
+  
+  HomeScreen({ Key? key }): super(key: homeKey);
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -51,6 +56,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => HomeScreenState();
 }
 class HomeScreenState extends State<HomeScreen> {
+  void refresh(String? id, bool isFilterreset) {
+    viewID = id;
+    subViewID = null;
+    APIService.cache = <String, APIResponse<dynamic>>{};
+    currentView = null;
+    beforeView = null;
+    resetAllFilter();
+    notNew = {};
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -62,10 +77,10 @@ class HomeScreenState extends State<HomeScreen> {
     AuthService();
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     APIService.cache = {};
-    
-    var _scaffoldKey = GlobalKey<ScaffoldState>();
+    AppRouter.navigateTo("#$viewID");
+    var scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       endDrawer: const NotificationDrawerWidget(),
       appBar: AppBar(
         elevation: 3,
@@ -76,22 +91,22 @@ class HomeScreenState extends State<HomeScreen> {
         // the App.build method, and use it to set our appbar title.
         title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
           child: SizedBox(child: Row(children: [
-            const Image(image: AssetImage('assets/images/logo.png'), width: 60,),
+            InkWell( onTap: () => AppRouter.navigateTo(""), child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
             Flexible( child: Container(padding: const EdgeInsets.only(left: 30), 
-              child: Text("SOFTWARE NAME", softWrap: true, overflow: TextOverflow.ellipsis,
-                style: TextStyle( color: Theme.of(context).highlightColor,),))),
+              child: MediaQuery.of(context).size.width > 600 ? Text("SOFTWARE NAME", overflow: TextOverflow.ellipsis,
+                style: TextStyle( color: Theme.of(context).highlightColor,),) : null)),
                 Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
-                child: Icon(Icons.verified_user, color: Theme.of(context).splashColor),),
+                child: MediaQuery.of(context).size.width > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
                 Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
-                  child: Text("${AuthService.user != null ? AuthService.user!.name : "unknown"} - ${AuthService.user != null ? AuthService.user!.email : ""}",
-                  overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)))),
+                  child: MediaQuery.of(context).size.width > 600 ? Text("${AuthService.user != null ? AuthService.user!.name : "unknown"} - ${AuthService.user != null ? AuthService.user!.email : ""}",
+                  overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)) : null)),
               ],)
         )),         
         toolbarHeight: 40,
         actions: <Widget>[
           Stack( children: [
              IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
-             onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),),
+             onPressed: () => scaffoldKey.currentState!.openEndDrawer(),),
              NotificationWidget(key: appBarKey,),
           ],),
           Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
@@ -105,7 +120,6 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
 class NotificationWidget extends StatefulWidget {
   const NotificationWidget({ Key? key }): super(key: key);
   // This widget is the home page of your application. It is stateful, meaning

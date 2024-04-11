@@ -58,7 +58,7 @@ class _ManyToManyState extends State<ManyToManyWidget> {
         }
       }
       return FutureBuilder<APIResponse<model.Shallowed>>(
-      future: APIService().get(url ?? "", true, null), 
+      future: APIService().get(url ?? "", firstAPI, null), 
       builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
         List<MultiSelectItem> items = <MultiSelectItem>[];
         widget.form[widget.name] = <dynamic>[];

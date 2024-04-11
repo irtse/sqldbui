@@ -19,8 +19,7 @@ class ActionBarWidget extends StatefulWidget {
   final DataFormWidget? form;
   final DatagridWidget? grid;
   final GlobalKey<GridWidgetState>? gridKey;
-  final GlobalKey<ViewWidgetState>? viewKey;
-  const ActionBarWidget ({ Key? key, this.view, required this.menu, this.gridKey, this.viewKey, this.grid, this.form}): super(key: key);
+  const ActionBarWidget ({ Key? key, this.view, required this.menu, this.gridKey, this.grid, this.form}): super(key: key);
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
@@ -28,23 +27,18 @@ class ActionBarState extends State<ActionBarWidget> {
   void loading(String method) { setState(() { states[method]= true; });}
   void loaded(String method) { setState(() { states[method]= false; });}
 
-  void refresh(int? viewID) {
-    firstAPI = true;
-    globalLoading = true;
-    globalMenuKey.currentState!.setState(() {});
-  }
-
   @override Widget build(BuildContext context) {
       List<Widget> actions = <Widget>[
         Column(
-          children: [IconButton(
+          children: [IconButton( constraints: const BoxConstraints(),
             tooltip: "refresh page",
             style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
                       }), ),
             icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
-            onPressed: () async { refresh(null); },
+            onPressed: () {  globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
+                : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID); },
           )],
         )
       ];
@@ -52,7 +46,7 @@ class ActionBarState extends State<ActionBarWidget> {
         if (isFilter()) {
           actions.add(
           Column(
-            children: [IconButton(
+            children: [IconButton( constraints: const BoxConstraints(),
                 tooltip: "reset filter",
                 style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
@@ -60,12 +54,10 @@ class ActionBarState extends State<ActionBarWidget> {
                       }), ),
                 icon: Icon( Icons.filter_alt_off, color: Theme.of(context).highlightColor, size: 20 ), 
                 onPressed: () async { 
-                  homeKey.currentState!.setState(() { 
-                    globalOrder.remove(currentView!.id);
-                    globalFilter.remove(currentView!.id);
-                    globalNew = false;
-                    globalOffset = 0;  
-                  });
+                  globalOrder.remove(viewID);
+                  globalFilter.remove(viewID);
+                  globalNew = false;
+                  globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                 },
               ),],
           )
@@ -73,17 +65,17 @@ class ActionBarState extends State<ActionBarWidget> {
       }
       actions.add(
           Column(
-            children: [IconButton(
+            children: [IconButton( constraints: const BoxConstraints(),
                 tooltip: "reset ui change",
                 style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
                       }), ),
                 icon: Icon( Icons.auto_fix_off, color: Theme.of(context).highlightColor, size: 20 ), 
-                onPressed: () async { 
-                  homeKey.currentState!.setState(() { 
+                onPressed: () { 
+                  homeKey.currentState?.setState(() { 
                     globalOffset = 0; 
-                    rects.remove(currentView!.id);
+                    rects.remove(viewID);
                   });
                 },
               ),]));
@@ -168,7 +160,7 @@ class ActionBarState extends State<ActionBarWidget> {
           }
           if (action.toLowerCase() == "delete") {
             actions.add(Column(
-              children: [IconButton(
+              children: [IconButton( constraints: const BoxConstraints(),
                 style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
@@ -183,22 +175,18 @@ class ActionBarState extends State<ActionBarWidget> {
         }
       }
       var row = <Widget>[];
-      if (homeKey.currentState!.widget.subViewID != null && AppRouter.routedSubID == null) {
-        row.add(Padding( padding: const EdgeInsets.only(left: 24.0), child: IconButton(
-                tooltip: "back to list",
+      if (subViewID != null && AppRouter.routedSubID == null) {
+        row.add(IconButton( 
+                tooltip: "back to list", constraints: const BoxConstraints(),
                 style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
                       }), ),
                 icon: Icon( Icons.arrow_back, color: Theme.of(context).highlightColor, ),
                 onPressed: () {
-                  widget.viewKey!.currentState!.setState(() {
-                    currentView = beforeView;
-                    firstAPI = true; 
-                    homeKey.currentState!.widget.subViewID=null;
-                  });
+                  globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true);
                 },
-              )));
+              ));
       }
       row.addAll([Flexible(child: Text(overflow: TextOverflow.ellipsis,
                     widget.view == null ? (globalLoading ? "LOADING" : "HOME") : widget.view!.name.replaceAll("_", " ").replaceAll("db", "").toUpperCase(), 
@@ -209,23 +197,15 @@ class ActionBarState extends State<ActionBarWidget> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ))),],);
       String path = "";
-      if (homeKey.currentState!.widget.viewID != null) {
-        path += "#${homeKey.currentState!.widget.viewID}";
-        if (homeKey.currentState!.widget.subViewID != null) { path += ":${homeKey.currentState!.widget.subViewID}"; }
-      }
+      if (viewID != null) { path += "#$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
       var controller = TextEditingController(text: path);
       if (widget.view != null) {
-        if (globalLoading) { Future.delayed(const Duration(seconds: 1), () { widget.menu.setState(() { globalLoading = false; }); }); }
+        if (globalLoading) { Future.delayed(const Duration(seconds: 1), () { globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); }); }
       }
-      return Container( height: 40, padding: const EdgeInsets.symmetric(horizontal: 30),
-        width: MediaQuery.of(context).size.width - menuSize,
-        decoration: BoxDecoration(
-          color: Theme.of(context).secondaryHeaderColor,
-          boxShadow: [ BoxShadow(color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3)) ]),
-        child:  Row(children: [ 
-                  Flexible(flex: 1, child: Row( children: row,)),
-                  Flexible( flex: 1, child: Row( children:  [ Expanded(
+      List<Widget> rows = [];
+      if (MediaQuery.of(context).size.width > 700) {
+        rows = [ Flexible(flex: 1, child: Row( children: row,)),
+                 Flexible( flex: 1, child: Row( children: [ Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 10.0, top: 5, bottom: 5),
                       child: TextFormField(
@@ -235,10 +215,13 @@ class ActionBarState extends State<ActionBarWidget> {
                         onSaved: (value) {
                           var split = controller.text.split('/');
                           if (split.length > 1) {
-                            homeKey.currentState!.widget.viewID = split[1];
-                            if (split.length > 2) { homeKey.currentState!.widget.subViewID = split[2]; }
+                            viewID = split[1];
+                            if (split.length > 2) { subViewID = split[2]; }
                           }
-                          homeKey.currentState!.setState(() {});
+                          globalMainViewKey.currentState?.refresh(
+                            split.length > 1 ? split[1] : null, 
+                            split.length > 2 ? split[1] : null, 
+                            null, null, true);
                         },
                         decoration: InputDecoration(
                         filled: true,
@@ -253,15 +236,21 @@ class ActionBarState extends State<ActionBarWidget> {
                                                    borderSide: BorderSide(color: Theme.of(context).primaryColor))
                     ))),
                   ),
-                  IconButton(
+                  IconButton( constraints: const BoxConstraints(),
                     tooltip: "go to data(s)",
                     style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) { return Colors.transparent; }), ),
                     icon: Icon( Icons.send, color: Theme.of(context).splashColor, size: 20,),
                     onPressed: () { AppRouter.navigateTo(controller.text); },
-                  )])
-                ),
-                Flexible( flex: 1, child: Row ( mainAxisAlignment: MainAxisAlignment.end, children: actions, )
-              )])
-            );
+                  )]
+                )),
+                Flexible( flex: 1, child: Row ( mainAxisAlignment: MainAxisAlignment.end, children: actions ))];
+      }
+      return Container( height: 40, padding: const EdgeInsets.symmetric(horizontal: 30),
+        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+        decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          boxShadow: [ BoxShadow(color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3)) ]),
+        child: Row(mainAxisSize: MainAxisSize.min, children: rows));
   }
 }

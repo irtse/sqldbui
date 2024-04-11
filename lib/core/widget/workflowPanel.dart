@@ -35,7 +35,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
               onChanged: (value) => change = true,
             )));
       }
-      return Container( width: MediaQuery.of(context).size.width - menuSize, decoration: BoxDecoration(color: Theme.of(context).splashColor,
+      return Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, decoration: BoxDecoration(color: Theme.of(context).splashColor,
           border: const Border(top: BorderSide(color: Colors.white, width: 1))),
         padding: const EdgeInsets.all(10), child: 
             Wrap(alignment: WrapAlignment.center, 

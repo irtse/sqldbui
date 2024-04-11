@@ -9,9 +9,7 @@ import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'dart:developer' as developer;
-
 import 'package:sqldbui2/main.dart';
-import 'package:sqldbui2/page/page.dart';
 
 @lazySingleton
 class AuthService extends ChangeNotifier {
@@ -46,22 +44,12 @@ class AuthService extends ChangeNotifier {
     _isAuthenticated = false; 
     user = null;
     error = null;
-    resetAllFilter();
-    notNew = {};
-    done = true;
-    views = [];
-    homeKey.currentState!.widget.viewID = null;
-    homeKey.currentState!.widget.subViewID = null;
-    homeKey.currentState!.setState(() { 
-      APIService.cache = <String, APIResponse<dynamic>>{};
-      currentView = null;
-      beforeView = null;
-    });
+    homeKey.currentState!.refresh(null, true);
   }
 
   void authenticate(User logUser) {
     authenticateShallow(logUser);
-    homeKey.currentState!.setState(() {});
+    homeKey.currentState!.refresh(null, true);
   }
   void authenticateShallow(User logUser) {
     _isAuthenticated = true; 

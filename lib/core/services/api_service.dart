@@ -8,11 +8,12 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 
-var firstAPI = true;
+var firstAPI = false;
 
 class APIConstants {
   static String mainEndpost = '/main';
@@ -59,10 +60,9 @@ class APIService {
                                                                 String method, String succeed, bool force, 
                                                                 BuildContext? context, int? limit, int? offset, bool isFilter) async {
     var err = ""; 
-    // developer.log('LOG URL ${url}', name: 'my.app.category');
     if (url != "") {
       if (cache.containsKey(url) && !force && cache[url] != null 
-      && (globalOrder.isEmpty || (currentView != null && !globalOrder.containsKey(currentView!.id)))) { 
+      && (globalOrder.isEmpty || (!globalOrder.containsKey(viewID)))) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
         } else { return cache[url]! as APIResponse<T>; }
       }
@@ -72,20 +72,20 @@ class APIService {
         var filter = "";
         var dir = "";
         if (url.contains("?") && AppRouter.routedSubID == null) {
-          if (currentView != null && globalOrder.containsKey(currentView!.id)) {
-            for (var order in globalOrder[currentView!.id]!.keys) {
+          if (globalOrder.containsKey(viewID)) {
+            for (var order in globalOrder[viewID]!.keys) {
               if (orderBy.isEmpty) { orderBy += "&orderby=$order"; 
               } else { orderBy += ",$order";  }
-              if (dir.isEmpty) { dir += "&dir=${globalOrder[currentView!.id]![order]}"; 
-              } else { dir += ",${globalOrder[currentView!.id]![order]}";  }
+              if (dir.isEmpty) { dir += "&dir=${globalOrder[viewID]![order]}"; 
+              } else { dir += ",${globalOrder[viewID]![order]}";  }
             }
           }
           if (isFilter) {
-            if (currentView != null && globalFilter.containsKey(currentView!.id)) {
-              for (var f in globalFilter[currentView!.id]!.keys) {  
-                if (globalFilter[currentView!.id]![f] != null && "${globalFilter[currentView!.id]![f]}" != "") { 
+            if (globalFilter.containsKey(viewID)) {
+              for (var f in globalFilter[viewID]!.keys) {  
+                if (globalFilter[viewID]![f] != null && "${globalFilter[viewID]![f]}" != "") { 
                   filter += "&$f=";
-                  for (var f in globalFilter[currentView!.id]![f]!) {
+                  for (var f in globalFilter[viewID]![f]!) {
                     filter += "%25${f.value}%25${f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "")}"; 
                   }
                 }
@@ -99,7 +99,7 @@ class APIService {
           globalOffset = 0; 
         }
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}${orderBy.isNotEmpty ? orderBy : ""}${ dir.isNotEmpty ? dir : ""}$filter", method, body);
-        developer.log('LOG ERR $response', name: 'my.app.category');
+        // developer.log('LOG ERR $response', name: 'my.app.category');
         if (response.statusCode != null && response.statusCode! < 400) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 

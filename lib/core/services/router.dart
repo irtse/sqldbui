@@ -1,12 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/model/view.dart' as model;
-import 'package:go_router/go_router.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
-import 'package:sqldbui2/page/page.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/services/api_service.dart';
 
 class AppRouter { 
   static String? routedSubID;
@@ -17,7 +15,6 @@ class AppRouter {
   final APIService service = APIService(); 
   String currentRoute = "/home";    
   List<model.View>? views;
-  @override      
   List<RouteBase> get routes => <RouteBase>[      
    //HomeScreen is generated as HomeRoute because     
    //of the replaceInRouteName property    
@@ -32,26 +29,30 @@ class AppRouter {
       name: "view",
       path: '/:id',
       builder: (BuildContext context, GoRouterState state) {
-        return HomeScreen(viewID: state.pathParameters['id'],);
+        viewID = state.pathParameters['id'];
+        return HomeScreen();
       },
     ),
     GoRoute(
           name: "subview",
           path: '/:id/:subid',
           builder: (BuildContext context, GoRouterState state) {
-            return HomeScreen(viewID: state.pathParameters['id'], subViewID: state.pathParameters['subid'],);
+            viewID = state.pathParameters['id'];
+            subViewID = state.pathParameters['subid'];
+            return HomeScreen();
           },
     ),
   ];  
+  static void navigateWith(String path) {
+    viewID = null;
+    globalMenuKey.currentState?.refreshUrl(path, null);  
+  }
   static void navigateTo(String path) {
-    homeKey.currentState!.setState(() {
-      var splitted = path.replaceAll("#", "/").replaceAll(":", "/").split("/");
-      currentView = null;
-      globalOffset = 0;
-      homeKey.currentState!.widget.viewID= splitted.length > 1 ? splitted[1] : null;
-      // homeKey.currentState!.widget.subViewID=splitted.length > 2 ? splitted[2] : null; 
-      routedSubID=splitted.length > 2 ? splitted[2] : null;
-    });
+    var splitted = path.replaceAll("#", "/").replaceAll(":", "/").split("/");
+    viewID = splitted.length > 1 ? splitted[1] : null;
+    routedSubID=splitted.length > 2 ? splitted[2] : null;
+    currentView = null;
+    globalMenuKey.currentState?.refresh();
   }
 }   
 // ROUTER SHOULD INVOKE MAIN TO ACCESS VIEW, VIEW ARE MENU SECTION

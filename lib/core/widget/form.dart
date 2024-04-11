@@ -1,7 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/workflowPanel.dart';
@@ -44,6 +43,13 @@ class FormWidgetState extends State<DataFormWidget> {
       String name = "Unknown Name";
       String description = "no description";
       if (widget.view != null && widget.view!.items.isNotEmpty) {
+        if (widget.view!.isList) { return Container(
+          width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
+          height: MediaQuery.of(context).size.height - 95 > 0 ? MediaQuery.of(context).size.height - 95 : 0, 
+          decoration: BoxDecoration(
+              color: Theme.of(context).highlightColor,
+              borderRadius:  const BorderRadius.only(bottomLeft: Radius.circular(7),)),
+          child: null); }
         var refItem = widget.view!.items[0];
         if (refItem.workflow != null) { 
           header.add(WorkflowBarWidget(workflow: refItem.workflow!));
@@ -80,12 +86,13 @@ class FormWidgetState extends State<DataFormWidget> {
         for (var url in widget.wrappersURL.values) {
           additionnal.add(Container( decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             margin: const EdgeInsets.only(top: 15),
-            width: MediaQuery.of(context).size.width - menuSize - 80,
+            width: MediaQuery.of(context).size.width - menuSize - 80 > 0 ? MediaQuery.of(context).size.width - menuSize - 80 : 0,
             child: Padding( padding: const EdgeInsets.only(bottom: 30), child: FutureBuilder<APIResponse<model.View>>(
               future: APIService().get<model.View>(url, firstAPI, null), 
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
+                    developer.log("THERE", name: "data");
                     if (data.workflow != null && !workflowBars.containsKey(url)) { 
                       Future.delayed(const Duration(seconds: 1), () { 
                         setState(() { workflowBars[url] = WorkflowBarWidget(workflow: data.workflow!); }); }
@@ -110,7 +117,7 @@ class FormWidgetState extends State<DataFormWidget> {
         } 
         if (!widget.subForm) {
           fields.add( 
-            AnimatedContainer( duration: const Duration(milliseconds: 500), width: MediaQuery.of(context).size.width - menuSize,
+            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
               margin: const EdgeInsets.only(bottom: 30),
               decoration: BoxDecoration( color: Colors.white, boxShadow: [
                 BoxShadow(
@@ -158,16 +165,16 @@ class FormWidgetState extends State<DataFormWidget> {
           || (fieldName == "description" && field.readonly && (refItem.values.containsKey("description") && refItem.values["description"] != null)) ) { continue; }
           String? url;
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
-          if(!(readOnly && value == null)) {
+          if(!(readOnly && value == null)) { 
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, 
                                               fieldName, field.label, field.description, field.require, 
-                                              readOnly, value, url, this);
+                                              readOnly, widget.view!.isEmpty ? null : value, url, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
               var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0, 
               top: field.type.contains("bool") ? 0 : 11.0 , bottom: field.type.contains("bool") ? 30 : 11.0),
               child: SizedBox( width:  field.type.contains("bool") ? 150 : (counter > 1 ?
-                  ((MediaQuery.of(context).size.width - menuSize - 100) / 2.3)
-                  : MediaQuery.of(context).size.width - menuSize - 100), 
+                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.3)
+                  : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1), 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);
             }
@@ -200,11 +207,11 @@ class FormWidgetState extends State<DataFormWidget> {
               children: [...fields, ...bottomFields, ...divider, ...additionnal]))));
       return widget.scroll ? Container( decoration: BoxDecoration(
                   color: Theme.of(context).highlightColor,
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10),),
+                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),),
                 ),
                 // color: widget.subForm ? Colors.transparent : Theme.of(context).highlightColor,
-                width: MediaQuery.of(context).size.width - menuSize,
-                height: MediaQuery.of(context).size.height - 95,
+                width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+                height: MediaQuery.of(context).size.height - 95 > 0 ? MediaQuery.of(context).size.height - 95 : 0,
                 child: Padding( padding: const EdgeInsets.only(bottom: 5), 
                   child: SingleChildScrollView( scrollDirection: Axis.vertical, 
                     child: Padding( padding: const EdgeInsets.all(0), child: form) )))
@@ -219,7 +226,7 @@ class FormWidgetState extends State<DataFormWidget> {
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),),
                 ),
-                width: MediaQuery.of(context).size.width - menuSize,
+                width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
                 child: form,
               );
     }

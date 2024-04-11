@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/workflowPanel.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -64,11 +63,6 @@ class ActionService {
     }
     if (!form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
     && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) {
-      if (form.view!.id == mainForm.currentState!.widget.view!.id) {
-        // ignore: use_build_context_synchronously
-        showAlertBanner(context, () {}, const InfoAlertBannerChild(text: "Nothing has change :)"), // <-- Put any widget here you want!
-                      alertBannerLocation:  AlertBannerLocation.bottom,);
-      }
       return views; 
     }
     var path = url;
@@ -87,7 +81,6 @@ class ActionService {
               if (globalWorkflowPanelWidgetKey.currentState!.hubs[hub]!.value) { nexts.add(hub); }
             }
             body["nexts"]=nexts.join(",");
-            developer.log('LOG ERR $nexts', name: 'my.app.category');
         }
       }
       if (form.view!.actions.contains(method.toLowerCase())) {
@@ -136,7 +129,7 @@ class ActionService {
         }
         if (form.view != null && form.view!.isEmpty && errorStr == "") { 
           Future.delayed(const Duration(seconds: 1), () { 
-            globalMenuKey.currentState!.refresh(form.view!.viewID!, null, true); 
+            globalMenuKey.currentState!.refreshView("${form.view!.viewID!}", null, true, false); 
           });
         }
     }

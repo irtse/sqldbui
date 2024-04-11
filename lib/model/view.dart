@@ -75,7 +75,6 @@ class Item extends SerializerDeserializer<Item> {
   @override Map<String, dynamic> serialize() => {};
 
   @override deserialize(Map<String, dynamic> json) {
-    // developer.log('LOG ITEM ${json["workflow"]}', name: 'my.app.category');
     return  Item(
       valuesShallow: json.containsKey("values_shallow") && json["values_shallow"] != null ? fromMapJson<Shallowed>(json["values_shallow"], Shallowed()) : <String, Shallowed>{}, 
       dataPath: json.containsKey("data_path") && json["data_path"] != null ? json["data_path"] : "", 

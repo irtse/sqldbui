@@ -103,25 +103,14 @@ class _DropDownState extends State<DropDownWidget> {
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
           String? initialValue;
-          model.Shallowed? first;
           Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
           if (snap.hasData && snap.data!.data != null) {
             initialValue = "";
             if(widget.form[widget.name] != null && !widget.component.widget.view!.isEmpty) {
               for (var data in snap.data!.data!) {
-                if (data.id == widget.form[widget.name]) { first = data; initialValue=data.name ?? "${data.id!}"; break; }
+                if (data.id == widget.form[widget.name]) { initialValue=data.name ?? "${data.id!}"; break; }
               }
-            } else {  first = snap.data!.data![0]; initialValue = first.label ?? first.name ?? "${first.id}";  }
-            if (first != null && first.linkPath != "" && widget.url != null && !widget.component.widget.wrappersURL.containsKey(widget.name)) {
-                Future.delayed(const Duration(microseconds: 100), () {
-                  if (!widget.component.widget.wrappersURL.containsKey(widget.name)) {
-                    widget.component.setState( () { 
-                        widget.component.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${first!.id}");
-                    }); 
-                  }
-                   
-              });
-            }
+            } else {  initialValue = null;  }
             for (var item in snap.data!.data!) {
               var v = item.name ?? "${item.id}";
               if (!mapped.containsKey(v)) {
@@ -133,6 +122,7 @@ class _DropDownState extends State<DropDownWidget> {
             }
           }
           return DropdownButtonFormField<String>(
+              hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis,),
               value: widget.value ?? initialValue,
               items: items, 
               style: const TextStyle(fontSize: 14, color: Colors.black),

@@ -10,24 +10,27 @@ class WorkflowBarWidget extends StatefulWidget{
 }
 class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
   @override Widget build(BuildContext context) {
-    var max = MediaQuery.of(context).size.width - menuSize;
+    double max = MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0;
     var itemWidth = (max - 200) / widget.workflow.steps.length;
     List<Widget> items = [];
     if (widget.workflow.steps.isNotEmpty) {
+      var active = false;
+      try { active = widget.workflow.current != "" && int.parse(widget.workflow.current) >= 0; 
+      } catch(e) { /* */ }
       items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), width: 100, gotBefore: false,
-        isDismissible: widget.workflow.isDismiss, beforeDismissible: widget.workflow.isDismiss,
-        active: widget.workflow.current != "" && int.parse(widget.workflow.current) > 0));
+        current: widget.workflow.current != "" && int.parse( widget.workflow.current) == 0,
+        isDismissible: widget.workflow.isDismiss, beforeDismissible: widget.workflow.isDismiss, active: active));
     }
     for (var i = 0; i < widget.workflow.steps.length; i++) {
       items.add(StepWidget( content: Text("step ${ i + 1 }", style: const TextStyle(color: Colors.white)),
         width: itemWidth, gotBefore: true, 
         steps: widget.workflow.steps.containsKey("${ i + 1 }") ? widget.workflow.steps["${ i + 1 }"] : null,
-        beforeCurrent: widget.workflow.current != "" && int.parse( widget.workflow.current) == i,
-        current: widget.workflow.current != "" && int.parse( widget.workflow.current ) == i + 1,
-        beforeActive: widget.workflow.current != "" && int.parse( widget.workflow.current) >= i + 1,
+        beforeCurrent: !widget.workflow.isClose && widget.workflow.current != "" && int.parse( widget.workflow.current) == i,
+        current: widget.workflow.current != "" && int.parse( widget.workflow.current ) == i + 1 && !widget.workflow.isClose,
+        beforeActive: widget.workflow.isClose || widget.workflow.current != "" && int.parse( widget.workflow.current) >= i + 1,
         isDismissible: widget.workflow.isDismiss || widget.workflow.currentDismiss && widget.workflow.current != "" && int.parse( widget.workflow.current) == i + 1, 
         beforeDismissible: widget.workflow.isDismiss || widget.workflow.currentDismiss && widget.workflow.current != "" && int.parse( widget.workflow.current) >= i + 1,
-        active: widget.workflow.current != "" && int.parse( widget.workflow.current) > ( i + 1 )));
+        active: widget.workflow.isClose || widget.workflow.current != "" && int.parse( widget.workflow.current) > ( i + 1 )));
     }
     if (widget.workflow.steps.isNotEmpty) {
       items.add(StepWidget(content : Padding(padding: const EdgeInsets.only(left: 10), 
@@ -38,7 +41,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
       beforeActive: widget.workflow.isClose && !widget.workflow.isDismiss, 
       active: widget.workflow.isClose && !widget.workflow.isDismiss));
     } else {
-      items.add(SizedBox( width: MediaQuery.of(context).size.width - menuSize,
+      items.add(SizedBox( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
         child: const Center(child: Text("no workflow related !", style: TextStyle(color: Colors.white)),)));
     }
     return Container(  margin: const EdgeInsets.only(top: 30), width: max,
