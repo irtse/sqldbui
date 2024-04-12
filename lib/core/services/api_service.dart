@@ -99,7 +99,6 @@ class APIService {
           globalOffset = 0; 
         }
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}${orderBy.isNotEmpty ? orderBy : ""}${ dir.isNotEmpty ? dir : ""}$filter", method, body);
-        // developer.log('LOG ERR $response', name: 'my.app.category');
         if (response.statusCode != null && response.statusCode! < 400) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 

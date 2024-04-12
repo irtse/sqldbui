@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
@@ -23,7 +24,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
             Padding( padding: const EdgeInsets.symmetric(horizontal: 5), child: AdvancedSwitch(
               initialValue: hub.isSet,
               controller: hubs[hub.workflow!.id],
-              enabled: hub.optionnal,
+              enabled: hub.optionnal && !currentView!.readOnly,
               activeColor: Colors.green,
               inactiveColor: Colors.grey,
               activeChild: Text(hub.name),

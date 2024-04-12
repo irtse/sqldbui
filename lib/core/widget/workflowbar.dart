@@ -85,8 +85,8 @@ class StepWidgetState extends State<StepWidget> {
               onSelected: (value) { },
               itemBuilder: (BuildContext bc) {
                 List<PopupMenuItem> rows = [];
-                List<Widget> additionnal = [];
                 for ( var step in widget.steps! ) {
+                  List<Widget> additionnal = [];
                   if (step.isClose) {
                     additionnal.add(Padding(padding: const EdgeInsets.only(left: 20), 
                       child: Transform.rotate( angle: step.isDismiss ? 0.7854 : 0, // 45 degrees in radians

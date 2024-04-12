@@ -70,7 +70,8 @@ class ActionService {
       if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var fieldName in schema.keys) {
           if (form.cacheForm[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
-          if (!["dbschema_id", "dbdest_table_id"].contains(fieldName) 
+          if (!["dbdest_table_id"].contains(fieldName) 
+          && !(["dbschema_id"].contains(fieldName) && form.cacheForm[fieldName] == null)
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
           && form.cacheForm[fieldName] is! List) { body[fieldName]=form.cacheForm[fieldName]; }
         }
@@ -85,6 +86,7 @@ class ActionService {
       }
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
+        developer.log("path $path $body", name: "ActionService");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 

@@ -11,28 +11,46 @@ class NotificationDrawerWidget extends StatefulWidget{
 }
 class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
   @override Widget build(BuildContext context) {
-    List<Widget> notifs = [Padding( padding: const EdgeInsets.only(top: 10, bottom: 5), 
-      child: Row( mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children : [ Padding(padding: const EdgeInsets.only(right: 10), child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20,)),
+    var len = MediaQuery.of(context).size.width > 300 ? (MediaQuery.of(context).size.width ~/ 10) : (MediaQuery.of(context).size.width ~/ 15);
+    double maxWidth = 0;
+    for ( var notif in AuthService.user!.notifications ) {
+      if (notif.name.length * 8 > maxWidth) { maxWidth = notif.name.length * 8; }
+      if (notif.description.length * 8 > maxWidth) { maxWidth = notif.description.length * 8; }
+    }
+    List<Widget> notifs = [Container( padding: const EdgeInsets.only(top: 10, bottom: 10), 
+      width: maxWidth < MediaQuery.of(context).size.width ? maxWidth : MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).splashColor, ))),
+      child: Row( mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children : [ Padding(padding: const EdgeInsets.only(right: 10), 
+      child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20,)),
         Text("Notifications", style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 15,),) ]))];
     for ( var notif in AuthService.user!.notifications ) {
         notifs.add(Stack( children : [ 
-          Padding(padding: const EdgeInsets.symmetric(vertical: 10), 
+          Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisSize: MainAxisSize.min, children: [ Container(
-          padding: const EdgeInsets.only(bottom: 10, top: 10),
-          // decoration: BoxDecoration(border: Border(top: BorderSide(color: Theme.of(context).splashColor, ))),
+          padding: const EdgeInsets.only(bottom: 20, top: 15),
+          width: maxWidth < MediaQuery.of(context).size.width ? maxWidth : MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).splashColor, ))),
           child: Column(children: [
-          Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: TextButton( onPressed: () { AppRouter.navigateWith(notif.ref); }, 
-            child: Row(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Icon(Icons.message, color: Theme.of(context).splashColor), Padding( padding: const EdgeInsets.only(left: 10), 
-                  child: Text(notif.name, overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
+          Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: TextButton( onPressed: () { 
+            AppRouter.navigateWith(notif.ref); 
+            Future.delayed(const Duration(seconds: 1), () => setState(() { APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), null); }));
+          }, 
+          child: Row(
+                  children: [Icon(Icons.message, color: Theme.of(context).splashColor), Padding( padding: const EdgeInsets.only(left: 10), 
+                  child: Text(notif.name[0] 
+                  + notif.name.substring(1, len > notif.name.length ? notif.name.length : len).toLowerCase() 
+                  + (len > notif.name.length ? "" : "...")
+                  , overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
                 ],))),
           Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
-            child: Row(children: [Text(notif.description[0] + notif.description.substring(1).toLowerCase(), 
+            child: Row( children: [Text(notif.description[0] 
+            + notif.description.substring(1, len > notif.description.length ? notif.description.length : len).toLowerCase() 
+            + (len > notif.description.length ? "" : "..."), 
               style: TextStyle(color: Theme.of(context).splashColor), overflow: TextOverflow.ellipsis,)])),
         ]))])),
-        Positioned(right: 5, top: 20, child: IconButton(icon: const Icon(Icons.close), 
+        Positioned(right: 10, top: 11, child: IconButton(icon: const Icon(Icons.close), 
           onPressed: () => { 
-            APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), context).then((value) =>
+            APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), null).then((value) =>
               setState(() {
                 AuthService.user!.notifications.remove(notif);
                 appBarKey.currentState!.setState(() {});

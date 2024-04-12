@@ -98,6 +98,14 @@ class GridWidgetState extends State<GridWidget> {
       col.prefetch();  
       count++; 
     }
+    if (maxWidth < MediaQuery.of(context).size.width - 350) { 
+      Future.delayed(const Duration(seconds: 1), () { 
+        homeKey.currentState?.setState(() { 
+          globalOffset = 0; 
+          rects.remove(viewID);
+        });
+      } );
+    }
     return  Padding( padding: EdgeInsets.only(left: rows.isEmpty ? 0 : 3), child:  Scrollbar(
       controller: _horizontal,
       thumbVisibility: true,
@@ -302,7 +310,7 @@ class GridColumnWidget extends StatefulWidget {
       double width = getWidth(false);
       late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
-        width: width.isNaN ? 300 : width,
+        width: width.isNaN ? 300 : width - 0.5,
         height: 55,
       );
       rects[viewID]![columnName] = rect;
@@ -359,6 +367,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     if (currentView != null && rects.containsKey(viewID)) {
       rects[viewID]![widget.columnName] = rect;
     }
+    
     return Container(width: rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
     decoration: BoxDecoration( color: widget.backgroundColor, 
             border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
