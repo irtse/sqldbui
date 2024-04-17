@@ -32,15 +32,15 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logOut(BuildContext context) async {
-    await service.get<User>("/auth/logout", true, context).then((value) => unAuthenticate(context)
-                                                    ).catchError((e) => unAuthenticate(context));
+    await service.get<User>("/auth/logout", true, context).then((value) => unAuthenticate()
+                                                    ).catchError((e) => unAuthenticate());
   }
   
   err(String err) {
     error = err;
     return null;
   }
-  void unAuthenticate(BuildContext context) {
+  void unAuthenticate() {
     _isAuthenticated = false; 
     user = null;
     error = null;

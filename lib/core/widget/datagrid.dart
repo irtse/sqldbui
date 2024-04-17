@@ -12,7 +12,7 @@ GlobalKey<DatagridWidgetState> globalGridWidgetKey = GlobalKey<DatagridWidgetSta
 GlobalKey<GridWidgetState> globalGridKey = GlobalKey<GridWidgetState>();
 // ignore: must_be_immutable
 class DatagridWidget extends StatefulWidget {
-  // final DataGridController dataGridController = DataGridController();
+  List<String> selected = [];
   Map<String, Map<String, dynamic>> cache = <String, Map<String, dynamic>>{};
   final model.View? view; 
   GlobalKey<ViewWidgetState>? viewKey;
@@ -24,7 +24,8 @@ class DatagridWidgetState extends State<DatagridWidget> {
   late Map<String, double> columnWidths = {};
   int maxCount(Map<String, model.SchemaField> schema) {
     var count = 1;
-    for (var _ in schema.keys) {
+    for (var fieldName in schema.keys) {
+      if (schema[fieldName]!.type.contains("many")) { continue; }
       count++;
     }
     return count;
@@ -86,7 +87,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
               allowSorting: !(datas.isEmpty && !isFilter()),
               label: GridValueWidget(fontSize: 15, value: "name"),
             ));
-          }
+      }
       
       for (var fieldName in schema.keys) {
         if (fieldName == "description" || fieldName == "name" || schema[fieldName]!.type.contains("many")) { continue; }

@@ -53,7 +53,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
               try {
                 model.Item item = currentView!.items.firstWhere((v) => v.values['id'] == subID);
                 if (item.linkPath != "") { 
-                  developer.log("qsdqsdqsd");
+                  developer.log("THERE View changed", name: "MainViewWidget");
                   Future.delayed( const Duration(seconds: 1), () => refreshUrl(item.linkPath, subID));  
                 } 
               } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }

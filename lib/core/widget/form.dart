@@ -92,7 +92,6 @@ class FormWidgetState extends State<DataFormWidget> {
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
-                    developer.log("THERE", name: "data");
                     if (data.workflow != null && !workflowBars.containsKey(url)) { 
                       Future.delayed(const Duration(seconds: 1), () { 
                         setState(() { workflowBars[url] = WorkflowBarWidget(workflow: data.workflow!); }); }
@@ -181,12 +180,12 @@ class FormWidgetState extends State<DataFormWidget> {
             if (((f.runtimeType == OneToManyWidget || f.runtimeType == ManyToManyWidget) && show) 
             && !(widget.view!.isEmpty && !widget.view!.actions.contains("post"))) { 
               bottomFields.add(
-                Padding(padding: const EdgeInsets.only(bottom: 30), 
+                Padding(padding: const EdgeInsets.only(bottom: 30, left: 30, right: 30), 
                   child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Theme.of(context).splashColor,
-                  ), child: Padding(padding: const EdgeInsets.all(10), child: f!,)))); 
+                  ), child: Padding(padding: const EdgeInsets.all(30), child: f!,)))); 
             }
           } 
         }

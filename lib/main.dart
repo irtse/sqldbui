@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_login/flutter_login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/sections/view.dart';
@@ -106,7 +107,9 @@ class HomeScreenState extends State<HomeScreen> {
         actions: <Widget>[
           Stack( children: [
              IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
-             onPressed: () => scaffoldKey.currentState!.openEndDrawer(),),
+             onPressed: () { 
+              if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
+             },),
              NotificationWidget(key: appBarKey,),
           ],),
           Padding(padding: const EdgeInsets.only(left: 25, right: 50), 

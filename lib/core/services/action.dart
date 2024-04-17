@@ -23,7 +23,7 @@ class ActionService {
       return () {};
     }
   static void Function() pressedList(ActionBarWidget widget, String schemaName, String url, 
-                                     Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async { }; }
+                                     Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
   static void Function() pressedForm(ActionBarWidget widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context,) { 
       return () async {
@@ -37,8 +37,10 @@ class ActionService {
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add) async {  
-    if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) {  return []; 
-    } else { form.formKey.currentState!.save(); }
+    if (method != "delete") {
+      if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) {  return []; 
+      } else { form.formKey.currentState!.save(); }
+    }                                                   
     var body = <String, dynamic>{};
     List<model.View> views = [];
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false);
@@ -61,12 +63,18 @@ class ActionService {
         // ignore: use_build_context_synchronously
         formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false);
     }
-    if (!form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
+    if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
     && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) {
       return views; 
     }
     var path = url;
-      if (form.cacheForm["id"] != null) { body["id"]=int.parse(form.cacheForm["id"]); }
+    developer.log("path $path", name: "ActionService");
+      if (form.cacheForm["id"] != null) { 
+        body["id"]=int.parse(form.cacheForm["id"]); 
+        if (method.toUpperCase() == "DELETE") {
+          path = path.replaceAll("rows=all", "rows=${body["id"]}");
+        }
+      }
       if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var fieldName in schema.keys) {
           if (form.cacheForm[fieldName] == null && method.toUpperCase() == "PUT") { continue; }

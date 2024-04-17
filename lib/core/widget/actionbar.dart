@@ -1,16 +1,16 @@
 import 'dart:developer' as developer;
-import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/services/action.dart';
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
@@ -28,20 +28,21 @@ class ActionBarState extends State<ActionBarWidget> {
   void loaded(String method) { setState(() { states[method]= false; });}
 
   @override Widget build(BuildContext context) {
-      List<Widget> actions = <Widget>[
-        Column(
-          children: [IconButton( constraints: const BoxConstraints(),
-            tooltip: "refresh page",
-            style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-            icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
-            onPressed: () {  globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
-                : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID); },
-          )],
-        )
-      ];
+      List<Widget> actions = <Widget>[];
+      if (viewID != null) {
+        actions.add(Column(
+            children: [IconButton( constraints: const BoxConstraints(),
+              tooltip: "refresh page",
+              style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                          return Theme.of(context).primaryColor;
+                        }), ),
+              icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
+              onPressed: () {  globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
+                  : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID); },
+            )],
+        ));
+      }
       if (widget.gridKey != null) {
         if (isFilter()) {
           actions.add(
@@ -79,49 +80,25 @@ class ActionBarState extends State<ActionBarWidget> {
                   });
                 },
               ),]));
-        
-
-        /*actions.add(
-          Column(
-            children: [IconButton(
-                tooltip: "download excel",
-                style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-                icon: Icon( Icons.download, color: Theme.of(context).highlightColor, ),
-                onPressed: () async {
-                    var state = widget.gridKey!.currentState;
-                    if (state != null) {
-                      final xls.Workbook workbook = state.exportToExcelWorkbook(
-                        rows: globalGridWidgetKey.currentState!.widget.dataGridController.selectedRows);
-                      final List<int> bytes = workbook.saveAsStream();
-                      workbook.dispose();
-                      await File('DataGrid.xlsx').writeAsBytes(bytes);
-                    }   
-                },
-              ),],
-          )
-        );*/
-        /* actions.add(
-            IconButton( tooltip: "download pdf",
-                style: ButtonStyle(  overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-                icon: Icon( Icons.picture_as_pdf, color: Theme.of(context).highlightColor, ),
-                onPressed: () async {
-                  var state = widget.gridKey!.currentState;
-                  if (state != null) {
-                    PdfDocument document = state.exportToPdfDocument(
-                      rows: globalGridWidgetKey.currentState!.widget.dataGridController.selectedRows);
-                    final List<int> bytes = document.saveSync();
-                    await File('DataGrid.xlsx').writeAsBytes(bytes);
-                  }   
-                },
-              )
-          );*/
       }
+        if (currentView != null && !currentView!.isEmpty && !(globalGridWidgetKey.currentState != null && globalGridWidgetKey.currentState!.widget.selected.isEmpty)) {
+          actions.add(Column(
+            children: [IconButton( constraints: const BoxConstraints(),
+              tooltip: "export ${currentView!.isList ? "selected " : ""}rows",
+              style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                          return Theme.of(context).primaryColor;
+                        }), ),
+              icon: Icon( Icons.file_download, color: Theme.of(context).highlightColor, ),
+              onPressed: () {  
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) { return MappingPopUpWidget(isExport: true, format: "csv"); },
+                );
+              },
+            )],
+          ));
+        }
       if (widget.view != null && !widget.view!.readOnly) {
         for (var action in widget.view!.actions) {
           action = action as String;
@@ -131,9 +108,28 @@ class ActionBarState extends State<ActionBarWidget> {
               child: const SpinKitCircle(color: Colors.white, size: 25.0,)));
             continue;
           }
-          if ( action.toLowerCase() == "post" && !widget.view!.isList ) {
-            actions.add(Column(
-              children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
+          if ( action.toLowerCase() == "post" ) {
+            if (currentView != null && currentView!.isList) {
+              actions.add(Column(
+                children: [IconButton( constraints: const BoxConstraints(),
+                  tooltip: "upload datas file",
+                  style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                              if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                              return Theme.of(context).primaryColor;
+                            }), ),
+                  icon: Icon( Icons.upload, color: Theme.of(context).highlightColor, ),
+                  onPressed: () {  
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) { return MappingPopUpWidget(isExport: false, format: "csv"); },
+                    );
+                  },
+                )],
+              ));
+            }
+            if (!widget.view!.isList) {
+              actions.add(Column(
+                children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
                     style: ButtonStyle( 
                       backgroundColor: MaterialStateColor.resolveWith((states) => Theme.of(context).splashColor) ,
                       overlayColor: MaterialStateProperty.resolveWith((states) {
@@ -144,7 +140,8 @@ class ActionBarState extends State<ActionBarWidget> {
                                   widget.view!.actionPath, <String>[], widget.view!.schema, action, context), 
                     child: Text("SUBMIT", style: TextStyle(
                     fontSize: 12, color: Theme.of(context).highlightColor)))),],
-            ));
+              ));
+            }
           }
           if (action.toLowerCase() == "put" && !widget.view!.isList && widget.view!.items.isNotEmpty) {
             actions.add(Column(
@@ -158,19 +155,17 @@ class ActionBarState extends State<ActionBarWidget> {
                     child: Text("SAVE", style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
             )); 
           }
-          if (action.toLowerCase() == "delete") {
+          if (action.toLowerCase() == "delete" && !widget.view!.isList) {
             actions.add(Column(
-              children: [IconButton( constraints: const BoxConstraints(),
-                style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+              children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
+                    style: ButtonStyle(  overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
                       }), ),
-                tooltip: "delete${ widget.view!.isList ? ' selected rows' : ''}",
-                icon: const Icon( Icons.restore_from_trash, color: Colors.white, ),
-                onPressed: ActionService.pressed(widget, widget.view!.isList, widget.view!.schemaName, 
-                                                 widget.view!.actionPath, <String>["id"],  widget.view!.schema, 
-                                                 action, context) )],
-            )); 
+                    onPressed: ActionService.pressed(widget, false, widget.view!.schemaName,  widget.view!.actionPath, 
+                                      <String>["id"], widget.view!.schema, action, context), 
+                    child: Text("DELETE", style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
+            ));
           }
         }
       }

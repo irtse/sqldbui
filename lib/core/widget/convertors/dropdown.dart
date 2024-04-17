@@ -7,7 +7,7 @@ import 'dart:developer' as developer;
 
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
-  final FormWidgetState component;
+  final FormWidgetState? component;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
@@ -17,8 +17,9 @@ class DropDownWidget extends StatefulWidget {
   final String? url;
   final String type;
   final String label;
+  bool isDark = false;
   DropDownWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
-                      required this.readOnly, required this.value, required this.label,
+                      required this.readOnly, required this.value, required this.label, this.isDark = false,
                       required this.require, required this.type, required this.url, required this.component}): super(key: key);
   @override
   _DropDownState createState() => _DropDownState();
@@ -30,15 +31,16 @@ class _DropDownState extends State<DropDownWidget> {
       return SizedBox(width: 400, height: 30, child: TextFormField(
                       readOnly: true,
                       initialValue: widget.value,
-                      style: const TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
                       decoration: InputDecoration(
                         filled: true,
                         suffixIcon: widget.type.contains("enum") ? const Icon(Icons.format_list_numbered) : const Icon(Icons.link),
                         errorStyle: const TextStyle(height: -2),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
-                        hintStyle: const TextStyle(fontSize: 12, ),
+                        fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).selectedRowColor : Colors.white),
+                        hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                         border: const OutlineInputBorder(),
+                        labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
                         enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                         hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}",
@@ -53,9 +55,9 @@ class _DropDownState extends State<DropDownWidget> {
       }
       return DropdownButtonFormField<String>( items: items, 
         value: widget.value ?? ( values.isNotEmpty ? values[0] : null),
-        style: const TextStyle(fontSize: 14, color: Colors.black),
+        style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
         onChanged: (value) {
-          widget.component.widget.detectChange = true;
+          widget.component?.widget.detectChange = true;
           if (value == null) { widget.form[widget.name]=null;
           } else { widget.form[widget.name]=value; }
         },
@@ -63,17 +65,19 @@ class _DropDownState extends State<DropDownWidget> {
           if (value == null) { widget.form[widget.name]=null;
           } else { widget.form[widget.name]=value; }
         },
+        dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
         decoration: InputDecoration(
           suffixIconColor: Theme.of(context).primaryColor,
           errorStyle: const TextStyle(height: -2),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           filled: true,
+          labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
           enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-          fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
-          hintStyle: const TextStyle(fontSize: 12, ),
+          fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).selectedRowColor : Colors.white),
+          hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
           border: const OutlineInputBorder(),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-          labelText: widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' '),
+          labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
         ),
         validator: (String? value) {
           return (value == null || value.isEmpty) && widget.require ? 'enter a proper value.' : null;
@@ -84,18 +88,18 @@ class _DropDownState extends State<DropDownWidget> {
       return SizedBox(width: 400, height: 30, child: TextFormField(
                       readOnly: true,
                       initialValue: widget.value,
-                      style: const TextStyle(fontSize: 14),
+                      style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
                       decoration: InputDecoration(
                         filled: true,
                         enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                         errorStyle: const TextStyle(height: -2),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
-                        hintStyle: const TextStyle(fontSize: 12, ),
+                        hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                         border: const OutlineInputBorder(),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                         hintText: "enter your ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
-                        labelText: widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' '),
+                        labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
                       ) ));
     }
     return FutureBuilder<APIResponse<model.Shallowed>>(
@@ -106,17 +110,19 @@ class _DropDownState extends State<DropDownWidget> {
           Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
           if (snap.hasData && snap.data!.data != null) {
             initialValue = "";
-            if(widget.form[widget.name] != null && !widget.component.widget.view!.isEmpty) {
+            if (widget.component != null) {
+              if(widget.form[widget.name] != null && !widget.component!.widget.view!.isEmpty) {
               for (var data in snap.data!.data!) {
                 if (data.id == widget.form[widget.name]) { initialValue=data.name ?? "${data.id!}"; break; }
               }
             } else {  initialValue = null;  }
-            for (var item in snap.data!.data!) {
-              var v = item.name ?? "${item.id}";
-              if (!mapped.containsKey(v)) {
-                mapped[v]=item;
-                if(widget.component.widget.view!.isEmpty || !(widget.component.widget.view!.isEmpty && !item.actions.contains("post"))) {
-                  items.add(DropdownMenuItem<String>(value: v, child: Text(v, overflow: TextOverflow.ellipsis,),));
+              for (var item in snap.data!.data!) {
+                var v = item.name ?? "${item.id}";
+                if (!mapped.containsKey(v)) {
+                  mapped[v]=item;
+                  if(widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post"))) {
+                    items.add(DropdownMenuItem<String>(value: v, child: Text(v, overflow: TextOverflow.ellipsis,),));
+                  }
                 }
               }
             }
@@ -125,15 +131,16 @@ class _DropDownState extends State<DropDownWidget> {
               hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis,),
               value: widget.value ?? initialValue,
               items: items, 
-              style: const TextStyle(fontSize: 14, color: Colors.black),
+              dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
+              style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
               onChanged: (value) {
-                widget.component.widget.detectChange = true;
+                widget.component?.widget.detectChange = true;
                 if (value == null) { widget.form[widget.name]=null;
                 } else { widget.form[widget.name]=mapped[value]!.id; }
                 var item = mapped[value];
                 if (widget.url != null && item != null && item.linkPath != "") {
-                  widget.component.setState( () { 
-                    widget.component.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+                  widget.component?.setState( () { 
+                    widget.component?.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                   }); 
                 }
               },
@@ -146,10 +153,11 @@ class _DropDownState extends State<DropDownWidget> {
                 enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                 border: const OutlineInputBorder(),
                 errorStyle: const TextStyle(height: -2),
-                hintStyle: const TextStyle(fontSize: 12),
+                hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+                labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
+                fillColor: widget.readOnly ? Theme.of(context).splashColor : ( widget.isDark ? Theme.of(context).selectedRowColor : Colors.white ),
                 labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
               ),
               validator: (String? value) {

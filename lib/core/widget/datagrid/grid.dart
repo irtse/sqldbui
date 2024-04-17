@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
 import 'package:sqldbui2/core/widget/fork/tranformablebox.dart' as fork;
@@ -48,7 +49,7 @@ Map<String, Map<String, Rect>> rects = {};
 // ignore: must_be_immutable
 class GridWidget extends StatefulWidget {
   GlobalKey<ViewWidgetState>? viewKey; 
-  bool isSelected = false;
+  bool isSelected = true;
   Map<String,String> links; 
   Map<String, model.Shallowed> contentShallowed;
   List<GridColumnWidget> columns; 
@@ -80,11 +81,14 @@ class GridWidgetState extends State<GridWidget> {
       additionnalContent.add(
         Padding(padding: const EdgeInsets.only(left: 5), child: Container(width: 75, height: 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(right: BorderSide( color: widget.borderColor, width: widget.borderWidth ),)),
-          child: CheckboxListTileFormField(enabled: true, initialValue: false, 
+          child: CheckboxListTile(enabled: true,
+          value: widget.isSelected, 
             onChanged: (value) { 
-              widget.isSelected=value; 
+              widget.isSelected=value ?? false; 
+              if (!widget.isSelected) { globalGridWidgetKey.currentState!.widget.selected = []; }
               setState(() {});
-            }, onSaved: (value) { widget.isSelected=value ?? false; },)
+              globalActionBar.currentState!.setState(() {});
+            })
         ))); 
     }
     var count = 0;
@@ -170,6 +174,9 @@ class GridWidgetState extends State<GridWidget> {
       return GridRowWidget( borderWidth: widget.borderWidth, borderColor: widget.borderColor, isSelected: widget.isSelected, 
         maxLength: widget.maxLength, contextWidth: widget.contextWidth,
         cells: columns.map<GridCell>((column) {
+          if (column.columnName == "id" && widget.isSelected && !globalGridWidgetKey.currentState!.widget.selected.contains(mapped[column.columnName])) {
+            globalGridWidgetKey.currentState!.widget.selected.add(mapped[column.columnName]);
+          }
         return GridCell( width: column.width, borderWidth: widget.borderWidth, borderColor: widget.borderColor,
           backgroundColor: widget.backgroundColor, columnName: column.columnName, value: mapped[column.columnName], );
       }, ).toList(), showCheckboxColumn: widget.showCheckboxColumn, contentShallowed: widget.contentShallowed, links: widget.links, viewKey: widget.viewKey,);
@@ -182,7 +189,7 @@ class GridRowWidget extends StatefulWidget {
   GlobalKey<ViewWidgetState>? viewKey; double borderWidth; Color borderColor; bool isSelected; int maxLength; double contextWidth;
   Map<String,String> links; Map<String, model.Shallowed> contentShallowed;
   List<GridCell> cells;  bool showCheckboxColumn; 
-  GridRowWidget ({ Key? key, required this.cells, required this.links, required this.contentShallowed, this.isSelected = false,
+  GridRowWidget ({ Key? key, required this.cells, required this.links, required this.contentShallowed, this.isSelected = true,
     required this.maxLength, required this.contextWidth,
     this.showCheckboxColumn = false, this.viewKey, this.borderColor = Colors.grey, this.borderWidth = 1 }): super(key: key);
   @override GridRowWidgetState createState() => GridRowWidgetState();
@@ -191,12 +198,21 @@ class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
     List<Widget> additionnalContent = [];
     if (widget.showCheckboxColumn) {
+      if (globalGridWidgetKey.currentState!.widget.selected.contains(widget.cells.first.value)) { widget.isSelected = true; }
       additionnalContent.add(
         Padding(padding: const EdgeInsets.only(left: 5), 
         child: Container(width: 73, height: 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
           child: CheckboxListTile(value: widget.isSelected, onChanged: (value) {
-             setState(() {  widget.isSelected=value ?? false;  });
+            widget.isSelected=value ?? false;
+            if (widget.isSelected) { globalGridWidgetKey.currentState!.widget.selected.add(widget.cells.first.value);
+            } else { 
+              globalGridKey.currentState!.widget.isSelected = false;
+              globalGridWidgetKey.currentState!.widget.selected.remove(widget.cells.first.value); 
+            }
+            globalActionBar.currentState!.setState(() {});
+            globalGridKey.currentState!.setState(() {});
+            setState(() { });
           },)
         ))); 
     }
@@ -290,13 +306,15 @@ class GridColumnWidget extends StatefulWidget {
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
-    double width = (label.value.length * 20) + (20 * 2);
-    if ((width * maxLength) <= getTotal() && !avoid && maxLength < 7) { width = (getTotal() /  maxLength); }
+    double width = (label.value.length * 19);
+    if ((width * maxLength) <= getTotal() && !avoid) { width = (getTotal() /  maxLength); }
+    if (width < 150) { width = 150; }
     return width;
   }
 
   bool isLower() {
-    var width = (label.value.length * 20) + (20 * 2);
+    var width = (label.value.length * 20);
+    if (width < 200) { width = 200; }
     return (width * maxLength) <= getTotal();
   }
 
@@ -310,7 +328,7 @@ class GridColumnWidget extends StatefulWidget {
       double width = getWidth(false);
       late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
-        width: width.isNaN ? 300 : width - 0.5,
+        width: width.isNaN ? 300 : width,
         height: 55,
       );
       rects[viewID]![columnName] = rect;

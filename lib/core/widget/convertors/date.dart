@@ -4,7 +4,7 @@ import 'package:date_field/date_field.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 
 class DateWidget extends StatefulWidget {
-  final FormWidgetState component;
+  final FormWidgetState? component;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
@@ -47,7 +47,7 @@ class _DateState extends State<DateWidget> {
         value: dateValue,
         lastDate: DateTime(date.year + 10, date.month, date.day),
         onChanged: (DateTime? value) { 
-          widget.component.widget.detectChange = true;
+          widget.component?.widget.detectChange = true;
           setState(() {
             dateValue=value!; 
             widget.form[widget.name]=value.toIso8601String(); 
