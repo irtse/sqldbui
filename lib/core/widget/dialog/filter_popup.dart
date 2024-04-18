@@ -127,7 +127,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       for (var search in advancedSearch) { search.globalKey.currentState!.save(); }
                       stateSort!(() {}); stateKind!(() {}); stateFilter!(() {});
                     }
-                    globalMenuKey.currentState?.refreshView(viewID, subViewID, true, true);
+                    globalMenuKey.currentState?.refreshView(viewID, subViewID, true, true, false);
                   },
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("SUBMIT", style: TextStyle(color: Colors.white, fontSize: 12))),)),

@@ -185,7 +185,7 @@ class FormWidgetState extends State<DataFormWidget> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     color: Theme.of(context).splashColor,
-                  ), child: Padding(padding: const EdgeInsets.all(30), child: f!,)))); 
+                  ), child: Padding(padding: const EdgeInsets.all(10), child: f!,)))); 
             }
           } 
         }
@@ -214,7 +214,9 @@ class FormWidgetState extends State<DataFormWidget> {
                 child: Padding( padding: const EdgeInsets.only(bottom: 5), 
                   child: SingleChildScrollView( scrollDirection: Axis.vertical, 
                     child: Padding( padding: const EdgeInsets.all(0), child: form) )))
-              : Container( decoration: BoxDecoration(
+              : Container( 
+                margin: EdgeInsets.only(top: widget.subForm ? 10 : 0, bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
+                decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.5),

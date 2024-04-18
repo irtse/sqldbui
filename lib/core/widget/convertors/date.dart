@@ -21,11 +21,11 @@ class DateWidget extends StatefulWidget {
 class _DateState extends State<DateWidget> {
   @override Widget build(BuildContext context) {
     var date = DateTime.now();
-      DateTime dateValue = DateTime.now();
+      DateTime? dateValue;
       if (widget.form[widget.name] != null) { 
         widget.value = widget.form[widget.name]; 
         dateValue = DateTime.parse(widget.value);
-      } else { widget.form[widget.name]=date.toIso8601String(); }
+      }
       return DateTimeField(
         dateFormat: DateFormat('y-M-dd'),
         mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,

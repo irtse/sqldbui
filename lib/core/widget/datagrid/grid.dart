@@ -11,6 +11,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:checkbox_formfield/checkbox_formfield.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 double maxWidth = 0;
 String? isNew;
@@ -76,7 +77,8 @@ class GridWidgetState extends State<GridWidget> {
       rects = {};
       refWidth = MediaQuery.of(context).size.width; 
     }
-    var rows = buildRows(widget.columns, widget.source);
+    List<Widget> rows = buildRows(widget.columns, widget.source);
+
     if (widget.showCheckboxColumn) {
       additionnalContent.add(
         Padding(padding: const EdgeInsets.only(left: 5), child: Container(width: 75, height: 50, alignment: Alignment.center,
@@ -102,7 +104,7 @@ class GridWidgetState extends State<GridWidget> {
       col.prefetch();  
       count++; 
     }
-    if (maxWidth < MediaQuery.of(context).size.width - 350) { 
+    if (maxWidth < MediaQuery.of(context).size.width - 400) { 
       Future.delayed(const Duration(seconds: 1), () { 
         homeKey.currentState?.setState(() { 
           globalOffset = 0; 
@@ -114,6 +116,7 @@ class GridWidgetState extends State<GridWidget> {
       controller: _horizontal,
       thumbVisibility: true,
       trackVisibility: true,
+      interactive: !globalLoading,
       child: SingleChildScrollView(
         controller: _horizontal,
         scrollDirection: Axis.horizontal, 
@@ -123,25 +126,17 @@ class GridWidgetState extends State<GridWidget> {
             controller: _vertical,
             thumbVisibility: true,
             trackVisibility: true,
-            notificationPredicate: (notif) => notif.depth == 1,
+            interactive: !globalLoading,
+            notificationPredicate: (notif) => notif.depth > -1,
             child: NotificationListener<ScrollNotification>(
                 onNotification: (scrollNotification) {
                   if (scrollNotification is ScrollEndNotification) {
                     if (currentView != null && (globalOffset + globalLimit) < currentView!.max) {
                       globalOffset += globalOffset + globalLimit;
-                      APIService().get<model.View>(currentView!.linkPath, true, context).then((value) {
-                        if (value.data != null && value.data!.isNotEmpty) { 
-                          globalMainViewKey.currentState!.setState(() {}); 
-                        }
+                      Future.delayed(const Duration(microseconds: 500), () {
+                        globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
                       });
-                    } else {
-                      globalOffset = 0;
-                      APIService().get<model.View>(currentView!.linkPath, true, context).then((value) {
-                        if (value.data != null && value.data!.isNotEmpty) { 
-                          globalMainViewKey.currentState!.setState(() {}); 
-                        }
-                      });
-                    }
+                    } 
                   }
                   return true;
                 },
@@ -284,8 +279,8 @@ class GridCell {
      this.borderWidth = 1, this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent});
   
   double getWidth(int maxLength, double contextWidth) {
-    double width = ("$value".length * 20);
-    if ((width * maxLength) < contextWidth && maxLength < 7) { 
+    double width = ("$value".length * 19);
+    if ((width * maxLength) < contextWidth) { 
       width = (((contextWidth  - (81.5 * maxLength)) - (42 * maxLength) - (borderWidth * maxLength)) /  maxLength); 
     }
     return width;
@@ -307,8 +302,10 @@ class GridColumnWidget extends StatefulWidget {
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
     double width = (label.value.length * 19);
+    developer.log("$width 1");
     if ((width * maxLength) <= getTotal() && !avoid) { width = (getTotal() /  maxLength); }
-    if (width < 150) { width = 150; }
+    developer.log("$width");
+    if (width < 130) { width = 130; }
     return width;
   }
 
@@ -319,7 +316,7 @@ class GridColumnWidget extends StatefulWidget {
   }
 
   double getTotal() {
-    return contextWidth - 82;
+    return contextWidth - 86;
   }
 
   void prefetch() {

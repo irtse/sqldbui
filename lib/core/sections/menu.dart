@@ -115,7 +115,7 @@ class MenuWidgetState extends State<MenuWidget> {
                       child: Material(type: MaterialType.transparency,
                         child: ListTile(
                           selected: "${catIndex.id}" == viewID,
-                          onTap: () async { refreshView("${catIndex.id}", cat, false, false); },
+                          onTap: () async { refreshView("${catIndex.id}", cat, false, false, false); },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
                           title: Text(catIndex.name, overflow: TextOverflow.ellipsis,
@@ -143,25 +143,35 @@ class MenuWidgetState extends State<MenuWidget> {
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content);
   }
   void refresh() {
-      APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
-        if (value.data != null) { widget.views = value.data; }
+      if (widget.views == null) {
+          APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
+          if (value.data != null) { widget.views = value.data; }
+          for (var view in widget.views!) {
+            if (view.id.toString() == viewID && subViewID != null) {
+              try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
+            }
+          }
+          setState(() {}); 
+        });
+      } else {
         for (var view in widget.views!) {
           if (view.id.toString() == viewID && subViewID != null) {
             try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
           }
         }
-        setState(() {});
-      });
+        setState(() {}); 
+      }
   }
   void refreshUrl(String? path, String? id) {
+    globalLoading = true;
     subViewID = id;
-    currentView = null;
     widget.url = path;
+    rects.remove(viewID);
     refresh();
   }
-  void refreshView(String? id, String? cat, bool isFirst, bool nullable) {
+  void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
     AppRouter.routedSubID = null;
-    globalLoading = true; // globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
+    globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
     firstAPI =  isFirst || globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
     globalOffset = 0;
     category=cat;
@@ -169,6 +179,6 @@ class MenuWidgetState extends State<MenuWidget> {
     viewID=id.toString();
     widget.url = null;
     if (nullable) { Future.delayed(const Duration(microseconds: 500), () => currentView = null);  }
-    setState(() {});
+    full ? refresh() : setState(() {});
   }
 }

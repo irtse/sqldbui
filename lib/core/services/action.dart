@@ -68,7 +68,6 @@ class ActionService {
       return views; 
     }
     var path = url;
-    developer.log("path $path", name: "ActionService");
       if (form.cacheForm["id"] != null) { 
         body["id"]=int.parse(form.cacheForm["id"]); 
         if (method.toUpperCase() == "DELETE") {
@@ -92,12 +91,15 @@ class ActionService {
             body["nexts"]=nexts.join(",");
         }
       }
+      String newViewID = "";
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
         developer.log("path $path $body", name: "ActionService");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {
+            
             views.add(value.data![0]); 
+            newViewID= "${value.data![0].schemaID}";
             form.cacheForm["id"]=value.data![0].items[0].values["id"];
             
             listSubForms(schema, form.cacheForm, method, schemaName, context);
@@ -138,8 +140,9 @@ class ActionService {
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
         if (form.view != null && form.view!.isEmpty && errorStr == "") { 
+          developer.log("qsdqsdqssdq $newViewID", name: "ActionService");
           Future.delayed(const Duration(seconds: 1), () { 
-            globalMenuKey.currentState!.refreshView("${form.view!.viewID!}", null, true, false); 
+            globalMenuKey.currentState?.refreshView(newViewID, null, true, false, true); 
           });
         }
     }

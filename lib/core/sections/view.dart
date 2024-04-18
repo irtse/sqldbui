@@ -32,10 +32,9 @@ class MainViewWidgetState extends State<MainViewWidget> {
     var view = widget.view; 
     if (view != null || widget.url != null) {
       if (APIService.cache.containsKey(view?.linkPath) && !firstAPI && widget.url == null) { globalLoading = false; }
-      if (firstAPI) { globalOffset = 0; }
       if ((currentView == null || currentView != null && currentView!.id.toString() != viewID 
       || AppRouter.routedSubID != null) || firstAPI || widget.url != null) {
-        developer.log("View changed", name: "MainViewWidget");
+        if (widget.url == null) { globalOffset = 0; }
         return FutureBuilder<APIResponse<model.View>>(
           future: widget.url == null && view!.isList  ? APIService().getWithOffset<model.View>("${view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
           : APIService().get<model.View>(widget.url ?? view!.linkPath, firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
@@ -53,8 +52,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
               try {
                 model.Item item = currentView!.items.firstWhere((v) => v.values['id'] == subID);
                 if (item.linkPath != "") { 
-                  developer.log("THERE View changed", name: "MainViewWidget");
-                  Future.delayed( const Duration(seconds: 1), () => refreshUrl(item.linkPath, subID));  
+                  Future.delayed( const Duration(seconds: 1), () => refreshUrl(item.linkPath, subID, true));  
                 } 
               } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }
             }
@@ -69,9 +67,9 @@ class MainViewWidgetState extends State<MainViewWidget> {
     }
     return ViewWidget(menu: widget.menu, view: currentView, views: widget.views); 
   }
-  void refreshUrl(String? path, String? id) {
+  void refreshUrl(String? path, String? id, bool load) {
     subViewID = id;
-    globalLoading = true;
+    globalLoading = load;
     setState(() { widget.url = path;});
   }
   void refresh(String? id, String? subID, String? cat, model.View? view, bool forceFirstAPI) {

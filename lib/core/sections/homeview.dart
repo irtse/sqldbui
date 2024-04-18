@@ -14,7 +14,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     for (var cat in categories.keys) {
       for (var view in categories[cat]!) {
         views.add(
-          InkWell( onTap: () { globalMenuKey.currentState?.refreshView("${view.id}", cat, false, false); },
+          InkWell( onTap: () { globalMenuKey.currentState?.refreshView("${view.id}", cat, false, false, false); },
               child: Container(
             margin: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: Colors.white,

@@ -118,6 +118,7 @@ class _DropDownState extends State<DropDownWidget> {
             } else {  initialValue = null;  }
               for (var item in snap.data!.data!) {
                 var v = item.name ?? "${item.id}";
+                v = v.replaceAll("db", "").replaceAll("_", " ");
                 if (!mapped.containsKey(v)) {
                   mapped[v]=item;
                   if(widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post"))) {

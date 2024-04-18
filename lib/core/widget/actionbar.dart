@@ -39,7 +39,7 @@ class ActionBarState extends State<ActionBarWidget> {
                         }), ),
               icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
               onPressed: () {  globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
-                  : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID); },
+                  : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID, true); },
             )],
         ));
       }
@@ -220,12 +220,12 @@ class ActionBarState extends State<ActionBarWidget> {
                         },
                         decoration: InputDecoration(
                         filled: true,
-                        labelStyle: TextStyle(color: Theme.of(context).hintColor),
-                        hintStyle: TextStyle(color: Theme.of(context).hintColor),
+                        labelStyle: TextStyle(color: Theme.of(context).splashColor),
+                        hintStyle: TextStyle(color: Theme.of(context).splashColor),
                         contentPadding: const EdgeInsets.all(1),
                         fillColor: Theme.of(context).secondaryHeaderColor,
                         iconColor: Theme.of(context).highlightColor,
-                        prefixIcon: const Icon(Icons.account_tree),
+                        prefixIcon: const Icon(Icons.account_tree),      
                         hintText: 'actual url...',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
                                                    borderSide: BorderSide(color: Theme.of(context).primaryColor))

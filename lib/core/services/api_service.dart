@@ -114,8 +114,7 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      if (cache.containsKey(url) && !force && cache[url] != null 
-      && (globalOrder.isEmpty || (!globalOrder.containsKey(viewID)))) { 
+      if (cache.containsKey(url) && !force && cache[url] != null) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
         } else { return cache[url]! as APIResponse<T>; }
       }
@@ -145,6 +144,9 @@ class APIService {
               // ignore: use_build_context_synchronously
               showAlertBanner(context, () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
                 alertBannerLocation:  AlertBannerLocation.bottom,);
+            }
+            if (method == "get") {
+              return cache[url] as APIResponse<T>;
             }
             return resp; 
           }

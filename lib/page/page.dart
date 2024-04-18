@@ -16,7 +16,7 @@ class PageWidget extends StatefulWidget {
 }
 class PageWidgetState extends State<PageWidget> {
   Future<APIResponse<model.View>> _items() async {
-    return APIService().get<model.View>(APIConstants.mainEndpost, false, null);    
+    return APIService().get<model.View>(APIConstants.mainEndpost, true, null);    
   }
 
   @override Widget build(BuildContext context) {
