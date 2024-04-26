@@ -143,7 +143,7 @@ class ActionBarState extends State<ActionBarWidget> {
               ));
             }
           }
-          if (action.toLowerCase() == "put" && !widget.view!.isList && widget.view!.items.isNotEmpty) {
+          if (action.toLowerCase() == "put" && !widget.view!.isList && widget.view!.items.isNotEmpty && !widget.view!.isEmpty) {
             actions.add(Column(
               children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
                     style: ButtonStyle(  overlayColor: MaterialStateProperty.resolveWith((states) {
@@ -155,7 +155,7 @@ class ActionBarState extends State<ActionBarWidget> {
                     child: Text("SAVE", style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
             )); 
           }
-          if (action.toLowerCase() == "delete" && !widget.view!.isList) {
+          if (action.toLowerCase() == "delete" && !widget.view!.isList && !widget.view!.isEmpty) {
             actions.add(Column(
               children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
                     style: ButtonStyle(  overlayColor: MaterialStateProperty.resolveWith((states) {

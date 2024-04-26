@@ -70,7 +70,7 @@ class AuthService extends ChangeNotifier {
           });
         }
       }).catchError( (e) { return err(e.toString()); }); 
-      await Future.delayed(const Duration(seconds: 30), () => refresh());
+      await Future.delayed(const Duration(seconds: 5), () => refresh());
     }
   }
 }

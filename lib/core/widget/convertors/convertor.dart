@@ -27,7 +27,7 @@ class Convertor {
                     validator: (bool? value) { return null; },
                     onSaved: (value) {form[name]=value;},
                     onChanged: (value) {
-                      comp?.widget.detectChange = true;
+                      comp.widget.detectChange = true;
                       form[name]=value;
                     },
                   );

@@ -30,7 +30,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                   title: Text( view.name[0].toUpperCase() + view.name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
                   style:  TextStyle( color: Theme.of(context).primaryColor, fontSize: 17), ),
                   trailing: const Text("go to view", style: const TextStyle(fontSize: 9, color: Colors.grey) ),
-                  subtitle: Text(view.description[0].toUpperCase() + view.description.substring(1).toLowerCase(), style: const TextStyle( fontSize: 10), ),
+                  subtitle: view.description == "" ? null : Text(view.description[0].toUpperCase() + view.description.substring(1).toLowerCase(), style: const TextStyle( fontSize: 10), ),
                 )),
           ],)) )));
       }

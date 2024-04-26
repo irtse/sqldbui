@@ -43,7 +43,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
                   , overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
                 ],))),
           Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
-            child: Row( children: [Text(notif.description[0] 
+            child: Row( children: [Text(notif.description == "" ? "" : notif.description[0] 
             + notif.description.substring(1, len > notif.description.length ? notif.description.length : len).toLowerCase() 
             + (len > notif.description.length ? "" : "..."), 
               style: TextStyle(color: Theme.of(context).splashColor), overflow: TextOverflow.ellipsis,)])),

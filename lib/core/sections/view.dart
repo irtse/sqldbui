@@ -30,6 +30,7 @@ class MainViewWidget extends StatefulWidget{
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     var view = widget.view; 
+    developer.log("message ${view?.name}", name: "MainViewWidget");
     if (view != null || widget.url != null) {
       if (APIService.cache.containsKey(view?.linkPath) && !firstAPI && widget.url == null) { globalLoading = false; }
       if ((currentView == null || currentView != null && currentView!.id.toString() != viewID 
@@ -95,15 +96,12 @@ class ViewWidget extends StatefulWidget{
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
-  @override Widget build(BuildContext context) {
-    return Container(child: _build(context));
-  }
+  @override Widget build(BuildContext context) { return Container(child: _build(context));  }
   Widget _build(BuildContext context) {
     List<Widget> comps = <Widget>[];
     if (MediaQuery.of(context).size.width < 660 ) {
       return Stack( children: [ 
-          Container(
-            margin: const EdgeInsets.only(top: 40),
+          Container( margin: const EdgeInsets.only(top: 40),
             width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
             height: MediaQuery.of(context).size.height - 95 > 0 ? MediaQuery.of(context).size.height - 95 : 0, 
                 decoration: BoxDecoration(

@@ -74,7 +74,7 @@ class MenuWidgetState extends State<MenuWidget> {
         initiallyExpanded[cat] = category == cat;
         if (categories[cat]!.isNotEmpty) {
           for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
-          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 180, top: 13, child: Container(
+          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 190 - ("$count".length * 10), top: 13, child: Container(
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
                                                       color: Theme.of(context).primaryColor),
             child: Padding(padding: const EdgeInsets.all(5), child: Text("$count", overflow: TextOverflow.ellipsis,
@@ -100,7 +100,7 @@ class MenuWidgetState extends State<MenuWidget> {
               child: ListView.builder(itemBuilder: (builder, index) {
                 if (categories[cat] == null || categories[cat]!.length <= index) { return null; }
                 var catIndex = categories[cat]![index];
-                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220, top: 8, child: Container(
+                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220 - ("${catIndex.newIds.length}".length * 10), top: 8, child: Container(
                   decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
                     color: Theme.of(context).primaryColor),
                   child: Padding(padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
@@ -118,8 +118,7 @@ class MenuWidgetState extends State<MenuWidget> {
                           onTap: () async { refreshView("${catIndex.id}", cat, false, false, false); },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
-                          title: Text(catIndex.name, overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 13.0,)),
+                          title: Text(catIndex.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
                           visualDensity: const VisualDensity(vertical: -4), // to compact
                           textColor: Colors.white,
                           selectedColor: Colors.white,

@@ -48,7 +48,7 @@ class _DropDownState extends State<DropDownWidget> {
                       ) ));
       }
       var items = <DropdownMenuItem<String>>[];
-      var values = widget.type.replaceAll("enum:", "").split(",");
+      var values = widget.type.replaceAll("enum__", "").split("_");
       for (var item in values) { 
         if (item == widget.value) { items.insert(0, DropdownMenuItem<String>( value: item, child: Text(item, overflow: TextOverflow.ellipsis,),)); 
         } else { items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));  }  

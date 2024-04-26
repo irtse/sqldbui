@@ -31,7 +31,7 @@ class _TextState extends State<TextWidget> {
               obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
               readOnly: widget.readOnly,
               initialValue: widget.value ?? "",
-              maxLines: widget.type.contains("text") ? 100 : (widget.type.contains("password") || widget.label.contains("password") ? 1 : null),
+              maxLines:  widget.type.contains("password") || widget.label.contains("password") ? 1 : (widget.type.contains("text") ? 100 : null),
               style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Theme.of(context).secondaryHeaderColor),
               enabled: true,
               autocorrect: true,

@@ -43,6 +43,7 @@ class ActionService {
     }                                                   
     var body = <String, dynamic>{};
     List<model.View> views = [];
+    developer.log("wrappers ${form.wrappers}", name: "ActionService");
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false);
     if (resp.isNotEmpty) {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
@@ -63,6 +64,7 @@ class ActionService {
         // ignore: use_build_context_synchronously
         formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false);
     }
+    developer.log("detectChange ${form.view?.items[0].values} ${form.detectChange}", name: "ActionService");
     if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
     && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) {
       return views; 
@@ -94,14 +96,11 @@ class ActionService {
       String newViewID = "";
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
-        developer.log("path $path $body", name: "ActionService");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {
-            
             views.add(value.data![0]); 
             newViewID= "${value.data![0].schemaID}";
             form.cacheForm["id"]=value.data![0].items[0].values["id"];
-            
             listSubForms(schema, form.cacheForm, method, schemaName, context);
           } 
           if (form.view!.isEmpty) { isNew = value.data![0].items[0].values["id"]; }
@@ -170,6 +169,7 @@ class ActionService {
                                                  String schemaName, BuildContext context, bool add, bool delete) async {
     List<model.View> views = [];
     for (var many in widgets) { 
+      developer.log("many ${many.view!.name} && ${many.view!.actionPath}", name: "ActionService");
       if (delete && many.view != null && many.view!.actions.contains("delete") 
       && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null

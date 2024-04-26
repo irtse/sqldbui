@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/flutter_login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/page/login.dart';
@@ -92,7 +90,11 @@ class HomeScreenState extends State<HomeScreen> {
         // the App.build method, and use it to set our appbar title.
         title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
           child: SizedBox(child: Row(children: [
-            InkWell( onTap: () => AppRouter.navigateTo(""), child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
+            InkWell( onTap: () {
+              viewID = "";
+              subViewID = null;
+              setState(() {});
+            }, child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
             Flexible( child: Container(padding: const EdgeInsets.only(left: 30), 
               child: MediaQuery.of(context).size.width > 600 ? Text("SOFTWARE NAME", overflow: TextOverflow.ellipsis,
                 style: TextStyle( color: Theme.of(context).highlightColor,),) : null)),
