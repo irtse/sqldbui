@@ -1,10 +1,8 @@
-FROM ghcr.io/cirruslabs/flutter as builder
- 
+FROM instrumentisto/flutter:3.19.6-androidsdk34-r0 as builder
+
 WORKDIR /app
  
 COPY . .
-
-RUN flutter pub upgrade
 
 RUN flutter pub get
  
