@@ -79,7 +79,7 @@ class FormWidgetState extends State<DataFormWidget> {
               Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
                 children: [ Icon(Icons.description, size: 20, color: Theme.of(context).splashColor), 
                     Flexible( child: Text(overflow: TextOverflow.ellipsis, description, 
-                      style: TextStyle(color: Theme.of(context).selectedRowColor)))] ))
+                      style: TextStyle(color: Theme.of(context).primaryColorLight)))] ))
               );
         }
         widget.wrappers = [];

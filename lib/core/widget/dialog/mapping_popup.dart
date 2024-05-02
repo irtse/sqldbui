@@ -97,7 +97,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               },
               child: Stack( children: [Container(constraints: BoxConstraints(minWidth: 200), 
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(7),
-                  color: Theme.of(context).selectedRowColor,),
+                  color: Theme.of(context).primaryColorLight,),
               height: 200, child: Center(child: Icon(Icons.upload_file, color: Theme.of(context).splashColor, size: 50,))),
             Positioned( left: 30, bottom: 10, child: Text(widget.files.isEmpty ? "no file upload..." : widget.files.map((e) => e.name).join(", "), style: TextStyle(color: Theme.of(context).splashColor),)),
           ]))),

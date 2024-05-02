@@ -64,7 +64,7 @@ class MenuWidgetState extends State<MenuWidget> {
                         labelStyle: TextStyle(color: Theme.of(context).highlightColor),
                         hintStyle: TextStyle(color: Theme.of(context).splashColor),
                         contentPadding: const EdgeInsets.all(2),
-                        fillColor: Theme.of(context).selectedRowColor,
+                        fillColor: Theme.of(context).primaryColorLight,
                         iconColor: Theme.of(context).highlightColor,
                         prefixIcon: Icon(Icons.filter_alt, size: 20, color: Theme.of(context).splashColor,),
                         hintText: 'filter menu...',
@@ -120,10 +120,10 @@ class MenuWidgetState extends State<MenuWidget> {
                   return Stack( alignment: Alignment.topRight, children: [
                     Container(decoration: BoxDecoration(
                         border: Border(top: BorderSide(color: Colors.black, width: index == 0 ? .5 : .25), bottom: BorderSide(color: Colors.black, width: .25)),
-                        color: "${catIndex.id}" == viewID ? Theme.of(context).selectedRowColor : Colors.transparent ),
+                        color: "${catIndex.id}" == viewID ? Theme.of(context).primaryColorLight : Colors.transparent ),
                       child:  Container(decoration: BoxDecoration(
                         border: Border(left: BorderSide(color: Theme.of(context).primaryColor, width: 10)),
-                        color: "${catIndex.id}" == viewID ? Theme.of(context).selectedRowColor : Colors.transparent ), 
+                        color: "${catIndex.id}" == viewID ? Theme.of(context).primaryColorLight : Colors.transparent ), 
                       child: Material(type: MaterialType.transparency,
                         child: ListTile(
                           selected: "${catIndex.id}" == viewID,
@@ -134,7 +134,7 @@ class MenuWidgetState extends State<MenuWidget> {
                           visualDensity: const VisualDensity(vertical: -4), // to compact
                           textColor: Colors.white,
                           selectedColor: Colors.white,
-                          hoverColor: Theme.of(context).selectedRowColor,
+                          hoverColor: Theme.of(context).primaryColorLight,
                           trailing: Padding( padding: EdgeInsets.only(right: catIndex.newIds.isNotEmpty ? (("${catIndex.newIds.length}".length + 1) * 10) : 0), 
                             child: InkWell( onTap: () {
                               catIndex.isFavorize = !catIndex.isFavorize;

@@ -113,7 +113,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
           ));
     }
     return Column( children: [
-    Container( color: Theme.of(context).selectedRowColor,  height: 40, width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+    Container( color: Theme.of(context).primaryColorLight,  height: 40, width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
       child: Stack( children: [ 
         Positioned( top: 10, left: 32, child: Row( children: [ Icon(Icons.filter_alt, color: Colors.white, size: 20) ] )),
         Row( mainAxisAlignment: MainAxisAlignment.end, children : [ Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 

@@ -12,7 +12,7 @@ import 'package:sqldbui2/page/page.dart';
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
-  selectedRowColor: const Color.fromRGBO(68, 71, 90, 1),
+  primaryColorLight: const Color.fromRGBO(68, 71, 90, 1),
   highlightColor: const Color.fromRGBO(248, 248, 242 , 1),
   shadowColor: const Color.fromRGBO(98, 114, 164  , 1),
 );

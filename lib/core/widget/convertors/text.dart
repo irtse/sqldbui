@@ -43,7 +43,7 @@ class _TextState extends State<TextWidget> {
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 filled: true,
-                fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).selectedRowColor : Colors.white),
+                fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
                 contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
                   top: widget.type.contains("text") ? 20 : 0,
                   bottom: widget.type.contains("text") ? 20 : 0),
