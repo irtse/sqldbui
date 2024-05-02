@@ -1,22 +1,21 @@
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
-import 'package:sqldbui2/model/response.dart';
-import 'package:sqldbui2/model/user.dart';
 import 'dart:developer' as developer;
 import 'package:sqldbui2/main.dart';
+import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/user.dart';
+import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   final service = APIService();
   factory AuthService() { return _instance; }
-  AuthService._internal() { refresh(); }
+  AuthService._internal() { 
+    refresh().then((value) {
+      if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, true); }
+    }); 
+  }
 
   static bool _isAuthenticated = false;
   static User? user;
@@ -26,9 +25,7 @@ class AuthService extends ChangeNotifier {
   Future<void> login(String name, String password) async {
     await service.post<User>("/auth/login", User(name: name.trim(), password: password.trim()).serialize(), null
                       ).then((value) { authenticate(value.data![0]); }
-                      ).catchError( (e) {
-                        return err(e.toString());
-                      }); 
+                      ).catchError( (e) { return err(e.toString()); }); 
   }
 
   Future<void> logOut(BuildContext context) async {
@@ -44,6 +41,7 @@ class AuthService extends ChangeNotifier {
     _isAuthenticated = false; 
     user = null;
     error = null;
+    SharedPreferences.getInstance().then((value) => value.setString("token", ""));
     homeKey.currentState!.refresh(null, true);
   }
 
@@ -57,20 +55,32 @@ class AuthService extends ChangeNotifier {
     user = logUser;
     error = null;
     APIService.auth = logUser.token;
+    SharedPreferences.getInstance().then((value) => value.setString("token", logUser.token));
     refresh();
   }
 
+  Future<String?> getTokenCookie() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("token");
+  }
   Future<void> refresh() async {
-    if(AuthService.isLoggedIn) {
-      /*await service.get<User>("/auth/refresh", true, null).then((value) { 
+    String? cookie = await getTokenCookie();
+    developer.log("COOKIE $cookie");
+    if (cookie != null) { APIService.auth = cookie; }
+    if (APIService.auth != "") {
+      await service.get<User>("/auth/refresh", true, null).then((value) async { 
         if (value.data != null && value.data!.isNotEmpty) {
-          appBarKey.currentState!.setState(() {
-            user!.token = value.data![0].token;
-            user!.notifications = value.data![0].notifications;
-          });
+          var d = value.data;
+          SharedPreferences.getInstance().then((value) => value.setString("token", d![0].token));
+          if (isLoggedIn) {
+              appBarKey.currentState!.setState(() {
+              user!.token = d![0].token;
+              user!.notifications = value.data![0].notifications;
+            });
+          } else {  authenticate(value.data![0]); } 
         }
-      }).catchError( (e) { return err(e.toString()); }); 
-      await Future.delayed(const Duration(seconds: 5), () => refresh());*/
+        Future.delayed(const Duration(seconds: 5), () => refresh());
+      }).catchError( (e) { unAuthenticate(); }); 
     }
   }
 }

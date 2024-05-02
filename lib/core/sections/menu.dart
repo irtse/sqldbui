@@ -88,7 +88,7 @@ class MenuWidgetState extends State<MenuWidget> {
         initiallyExpanded[cat] = category == cat;
         if (categories[cat]!.isNotEmpty) {
           for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
-          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 170, top: 13, child: Container(
+          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 190 - ("$count".length * 8), top: 13, child: Container(
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(7)), color: Theme.of(context).primaryColor),
             child: Padding(padding: const EdgeInsets.all(5), child: Text("$count", overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),)
@@ -112,7 +112,7 @@ class MenuWidgetState extends State<MenuWidget> {
               child: ListView.builder(itemBuilder: (builder, index) {
                 if (categories[cat] == null || categories[cat]!.length <= index) { return null; }
                 var catIndex = categories[cat]![index];
-                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220 - ("${catIndex.newIds.length}".length * 7), top: 8, child: Container(
+                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220 - ("${catIndex.newIds.length}".length * 8), top: 8, child: Container(
                   decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(7)),
                     color: Theme.of(context).primaryColor),
                   child: Padding(padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 

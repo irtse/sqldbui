@@ -75,6 +75,8 @@ dependencies:
   visibility_detector: ^0.4.0+2
   material: ^1.0.0+2
   go_router: ^14.0.2
+  get: ^4.6.6
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
