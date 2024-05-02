@@ -4,7 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/widget/form.dart';
@@ -30,18 +30,25 @@ class MainViewWidget extends StatefulWidget{
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     var view = widget.view; 
-    developer.log("message ${view?.name}", name: "MainViewWidget");
     if (view != null || widget.url != null) {
       if (APIService.cache.containsKey(view?.linkPath) && !firstAPI && widget.url == null) { globalLoading = false; }
       if ((currentView == null || currentView != null && currentView!.id.toString() != viewID 
       || AppRouter.routedSubID != null) || firstAPI || widget.url != null) {
-        if (widget.url == null) { globalOffset = 0; }
         return FutureBuilder<APIResponse<model.View>>(
-          future: widget.url == null && view!.isList  ? APIService().getWithOffset<model.View>("${view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
-          : APIService().get<model.View>(widget.url ?? view!.linkPath, firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
+          future: view!.isList ? APIService().getWithOffset<model.View>("${widget.url ?? view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
+          : APIService().get<model.View>(widget.url ?? view.linkPath, firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0]; 
+              if (snap.data!.data!.length > 1 && currentView!.isList) {
+                for (var view in snap.data!.data!.sublist(1)) { 
+                  for (var item in view.items) { 
+                    if (currentView!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { 
+                      currentView!.items.add(item); 
+                    }
+                  }
+                }
+              }
               try { 
                 var v = widget.views?.firstWhere((element) => "${element.id}" == viewID);
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
@@ -57,6 +64,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
                 } 
               } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }
             }
+            developer.log("MainViewWidget ${viewID} ${subViewID} ${category} ${currentView?.id} ${currentView?.items.length}", name: "MainViewWidget");
             return ViewWidget(menu: widget.menu, view: currentView, views: widget.views);
         });
       } 

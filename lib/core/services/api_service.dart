@@ -2,6 +2,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:alert_banner/exports.dart';
@@ -12,7 +13,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 var firstAPI = false;
 
@@ -90,6 +91,20 @@ class APIService {
     return orderBy + dir;
   }
 
+  String getColumns(String url, bool isFilter) {
+    if (!isFilter) { return ""; }
+    var columns = "";
+    if (url.contains("?") && AppRouter.routedSubID == null &&
+   colsSchemaValid.containsKey(viewID)) {
+      columns += "&columns=";
+      for (var column in colsSchemaValid[viewID]!.keys) { 
+        if (colsSchemaValid[viewID]![column]!.value) {  columns += "$column,"; }
+      }
+      columns = columns.substring(0, columns.length - 1);
+    }
+    return columns;
+  }
+
   String getFilter(String url, bool isFilter) {
     var filter = "";
     if (url.contains("?") && AppRouter.routedSubID == null && isFilter) {
@@ -114,7 +129,7 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      if (cache.containsKey(url) && !force && cache[url] != null) { 
+      if (cache.containsKey(url) && !force && cache[url] != null && offset == null) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
         } else { return cache[url]! as APIResponse<T>; }
       }
@@ -122,22 +137,21 @@ class APIService {
         dio.options.headers["authorization"] = auth;
         var orderBy = getOrderDir(url);
         var filter = getFilter(url, isFilter);
+        var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { 
           offset = 0; 
           globalOffset = 0; 
         }
-        var response = await request("$url${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", 
+        var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", 
                                      method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
             if (method == "get") { 
-              if (limit != null && cache.containsKey(url)) { 
-                if (offset != null && offset > 0) { 
+              if (limit != null && cache.containsKey(url) && offset != null && offset > 0) { 
                   cache[url]!.data!.addAll(resp.data!);
                   cache[url]!.offset = offset; 
                   return cache[url]! as APIResponse<T>;
-                }
               } else { cache[url]=resp; } 
             }
             if (context != null && succeed != "") {

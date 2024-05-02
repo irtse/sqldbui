@@ -1,4 +1,5 @@
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
@@ -22,6 +23,7 @@ class MenuWidget extends StatefulWidget{
 }
 bool globalLoading = true;
 class MenuWidgetState extends State<MenuWidget> {
+  bool isFavorite = false;
   TextEditingController controller = TextEditingController();
   Map<String, bool> initiallyExpanded = {};
   @override Widget build(BuildContext context) {
@@ -34,7 +36,8 @@ class MenuWidgetState extends State<MenuWidget> {
     categories = <String, List<model.View>>{};
     if (widget.views != null) {
       for (var view in widget.views!) {
-        if (controller.text != "" && !view.name.toLowerCase().contains(controller.text.toLowerCase())) { continue; }
+        if (controller.text != "" && !view.name.toLowerCase().contains(controller.text.toLowerCase())
+        || (isFavorite && !view.isFavorize)) { continue; }
         var cat = view.category == "" ? "general" : view.category;
         if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
         if (eldestCat.containsKey(cat)) {
@@ -45,7 +48,8 @@ class MenuWidgetState extends State<MenuWidget> {
         categories[cat]!.add(view);
       }
     }
-    List<Widget> comps = <Widget>[Container(
+    List<Widget> comps = [];
+    List<Widget> header = <Widget>[Container(
         decoration: BoxDecoration(
           color: Theme.of(context).secondaryHeaderColor,
           border: const Border(bottom: BorderSide(color: Colors.black, width: 0.5))
@@ -54,7 +58,7 @@ class MenuWidgetState extends State<MenuWidget> {
                         cursorHeight: 15,
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
                         controller: controller,
-                        onChanged: (value) => setState(() { }),
+                        onChanged: (value) => viewID == "" || viewID == null ? homeKey.currentState?.setState(() {}) : setState(() { }),
                         decoration: InputDecoration(
                         filled: true,
                         labelStyle: TextStyle(color: Theme.of(context).highlightColor),
@@ -68,15 +72,24 @@ class MenuWidgetState extends State<MenuWidget> {
                                                    borderSide: BorderSide(color: Theme.of(context).primaryColor))
                       )
         ),
-      )))];
+      ))), Row(children: [
+        InkWell( onTap: () { setState(() {isFavorite = false; });}, child: Container(
+          decoration: BoxDecoration(
+            color: isFavorite ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,
+            border: const Border(bottom: BorderSide(color: Colors.black, width: 0.4), right: BorderSide(color: Colors.black, width: 0.4)) ),
+          alignment: Alignment.center, height: 40, width: menuSize > 0 ? menuSize / 2 : 0, child: Icon(Icons.all_inbox, color: Theme.of(context).highlightColor,))),
+        InkWell( onTap: () { setState(() { isFavorite = true; });}, child: Container(decoration: BoxDecoration(
+            color: isFavorite ? Theme.of(context).primaryColor : Theme.of(context).secondaryHeaderColor,
+            border: const Border(bottom: BorderSide(color: Colors.black, width: 0.4))),
+          alignment: Alignment.center, height: 40, width: menuSize > 0 ? menuSize / 2 : 0, child: Icon(Icons.favorite_border, color: Theme.of(context).highlightColor))),],)
+      ];
       for (var cat in categories.keys) {
         var count = 0;
         initiallyExpanded[cat] = category == cat;
         if (categories[cat]!.isNotEmpty) {
           for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
-          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 190 - ("$count".length * 10), top: 13, child: Container(
-            decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
-                                                      color: Theme.of(context).primaryColor),
+          List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 170, top: 13, child: Container(
+            decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(7)), color: Theme.of(context).primaryColor),
             child: Padding(padding: const EdgeInsets.all(5), child: Text("$count", overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),)
           )))] : [];
@@ -90,18 +103,17 @@ class MenuWidgetState extends State<MenuWidget> {
             shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
             initiallyExpanded: initiallyExpanded[cat]!,
             backgroundColor: Theme.of(context).secondaryHeaderColor,
-            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10),
-                                           child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
-              Flexible( child: Text(cat.toUpperCase(), overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11))) ]), 
+            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
+              Flexible( child: Padding( padding: EdgeInsets.only(right: "$count".isNotEmpty ? (("$count".length + 1) * 7) : 0), child: Text(cat.toUpperCase(), overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11)))) ]), 
             iconColor: isMenu ? Theme.of(context).highlightColor : Colors.transparent, 
             collapsedIconColor: isMenu ? Theme.of(context).highlightColor : Colors.transparent,
             children: [ Container(width: menuSize, height: categories[cat]!.length * 40, color: Theme.of(context).secondaryHeaderColor,
               child: ListView.builder(itemBuilder: (builder, index) {
                 if (categories[cat] == null || categories[cat]!.length <= index) { return null; }
                 var catIndex = categories[cat]![index];
-                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220 - ("${catIndex.newIds.length}".length * 10), top: 8, child: Container(
-                  decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
+                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220 - ("${catIndex.newIds.length}".length * 7), top: 8, child: Container(
+                  decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(7)),
                     color: Theme.of(context).primaryColor),
                   child: Padding(padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
                     overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))))] : [];
@@ -118,11 +130,21 @@ class MenuWidgetState extends State<MenuWidget> {
                           onTap: () async { refreshView("${catIndex.id}", cat, false, false, false); },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
-                          title: Text(catIndex.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
+                          title: Text(catIndex.label ?? catIndex.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
                           visualDensity: const VisualDensity(vertical: -4), // to compact
                           textColor: Colors.white,
                           selectedColor: Colors.white,
                           hoverColor: Theme.of(context).selectedRowColor,
+                          trailing: Padding( padding: EdgeInsets.only(right: catIndex.newIds.isNotEmpty ? (("${catIndex.newIds.length}".length + 1) * 10) : 0), 
+                            child: InkWell( onTap: () {
+                              catIndex.isFavorize = !catIndex.isFavorize;
+                              var urlPath = catIndex.favorizePath;
+                              if (!catIndex.isFavorize) {
+                                for (var k in catIndex.favorizeBody.keys) { urlPath += "&$k=${catIndex.favorizeBody[k]}"; }
+                              }
+                              setState(() {});
+                              APIService().call(urlPath, catIndex.isFavorize ? "post" : "delete", catIndex.favorizeBody, true, null);
+                            }, child: Icon( catIndex.isFavorize ? Icons.favorite : Icons.favorite_border, size: 14))),
                           leading: catIndex.isList ? const Icon(Icons.list) : const Icon(Icons.edit_document),
                       )))), ...badge] ); 
                   }))],), ...badgeCat])));
@@ -134,10 +156,12 @@ class MenuWidgetState extends State<MenuWidget> {
     content = [ 
       FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-        return Container( padding: const EdgeInsets.only(bottom: 80),
+        return  Column(
+          children : [ ...header,
+            Container( padding: const EdgeInsets.only(bottom: 80),
           color: Theme.of(context).secondaryHeaderColor,
-          width: menuSize, height: MediaQuery.of(context).size.height - 40 > 0 ? MediaQuery.of(context).size.height - 40 : 0, child: SingleChildScrollView(
-          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),); }), ...additionnalContent];
+          width: menuSize, height: MediaQuery.of(context).size.height - 121 > 0 ? MediaQuery.of(context).size.height - 121 : 0, child: SingleChildScrollView(
+            child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); }), ...additionnalContent];
     if (!isMenu) { return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content); }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content);
   }

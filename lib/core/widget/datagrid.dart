@@ -1,10 +1,12 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 
 int globalLimit = 20;
 int globalOffset = 0;
@@ -25,7 +27,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
   int maxCount(Map<String, model.SchemaField> schema) {
     var count = 1;
     for (var fieldName in schema.keys) {
-      if (schema[fieldName]!.type.contains("many")) { continue; }
+      if (schema[fieldName]!.type.contains("many") || !schema[fieldName]!.active) { continue; }
       count++;
     }
     return count;
@@ -50,6 +52,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
           datas.add(item.values); 
         }
       }
+      developer.log("DatagridWidget ${datas.length}", name: "DatagridWidget");
       schema = widget.view!.schema;
       columns.add(GridColumnWidget(context: context,
               width: columnWidths.containsKey("id") ? columnWidths["id"]! : double.nan,
@@ -62,35 +65,8 @@ class DatagridWidgetState extends State<DatagridWidget> {
               borderColor: Theme.of(context).splashColor,
               label: GridValueWidget(fontSize: 15, icon: Icons.tag)
           ));
-      if (schema.keys.contains("description")) {
-        columns.add(GridColumnWidget(context: context,
-          type: "varchar", 
-          maxLength: maxCount(schema),
-          contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-          width: columnWidths.containsKey("description") ? columnWidths["id"]! : 70,
-          allowSorting: false,
-          allowFiltering: false,
-          columnName: "description",
-          borderColor: Theme.of(context).splashColor,
-          label: GridValueWidget(fontSize: 15, icon: Icons.search)
-        ));
-      }
-      if (schema.keys.contains("name")) {
-            columns.add(GridColumnWidget(context: context,
-              maxLength: maxCount(schema),
-              type: "varchar",
-              borderColor: Theme.of(context).splashColor,
-              width: columnWidths.containsKey("name") ? columnWidths["name"]! : 300,
-              contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-              columnName: "name",
-              allowFiltering: !(datas.isEmpty && !isFilter()),
-              allowSorting: !(datas.isEmpty && !isFilter()),
-              label: GridValueWidget(fontSize: 15, value: "name"),
-            ));
-      }
-      
-      for (var fieldName in schema.keys) {
-        if (fieldName == "description" || fieldName == "name" || schema[fieldName]!.type.contains("many")) { continue; }
+      for (var fieldName in currentView!.order) {
+        if (schema[fieldName]!.type.contains("many") || !schema[fieldName]!.active) { continue; }
         columns.add(GridColumnWidget(context: context,
               type: schema[fieldName]!.type,
               contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
@@ -107,13 +83,45 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if (globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
       datas.sort( (a, b) =>  (b["id"] != null ? int.parse( b["id"]) : 0) -  (a["id"] != null ? int.parse(a["id"]) : 0) );
     } 
-    return Column( children: [Container( 
-      height: MediaQuery.of(context).size.height - 110 > 0 ? MediaQuery.of(context).size.height - 110 : 0,
+    var buttons = <Widget>[];
+    if ( currentView!.actions.contains("post") ) {
+      if (currentView != null && currentView!.isList) {
+        buttons.add(Column( children: [IconButton( constraints: const BoxConstraints(),
+          tooltip: "upload datas file", style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                              if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                              return Theme.of(context).primaryColor;
+                            }), ),
+          icon: Icon( Icons.upload, color: Theme.of(context).highlightColor, ),
+          onPressed: () {  showDialog<void>(context: context,
+                      builder: (BuildContext context) { return MappingPopUpWidget(isExport: false, format: "csv"); });
+          })]));}
+      buttons.add(Column(
+            children: [IconButton( constraints: const BoxConstraints(),
+              tooltip: "export ${currentView!.isList ? "selected " : ""}rows",
+              style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                          return Theme.of(context).primaryColor;
+                        }), ),
+              icon: Icon( Icons.file_download, color: Theme.of(context).highlightColor, ),
+              onPressed: () {  
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) { return MappingPopUpWidget(isExport: true, format: "csv"); },
+                );
+              },
+            )],
+          ));
+    }
+    return Column( children: [
+    Container( color: Theme.of(context).selectedRowColor,  height: 40, width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+      child: Stack( children: [ 
+        Positioned( top: 10, left: 32, child: Row( children: [ Icon(Icons.filter_alt, color: Colors.white, size: 20) ] )),
+        Row( mainAxisAlignment: MainAxisAlignment.end, children : [ Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
+          child: Row(children: [ ...buttons, FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) ])) ]) ])),
+    Container( 
+      height: MediaQuery.of(context).size.height - 150 > 0 ? MediaQuery.of(context).size.height - 150 : 0,
       width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-      decoration: BoxDecoration(
-                  color:  Theme.of(context).highlightColor,
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),),
-                ),
+      decoration: BoxDecoration( color:  Theme.of(context).highlightColor,  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),)),
       child : GridWidget(
           key: globalGridKey,
           links: links, 

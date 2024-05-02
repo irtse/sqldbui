@@ -9,6 +9,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
   SchemaField({
     this.label = "",
     this.type = "",
+    this.active = true,
     this.index = 0,
     this.placeholder = "",
     this.description = "",
@@ -23,6 +24,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
 
   String label;
   String type;
+  bool active;
   int index;
   String description;
   String placeholder;
@@ -37,6 +39,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
   @override Map<String, dynamic> serialize() => { };
 
   @override SchemaField deserialize(Map<String, dynamic> json) => SchemaField(
+    active: json.containsKey("active") && json["active"] != null ? json["active"] : true,
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : <String>[], 
     actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
     schema: json.containsKey("data_schema") && json["data_schema"] != null ?  fromMapJson(json["data_schema"], SchemaField()) : emptySchema, 
@@ -173,6 +176,7 @@ class View extends SerializerDeserializer<View> {
     this.wrapperSchema,
     this.wrapper,
     this.actionPath = "",
+    this.favorizePath = "",
     this.order = emptyStr, 
     this.schemaID,
     this.isEmpty = false,
@@ -180,6 +184,9 @@ class View extends SerializerDeserializer<View> {
     this.newIds = emptyStr,
     this.max = 0,
     this.workflow,
+    this.isFavorize = false,
+    this.favorizeBody = emptyDyn,
+    this.filterPath = "",
   });
 
   String actionPath;
@@ -193,13 +200,17 @@ class View extends SerializerDeserializer<View> {
   String category;
   String linkPath;
   bool isEmpty;
+  bool isFavorize;
   int id;
   String schemaName;
+  String favorizePath;
+  String filterPath;
   View? wrapper;
   int? schemaID;
   int? viewID;
   Map<String, SchemaField> schema;
   Map<String, SchemaField>? wrapperSchema;
+  Map<String, dynamic> favorizeBody;
   List<dynamic> order;
   List<dynamic> newIds;
   int max;
@@ -211,6 +222,10 @@ class View extends SerializerDeserializer<View> {
     id: json.containsKey("id") && json["id"] != null ? json["id"] : -1, 
     max: json.containsKey("max") && json["max"] != null ? json["max"] : 0, 
     newIds: json.containsKey("new") && json["new"] != null ? json["new"] : <String>[], 
+    favorizeBody : json.containsKey("favorize_body") && json["favorize_body"] != null ? json["favorize_body"] : {},
+    favorizePath : json.containsKey("favorize_path") && json["favorize_path"] != null ? json["favorize_path"] : "",
+    filterPath : json.containsKey("filter_path") && json["filter_path"] != null ? json["filter_path"] : "",
+    isFavorize: json.containsKey("is_favorize") && json["is_favorize"] != null ? json["is_favorize"] : false,
     schemaID: json.containsKey("schema_id") && json["schema_id"] != null ? json["schema_id"] : null, 
     isEmpty: json.containsKey("is_empty") && json["is_empty"] != null ? json["is_empty"] : false, 
     readOnly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,  
@@ -244,6 +259,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.schemaName = "",
     this.order = emptyStr, 
     this.workflow,
+    this.fields = emptyStr,
   });
   String? label;
   String? name;
@@ -256,10 +272,13 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   List<dynamic> actions;
   Map<String, SchemaField> schema;
   Workflow? workflow;
+  List<dynamic> fields;
 
   @override deserialize(Map<String, dynamic> json) {
+    developer.log("Shallowed $json", name: "Shallowed");
     return Shallowed(
     id: json.containsKey("id") ? json["id"] : null, 
+    fields: json.containsKey("fields") ? json["fields"] : <String>[],
     name: json.containsKey("name") ? json["name"] : null,
     label: json.containsKey("label") ? json["label"] : null,
     workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 

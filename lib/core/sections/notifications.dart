@@ -2,6 +2,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
+import 'dart:developer' as developer;
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/router.dart';
 // ignore: must_be_immutable
@@ -11,7 +12,7 @@ class NotificationDrawerWidget extends StatefulWidget{
 }
 class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
   @override Widget build(BuildContext context) {
-    var len = MediaQuery.of(context).size.width > 300 ? (MediaQuery.of(context).size.width ~/ 10) : (MediaQuery.of(context).size.width ~/ 15);
+    var len = MediaQuery.of(context).size.width > 300 ? (300 ~/ 4.2) : (MediaQuery.of(context).size.width ~/ 15);
     double maxWidth = 0;
     for ( var notif in AuthService.user!.notifications ) {
       if (notif.name.length * 8 > maxWidth) { maxWidth = notif.name.length * 8; }
@@ -24,6 +25,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
       child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20,)),
         Text("Notifications", style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 15,),) ]))];
     for ( var notif in AuthService.user!.notifications ) {
+        developer.log("maxWidth $len ${notif.name.length}", name: "NotificationDrawerWidget");
         notifs.add(Stack( children : [ 
           Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisSize: MainAxisSize.min, children: [ Container(

@@ -5,7 +5,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:sqldbui2/page/page.dart';

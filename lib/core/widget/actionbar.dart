@@ -1,5 +1,4 @@
 import 'dart:developer' as developer;
-import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/form.dart';
@@ -7,10 +6,8 @@ import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/core/services/action.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
@@ -23,10 +20,6 @@ class ActionBarWidget extends StatefulWidget {
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
-  Map<String, bool> states = {};
-  void loading(String method) { setState(() { states[method]= true; });}
-  void loaded(String method) { setState(() { states[method]= false; });}
-
   @override Widget build(BuildContext context) {
       List<Widget> actions = <Widget>[];
       if (viewID != null) {
@@ -38,7 +31,9 @@ class ActionBarState extends State<ActionBarWidget> {
                           return Theme.of(context).primaryColor;
                         }), ),
               icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
-              onPressed: () {  globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
+              onPressed: () {  
+                globalOffset = 0;
+                globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
                   : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID, true); },
             )],
         ));
@@ -80,94 +75,6 @@ class ActionBarState extends State<ActionBarWidget> {
                   });
                 },
               ),]));
-      }
-        if (currentView != null && !currentView!.isEmpty && !(globalGridWidgetKey.currentState != null && globalGridWidgetKey.currentState!.widget.selected.isEmpty)) {
-          actions.add(Column(
-            children: [IconButton( constraints: const BoxConstraints(),
-              tooltip: "export ${currentView!.isList ? "selected " : ""}rows",
-              style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                          if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                          return Theme.of(context).primaryColor;
-                        }), ),
-              icon: Icon( Icons.file_download, color: Theme.of(context).highlightColor, ),
-              onPressed: () {  
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) { return MappingPopUpWidget(isExport: true, format: "csv"); },
-                );
-              },
-            )],
-          ));
-        }
-      if (widget.view != null && !widget.view!.readOnly) {
-        for (var action in widget.view!.actions) {
-          action = action as String;
-          if (states.containsKey(action) && states[action]!) {
-            actions.add( SizedBox(
-              width: action == "post" ? 6 * 12 : (action == "put" ? 5 * 12 : 12),
-              child: const SpinKitCircle(color: Colors.white, size: 25.0,)));
-            continue;
-          }
-          if ( action.toLowerCase() == "post" ) {
-            if (currentView != null && currentView!.isList) {
-              actions.add(Column(
-                children: [IconButton( constraints: const BoxConstraints(),
-                  tooltip: "upload datas file",
-                  style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                              if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                              return Theme.of(context).primaryColor;
-                            }), ),
-                  icon: Icon( Icons.upload, color: Theme.of(context).highlightColor, ),
-                  onPressed: () {  
-                    showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) { return MappingPopUpWidget(isExport: false, format: "csv"); },
-                    );
-                  },
-                )],
-              ));
-            }
-            if (!widget.view!.isList) {
-              actions.add(Column(
-                children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
-                    style: ButtonStyle( 
-                      backgroundColor: MaterialStateColor.resolveWith((states) => Theme.of(context).splashColor) ,
-                      overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-                    onPressed: ActionService.pressed(widget, false, widget.view!.schemaName,  
-                                  widget.view!.actionPath, <String>[], widget.view!.schema, action, context), 
-                    child: Text("SUBMIT", style: TextStyle(
-                    fontSize: 12, color: Theme.of(context).highlightColor)))),],
-              ));
-            }
-          }
-          if (action.toLowerCase() == "put" && !widget.view!.isList && widget.view!.items.isNotEmpty && !widget.view!.isEmpty) {
-            actions.add(Column(
-              children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
-                    style: ButtonStyle(  overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-                    onPressed: ActionService.pressed(widget, false, widget.view!.schemaName,  widget.view!.actionPath, 
-                                      <String>["id"], widget.view!.schema, action, context), 
-                    child: Text("SAVE", style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
-            )); 
-          }
-          if (action.toLowerCase() == "delete" && !widget.view!.isList && !widget.view!.isEmpty) {
-            actions.add(Column(
-              children: [Padding( padding: const EdgeInsets.only(top: 4, left: 2, right: 2), child: TextButton(
-                    style: ButtonStyle(  overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-                    onPressed: ActionService.pressed(widget, false, widget.view!.schemaName,  widget.view!.actionPath, 
-                                      <String>["id"], widget.view!.schema, action, context), 
-                    child: Text("DELETE", style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
-            ));
-          }
-        }
       }
       var row = <Widget>[];
       if (subViewID != null && AppRouter.routedSubID == null) {
@@ -244,8 +151,8 @@ class ActionBarState extends State<ActionBarWidget> {
         width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
         decoration: BoxDecoration(
           color: Theme.of(context).secondaryHeaderColor,
-          boxShadow: [ BoxShadow(color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3)) ]),
+          boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5),
+                      spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ]),
         child: Row(mainAxisSize: MainAxisSize.min, children: rows));
   }
 }

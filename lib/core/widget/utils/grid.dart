@@ -10,8 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:checkbox_formfield/checkbox_formfield.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 double maxWidth = 0;
 String? isNew;
@@ -21,7 +19,6 @@ class Filter {
   String? connector;
   Filter({required this.value, this.connector});
 }
-
 bool globalNew = false;
 Map<String, Map<String,List<Filter>>> globalFilter = <String, Map<String,List<Filter>>>{};
 Map<String, Map<String,String>> globalOrder = <String, Map<String,String>>{};
@@ -36,8 +33,7 @@ bool isFilter() {
   && (globalOrder[viewID]!.isNotEmpty || globalFilter[viewID]!.isNotEmpty || globalNew);
 }
 void resetAllFilter() {
-  if (currentView != null && globalFilter.containsKey(viewID) 
-      && globalOrder.containsKey(viewID)) {
+  if (currentView != null && globalFilter.containsKey(viewID) && globalOrder.containsKey(viewID)) {
     globalOrder.clear();
     globalFilter.clear();
     rects.clear(); 
@@ -47,6 +43,7 @@ void resetAllFilter() {
 }
 double refWidth = 0;
 Map<String, Map<String, Rect>> rects = {};
+bool wait = false;
 // ignore: must_be_immutable
 class GridWidget extends StatefulWidget {
   GlobalKey<ViewWidgetState>? viewKey; 
@@ -130,12 +127,11 @@ class GridWidgetState extends State<GridWidget> {
             notificationPredicate: (notif) => notif.depth > -1,
             child: NotificationListener<ScrollNotification>(
                 onNotification: (scrollNotification) {
+                  developer.log("scrollNotification ${currentView?.items.length} ${globalOffset + globalLimit}", name: "GridWidget");
                   if (scrollNotification is ScrollEndNotification) {
-                    if (currentView != null && (globalOffset + globalLimit) < currentView!.max) {
-                      globalOffset += globalOffset + globalLimit;
-                      Future.delayed(const Duration(microseconds: 500), () {
-                        globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
-                      });
+                    if (currentView != null && currentView!.items.length < currentView!.max) {
+                      if (currentView?.items.length == globalOffset + globalLimit) { globalOffset += globalLimit; }
+                      globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
                     } 
                   }
                   return true;
@@ -360,32 +356,25 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,)));
     } 
     if (widget.allowFiltering) { 
-      buttons.add(FilterPopUpWidget( 
-      label: widget.label.value, columnName: widget.columnName, component: this,)); }
+      buttons.add(FilterPopUpWidget(label: widget.label.value, columnName: widget.columnName, component: this,)); }
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
       if (((widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
       || (widget.allowFiltering && (globalFilter[viewID]!.containsKey(widget.columnName)) || globalNew))) { 
         buttons.add(IconButton(onPressed: () async { 
           resetFilter(widget.columnName);
           globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
-        },
-        icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 18,)));
+        }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 18,)));
       } 
     }
     widget.width = width + 42;
     if (viewID != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
     late Rect rect = rects[viewID]!.containsKey(widget.columnName) ? rects[viewID]![widget.columnName]! : Rect.fromCenter(
       center: MediaQuery.of(context).size.center(Offset.zero),
-      width: width.isNaN ? 300 : width + 42,
-      height: 55,
-    );
-    if (currentView != null && rects.containsKey(viewID)) {
-      rects[viewID]![widget.columnName] = rect;
-    }
+      width: width.isNaN ? 300 : width + 42, height: 55 );
+    if (currentView != null && rects.containsKey(viewID)) { rects[viewID]![widget.columnName] = rect; }
     
     return Container(width: rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
-    decoration: BoxDecoration( color: widget.backgroundColor, 
-            border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
+    decoration: BoxDecoration( color: widget.backgroundColor, border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
     child: fork.TransformableBox(
       rect: rect,
       allowFlippingWhileResizing: false,
@@ -426,9 +415,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
                 if (newWidth < 0) { newWidth = ((buttons.length + 1) * 40) + 60; }
                 rects[viewID]![widget.columnName] = Rect.fromCenter(
                   center: MediaQuery.of(context).size.center(Offset.zero),
-                  width: newWidth,
-                  height: 55,
-                );
+                  width: newWidth, height: 55 );
                 widget.width = newWidth;
               } else {
                 newWidth = rects[viewID]![last.widget.columnName]!.width + diff;

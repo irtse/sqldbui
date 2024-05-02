@@ -1,9 +1,8 @@
 import 'dart:developer' as developer;
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 
 // ignore: must_be_immutable
 class FilterPopUpWidget extends StatefulWidget{
@@ -127,7 +126,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       for (var search in advancedSearch) { search.globalKey.currentState!.save(); }
                       stateSort!(() {}); stateKind!(() {}); stateFilter!(() {});
                     }
-                    globalMenuKey.currentState?.refreshView(viewID, subViewID, true, true, false);
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                   },
                   style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("SUBMIT", style: TextStyle(color: Colors.white, fontSize: 12))),)),

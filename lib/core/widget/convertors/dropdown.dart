@@ -50,10 +50,13 @@ class _DropDownState extends State<DropDownWidget> {
       var items = <DropdownMenuItem<String>>[];
       var values = widget.type.replaceAll("enum__", "").split("_");
       for (var item in values) { 
-        if (item == widget.value) { items.insert(0, DropdownMenuItem<String>( value: item, child: Text(item, overflow: TextOverflow.ellipsis,),)); 
-        } else { items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));  }  
+        if (items.where((element) => element.value == item).isEmpty) {
+          items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));
+        }
       }
+
       return DropdownButtonFormField<String>( items: items, 
+        hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis,),
         value: widget.value ?? ( values.isNotEmpty ? values[0] : null),
         style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
         onChanged: (value) {

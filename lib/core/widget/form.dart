@@ -1,8 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/convertors/onetomany.dart';
+import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/workflowPanel.dart';
 import 'package:sqldbui2/core/widget/workflowbar.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -38,6 +40,7 @@ class FormWidgetState extends State<DataFormWidget> {
       widget.detectChange = false;
       additionnal = [];
       List<Widget> header = [];
+      List<Widget> head = [];
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
       String name = "Unknown Name";
@@ -68,10 +71,8 @@ class FormWidgetState extends State<DataFormWidget> {
         List<Widget> title = [];
         if (name != "") {
           title.add(Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
-            children: [ 
-              Flexible( child: Text(name, overflow: TextOverflow.ellipsis, 
-                style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 25))) 
-          ])));
+            children: [ Flexible( child: Text(name, overflow: TextOverflow.ellipsis, 
+              style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 25))) ])));
         }
         if (description != "" && !description.contains("no description")) {
             title.add(
@@ -83,6 +84,7 @@ class FormWidgetState extends State<DataFormWidget> {
         }
         widget.wrappers = [];
         additionnal = [];
+        if (currentView != null && currentView!.isEmpty && widget.subForm) { widget.wrappersURL = {}; }
         for (var url in widget.wrappersURL.values) {
           additionnal.add(Container( decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             margin: const EdgeInsets.only(top: 15),
@@ -114,21 +116,27 @@ class FormWidgetState extends State<DataFormWidget> {
           ))));
           if (workflowBars.containsKey(url) && !widget.subForm) { header = [ workflowBars[url]! ]; }
         } 
+        List<Widget> actions = [];
         if (!widget.subForm) {
-          fields.add( 
+          if (widget.view != null && !widget.view!.readOnly) {
+            if (widget.view!.actions.contains("post") || widget.view!.actions.contains("put")) {
+              actions.add(ButtonWidget(method: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "post" : "put", 
+                text: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "SUBMIT" : "SAVE", color: Theme.of(context).primaryColor));
+            }
+            if (widget.view!.actions.contains("delete") && !widget.view!.isEmpty) {
+              actions.add(ButtonWidget(method: "delete", text: "DELETE", color: Theme.of(context).splashColor));
+            }
+          }   
+          head.add( 
             Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
               margin: const EdgeInsets.only(bottom: 30),
               decoration: BoxDecoration( color: Colors.white, boxShadow: [
-                BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 0, blurRadius: 3,
-                        offset: const Offset(3, 3), // changes position of shadow
-                      ),
-              ]), child: Column(children: [ Padding(padding: EdgeInsets.only(top: 50, bottom: header.isEmpty ? 30 : 0), 
-                child: Column(children: title,)),...header]), )
+                BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
+              ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 50, bottom: header.isEmpty ? 30 : 0), 
+                child: Column(children: [...title, ...header],)), Positioned(top: 60, right: 50, child : Row( children : actions))]), )
           );
         } else if (name != "") {
-          fields.add(SizedBox( height: 30, 
+          head.add(SizedBox( height: 30, 
                 child:  Stack( children: [ Row( children: [ Padding(padding: const EdgeInsets.only(right: 15, top: 1), 
                     child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 30,)), 
                     Flexible( child: Text(name[0].toUpperCase() + name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
@@ -140,7 +148,7 @@ class FormWidgetState extends State<DataFormWidget> {
                   highlightColor: Colors.transparent,  
                   hoverColor: Colors.transparent,))
                 ])));
-          fields.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
+          head.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
         }
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         double counter = 0;
@@ -203,7 +211,7 @@ class FormWidgetState extends State<DataFormWidget> {
             ),
             child: Wrap(
                alignment: WrapAlignment.center,
-              children: [...fields, ...bottomFields, ...divider, ...additionnal]))));
+              children: [...head, Padding( padding: const EdgeInsets.symmetric(horizontal: 30), child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...divider, ...additionnal]))));
       return widget.scroll ? Container( decoration: BoxDecoration(
                   color: Theme.of(context).highlightColor,
                   borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),),

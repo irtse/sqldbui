@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/menu.dart';

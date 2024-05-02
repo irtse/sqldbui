@@ -5,7 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'dart:developer' as developer;
@@ -62,7 +62,7 @@ class AuthService extends ChangeNotifier {
 
   Future<void> refresh() async {
     if(AuthService.isLoggedIn) {
-      await service.get<User>("/auth/refresh", true, null).then((value) { 
+      /*await service.get<User>("/auth/refresh", true, null).then((value) { 
         if (value.data != null && value.data!.isNotEmpty) {
           appBarKey.currentState!.setState(() {
             user!.token = value.data![0].token;
@@ -70,7 +70,7 @@ class AuthService extends ChangeNotifier {
           });
         }
       }).catchError( (e) { return err(e.toString()); }); 
-      await Future.delayed(const Duration(seconds: 5), () => refresh());
+      await Future.delayed(const Duration(seconds: 5), () => refresh());*/
     }
   }
 }

@@ -2,36 +2,34 @@ import 'dart:developer' as developer;
 import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/button.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/widget/workflowPanel.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 
 List<String> errors = <String>[];
 @lazySingleton
 class ActionService {
-  static void Function() pressed(ActionBarWidget widget, bool isList, String schemaName, String url, 
+  static void Function() pressed(ButtonWidgetState widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, String method, BuildContext context) {
       errors = [];
-      if (!isList && widget.form != null) { return pressedForm(widget, mainForm, schemaName, url, schema, method, context); }
-      if (isList && widget.grid != null) { return pressedList(widget, schemaName, url, schema, method, context); }
-      return () {};
+      return pressedForm(widget, mainForm, schemaName, url, schema, method, context);
     }
-  static void Function() pressedList(ActionBarWidget widget, String schemaName, String url, 
+  static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
-  static void Function() pressedForm(ActionBarWidget widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
+  static void Function() pressedForm(ButtonWidgetState widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context,) { 
       return () async {
-        globalActionBar.currentState!.loading(method);
+        widget.loading();
         if (mainForm.currentState != null) {
           await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, {});
         }
-        globalActionBar.currentState!.loaded(method);
+        widget.loaded();
       };
   }
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
