@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sqldbui2/core/sections/notifications.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
-import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/services/auth_service.dart';
+
+import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:sqldbui2/page/page.dart';
 
@@ -17,9 +18,7 @@ final ThemeData myTheme = ThemeData(
   shadowColor: const Color.fromRGBO(98, 114, 164  , 1),
 );
 
-void main() {
-  runApp(const MyApp());
-}
+void main() { runApp(const MyApp()); }
 final _authProvider = AuthService();          
 final _appRouter = AppRouter();   
 
@@ -75,7 +74,6 @@ class HomeScreenState extends State<HomeScreen> {
     // than having to individually change instances of widgets.
     AuthService();
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
-    APIService.cache = {};
     AppRouter.navigateTo("#$viewID");
     var scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(

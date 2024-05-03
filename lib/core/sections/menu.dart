@@ -1,4 +1,4 @@
-import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -27,11 +27,6 @@ class MenuWidgetState extends State<MenuWidget> {
   TextEditingController controller = TextEditingController();
   Map<String, bool> initiallyExpanded = {};
   @override Widget build(BuildContext context) {
-    var additionnalContent = <Widget>[];
-    try {
-      additionnalContent.add(MainViewWidget(key: globalMainViewKey, menu: this, url: widget.url,
-        views: widget.views, view: widget.views?.firstWhere((v) => '${v.id}' == viewID  && viewID != "")));
-    } catch (e) { additionnalContent.add(MainViewWidget(views: widget.views, menu: this, view: null, url: widget.url)); }
     var eldestCat = categories;
     categories = <String, List<model.View>>{};
     if (widget.views != null) {
@@ -49,12 +44,13 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     List<Widget> comps = [];
-    List<Widget> header = <Widget>[Container(
+    List<Widget> header = menuSize <= 0 ? [] : <Widget>[Container(
         decoration: BoxDecoration(
           color: Theme.of(context).secondaryHeaderColor,
           border: const Border(bottom: BorderSide(color: Colors.black, width: 0.5))
         ),
-        child: Padding( padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10), child : Container(height: 30, width: 230, child:TextFormField(
+        child: Padding( padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10), child : Container(
+                        height: 30, width: (menuSize - 20) > 0 ? (menuSize - 20) : 0, child:TextFormField(
                         cursorHeight: 15,
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
                         controller: controller,
@@ -151,19 +147,13 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     firstAPI = false;
-    List<Widget> content = [];
-    menuSize = isMenu ? (MediaQuery.of(context).size.width < 250 ? 202 : 250) : 0;
-    content = [ 
-      FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
+    menuSize = isMenu ? (MediaQuery.of(context).size.width <= 250 ? 202 : 250) : 0;
+    return FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-        return  Column(
-          children : [ ...header,
-            Container( padding: const EdgeInsets.only(bottom: 80),
-          color: Theme.of(context).secondaryHeaderColor,
-          width: menuSize, height: MediaQuery.of(context).size.height - 121 > 0 ? MediaQuery.of(context).size.height - 121 : 0, child: SingleChildScrollView(
-            child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); }), ...additionnalContent];
-    if (!isMenu) { return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content); }
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: content);
+        return  Column(  children : [ ...header, Container( padding: const EdgeInsets.only(bottom: 80),
+            height: MediaQuery.of(context).size.height - 121 > 0 ? MediaQuery.of(context).size.height - 121 : 0, 
+            child: SingleChildScrollView(
+              child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); });
   }
   void refresh() {
       if (widget.views == null) {
@@ -175,6 +165,7 @@ class MenuWidgetState extends State<MenuWidget> {
             }
           }
           setState(() {}); 
+          globalMainViewKey.currentState?.setState(() {}); 
         });
       } else {
         for (var view in widget.views!) {
@@ -182,15 +173,9 @@ class MenuWidgetState extends State<MenuWidget> {
             try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
           }
         }
-        setState(() {}); 
+        globalMainViewKey.currentState?.setState(() {}); 
+        setState(() {});
       }
-  }
-  void refreshUrl(String? path, String? id) {
-    globalLoading = true;
-    subViewID = id;
-    widget.url = path;
-    rects.remove(viewID);
-    refresh();
   }
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
     AppRouter.routedSubID = null;
@@ -199,9 +184,11 @@ class MenuWidgetState extends State<MenuWidget> {
     globalOffset = 0;
     category=cat;
     subViewID=null;
+    currentView = null;
     viewID=id.toString();
     widget.url = null;
     if (nullable) { Future.delayed(const Duration(microseconds: 500), () => currentView = null);  }
-    full ? refresh() : setState(() {});
+    full ? refresh() : globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true);
+    setState(() {});
   }
 }

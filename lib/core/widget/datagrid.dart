@@ -1,12 +1,13 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
-import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/main.dart';
-import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/utils/grid.dart';
+import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+
 
 int globalLimit = 20;
 int globalOffset = 0;
@@ -52,7 +53,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
           datas.add(item.values); 
         }
       }
-      developer.log("DatagridWidget ${datas.length}", name: "DatagridWidget");
       schema = widget.view!.schema;
       columns.add(GridColumnWidget(context: context,
               width: columnWidths.containsKey("id") ? columnWidths["id"]! : double.nan,
@@ -115,14 +115,13 @@ class DatagridWidgetState extends State<DatagridWidget> {
     return Column( children: [
     Container( color: Theme.of(context).primaryColorLight,  height: 40, width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
       child: Stack( children: [ 
-        Positioned( top: 10, left: 32, child: Row( children: [ Icon(Icons.filter_alt, color: Colors.white, size: 20) ] )),
+        const Positioned( top: 10, left: 32, child: Row( children: [ Icon(Icons.filter_alt, color: Colors.white, size: 20) ] )),
         Row( mainAxisAlignment: MainAxisAlignment.end, children : [ Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
           child: Row(children: [ ...buttons, FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) ])) ]) ])),
     Container( 
-      height: MediaQuery.of(context).size.height - 150 > 0 ? MediaQuery.of(context).size.height - 150 : 0,
+      height: MediaQuery.of(context).size.height - 120 > 0 ? MediaQuery.of(context).size.height - 120 : 0,
       width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-      decoration: BoxDecoration( color:  Theme.of(context).highlightColor,  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),)),
-      child : GridWidget(
+      decoration: BoxDecoration( color:  Theme.of(context).highlightColor), child : GridWidget(
           key: globalGridKey,
           links: links, 
           contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,

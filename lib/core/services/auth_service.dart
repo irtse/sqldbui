@@ -6,15 +6,18 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+var timeBomb = 10;
 @lazySingleton
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   final service = APIService();
   factory AuthService() { return _instance; }
   AuthService._internal() { 
-    refresh().then((value) {
-      if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, true); }
-    }); 
+    if (timeBomb == 10) {
+      refresh(true).then((value) {
+        if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, true); }
+      }); 
+    } else { timer(); }
   }
 
   static bool _isAuthenticated = false;
@@ -30,7 +33,7 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logOut(BuildContext context) async {
     await service.get<User>("/auth/logout", true, context).then((value) => unAuthenticate()
-                                                    ).catchError((e) => unAuthenticate());
+                                                         ).catchError((e) => unAuthenticate());
   }
   
   err(String err) {
@@ -56,16 +59,15 @@ class AuthService extends ChangeNotifier {
     error = null;
     APIService.auth = logUser.token;
     SharedPreferences.getInstance().then((value) => value.setString("token", logUser.token));
-    refresh();
+    refresh(false);
   }
 
   Future<String?> getTokenCookie() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString("token");
   }
-  Future<void> refresh() async {
+  Future<void> refresh(bool auth) async {
     String? cookie = await getTokenCookie();
-    developer.log("COOKIE $cookie");
     if (cookie != null) { APIService.auth = cookie; }
     if (APIService.auth != "") {
       await service.get<User>("/auth/refresh", true, null).then((value) async { 
@@ -78,9 +80,17 @@ class AuthService extends ChangeNotifier {
               user!.notifications = value.data![0].notifications;
             });
           } else {  authenticate(value.data![0]); } 
+          timer();
         }
-        Future.delayed(const Duration(seconds: 5), () => refresh());
-      }).catchError( (e) { unAuthenticate(); }); 
+      }).catchError( (e) { auth? unAuthenticate() : err(e); }); 
+    }
+  }
+  timer() {
+    if (timeBomb > 0) {
+      timeBomb--;  Future.delayed(const Duration(seconds: 1), () => timer());
+    } else { 
+      timeBomb = 10; 
+      refresh(false);
     }
   }
 }

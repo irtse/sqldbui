@@ -25,7 +25,6 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
       child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20,)),
         Text("Notifications", style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 15,),) ]))];
     for ( var notif in AuthService.user!.notifications ) {
-        developer.log("maxWidth $len ${notif.name.length}", name: "NotificationDrawerWidget");
         notifs.add(Stack( children : [ 
           Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisSize: MainAxisSize.min, children: [ Container(
@@ -39,7 +38,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
           }, 
           child: Row(
                   children: [Icon(Icons.message, color: Theme.of(context).splashColor), Padding( padding: const EdgeInsets.only(left: 10), 
-                  child: Text(notif.name[0] 
+                  child: Text(notif.name[0].toUpperCase()
                   + notif.name.substring(1, len > notif.name.length ? notif.name.length : len).toLowerCase() 
                   + (len > notif.name.length ? "" : "...")
                   , overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),

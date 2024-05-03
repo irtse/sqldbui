@@ -1,12 +1,11 @@
+import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
-import 'package:sqldbui2/main.dart';
-import 'dart:developer' as developer;
-import 'package:sqldbui2/model/response.dart';
-import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 // ignore: must_be_immutable
 Map<String, String?> filterView = <String, String?>{};
@@ -25,7 +24,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
   Map<String, List<dynamic>> filterConfs = {};
   @override Widget build(BuildContext context) {
     if (filterView.containsKey(viewID!)) { widget.currentFilter = filterView[viewID!] ?? ""; }
-    return FutureBuilder(future: APIService().get<model.Shallowed>(currentView!.filterPath, true, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
+    return FutureBuilder(future: APIService().get<model.Shallowed>(currentView!.filterPath, firstAPI, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
       var dpItems = <DropdownMenuItem<String>>[];
       List<Widget> items = [];
       double max = 0;
@@ -36,7 +35,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
         }
       }
       for (var fieldName in widget.schema.keys) {
-        if (widget.schema[fieldName]!.label.length * 30 > max) { max = widget.schema[fieldName]!.label.length * 30; }
+        if (widget.schema[fieldName]!.label.length * 30 > max) { max = widget.schema[fieldName]!.label.length * 25; }
       }
       if (!colsSchemaValid.containsKey(viewID)) {  colsSchemaValid[viewID!]= <String, ValueNotifier<bool>>{}; }
       for (var fieldName in widget.schema.keys) {
@@ -44,7 +43,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
         if (!colsSchemaValid[viewID!]!.containsKey(fieldName)) { 
           colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(widget.schema[fieldName]!.active); 
         } 
-        if (widget.currentFilter == "") { colsSchemaValid[viewID!]![fieldName]!.value = widget.schema[fieldName]!.active; }
+        // if (widget.currentFilter == "") { colsSchemaValid[viewID!]![fieldName]!.value = widget.schema[fieldName]!.active; }
         if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
           colsSchemaValid[viewID!]![fieldName]!.value = filterConfs[widget.currentFilter]!.contains(fieldName);
         }
@@ -99,15 +98,14 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     validator: (String? value) { return null; },
                   ),
                   Divider(color: Theme.of(context).splashColor,),
-                  Container( constraints: const BoxConstraints(maxHeight: 300), child: SingleChildScrollView( child: Column(children: items))),
+                  Container( constraints: const BoxConstraints(maxHeight: 200), child: SingleChildScrollView( child: Column(children: items))),
                   Padding(padding: const EdgeInsets.only(bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
                   Row( mainAxisAlignment: MainAxisAlignment.center, children : [ Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () { 
                       if (widget.currentFilter != "") { filterView[viewID!] = widget.currentFilter;  }
-                      homeKey.currentState?.setState(() { 
-                        globalOffset = 0; 
-                        rects.remove(viewID);
-                      });
+                      globalOffset = 0; 
+                      rects.remove(viewID);
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                   }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("APPLY", style: TextStyle(color: Colors.white, fontSize: 12))))),
                   widget.currentFilter != "" ? 
@@ -127,10 +125,9 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     }
                     var body = <String, dynamic>{ "link" : currentView!.schemaName, "fields" : fields  };
                     APIService().post(currentView!.filterPath, body, null).then((value) { // TODO
-                      homeKey.currentState?.setState(() { 
-                        globalOffset = 0; 
-                        rects.remove(viewID);
-                      });
+                      globalOffset = 0; 
+                      rects.remove(viewID);
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                     });
                   }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("SAVE & APPLY", style: TextStyle(color: Colors.white, fontSize: 12))),) ])

@@ -3,6 +3,7 @@ import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 
 // ignore: must_be_immutable
+GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
 class HomeViewWidget extends StatefulWidget{
   const HomeViewWidget ({ Key? key}): super(key: key);
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
@@ -45,12 +46,10 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     }
     return Container(
             margin: const EdgeInsets.only(top: 40),
-            padding: const EdgeInsets.all(30),
+            padding: const EdgeInsets.only(top: 30, right: 30, left: 30),
             width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-            height: MediaQuery.of(context).size.height - 110 > 0 ? MediaQuery.of(context).size.height - 110 : 0, 
-                decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius:  const BorderRadius.only(bottomLeft: Radius.circular(7),)),
-                child: SingleChildScrollView(child: Wrap(alignment: WrapAlignment.center, children:views,)));
+            height: MediaQuery.of(context).size.height - 80 > 0 ? MediaQuery.of(context).size.height - 80 : 0, 
+                decoration: BoxDecoration( color: Colors.grey[200]),
+                child: SingleChildScrollView(child: Wrap(alignment: WrapAlignment.center, children:views)));
   }
 }

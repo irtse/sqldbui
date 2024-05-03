@@ -31,10 +31,11 @@ class _TextState extends State<TextWidget> {
               obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
               readOnly: widget.readOnly,
               initialValue: widget.value ?? "",
-              maxLines:  widget.type.contains("password") || widget.label.contains("password") ? 1 : (widget.type.contains("text") ? 100 : null),
-              style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Theme.of(context).secondaryHeaderColor),
+              maxLines:  (widget.type.contains("text") ? 100 : 1),
+              style: TextStyle( fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Theme.of(context).secondaryHeaderColor),
               enabled: true,
               autocorrect: true,
+              keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: widget.isDark ? Theme.of(context).splashColor : Colors.grey, width: 1.0)),
                 border: const OutlineInputBorder(),

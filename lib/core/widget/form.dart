@@ -48,10 +48,8 @@ class FormWidgetState extends State<DataFormWidget> {
       if (widget.view != null && widget.view!.items.isNotEmpty) {
         if (widget.view!.isList) { return Container(
           width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-          height: MediaQuery.of(context).size.height - 95 > 0 ? MediaQuery.of(context).size.height - 95 : 0, 
-          decoration: BoxDecoration(
-              color: Theme.of(context).highlightColor,
-              borderRadius:  const BorderRadius.only(bottomLeft: Radius.circular(7),)),
+          height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
+          decoration: BoxDecoration(color: Theme.of(context).highlightColor),
           child: null); }
         var refItem = widget.view!.items[0];
         if (refItem.workflow != null) { 
@@ -69,11 +67,12 @@ class FormWidgetState extends State<DataFormWidget> {
         if (refItem.dataPath != "") { widget.wrappersURL["relatedDatas"] = refItem.dataPath; }
         var schema = widget.view!.schema;
         List<Widget> title = [];
-        if (name != "") {
-          title.add(Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
-            children: [ Flexible( child: Text(name, overflow: TextOverflow.ellipsis, 
-              style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 25))) ])));
-        }
+        var len = MediaQuery.of(context).size.width > 300 ? (300 ~/ 4.2) : (MediaQuery.of(context).size.width ~/ 15);
+        title.add(Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
+          children: [ Flexible( child: Text(name[0].toUpperCase()
+                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() 
+                  + (len > name.length ? "" : "..."),
+            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 25))) ])));
         if (description != "" && !description.contains("no description")) {
             title.add(
               Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
@@ -173,15 +172,15 @@ class FormWidgetState extends State<DataFormWidget> {
           String? url;
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
           if(!(readOnly && value == null)) { 
+            double max = field.type.contains("bool") ? 150 : (counter > 1 ?
+                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.3)
+                  : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, 
                                               fieldName, field.label, field.description, field.require, 
-                                              readOnly, widget.view!.isEmpty ? null : value, url, this);
+                                              readOnly, widget.view!.isEmpty ? null : value, url, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
-              var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0, 
-              top: field.type.contains("bool") ? 0 : 11.0 , bottom: field.type.contains("bool") ? 30 : 11.0),
-              child: SizedBox( width:  field.type.contains("bool") ? 150 : (counter > 1 ?
-                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.3)
-                  : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1), 
+              var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0,  top: field.type.contains("bool") ? 0 : 11.0 , bottom: field.type.contains("bool") ? 30 : 11.0),
+              child: SizedBox( width: max, 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);
             }
@@ -212,13 +211,9 @@ class FormWidgetState extends State<DataFormWidget> {
             child: Wrap(
                alignment: WrapAlignment.center,
               children: [...head, Padding( padding: const EdgeInsets.symmetric(horizontal: 30), child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...divider, ...additionnal]))));
-      return widget.scroll ? Container( decoration: BoxDecoration(
-                  color: Theme.of(context).highlightColor,
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7),),
-                ),
-                // color: widget.subForm ? Colors.transparent : Theme.of(context).highlightColor,
+      return widget.scroll ? Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
                 width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-                height: MediaQuery.of(context).size.height - 95 > 0 ? MediaQuery.of(context).size.height - 95 : 0,
+                height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0,
                 child: Padding( padding: const EdgeInsets.only(bottom: 5), 
                   child: SingleChildScrollView( scrollDirection: Axis.vertical, 
                     child: Padding( padding: const EdgeInsets.all(0), child: form) )))

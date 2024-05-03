@@ -11,12 +11,11 @@ import 'package:sqldbui2/core/widget/utils/grid.dart';
 
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
-  final MenuWidgetState menu;
   final model.View? view;
   final DataFormWidget? form;
   final DatagridWidget? grid;
   final GlobalKey<GridWidgetState>? gridKey;
-  const ActionBarWidget ({ Key? key, this.view, required this.menu, this.gridKey, this.grid, this.form}): super(key: key);
+  const ActionBarWidget ({ Key? key, this.view, this.gridKey, this.grid, this.form}): super(key: key);
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
@@ -69,7 +68,7 @@ class ActionBarState extends State<ActionBarWidget> {
                       }), ),
                 icon: Icon( Icons.auto_fix_off, color: Theme.of(context).highlightColor, size: 20 ), 
                 onPressed: () { 
-                  homeKey.currentState?.setState(() { 
+                  globalMainViewKey.currentState?.setState(() { 
                     globalOffset = 0; 
                     rects.remove(viewID);
                   });

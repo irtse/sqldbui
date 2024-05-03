@@ -2,7 +2,6 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:alert_banner/exports.dart';
@@ -15,8 +14,9 @@ import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-var firstAPI = false;
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 
+var firstAPI = false;
 class APIConstants {
   static String mainEndpost = '/main';
   static String genericEndpost = '/generic/';
@@ -28,7 +28,7 @@ class APIService {
   static String auth = "";
   static final dio = Dio(
     BaseOptions(
-      baseUrl: 'http://localhost:8080/v1', // you can keep this blank
+      baseUrl: '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1', // you can keep this blank
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
     ),
   )..interceptors.add(LogInterceptor( requestHeader: true, ),);
@@ -129,19 +129,16 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      if (cache.containsKey(url) && !force && cache[url] != null && offset == null) { 
+      if (cache.containsKey(url) && !force && cache[url] != null) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
-        } else { return cache[url]! as APIResponse<T>; }
+        } else { return cache[url]! as APIResponse<T>; } 
       }
       try {
         dio.options.headers["authorization"] = auth;
         var orderBy = getOrderDir(url);
         var filter = getFilter(url, isFilter);
         var cols = getColumns(url, offset != null);
-        if (currentView != null && offset != null && currentView!.max < offset) { 
-          offset = 0; 
-          globalOffset = 0; 
-        }
+        if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", 
                                      method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
@@ -159,21 +156,17 @@ class APIService {
               showAlertBanner(context, () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
                 alertBannerLocation:  AlertBannerLocation.bottom,);
             }
-            if (method == "get") {
-              return cache[url] as APIResponse<T>;
-            }
+            if (method == "get") {  return cache[url] as APIResponse<T>;  }
             return resp; 
           }
           err = resp.error ?? "internal error";
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
-        developer.log('LOG ERR $e $s', name: 'my.app.category');
-        err = e.toString(); }
+        developer.log('LOG ERR $e $s ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}', name: 'my.app.category');
+        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
     } else { err = "no url"; }
-    if (err.contains("token") && err.contains("expired")) {
-      AuthService().unAuthenticate();
-    }
+    if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null) {
       // ignore: use_build_context_synchronously
       showAlertBanner( context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!

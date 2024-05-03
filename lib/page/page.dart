@@ -1,10 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 /// Flutter code sample for [FutureBuilder].
 GlobalKey<PageWidgetState> globalPageKey = GlobalKey<PageWidgetState>();
@@ -15,33 +15,36 @@ class PageWidget extends StatefulWidget {
   State<PageWidget> createState() => PageWidgetState();
 }
 class PageWidgetState extends State<PageWidget> {
-  Future<APIResponse<model.View>> _items() async {
-    return APIService().get<model.View>(APIConstants.mainEndpost, true, null);    
-  }
-
   @override Widget build(BuildContext context) {
+    menuSize = isMenu ? (MediaQuery.of(context).size.width <= 250 ? MediaQuery.of(context).size.width : 250) : 0;
     return Stack( alignment: Alignment.topCenter,
       children: [
         FutureBuilder<APIResponse<model.View>>(
-          future: _items(), // a previously-obtained Future<String> or null
+          future: APIService().get<model.View>(APIConstants.mainEndpost, false, null), // a previously-obtained Future<String> or null
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
-          if (snapshot.hasData && snapshot.data!.data != null) { return MenuWidget(key: globalMenuKey, views: snapshot.data!.data); }
-          return MenuWidget(key: globalMenuKey, views: null);
+          var c = <Widget>[];
+          if (snapshot.hasData && snapshot.data!.data != null) { 
+            List<model.View> views = snapshot.data!.data!;
+            List<Widget> c = menuSize == 0 ? [] : <Widget>[Container(
+              color: Theme.of(context).secondaryHeaderColor,
+              width: menuSize, child: MenuWidget(key: globalMenuKey, views: views))];
+            try { c.add(MainViewWidget(key: globalMainViewKey, views: views));  } catch (e) { /* */ }
+            return Row(crossAxisAlignment: CrossAxisAlignment.start, children: c);
+          }
+          return Row(crossAxisAlignment: CrossAxisAlignment.start, children: c);
       }
-    ), Positioned(
-      bottom: 6,
-      child: MediaQuery.of(context).size.width > 600 ? Text("Copyright © 2024 IRT Saint Exupéry. All rights reserved.",
-        style: TextStyle(color: Theme.of(context).splashColor, fontSize: 11)) : const Text("")), 
+    ),
     AnimatedPositioned(
-      duration: const Duration(milliseconds: 200), left: isMenu ? 80 : -10, bottom: 0,
+      duration: const Duration(milliseconds: 200), 
+      left: isMenu ? 80 : -10, bottom: -8,
       child: CircleAvatar(
         radius: 30, backgroundColor: Theme.of(context).secondaryHeaderColor,
         child: IconButton( iconSize: 30, color: Theme.of(context).splashColor,
           icon: Icon(isMenu ? Icons.close :  Icons.menu), 
-      onPressed: () { setState(() {
-        isMenu = !isMenu;
-        rects.remove(viewID);
-      });  },)
+      onPressed: () { 
+        globalHomeViewKey.currentState?.setState(() {});
+        setState(() { isMenu = !isMenu;  });
+      })
     ))],
     );
     

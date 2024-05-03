@@ -101,9 +101,9 @@ class GridWidgetState extends State<GridWidget> {
       col.prefetch();  
       count++; 
     }
-    if (maxWidth < MediaQuery.of(context).size.width - 400) { 
-      Future.delayed(const Duration(seconds: 1), () { 
-        homeKey.currentState?.setState(() { 
+    if (maxWidth < MediaQuery.of(context).size.width - 350) { 
+      Future.delayed(const Duration(microseconds: 100), () { 
+        globalMainViewKey.currentState?.setState(() { 
           globalOffset = 0; 
           rects.remove(viewID);
         });
@@ -127,7 +127,6 @@ class GridWidgetState extends State<GridWidget> {
             notificationPredicate: (notif) => notif.depth > -1,
             child: NotificationListener<ScrollNotification>(
                 onNotification: (scrollNotification) {
-                  developer.log("scrollNotification ${currentView?.items.length} ${globalOffset + globalLimit}", name: "GridWidget");
                   if (scrollNotification is ScrollEndNotification) {
                     if (currentView != null && currentView!.items.length < currentView!.max) {
                       if (currentView?.items.length == globalOffset + globalLimit) { globalOffset += globalLimit; }
@@ -238,7 +237,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
         }
       }
       var child = e.columnName != "description" ? ListTile(
-        onTap: () => globalMenuKey.currentState!.refreshUrl(widget.links[cellID], cellID),
+        onTap: () => globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false),
         title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).primaryColorLight))))
@@ -297,10 +296,8 @@ class GridColumnWidget extends StatefulWidget {
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
-    double width = (label.value.length * 19);
-    developer.log("$width 1");
-    if ((width * maxLength) <= getTotal() && !avoid) { width = (getTotal() /  maxLength); }
-    developer.log("$width");
+    double width = (label.value.length * 17);
+    if ((width * maxLength) <= getTotal() && !avoid && maxLength <= 8) { width = (getTotal() /  maxLength); }
     if (width < 130) { width = 130; }
     return width;
   }
@@ -311,9 +308,7 @@ class GridColumnWidget extends StatefulWidget {
     return (width * maxLength) <= getTotal();
   }
 
-  double getTotal() {
-    return contextWidth - 86;
-  }
+  double getTotal() { return contextWidth - (80 + maxLength); }
 
   void prefetch() {
     if (currentView != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
@@ -321,11 +316,9 @@ class GridColumnWidget extends StatefulWidget {
       double width = getWidth(false);
       late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
-        width: width.isNaN ? 300 : width,
-        height: 55,
+        width: width.isNaN ? 130 : width, height: 55,
       );
       rects[viewID]![columnName] = rect;
-      
     }
     maxWidth += rects[viewID]![columnName]!.width;
   }
@@ -369,8 +362,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     widget.width = width + 42;
     if (viewID != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
     late Rect rect = rects[viewID]!.containsKey(widget.columnName) ? rects[viewID]![widget.columnName]! : Rect.fromCenter(
-      center: MediaQuery.of(context).size.center(Offset.zero),
-      width: width.isNaN ? 300 : width + 42, height: 55 );
+      center: MediaQuery.of(context).size.center(Offset.zero), width: width.isNaN ? 300 : width + 42, height: 55 );
     if (currentView != null && rects.containsKey(viewID)) { rects[viewID]![widget.columnName] = rect; }
     
     return Container(width: rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
@@ -395,8 +387,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             rects[viewID]![widget.columnName] = Rect.fromCenter(
               center: MediaQuery.of(context).size.center(Offset.zero),
               width: newWidth,
-              height: 55,
-            );
+              height: 55);
             widget.width = newWidth;
             var total = rects[viewID]!.values.fold<double>(0, (previousValue, element) => previousValue + element.width);
             if (widget.nextColumn != null && widget.contextWidth > total) {

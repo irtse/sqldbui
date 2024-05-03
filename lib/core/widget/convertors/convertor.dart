@@ -11,7 +11,7 @@ import 'dart:developer' as developer;
 import 'package:sqldbui2/core/widget/form.dart';
 class Convertor {
   static Widget? formFieldByType(Map<String, dynamic> form, BuildContext context, String schemaName, String type, String name, String label, 
-  String description, bool require, bool readOnly, dynamic value, String? url, FormWidgetState comp) {
+  String description, bool require, bool readOnly, dynamic value, String? url, double maxWidth, FormWidgetState comp) {
     type = type.toLowerCase();
     if (type.contains("text") || type.contains("varchar") 
     || ((type.contains("time") || type.contains("date")) && readOnly)) { 

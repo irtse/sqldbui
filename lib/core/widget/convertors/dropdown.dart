@@ -56,9 +56,10 @@ class _DropDownState extends State<DropDownWidget> {
       }
 
       return DropdownButtonFormField<String>( items: items, 
-        hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis,),
+        isExpanded: true,
+        hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
         value: widget.value ?? ( values.isNotEmpty ? values[0] : null),
-        style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
+        style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
         onChanged: (value) {
           widget.component?.widget.detectChange = true;
           if (value == null) { widget.form[widget.name]=null;
@@ -69,11 +70,12 @@ class _DropDownState extends State<DropDownWidget> {
           } else { widget.form[widget.name]=value; }
         },
         dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
-        decoration: InputDecoration(
+        decoration: InputDecoration( isDense: true,
           suffixIconColor: Theme.of(context).primaryColor,
           errorStyle: const TextStyle(height: -2),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           filled: true,
+          constraints: BoxConstraints(minWidth: 0),
           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
           enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
           fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
@@ -100,13 +102,13 @@ class _DropDownState extends State<DropDownWidget> {
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
                         hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                         border: const OutlineInputBorder(),
-                        contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
+                        contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
                         hintText: "enter your ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}",
                         labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
                       ) ));
     }
     return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.url!, true, null), 
+        future: APIService().get(widget.url!, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
           String? initialValue;
@@ -132,11 +134,12 @@ class _DropDownState extends State<DropDownWidget> {
             }
           }
           return DropdownButtonFormField<String>(
-              hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis,),
+              isExpanded: true,
+              hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
               value: widget.value ?? initialValue,
               items: items, 
               dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
-              style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
+              style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
               onChanged: (value) {
                 widget.component?.widget.detectChange = true;
                 if (value == null) { widget.form[widget.name]=null;
@@ -153,14 +156,14 @@ class _DropDownState extends State<DropDownWidget> {
                 } else if (mapped[value] != null) { widget.form[widget.name]=mapped[value]!.id; }
               },
               decoration: InputDecoration(
-                filled: true,
+                filled: true, isDense: true,
                 enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                 border: const OutlineInputBorder(),
                 errorStyle: const TextStyle(height: -2),
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                 labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
+                contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
                 fillColor: widget.readOnly ? Theme.of(context).splashColor : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                 labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
               ),

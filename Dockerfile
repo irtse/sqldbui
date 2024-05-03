@@ -6,7 +6,7 @@ COPY . .
 
 RUN flutter pub get
  
-RUN flutter build web --release --build-number ${CI_JOB_ID:-1}
+RUN flutter build web --dart-define=HOST=${HOST:-http://locahost:8080} --release --build-number ${CI_JOB_ID:-1}
 
 FROM scratch
  
