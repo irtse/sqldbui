@@ -28,8 +28,7 @@ class ActionBarState extends State<ActionBarWidget> {
               style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                           if (states.contains(MaterialState.pressed)) { return Colors.green; }
                           return Theme.of(context).primaryColor;
-                        }), ),
-              icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
+              }), ), icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
               onPressed: () {  
                 globalOffset = 0;
                 globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
@@ -39,22 +38,18 @@ class ActionBarState extends State<ActionBarWidget> {
       }
       if (widget.gridKey != null) {
         if (isFilter()) {
-          actions.add(
-          Column(
-            children: [IconButton( constraints: const BoxConstraints(),
+          actions.add( Column( children: [IconButton( constraints: const BoxConstraints(),
                 tooltip: "reset filter",
                 style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
                         if (states.contains(MaterialState.pressed)) { return Colors.green; }
                         return Theme.of(context).primaryColor;
-                      }), ),
-                icon: Icon( Icons.filter_alt_off, color: Theme.of(context).highlightColor, size: 20 ), 
+                }), ), icon: Icon( Icons.filter_alt_off, color: Theme.of(context).highlightColor, size: 20 ), 
                 onPressed: () async { 
                   globalOrder.remove(viewID);
                   globalFilter.remove(viewID);
                   globalNew = false;
                   globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
-                },
-              ),],
+                }),],
           )
         );
       }
@@ -75,19 +70,25 @@ class ActionBarState extends State<ActionBarWidget> {
                 },
               ),]));
       }
+      if (currentView != null && (MediaQuery.of(context).size.width - menuSize) > 650) {
+        for (var short in currentView!.shortcuts.keys) {
+          actions.add(Padding( padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5), 
+            child: OutlinedButton( style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+                          if (states.contains(MaterialState.pressed)) { return Colors.green; }
+                          return Theme.of(context).primaryColor;
+            }), ), onPressed: () {
+            AppRouter.navigateTo(currentView!.shortcuts[short]);
+          }, child: Text(short, overflow: TextOverflow.ellipsis, style: const TextStyle( color: Colors.white, fontSize: 12 )))));
+        }
+      }
       var row = <Widget>[];
       if (subViewID != null && AppRouter.routedSubID == null) {
-        row.add(IconButton( 
-                tooltip: "back to list", constraints: const BoxConstraints(),
-                style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                      }), ),
-                icon: Icon( Icons.arrow_back, color: Theme.of(context).highlightColor, ),
-                onPressed: () {
-                  globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true);
-                },
-              ));
+        row.add(IconButton(tooltip: "back to list", constraints: const BoxConstraints(),
+          style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+            if (states.contains(MaterialState.pressed)) { return Colors.green; }
+            return Theme.of(context).primaryColor;
+          }), ), icon: Icon( Icons.arrow_back, color: Theme.of(context).highlightColor, ),
+          onPressed: () {  globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true); }));
       }
       row.addAll([Flexible(child: Text(overflow: TextOverflow.ellipsis,
                     widget.view == null ? (globalLoading ? "LOADING" : "HOME") : widget.view!.name.replaceAll("_", " ").replaceAll("db", "").toUpperCase(), 

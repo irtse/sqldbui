@@ -70,8 +70,7 @@ class MenuWidgetState extends State<MenuWidget> {
         ),
       ))), Row(children: [
         InkWell( onTap: () { setState(() {isFavorite = false; });}, child: Container(
-          decoration: BoxDecoration(
-            color: isFavorite ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,
+          decoration: BoxDecoration(color: isFavorite ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,
             border: const Border(bottom: BorderSide(color: Colors.black, width: 0.4), right: BorderSide(color: Colors.black, width: 0.4)) ),
           alignment: Alignment.center, height: 40, width: menuSize > 0 ? menuSize / 2 : 0, child: Icon(Icons.all_inbox, color: Theme.of(context).highlightColor,))),
         InkWell( onTap: () { setState(() { isFavorite = true; });}, child: Container(decoration: BoxDecoration(
@@ -150,7 +149,7 @@ class MenuWidgetState extends State<MenuWidget> {
     menuSize = isMenu ? (MediaQuery.of(context).size.width <= 250 ? 202 : 250) : 0;
     return FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-        return  Column(  children : [ ...header, Container( padding: const EdgeInsets.only(bottom: 80),
+        return  Column(  children : [ ...header, Container( padding: const EdgeInsets.only(bottom: 55),
             height: MediaQuery.of(context).size.height - 121 > 0 ? MediaQuery.of(context).size.height - 121 : 0, 
             child: SingleChildScrollView(
               child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); });

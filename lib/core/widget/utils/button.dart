@@ -25,7 +25,7 @@ class ButtonWidgetState extends State<ButtonWidget> {
                   overlayColor: MaterialStateProperty.resolveWith((states) {
                   if (states.contains(MaterialState.pressed)) { return Colors.green; }
                   return Colors.green;
-                }), ), onPressed: (){}, child: const SpinKitCircle(color: Colors.white, size: 20.0,))),],
+                }), ), onPressed: (){}, child: const SpinKitCircle(color: Colors.white, size: 12.0,))),],
               );
     }
     return Column(children: [Padding( padding: const EdgeInsets.only(left: 5, right: 5), child: TextButton(
@@ -36,7 +36,7 @@ class ButtonWidgetState extends State<ButtonWidget> {
                   if (states.contains(MaterialState.pressed)) { return Colors.green; }
                   return Theme.of(context).primaryColor;
                 }), ), onPressed: ActionService.pressed(this, false, currentView!.schemaName,  currentView!.actionPath, 
-                  <String>["id"], currentView!.schema, widget.method, context), child: Text(widget.text, style: TextStyle( fontSize: 15, color: Theme.of(context).highlightColor)))),],
+                  <String>["id"], currentView!.schema, widget.method, context), child: Text(widget.text, style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
               );
   }
 }

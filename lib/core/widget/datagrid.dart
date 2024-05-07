@@ -1,8 +1,10 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
@@ -115,7 +117,38 @@ class DatagridWidgetState extends State<DatagridWidget> {
     return Column( children: [
     Container( color: Theme.of(context).primaryColorLight,  height: 40, width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
       child: Stack( children: [ 
-        const Positioned( top: 10, left: 32, child: Row( children: [ Icon(Icons.filter_alt, color: Colors.white, size: 20) ] )),
+        Positioned( top: 7, left: 32, child: Row( children: [  const Padding( padding: EdgeInsets.only(right: 10), child : Icon(Icons.filter_alt, color: Colors.white, size: 20)),
+        FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", firstAPI, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
+          var dpItems = <DropdownMenuItem<String>>[];
+          if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
+            for (var i in snapshot.data!.data!) { 
+              // filterConfs[i.label!] = i.fields;
+              dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
+            }
+          }
+          return SizedBox( height: 25,
+            width: (MediaQuery.of(context).size.width - menuSize) / 3, child: DropdownButtonFormField<String>( items: dpItems, 
+                    // value: widget.currentFilter != "" ? widget.currentFilter : null,
+                    hint: Text("select an existing filter...", overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
+                    isExpanded: true,
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                    onChanged: (value) {},
+                    dropdownColor: Theme.of(context).highlightColor,
+                    decoration: InputDecoration(
+                      suffixIconColor: Theme.of(context).primaryColor,
+                      errorStyle: const TextStyle(height: -2),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      filled: true,
+                      labelStyle: const TextStyle(color: Colors.white),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+                      fillColor: (Theme.of(context).secondaryHeaderColor),
+                      hintStyle: TextStyle(fontSize: 10, color: Theme.of(context).splashColor),
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
+                    ),
+                    validator: (String? value) { return null; }));
+        }), 
+        ] )),
         Row( mainAxisAlignment: MainAxisAlignment.end, children : [ Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
           child: Row(children: [ ...buttons, FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) ])) ]) ])),
     Container( 

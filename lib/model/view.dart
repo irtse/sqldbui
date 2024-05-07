@@ -187,6 +187,7 @@ class View extends SerializerDeserializer<View> {
     this.isFavorize = false,
     this.favorizeBody = emptyDyn,
     this.filterPath = "",
+    this.shortcuts = emptyDyn,
   });
 
   String actionPath;
@@ -215,11 +216,13 @@ class View extends SerializerDeserializer<View> {
   List<dynamic> newIds;
   int max;
   Workflow? workflow;
+  Map<String, dynamic> shortcuts= <String, dynamic>{};
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
     workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
     id: json.containsKey("id") && json["id"] != null ? json["id"] : -1, 
+    shortcuts: json.containsKey("shortcuts") && json["shortcuts"] != null ? json["shortcuts"] : <String, dynamic>{},
     max: json.containsKey("max") && json["max"] != null ? json["max"] : 0, 
     newIds: json.containsKey("new") && json["new"] != null ? json["new"] : <String>[], 
     favorizeBody : json.containsKey("favorize_body") && json["favorize_body"] != null ? json["favorize_body"] : {},

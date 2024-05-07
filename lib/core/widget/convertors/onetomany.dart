@@ -57,14 +57,13 @@ class OneToManyState extends State<OneToManyWidget> {
                 widget.flashed[dataForm.view!.id] = dataForm;
                 if (!widget.readOnly && data.actions.contains("delete")) {
                   var w = Stack(children: [dataForm,
-                            Positioned(top: 50, left: MediaQuery.of(context).size.width - 450, 
+                            Positioned(top: 20, left: MediaQuery.of(context).size.width - 470, 
                             child: IconButton(onPressed: () {
                               widget.component.widget.detectChange = true;
                               setState(() {
                                 var w = widget.component.widget.oneToManiesFormDelete;
                                 w.add(dataForm);
-                              });
-                            }, icon: const Icon(Icons.delete)))],);
+                              }); }, icon: const Icon(Icons.delete, color: Colors.grey,)))],);
                   items.add(w);
                 } else {  items.add(dataForm); }
                 var e = widget.component.widget.existingOneToManiesForm;

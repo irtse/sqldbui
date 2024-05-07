@@ -1,3 +1,4 @@
+// import 'package:cookie_consent/cookie_consent.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -76,6 +77,7 @@ class HomeScreenState extends State<HomeScreen> {
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     AppRouter.navigateTo("#$viewID");
     var scaffoldKey = GlobalKey<ScaffoldState>();
+    // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
     return Scaffold(
       key: scaffoldKey,
       endDrawer: const NotificationDrawerWidget(),

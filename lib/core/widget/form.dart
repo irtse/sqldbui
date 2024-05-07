@@ -58,28 +58,20 @@ class FormWidgetState extends State<DataFormWidget> {
         }
         name = widget.view!.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
         description = widget.view!.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
-        if (refItem.values.containsKey("name") && refItem.values["name"] != null) {
-          name += ": ${refItem.values["name"].toUpperCase()}";
-        }
-        if (refItem.values.containsKey("description") && refItem.values["description"] != null) {
-          description = refItem.values["description"].toLowerCase();
-        }
+        if (refItem.values.containsKey("name") && refItem.values["name"] != null) { name += ": ${refItem.values["name"].toUpperCase()}"; }
+        if (refItem.values.containsKey("description") && refItem.values["description"] != null) { description = refItem.values["description"].toLowerCase(); }
         if (refItem.dataPath != "") { widget.wrappersURL["relatedDatas"] = refItem.dataPath; }
         var schema = widget.view!.schema;
         List<Widget> title = [];
-        var len = MediaQuery.of(context).size.width > 300 ? (300 ~/ 4.2) : (MediaQuery.of(context).size.width ~/ 15);
-        title.add(Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
+        var len = (MediaQuery.of(context).size.width - 150) > 300 ? (300 ~/ 4.2) : ((MediaQuery.of(context).size.width - 150) ~/ 15);
+        title.add(Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
           children: [ Flexible( child: Text(name[0].toUpperCase()
-                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() 
-                  + (len > name.length ? "" : "..."),
-            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 25))) ])));
+                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() + (len > name.length ? "" : "..."),
+            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))) ])));
         if (description != "" && !description.contains("no description")) {
-            title.add(
-              Padding( padding: const EdgeInsets.only(left: 130), child: Row( 
-                children: [ Icon(Icons.description, size: 20, color: Theme.of(context).splashColor), 
-                    Flexible( child: Text(overflow: TextOverflow.ellipsis, description, 
-                      style: TextStyle(color: Theme.of(context).primaryColorLight)))] ))
-              );
+            title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
+                children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
+                    Flexible( child: Text(overflow: TextOverflow.ellipsis, description, style: const TextStyle(color: Colors.grey, fontSize: 12)))] )));
         }
         widget.wrappers = [];
         additionnal = [];
@@ -94,9 +86,7 @@ class FormWidgetState extends State<DataFormWidget> {
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
                     if (data.workflow != null && !workflowBars.containsKey(url)) { 
-                      Future.delayed(const Duration(seconds: 1), () { 
-                        setState(() { workflowBars[url] = WorkflowBarWidget(workflow: data.workflow!); }); }
-                      );
+                      Future.delayed(const Duration(seconds: 1), () { setState(() { workflowBars[url] = WorkflowBarWidget(workflow: data.workflow!); }); } );
                     }  
                     var newView = model.View(name: "${widget.view!.isEmpty ? "empty " : ""}${data.schemaName.replaceAll("_", " ").replaceAll("db", "")} formulary",
                       workflow: data.workflow,
@@ -123,29 +113,26 @@ class FormWidgetState extends State<DataFormWidget> {
                 text: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "SUBMIT" : "SAVE", color: Theme.of(context).primaryColor));
             }
             if (widget.view!.actions.contains("delete") && !widget.view!.isEmpty) {
-              actions.add(ButtonWidget(method: "delete", text: "DELETE", color: Theme.of(context).splashColor));
+              actions.add(ButtonWidget(method: "delete", text: "DELETE", color: Colors.grey));
             }
           }   
           head.add( 
-            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-              margin: const EdgeInsets.only(bottom: 30),
+            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, height: 112,
               decoration: BoxDecoration( color: Colors.white, boxShadow: [
                 BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
-              ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 50, bottom: header.isEmpty ? 30 : 0), 
-                child: Column(children: [...title, ...header],)), Positioned(top: 60, right: 50, child : Row( children : actions))]), )
+              ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 40, bottom: header.isEmpty ? 25 : 0), 
+                child: Column(children: [...title, ...header],)), Positioned(top: 50, right: 50, child : Row( children : actions))]), )
           );
         } else if (name != "") {
-          head.add(SizedBox( height: 30, 
-                child:  Stack( children: [ Row( children: [ Padding(padding: const EdgeInsets.only(right: 15, top: 1), 
-                    child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 30,)), 
+          head.add(Padding( padding: const EdgeInsets.only(left: 30, top: 20, bottom: 10),
+                child: Stack( children: [ Row( children: [ Padding(padding: const EdgeInsets.only(right: 15, top: 1), 
+                    child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 20,)), 
                     Flexible( child: Text(name[0].toUpperCase() + name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
-                      style:TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 18))) ]),
-                  Positioned(right: -20, top: -15, child: IconButton(onPressed: () => { setState(() => show = !show)}, 
+                      style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) ]),
+                  Positioned(right: 20, top: -17.5, child: IconButton(onPressed: () => { setState(() => show = !show )}, 
                     icon: Icon(show ?  Icons.arrow_drop_down_sharp : Icons.arrow_drop_up_sharp, 
-                  color: Theme.of(context).primaryColor, size: 45,),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,  
-                  hoverColor: Colors.transparent,))
+                  color: Theme.of(context).splashColor, size: 40,),
+                  splashColor: Colors.transparent, highlightColor: Colors.transparent, hoverColor: Colors.transparent,))
                 ])));
           head.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
         }
@@ -175,23 +162,18 @@ class FormWidgetState extends State<DataFormWidget> {
             double max = field.type.contains("bool") ? 150 : (counter > 1 ?
                   ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.3)
                   : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
-            var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, 
-                                              fieldName, field.label, field.description, field.require, 
-                                              readOnly, widget.view!.isEmpty ? null : value, url, max, this);
+            var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
+                                              field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
               var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0,  top: field.type.contains("bool") ? 0 : 11.0 , bottom: field.type.contains("bool") ? 30 : 11.0),
-              child: SizedBox( width: max, 
+              child: SizedBox( width: widget.subForm && !field.type.contains("bool") ? max - 50 : max, 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);
             }
             if (((f.runtimeType == OneToManyWidget || f.runtimeType == ManyToManyWidget) && show) 
             && !(widget.view!.isEmpty && !widget.view!.actions.contains("post"))) { 
-              bottomFields.add(
-                Padding(padding: const EdgeInsets.only(bottom: 30, left: 30, right: 30), 
-                  child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Theme.of(context).splashColor,
+              bottomFields.add(Padding(padding: const EdgeInsets.only(bottom: 30, left: 30, right: 30), 
+                  child: Container( decoration: BoxDecoration(  borderRadius: BorderRadius.circular(10), color: Theme.of(context).splashColor,
                   ), child: Padding(padding: const EdgeInsets.all(10), child: f!,)))); 
             }
           } 
@@ -199,39 +181,18 @@ class FormWidgetState extends State<DataFormWidget> {
         widget.cacheForm = newCacheEntry;
       }
       List<Widget> divider = widget.subForm ? [] : [Padding( padding: const EdgeInsets.only(top: 20, bottom: 20), child: Divider(color: Theme.of(context).splashColor),)];
-      var form = Padding(padding: EdgeInsets.all(widget.subForm ? 40 : 0), 
-      child: Form( key: widget.formKey, 
-        autovalidateMode: AutovalidateMode.always,
-        child: Container(
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(7),),
-            ),
-            child: Wrap(
-               alignment: WrapAlignment.center,
-              children: [...head, Padding( padding: const EdgeInsets.symmetric(horizontal: 30), child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...divider, ...additionnal]))));
-      return widget.scroll ? Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
-                width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-                height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0,
-                child: Padding( padding: const EdgeInsets.only(bottom: 5), 
-                  child: SingleChildScrollView( scrollDirection: Axis.vertical, 
-                    child: Padding( padding: const EdgeInsets.all(0), child: form) )))
-              : Container( 
-                margin: EdgeInsets.only(top: widget.subForm ? 10 : 0, bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 0, blurRadius: 3,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),),
-                ),
-                width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-                child: form,
-              );
+      var form = Padding(padding: widget.subForm ? const EdgeInsets.all(40) : const EdgeInsets.only(top: 30), 
+      child: Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, child: Container(alignment: Alignment.center,
+            decoration: const BoxDecoration( color: Colors.transparent, borderRadius: BorderRadius.only(bottomLeft: Radius.circular(7),)),
+            child: Wrap(alignment: WrapAlignment.center, children: [Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
+              child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...divider, ...additionnal]))));
+      return widget.scroll ? Stack( children: [ Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
+        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+        child: Container(margin: const EdgeInsets.only(top: 112), height: MediaQuery.of(context).size.height - 177 > 0 ? MediaQuery.of(context).size.height - 177 : 0,
+           child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head])
+      : Container( margin: EdgeInsets.only(top: widget.subForm ? 10 : 0, bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
+        decoration: BoxDecoration(boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))],
+          color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),)),
+        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, child: Column( children: [...head, form]));
     }
 }

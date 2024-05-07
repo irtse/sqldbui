@@ -124,9 +124,11 @@ class _DropDownState extends State<DropDownWidget> {
               for (var item in snap.data!.data!) {
                 var v = item.name ?? "${item.id}";
                 v = v.replaceAll("db", "").replaceAll("_", " ");
-                if (!mapped.containsKey(v)) {
+                var t = items.where((element) => element.value == v);
+                if (!mapped.containsKey(v) && t.isEmpty){
                   mapped[v]=item;
-                  if(widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post"))) {
+                  if(widget.component!.widget.view!.isEmpty 
+                  || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post"))) {
                     items.add(DropdownMenuItem<String>(value: v, child: Text(v, overflow: TextOverflow.ellipsis,),));
                   }
                 }
