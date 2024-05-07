@@ -58,7 +58,7 @@ class _DropDownState extends State<DropDownWidget> {
       return DropdownButtonFormField<String>( items: items, 
         isExpanded: true,
         hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
-        value: widget.value ?? ( values.isNotEmpty ? values[0] : null),
+        value: widget.value,
         style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
         onChanged: (value) {
           widget.component?.widget.detectChange = true;
@@ -114,13 +114,12 @@ class _DropDownState extends State<DropDownWidget> {
           String? initialValue;
           Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
           if (snap.hasData && snap.data!.data != null) {
-            initialValue = "";
-            if (widget.component != null) {
-              if(widget.form[widget.name] != null && !widget.component!.widget.view!.isEmpty) {
-              for (var data in snap.data!.data!) {
-                if (data.id == widget.form[widget.name]) { initialValue=data.name ?? "${data.id!}"; break; }
+              if (widget.component != null) {
+                if(widget.form[widget.name] != null && !widget.component!.widget.view!.isEmpty) {
+                for (var data in snap.data!.data!) {
+                  if (data.id == widget.form[widget.name]) { initialValue=data.name ?? "${data.id!}"; break; }
+                }
               }
-            } else {  initialValue = null;  }
               for (var item in snap.data!.data!) {
                 var v = item.name ?? "${item.id}";
                 v = v.replaceAll("db", "").replaceAll("_", " ");

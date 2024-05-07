@@ -52,7 +52,7 @@ class AppRouter {
     viewID = splitted.length > 1 ? splitted[1] : null;
     routedSubID=splitted.length > 2 ? splitted[2] : null;
     currentView = null;
-    globalMenuKey.currentState?.refresh();
+    globalMenuKey.currentState?.refresh(false);
   }
 }   
 // ROUTER SHOULD INVOKE MAIN TO ACCESS VIEW, VIEW ARE MENU SECTION

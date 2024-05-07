@@ -44,7 +44,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
       items.add(SizedBox( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
         child: const Center(child: Text("no workflow related !", style: TextStyle(color: Colors.white)),)));
     }
-    return Container(  margin: const EdgeInsets.only(top: 30), width: max,
+    return Container(  margin: const EdgeInsets.only(top: 25), width: max,
       height: 40, color: widget.workflow.steps.isEmpty ? Theme.of(context).splashColor : Colors.white,
       child: Row(children: items,),);
   }

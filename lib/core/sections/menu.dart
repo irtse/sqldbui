@@ -154,8 +154,8 @@ class MenuWidgetState extends State<MenuWidget> {
             child: SingleChildScrollView(
               child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); });
   }
-  void refresh() {
-      if (widget.views == null) {
+  void refresh(bool getView) {
+      if (widget.views == null || getView) {
           APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
           if (value.data != null) { widget.views = value.data; }
           for (var view in widget.views!) {
@@ -187,7 +187,7 @@ class MenuWidgetState extends State<MenuWidget> {
     viewID=id.toString();
     widget.url = null;
     if (nullable) { Future.delayed(const Duration(microseconds: 500), () => currentView = null);  }
-    full ? refresh() : globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true);
+    full ? refresh(false) : globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true);
     setState(() {});
   }
 }

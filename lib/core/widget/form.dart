@@ -18,6 +18,7 @@ Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, 
 class DataFormWidget extends StatefulWidget {
   Map<String, dynamic> cacheForm = {};
   List<DataFormWidget>wrappers = <DataFormWidget>[];
+  List<GlobalKey<FormWidgetState>>wrappersGlobalKey = <GlobalKey<FormWidgetState>>[];
   final model.View? view;
   bool scroll;
   bool subForm;
@@ -76,6 +77,7 @@ class FormWidgetState extends State<DataFormWidget> {
         widget.wrappers = [];
         additionnal = [];
         if (currentView != null && currentView!.isEmpty && widget.subForm) { widget.wrappersURL = {}; }
+        widget.wrappersGlobalKey = [];
         for (var url in widget.wrappersURL.values) {
           additionnal.add(Container( decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             margin: const EdgeInsets.only(top: 15),
@@ -95,7 +97,9 @@ class FormWidgetState extends State<DataFormWidget> {
                       actions: data.actions, readOnly: data.readOnly, schemaName: data.schemaName, 
                       items: data.items.isNotEmpty && !widget.view!.isEmpty ? data.items : <model.Item>[model.Item()] );
                     newView.isEmpty = widget.view!.isEmpty;
-                    var w = DataFormWidget(view: newView, scroll: false, subForm: true,);
+                    GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
+                    var w = DataFormWidget(key: newViewKey, view: newView, scroll: false, subForm: true);
+                    widget.wrappersGlobalKey.add(newViewKey);
                     widget.wrappers.add(w);
                     return w;
                   }
@@ -117,7 +121,7 @@ class FormWidgetState extends State<DataFormWidget> {
             }
           }   
           head.add( 
-            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, height: 112,
+            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, height: header.isEmpty ? 112 : 152,
               decoration: BoxDecoration( color: Colors.white, boxShadow: [
                 BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
               ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 40, bottom: header.isEmpty ? 25 : 0), 
@@ -160,7 +164,7 @@ class FormWidgetState extends State<DataFormWidget> {
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
           if(!(readOnly && value == null)) { 
             double max = field.type.contains("bool") ? 150 : (counter > 1 ?
-                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.3)
+                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.5)
                   : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
                                               field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
@@ -188,7 +192,7 @@ class FormWidgetState extends State<DataFormWidget> {
               child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...divider, ...additionnal]))));
       return widget.scroll ? Stack( children: [ Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
         width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        child: Container(margin: const EdgeInsets.only(top: 112), height: MediaQuery.of(context).size.height - 177 > 0 ? MediaQuery.of(context).size.height - 177 : 0,
+        child: Container(margin: EdgeInsets.only(top: header.isEmpty ? 112 : 152), height: MediaQuery.of(context).size.height - 177 > 0 ? MediaQuery.of(context).size.height - 177 : 0,
            child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head])
       : Container( margin: EdgeInsets.only(top: widget.subForm ? 10 : 0, bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
         decoration: BoxDecoration(boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))],

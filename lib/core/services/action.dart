@@ -123,9 +123,7 @@ class ActionService {
       
       if (form.view!.id == mainForm.currentState!.widget.view!.id) { APIService.cache = {}; }
       Future.delayed(const Duration(seconds: 1), () {
-        for (var state in form.oneToManiesStateForm.values) { state.setState(() { 
-          form.oneToManiesForm = [];
-        }); }
+        for (var state in form.oneToManiesStateForm.values) { state.setState(() { form.oneToManiesForm = []; }); }
         form.oneToManiesStateForm = {};
       });
     if (form.view!.id == mainForm.currentState!.widget.view!.id) {
@@ -136,12 +134,7 @@ class ActionService {
           showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
-        if (form.view != null && form.view!.isEmpty && errorStr == "") { 
-          developer.log("qsdqsdqssdq $newViewID", name: "ActionService");
-          Future.delayed(const Duration(seconds: 1), () { 
-            globalMenuKey.currentState?.refreshView(newViewID, null, true, false, true); 
-          });
-        }
+        if (form.view != null && form.view!.isEmpty && errorStr == "") { globalMenuKey.currentState?.refresh(true); }
     }
     return views;
   }
