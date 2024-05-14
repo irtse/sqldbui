@@ -57,7 +57,7 @@ class _DropDownState extends State<DropDownWidget> {
 
       return DropdownButtonFormField<String>( items: items, 
         isExpanded: true,
-        hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
+        hint: Text("select a ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
         value: widget.value,
         style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
         onChanged: (value) {
@@ -111,23 +111,16 @@ class _DropDownState extends State<DropDownWidget> {
         future: APIService().get(widget.url!, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
-          String? initialValue;
           Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
           if (snap.hasData && snap.data!.data != null) {
               if (widget.component != null) {
-                if(widget.form[widget.name] != null && !widget.component!.widget.view!.isEmpty) {
-                for (var data in snap.data!.data!) {
-                  if (data.id == widget.form[widget.name]) { initialValue=data.name ?? "${data.id!}"; break; }
-                }
-              }
               for (var item in snap.data!.data!) {
                 var v = item.name ?? "${item.id}";
                 v = v.replaceAll("db", "").replaceAll("_", " ");
                 var t = items.where((element) => element.value == v);
                 if (!mapped.containsKey(v) && t.isEmpty){
                   mapped[v]=item;
-                  if(widget.component!.widget.view!.isEmpty 
-                  || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post"))) {
+                  if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
                     items.add(DropdownMenuItem<String>(value: v, child: Text(v, overflow: TextOverflow.ellipsis,),));
                   }
                 }
@@ -136,8 +129,8 @@ class _DropDownState extends State<DropDownWidget> {
           }
           return DropdownButtonFormField<String>(
               isExpanded: true,
-              hint: Text("select a ${widget.schemaName.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
-              value: widget.value ?? initialValue,
+              hint: Text("select a ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
+              value: widget.value,
               items: items, 
               dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
               style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
@@ -160,7 +153,7 @@ class _DropDownState extends State<DropDownWidget> {
                 filled: true, isDense: true,
                 enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                 border: const OutlineInputBorder(),
-                errorStyle: const TextStyle(height: -2),
+                errorStyle: const TextStyle(height: -2, fontSize: 0),
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                 labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
                 floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -169,7 +162,7 @@ class _DropDownState extends State<DropDownWidget> {
                 labelText: "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}",
               ),
               validator: (String? value) {
-                return (value == null || value.isEmpty) && widget.require ? 'enter a proper value.' : null;
+                return (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'enter a proper value.' : null;
               },
             );
         });

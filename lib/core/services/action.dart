@@ -41,7 +41,6 @@ class ActionService {
     }                                                   
     var body = <String, dynamic>{};
     List<model.View> views = [];
-    developer.log("wrappers ${form.wrappers}", name: "ActionService");
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false);
     if (resp.isNotEmpty) {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
@@ -52,38 +51,36 @@ class ActionService {
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
         if (errorStr != "") {
           // ignore: use_build_context_synchronously
-          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
-                          alertBannerLocation:  AlertBannerLocation.top,);
+          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
         }
       return views;
     }
+    print(form.view!.name);
+    print(form.detectChange);
+    if (form.oneToManiesForm.where((element) => element.detectChange).isNotEmpty) { form.detectChange = true; }
     if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
         form.detectChange = true;
         // ignore: use_build_context_synchronously
         formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false);
     }
-    developer.log("detectChange ${form.view?.items[0].values} ${form.detectChange}", name: "ActionService");
     if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
-    && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) {
-      return views; 
-    }
+    && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) { return views; }
     var path = url;
       if (form.cacheForm["id"] != null) { 
         body["id"]=int.parse(form.cacheForm["id"]); 
-        if (method.toUpperCase() == "DELETE") {
-          path = path.replaceAll("rows=all", "rows=${body["id"]}");
-        }
-      }
+        if (method.toUpperCase() == "DELETE") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
+      } else if (method.toUpperCase() == "PUT") { method = "post"; }
       if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var fieldName in schema.keys) {
           if (form.cacheForm[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
+          if (schema[fieldName] != null && schema[fieldName]!.type.toLowerCase().contains("many")) { continue; }
           if (!["dbdest_table_id"].contains(fieldName) 
           && !(["dbschema_id"].contains(fieldName) && form.cacheForm[fieldName] == null)
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
           && form.cacheForm[fieldName] is! List) { body[fieldName]=form.cacheForm[fieldName]; }
         }
         for (var k in add.keys) { body[k] = add[k]; }
-        if (globalWorkflowPanelWidgetKey.currentState != null) {
+        if (globalWorkflowPanelWidgetKey.currentState != null && form.view!.id == mainForm.currentState!.widget.view!.id) {
             List<String> nexts = [];
             for (var hub in globalWorkflowPanelWidgetKey.currentState!.hubs.keys) {
               if (globalWorkflowPanelWidgetKey.currentState!.hubs[hub]!.value) { nexts.add(hub); }
@@ -91,20 +88,16 @@ class ActionService {
             body["nexts"]=nexts.join(",");
         }
       }
-      String newViewID = "";
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
+          print("change BLBLBL");
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 
-            newViewID= "${value.data![0].schemaID}";
             form.cacheForm["id"]=value.data![0].items[0].values["id"];
-            listSubForms(schema, form.cacheForm, method, schemaName, context);
+            listSubForms(schema, form.cacheForm, method, value.data![0].schemaName, context, false);
           } 
           if (form.view!.isEmpty) { isNew = value.data![0].items[0].values["id"]; }
-          formSubForms(form.oneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.oneToManiesFormDelete, form.cacheForm, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
           if (form.view!.id == mainForm.currentState!.widget.view!.id) {
             showAlertBanner(context, () {}, 
               InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (method == "put" ? "save" : method)} datas suceed :)"), // <-- Put any widget here you want!
@@ -112,13 +105,14 @@ class ActionService {
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
+          print("change ERROR");
           errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}");
-          listSubForms(schema, form.cacheForm, method, schemaName, context);
-          formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-          formSubForms(form.oneToManiesFormDelete, {}, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
+          listSubForms(schema, form.cacheForm, method, schemaName, context, true);
           APIResponse<model.View>(data: null);
         });      
+        formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+        formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+        formSubForms(form.oneToManiesFormDelete, {}, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
       }
       
       if (form.view!.id == mainForm.currentState!.widget.view!.id) { APIService.cache = {}; }
@@ -138,11 +132,13 @@ class ActionService {
     }
     return views;
   }
-  static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, BuildContext context) async {
+  static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, BuildContext context, bool warn) async {
     for (var fieldName in schema.keys) {
       if (values[fieldName] is List) {
-        await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", null
+        if(values["id"] != null) {
+          await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", null
                                  ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
+        }
         for (var item in values[fieldName] as List) {
           var newBody = <String, dynamic> {};
           for (var f in schema[fieldName]!.schema.keys) {
@@ -150,7 +146,7 @@ class ActionService {
             } else if (f.contains("_id")) { newBody[f]=item["id"];  }
           } 
           // ignore: use_build_context_synchronously
-          await APIService().call<model.View>(schema[fieldName]!.actionPath, method, newBody, true, null
+          await APIService().post<model.View>(schema[fieldName]!.actionPath, newBody, null
                                              ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
         }
       }
@@ -159,10 +155,11 @@ class ActionService {
   static Future<List<model.View>> formSubForms(List<DataFormWidget> widgets, Map<String, dynamic> values, String method, 
                                                  String schemaName, BuildContext context, bool add, bool delete) async {
     List<model.View> views = [];
+    print(schemaName);
+    print(widgets);
     for (var many in widgets) { 
       developer.log("many ${many.view!.name} && ${many.view!.actionPath}", name: "ActionService");
-      if (delete && many.view != null && many.view!.actions.contains("delete") 
-      && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
+      if (delete && many.view != null && many.view!.actions.contains("delete") && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null
                                  ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
       } else if (many.view != null && many.view!.actions.contains(method)) {

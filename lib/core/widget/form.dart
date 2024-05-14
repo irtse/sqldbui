@@ -46,6 +46,7 @@ class FormWidgetState extends State<DataFormWidget> {
       List<Widget> bottomFields = <Widget>[];
       String name = "Unknown Name";
       String description = "no description";
+      model.Workflow? wf;
       if (widget.view != null && widget.view!.items.isNotEmpty) {
         if (widget.view!.isList) { return Container(
           width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
@@ -54,6 +55,7 @@ class FormWidgetState extends State<DataFormWidget> {
           child: null); }
         var refItem = widget.view!.items[0];
         if (refItem.workflow != null) { 
+          wf = refItem.workflow; 
           header.add(WorkflowBarWidget(workflow: refItem.workflow!));
           header.add(WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, workflow: refItem.workflow!));  
         }
@@ -90,7 +92,7 @@ class FormWidgetState extends State<DataFormWidget> {
                     if (data.workflow != null && !workflowBars.containsKey(url)) { 
                       Future.delayed(const Duration(seconds: 1), () { setState(() { workflowBars[url] = WorkflowBarWidget(workflow: data.workflow!); }); } );
                     }  
-                    var newView = model.View(name: "${widget.view!.isEmpty ? "empty " : ""}${data.schemaName.replaceAll("_", " ").replaceAll("db", "")} formulary",
+                    var newView = model.View(name: "${widget.view!.isEmpty ? "empty " : ""}${widget.view!.isEmpty ? data.name : data.schemaName.replaceAll("_", " ").replaceAll("db", "")} formulary",
                       workflow: data.workflow,
                       linkPath: data.linkPath, schema: data.schema, order: data.order, 
                       actionPath: data.actionPath.contains(data.schemaName) ? data.actionPath : data.linkPath,
@@ -109,37 +111,6 @@ class FormWidgetState extends State<DataFormWidget> {
           ))));
           if (workflowBars.containsKey(url) && !widget.subForm) { header = [ workflowBars[url]! ]; }
         } 
-        List<Widget> actions = [];
-        if (!widget.subForm) {
-          if (widget.view != null && !widget.view!.readOnly) {
-            if (widget.view!.actions.contains("post") || widget.view!.actions.contains("put")) {
-              actions.add(ButtonWidget(method: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "post" : "put", 
-                text: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "SUBMIT" : "SAVE", color: Theme.of(context).primaryColor));
-            }
-            if (widget.view!.actions.contains("delete") && !widget.view!.isEmpty) {
-              actions.add(ButtonWidget(method: "delete", text: "DELETE", color: Colors.grey));
-            }
-          }   
-          head.add( 
-            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, height: header.isEmpty ? 112 : 152,
-              decoration: BoxDecoration( color: Colors.white, boxShadow: [
-                BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
-              ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 40, bottom: header.isEmpty ? 25 : 0), 
-                child: Column(children: [...title, ...header],)), Positioned(top: 50, right: 50, child : Row( children : actions))]), )
-          );
-        } else if (name != "") {
-          head.add(Padding( padding: const EdgeInsets.only(left: 30, top: 20, bottom: 10),
-                child: Stack( children: [ Row( children: [ Padding(padding: const EdgeInsets.only(right: 15, top: 1), 
-                    child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 20,)), 
-                    Flexible( child: Text(name[0].toUpperCase() + name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) ]),
-                  Positioned(right: 20, top: -17.5, child: IconButton(onPressed: () => { setState(() => show = !show )}, 
-                    icon: Icon(show ?  Icons.arrow_drop_down_sharp : Icons.arrow_drop_up_sharp, 
-                  color: Theme.of(context).splashColor, size: 40,),
-                  splashColor: Colors.transparent, highlightColor: Colors.transparent, hoverColor: Colors.transparent,))
-                ])));
-          head.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
-        }
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         double counter = 0;
         for (var fieldName in widget.view!.order) {
@@ -162,7 +133,7 @@ class FormWidgetState extends State<DataFormWidget> {
           || (fieldName == "description" && field.readonly && (refItem.values.containsKey("description") && refItem.values["description"] != null)) ) { continue; }
           String? url;
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
-          if(!(readOnly && value == null)) { 
+          // if(!(readOnly && value == null)) { 
             double max = field.type.contains("bool") ? 150 : (counter > 1 ?
                   ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.5)
                   : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
@@ -180,23 +151,55 @@ class FormWidgetState extends State<DataFormWidget> {
                   child: Container( decoration: BoxDecoration(  borderRadius: BorderRadius.circular(10), color: Theme.of(context).splashColor,
                   ), child: Padding(padding: const EdgeInsets.all(10), child: f!,)))); 
             }
-          } 
         }
         widget.cacheForm = newCacheEntry;
+        List<Widget> actions = [];
+        if (!widget.subForm) {
+          if (widget.view != null && !widget.view!.readOnly) {
+            if (widget.view!.actions.contains("post") || widget.view!.actions.contains("put")) {
+              actions.add(ButtonWidget(method: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "post" : "put", 
+                text: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "SUBMIT" : "SAVE", color: Theme.of(context).primaryColor));
+            }
+            if (widget.view!.actions.contains("delete") && !widget.view!.isEmpty) {
+              actions.add(ButtonWidget(method: "delete", text: "DELETE", color: Colors.grey));
+            }
+          }   
+          head.add( 
+            Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
+            height: wf == null && header.isEmpty ? 112 : ( wf != null &&  wf.currentHub ? 203 : 152),
+              decoration: BoxDecoration( color: Colors.white, boxShadow: [
+                BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
+              ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 40, bottom: wf == null && header.isEmpty ? 25 :  0), 
+                child: Column(children: [...title, ...header],)), Positioned(top: 50, right: 50, child : Row( children : actions))]), )
+          );
+        } else if (name != "") {
+          head.add(Padding( padding: const EdgeInsets.only(left: 30, top: 20, bottom: 10),
+                child: Stack( children: [ Row( children: [ Padding(padding: const EdgeInsets.only(right: 15, top: 1), 
+                    child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 20,)), 
+                    Flexible( child: Text(name[0].toUpperCase() + name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) ]),
+                  fields.isEmpty ? Container() : Positioned(right: 20, top: -17.5, child: IconButton(onPressed: () => { setState(() => show = !show )}, 
+                    icon: Icon(show ?  Icons.arrow_drop_down_sharp : Icons.arrow_drop_up_sharp, 
+                  color: Theme.of(context).splashColor, size: 40,),
+                  splashColor: Colors.transparent, highlightColor: Colors.transparent, hoverColor: Colors.transparent,))
+                ])));
+          head.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
+        }
       }
-      List<Widget> divider = widget.subForm ? [] : [Padding( padding: const EdgeInsets.only(top: 20, bottom: 20), child: Divider(color: Theme.of(context).splashColor),)];
       var form = Padding(padding: widget.subForm ? const EdgeInsets.all(40) : const EdgeInsets.only(top: 30), 
       child: Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, child: Container(alignment: Alignment.center,
             decoration: const BoxDecoration( color: Colors.transparent, borderRadius: BorderRadius.only(bottomLeft: Radius.circular(7),)),
-            child: Wrap(alignment: WrapAlignment.center, children: [Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
-              child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...divider, ...additionnal]))));
+            child: Wrap(alignment: WrapAlignment.center, children: [ Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
+              child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...additionnal]))));
       return widget.scroll ? Stack( children: [ Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
         width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        child: Container(margin: EdgeInsets.only(top: header.isEmpty ? 112 : 152), height: MediaQuery.of(context).size.height - 177 > 0 ? MediaQuery.of(context).size.height - 177 : 0,
+        child: Container(margin: EdgeInsets.only(top: wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)), 
+        height: MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) > 0 ? 
+          MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) : 0,
            child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head])
-      : Container( margin: EdgeInsets.only(top: widget.subForm ? 10 : 0, bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
+      : Container( margin: EdgeInsets.only(bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
         decoration: BoxDecoration(boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))],
           color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),)),
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, child: Column( children: [...head, form]));
+        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, child: Column( children: [...head, fields.isEmpty ? Container() : form]));
     }
 }

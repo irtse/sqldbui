@@ -24,7 +24,8 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
   Map<String, List<dynamic>> filterConfs = {};
   bool force = false;
   @override Widget build(BuildContext context) {
-    if (filterView.containsKey(viewID!) && filterView[viewID] != null && filterView[viewID] != "") { 
+    if (viewID == null) { return Container(); }
+    if (filterView.containsKey(viewID) && filterView[viewID] != null && filterView[viewID] != "") { 
       widget.currentFilter = filterView[viewID!]!; 
     }
     return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", firstAPI || force, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {

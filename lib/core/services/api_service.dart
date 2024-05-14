@@ -139,8 +139,7 @@ class APIService {
         var filter = getFilter(url, isFilter);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
-        var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", 
-                                     method, body, options);
+        var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
@@ -163,6 +162,7 @@ class APIService {
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
+        print(e); print(s);
         developer.log('LOG ERR $e $s ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}', name: 'my.app.category');
         err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
     } else { err = "no url"; }

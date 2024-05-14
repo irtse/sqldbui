@@ -25,7 +25,7 @@ class _TextState extends State<TextWidget> {
   @override Widget build(BuildContext context) {
     if (widget.form[widget.name] != null) { widget.value = widget.form[widget.name]; }
           if ((widget.type.contains("time") || widget.type.contains("date")) && widget.value != null) {
-            widget.value = '${widget.value}'.substring(0,10);
+            widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
           }
           return TextFormField(
               obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
@@ -60,7 +60,7 @@ class _TextState extends State<TextWidget> {
               },
               onSaved: (String? value) => widget.form[widget.name]=value,
               validator: (String? value) {
-                var t = (value == null || value.isEmpty) && widget.require ? 'enter a proper value.' : null;
+                var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'enter a proper value.' : null;
                 return t;
               },
             );

@@ -69,7 +69,7 @@ class MenuWidgetState extends State<MenuWidget> {
                       )
         ),
       ))), Row(children: [
-        InkWell( onTap: () { setState(() {isFavorite = false; });}, child: Container(
+        InkWell( onTap: () { setState(() { isFavorite = false; });}, child: Container(
           decoration: BoxDecoration(color: isFavorite ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,
             border: const Border(bottom: BorderSide(color: Colors.black, width: 0.4), right: BorderSide(color: Colors.black, width: 0.4)) ),
           alignment: Alignment.center, height: 40, width: menuSize > 0 ? menuSize / 2 : 0, child: Icon(Icons.all_inbox, color: Theme.of(context).highlightColor,))),
@@ -146,7 +146,7 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     firstAPI = false;
-    menuSize = isMenu ? (MediaQuery.of(context).size.width <= 250 ? 202 : 250) : 0;
+    menuSize = isMenu && MediaQuery.of(context).size.width > 250 ? 250 : 0;
     return FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         return  Column(  children : [ ...header, Container( padding: const EdgeInsets.only(bottom: 55),
@@ -155,7 +155,7 @@ class MenuWidgetState extends State<MenuWidget> {
               child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); });
   }
   void refresh(bool getView) {
-      if (widget.views == null || getView) {
+      if (widget.views == null || getView || firstAPI) {
           APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
           if (value.data != null) { widget.views = value.data; }
           for (var view in widget.views!) {
@@ -179,7 +179,7 @@ class MenuWidgetState extends State<MenuWidget> {
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
     AppRouter.routedSubID = null;
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
-    firstAPI =  isFirst || globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
+    firstAPI = isFirst;
     globalOffset = 0;
     category=cat;
     subViewID=null;
@@ -187,7 +187,8 @@ class MenuWidgetState extends State<MenuWidget> {
     viewID=id.toString();
     widget.url = null;
     if (nullable) { Future.delayed(const Duration(microseconds: 500), () => currentView = null);  }
-    full ? refresh(false) : globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true);
+    if(full) { refresh(false); }
+    globalMainViewKey.currentState?.refresh(viewID, null, category, currentView, true);
     setState(() {});
   }
 }

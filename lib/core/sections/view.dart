@@ -35,11 +35,12 @@ class MainViewWidgetState extends State<MainViewWidget> {
       if ((currentView == null || currentView != null && currentView!.id.toString() != viewID 
       || AppRouter.routedSubID != null) || firstAPI || widget.url != null) {
         return FutureBuilder<APIResponse<model.View>>(
-          future: view!.isList ? APIService().getWithOffset<model.View>("${widget.url ?? view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
-          : APIService().get<model.View>(widget.url ?? view.linkPath, firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
+          future: view != null && view.isList ? APIService().getWithOffset<model.View>("${widget.url ?? view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
+          : APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : ""), firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0]; 
+              currentView!.isList = subViewID == null && !currentView!.isEmpty;
               if (snap.data!.data!.length > 1 && currentView!.isList) {
                 for (var view in snap.data!.data!.sublist(1)) { 
                   for (var item in view.items) { 
@@ -65,7 +66,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
                 } 
               } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }
             }
-            developer.log("MainViewWidget ${viewID} ${subViewID} ${category} ${currentView?.id} ${currentView?.items.length}", name: "MainViewWidget");
             return ViewWidget(view: currentView, views: widget.views);
         });
       } 

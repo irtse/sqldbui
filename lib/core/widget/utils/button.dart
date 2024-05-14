@@ -25,7 +25,7 @@ class ButtonWidgetState extends State<ButtonWidget> {
                   overlayColor: MaterialStateProperty.resolveWith((states) {
                   if (states.contains(MaterialState.pressed)) { return Colors.green; }
                   return Colors.green;
-                }), ), onPressed: (){}, child: const SpinKitCircle(color: Colors.white, size: 12.0,))),],
+                }), ), onPressed: (){}, child: const SpinKitCircle(color: Colors.white, size: 15.0,))),],
               );
     }
     return Column(children: [Padding( padding: const EdgeInsets.only(left: 5, right: 5), child: TextButton(

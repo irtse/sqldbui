@@ -51,14 +51,9 @@ class _ManyToManyState extends State<ManyToManyWidget> {
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags,)]) ]),);
     } else {
-      String? url;
-      for (var fieldName in scheme.schema.keys) {
-        if (!fieldName.contains(widget.schemaName) && scheme.schema[fieldName]!.valuesPath != "") {
-          url = scheme.schema[fieldName]!.valuesPath;  break;
-        }
-      }
+      String url = scheme.valuesPath;
       return FutureBuilder<APIResponse<model.Shallowed>>(
-      future: APIService().get(url ?? "", firstAPI, null), 
+      future: APIService().get(url, true, null), 
       builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
         List<MultiSelectItem> items = <MultiSelectItem>[];
         widget.form[widget.name] = <dynamic>[];
@@ -76,7 +71,7 @@ class _ManyToManyState extends State<ManyToManyWidget> {
         }
         return Padding( padding: const EdgeInsets.only(left: 25, right: 25, bottom: 15), child: MultiSelectDialogField(
           initialValue: widget.form[widget.name],
-          validator: (value) => (value == null || value.isEmpty) && widget.require ? 'do not leave empty' : null,
+          validator: (value) => (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'do not leave empty' : null,
           title: Padding(padding: const EdgeInsets.only(left: 30), child: Text( "${widget.label.toUpperCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Theme.of(context).primaryColor ), )),
           buttonText: Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Colors.black, fontSize: 14, ), ),
           items: items,

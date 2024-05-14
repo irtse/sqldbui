@@ -54,6 +54,7 @@ dependencies:
   go_router: ^14.0.2
   shared_preferences: ^2.2.3
   cookie_consent: ^1.0.0
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:

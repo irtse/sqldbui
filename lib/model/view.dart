@@ -112,7 +112,7 @@ class Step extends SerializerDeserializer<Step> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Step(
-      id: json.containsKey("id") && json["id"] != null ? json["id"] : "", 
+      id: json.containsKey("id") && json["id"] != null ? "${json["id"]}" : "", 
       name: json.containsKey("name") && json["name"] != null ? json["name"] : "", 
       isClose: json.containsKey("is_close") && json["is_close"] != null ? json["is_close"] : false,
       isCurrent: json.containsKey("is_current") && json["is_current"] != null ? json["is_current"] : false,

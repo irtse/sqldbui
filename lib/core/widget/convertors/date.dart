@@ -8,13 +8,14 @@ class DateWidget extends StatefulWidget {
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
+  final bool require;
   final bool readOnly;
   dynamic value;
   final String label;
   final String type;
   DateWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.type, required this.value, required this.label,
-                      required this.component}): super(key: key);
+                      required this.component, this.require = false}): super(key: key);
   @override
   _DateState createState() => _DateState();
 }
@@ -42,7 +43,7 @@ class _DateState extends State<DateWidget> {
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase()}",
-            labelText: widget.label.toLowerCase(),
+            labelText: "${widget.label.toLowerCase()}${widget.require ? '*' : ''}",
           ),
         value: dateValue,
         lastDate: DateTime(date.year + 10, date.month, date.day),

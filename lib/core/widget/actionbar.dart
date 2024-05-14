@@ -31,6 +31,7 @@ class ActionBarState extends State<ActionBarWidget> {
               }), ), icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
               onPressed: () {  
                 globalOffset = 0;
+                globalMenuKey.currentState?.refresh(true);
                 globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
                   : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID, true); },
             )],
@@ -88,7 +89,9 @@ class ActionBarState extends State<ActionBarWidget> {
             if (states.contains(MaterialState.pressed)) { return Colors.green; }
             return Theme.of(context).primaryColor;
           }), ), icon: Icon( Icons.arrow_back, color: Theme.of(context).highlightColor, ),
-          onPressed: () {  globalMainViewKey.currentState?.refresh(viewID, null, category, beforeView, true); }));
+          onPressed: () {  
+            globalMainViewKey.currentState?.refresh(viewID, null, category, null, true); 
+          }));
       }
       row.addAll([Flexible(child: Text(overflow: TextOverflow.ellipsis,
                     widget.view == null ? (globalLoading ? "LOADING" : "HOME") : widget.view!.name.replaceAll("_", " ").replaceAll("db", "").toUpperCase(), 

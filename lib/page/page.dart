@@ -25,7 +25,7 @@ class PageWidgetState extends State<PageWidget> {
           var c = <Widget>[];
           if (snapshot.hasData && snapshot.data!.data != null) { 
             List<model.View> views = snapshot.data!.data!;
-            List<Widget> c = menuSize == 0 ? [] : <Widget>[Container(
+            List<Widget> c = menuSize == 0 || MediaQuery.of(context).size.width <= 250 ? [] : <Widget>[Container(
               color: Theme.of(context).secondaryHeaderColor,
               width: menuSize, child: MenuWidget(key: globalMenuKey, views: views))];
             try { c.add(MainViewWidget(key: globalMainViewKey, views: views));  } catch (e) { /* */ }

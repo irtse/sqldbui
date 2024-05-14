@@ -1,15 +1,15 @@
 import 'dart:developer' as developer;
-import 'package:flutter_box_transform/flutter_box_transform.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/widget/actionbar.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
-import 'package:sqldbui2/core/widget/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
+import 'package:flutter_box_transform/flutter_box_transform.dart';
+import 'package:sqldbui2/core/widget/fork/tranformablebox.dart' as fork;
 
 double maxWidth = 0;
 String? isNew;
@@ -68,8 +68,9 @@ class GridWidget extends StatefulWidget {
 class GridWidgetState extends State<GridWidget> {
   final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
   @override Widget build(BuildContext context) { 
+    if (viewID == null) { return Container(); }
     List<Widget> additionnalContent = [];
-    if (currentView != null) { notNew[viewID!] = []; }
+    if (currentView != null && viewID != null) { notNew[viewID!] = []; }
     if (refWidth != MediaQuery.of(context).size.width) { 
       rects = {};
       refWidth = MediaQuery.of(context).size.width; 
@@ -311,8 +312,8 @@ class GridColumnWidget extends StatefulWidget {
   double getTotal() { return contextWidth - (80 + maxLength); }
 
   void prefetch() {
-    if (currentView != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
-    if (!rects[viewID]!.containsKey(columnName)) {
+    if (currentView != null && !rects.containsKey(viewID) && viewID != null) { rects[viewID!] = {}; }
+    if (rects[viewID] != null && !rects[viewID]!.containsKey(columnName)) {
       double width = getWidth(false);
       late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
@@ -320,7 +321,7 @@ class GridColumnWidget extends StatefulWidget {
       );
       rects[viewID]![columnName] = rect;
     }
-    maxWidth += rects[viewID]![columnName]!.width;
+    maxWidth += rects[viewID] != null ? rects[viewID]![columnName]!.width : 300;
   }
 }
 class GridColumnWidgetState extends State<GridColumnWidget> {
@@ -329,12 +330,12 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     var width = widget.getWidth(false);
     List<Widget> buttons = [];
     if (currentView !=  null) {
-      if (!globalFilter.containsKey(viewID)) { globalFilter[viewID!] = {}; }
-      if (!globalOrder.containsKey(viewID)) { globalOrder[viewID!] = {}; }
+      if (!globalFilter.containsKey(viewID) && viewID != null) { globalFilter[viewID!] = {}; }
+      if (!globalOrder.containsKey(viewID) && viewID != null) { globalOrder[viewID!] = {}; }
     }
     if (widget.allowSorting) { 
       buttons.add(IconButton(onPressed: () async { 
-        if (currentView !=  null) {
+        if (currentView !=  null && viewID != null) {
           globalOffset = 0;
           globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "desc" || globalOrder[viewID]![widget.columnName] == null  ? "asc" : "desc";
           APIService().get<model.View>(currentView!.linkPath, true, context).then((value){
@@ -345,14 +346,14 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         }
       }, 
       icon: Icon( currentView != null && globalOrder.containsKey(viewID) && (
-        (globalOrder[viewID]![widget.columnName] == "desc")
+        (globalOrder[viewID]![widget.columnName] == "desc" && viewID != null && globalOrder[viewID] != null)
         || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,)));
     } 
     if (widget.allowFiltering) { 
       buttons.add(FilterPopUpWidget(label: widget.label.value, columnName: widget.columnName, component: this,)); }
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
-      if (((widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
-      || (widget.allowFiltering && (globalFilter[viewID]!.containsKey(widget.columnName)) || globalNew))) { 
+      if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
+      || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.containsKey(widget.columnName)) || globalNew))) { 
         buttons.add(IconButton(onPressed: () async { 
           resetFilter(widget.columnName);
           globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
@@ -365,7 +366,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
       center: MediaQuery.of(context).size.center(Offset.zero), width: width.isNaN ? 300 : width + 42, height: 55 );
     if (currentView != null && rects.containsKey(viewID)) { rects[viewID]![widget.columnName] = rect; }
     
-    return Container(width: rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
+    return Container(width: rects[viewID] != null && rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
     decoration: BoxDecoration( color: widget.backgroundColor, border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
     child: fork.TransformableBox(
       rect: rect,

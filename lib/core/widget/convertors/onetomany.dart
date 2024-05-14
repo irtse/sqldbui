@@ -57,7 +57,7 @@ class OneToManyState extends State<OneToManyWidget> {
                 widget.flashed[dataForm.view!.id] = dataForm;
                 if (!widget.readOnly && data.actions.contains("delete")) {
                   var w = Stack(children: [dataForm,
-                            Positioned(top: 20, left: MediaQuery.of(context).size.width - 470, 
+                            Positioned(top: 10,  left: MediaQuery.of(context).size.width - 640, 
                             child: IconButton(onPressed: () {
                               widget.component.widget.detectChange = true;
                               setState(() {
@@ -85,6 +85,7 @@ class OneToManyState extends State<OneToManyWidget> {
         var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
           widget.component.widget.detectChange = true;
+          print(widget.component.widget.view?.name);
           var mapped = <String, dynamic>{};
           List<String> order = <String>[];
           for (var fieldName in scheme.schema.keys) { 
@@ -93,6 +94,7 @@ class OneToManyState extends State<OneToManyWidget> {
           }
           var newView = model.View(name: "${widget.label} ${filtered.length + 1}", actions: scheme.actions, actionPath: scheme.actionPath,
                                   schema: scheme.schema, order: order, isEmpty: true, items: <model.Item>[model.Item(values: mapped)]);
+          widget.component.widget.detectChange = true;
           setState(() { 
             var k = GlobalKey<FormWidgetState>();
             widget.component.widget.oneToManiesForm.add(DataFormWidget(key: k, view: newView, scroll: false, subForm: true, superFormSchemaName: widget.schemaName)); 
@@ -106,8 +108,7 @@ class OneToManyState extends State<OneToManyWidget> {
               var val = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
               if (val.isNotEmpty) {
                 widget.component.widget.oneToManiesForm.remove(val.last); 
-                try { widget.component.widget.oneToManiesStateForm.remove(val.last); 
-                } catch(e) { /* EMPTY and proud to be */ } 
+                try { widget.component.widget.oneToManiesStateForm.remove(val.last); } catch(e) { /* EMPTY and proud to be */ } 
               }
             });},));
         }

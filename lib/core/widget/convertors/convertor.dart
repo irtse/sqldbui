@@ -16,7 +16,7 @@ class Convertor {
     if (type.contains("text") || type.contains("varchar") 
     || ((type.contains("time") || type.contains("date")) && readOnly)) { 
         return TextWidget(form : form, schemaName: schemaName, name: name,readOnly: readOnly, value: value, label: label, require: require, type: type, component: comp,);
-      } else if ((type.contains("int") && url == null) || type.contains("double") || type.contains("float") || type.contains("money")) { 
+      } else if ((type.contains("int") && url == null) || type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal")) { 
         return NumberWidget(form : form, schemaName: schemaName, name: name,readOnly: readOnly, value: value, label: label, require: require, type: type, component: comp,);
       } else if (type.contains("bool")) {
     if (form[name] != null) { value = form[name]; }
@@ -32,7 +32,7 @@ class Convertor {
                     },
                   );
     } else if (type.contains("time") || type.contains("date")) { 
-        return DateWidget(form : form, type: type, schemaName: schemaName, name: name,readOnly: readOnly, value: value, label: label, component: comp,);
+        return DateWidget(form : form, type: type, schemaName: schemaName, require: require, name: name,readOnly: readOnly, value: value, label: label, component: comp,);
     } else if ((url != null && type.contains("int")) || type.contains("enum") ) {
         return DropDownWidget(form: form, schemaName: schemaName, name: name, readOnly: readOnly, value: value, label: label, require: require, 
                     type: type, url: url, component: comp);

@@ -70,10 +70,10 @@ class _NumberState extends State<NumberWidget> {
             if (widget.type.contains("int") && value != null) {
               try { double.parse(value); } catch (e) { err = true; }
             }
-            if ((widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("money")) && value != null) {
+            if ((widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("decimal") || widget.type.contains("money")) && value != null) {
               try { double.parse(value); } catch (e) { err = true; }
             }
-            return (value == null || value.isEmpty) && widget.require || err && widget.require ? 'enter a proper number.' : null;
+            return (value == null || value.isEmpty) && widget.require && !widget.readOnly || err && widget.require && !widget.readOnly ? 'enter a proper number.' : null;
           },
         ));
   }
