@@ -129,6 +129,7 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
+      print("$url $force");
       if (cache.containsKey(url) && !force && cache[url] != null) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
         } else { return cache[url]! as APIResponse<T>; } 
@@ -137,6 +138,7 @@ class APIService {
         dio.options.headers["authorization"] = auth;
         var orderBy = getOrderDir(url);
         var filter = getFilter(url, isFilter);
+        print(filter);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
@@ -167,7 +169,7 @@ class APIService {
         err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
-    if (context != null) {
+    if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
       showAlertBanner( context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
                        alertBannerLocation:  AlertBannerLocation.bottom,);

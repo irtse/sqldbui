@@ -67,7 +67,7 @@ class AuthService extends ChangeNotifier {
     return prefs.getString("token");
   }
   Future<void> refresh(bool auth) async {
-    /*String? cookie = await getTokenCookie();
+    String? cookie = await getTokenCookie();
     if (cookie != null) { APIService.auth = cookie; }
     if (APIService.auth != "") {
       await service.get<User>("/auth/refresh", true, null).then((value) async { 
@@ -83,7 +83,7 @@ class AuthService extends ChangeNotifier {
           timer();
         }
       }).catchError( (e) { auth && isLoggedIn ? unAuthenticate() : null; }); 
-    }*/
+    }
   }
   timer() {
     if (timeBomb > 0) {

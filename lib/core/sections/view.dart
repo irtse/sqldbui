@@ -92,7 +92,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       category=cat;
       viewID=id;
       subViewID=subID;
-      globalLoading = true; // globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
+      globalLoading = true;
       firstAPI =  forceFirstAPI || globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
     });
   }

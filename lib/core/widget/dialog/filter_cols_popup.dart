@@ -57,7 +57,8 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     activeColor: Colors.green, inactiveColor: Colors.grey,
                     activeChild: Text(label), inactiveChild: Text("$label <hide>"), 
                     borderRadius:  const BorderRadius.all(Radius.circular(15)),
-                    width: max, height: 30.0, disabledOpacity: 0.5)));
+                    width: max, height: 30.0, disabledOpacity: 0.5,
+                    onChanged: (value) => colsSchemaValid[viewID!]![fieldName]!.value = value,)));
       }
       return PopupMenuButton(
       color: Colors.white,

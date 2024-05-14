@@ -1,6 +1,7 @@
 // import 'package:cookie_consent/cookie_consent.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -80,6 +81,8 @@ class HomeScreenState extends State<HomeScreen> {
     // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
     return Scaffold(
       key: scaffoldKey,
+      floatingActionButton: FloatingActionButton(child: Icon(Icons.question_mark, color: Colors.white,), backgroundColor: Theme.of(context).primaryColor,
+        onPressed: () => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },)),
       endDrawer: const NotificationDrawerWidget(),
       appBar: AppBar(
         elevation: 3,
