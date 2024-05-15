@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/widget/convertors/date.dart';
 import 'package:sqldbui2/core/widget/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/convertors/manytomany.dart';
@@ -20,17 +22,21 @@ class Convertor {
         return NumberWidget(form : form, schemaName: schemaName, name: name,readOnly: readOnly, value: value, label: label, require: require, type: type, component: comp,);
       } else if (type.contains("bool")) {
     if (form[name] != null) { value = form[name]; }
-        return CheckboxListTileFormField(
-                    enabled: !readOnly,
+        ValueNotifier<bool> ctrl = ValueNotifier(value ?? false);
+        return AdvancedSwitch(
                     initialValue: value ?? false,
-                    title: Text("${label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${require ? '*' : ''}", style: const TextStyle(fontSize: 10)),
-                    validator: (bool? value) { return null; },
-                    onSaved: (value) {form[name]=value;},
+                    enabled: !readOnly,
+                    controller: ctrl,
+                    activeColor: Colors.green, inactiveColor: Colors.grey,
+                    activeChild: Text("${label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${require ? '*' : ''}"), 
+                    inactiveChild: Text("${label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${require ? '*' : ''}"), 
+                    borderRadius:  const BorderRadius.all(Radius.circular(15)),
+                    width: 200, height: 30.0, disabledOpacity: 0.5,
                     onChanged: (value) {
                       comp.widget.detectChange = true;
                       form[name]=value;
-                    },
-                  );
+                      ctrl.value = value;
+                    },);
     } else if (type.contains("time") || type.contains("date")) { 
         return DateWidget(form : form, type: type, schemaName: schemaName, require: require, name: name,readOnly: readOnly, value: value, label: label, component: comp,);
     } else if ((url != null && type.contains("int")) || type.contains("enum") ) {

@@ -134,13 +134,13 @@ class FormWidgetState extends State<DataFormWidget> {
           String? url;
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
           // if(!(readOnly && value == null)) { 
-            double max = field.type.contains("bool") ? 150 : (counter > 1 ?
+            double max = (counter > 1 ?
                   ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.5)
                   : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
                                               field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
-              var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0,  top: field.type.contains("bool") ? 0 : 11.0 , bottom: field.type.contains("bool") ? 30 : 11.0),
+              var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0,  top: 11.0 , bottom: 11.0),
               child: SizedBox( width: widget.subForm && !field.type.contains("bool") ? max - 50 : max, 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);

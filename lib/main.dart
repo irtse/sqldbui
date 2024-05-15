@@ -81,8 +81,8 @@ class HomeScreenState extends State<HomeScreen> {
     // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
     return Scaffold(
       key: scaffoldKey,
-      floatingActionButton: FloatingActionButton(child: Icon(Icons.question_mark, color: Colors.white,), backgroundColor: Theme.of(context).primaryColor,
-        onPressed: () => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },)),
+      floatingActionButton: FloatingActionButton(backgroundColor: Theme.of(context).primaryColor,
+        onPressed: () => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },), child: Icon(Icons.question_mark, color: Colors.white,)),
       endDrawer: const NotificationDrawerWidget(),
       appBar: AppBar(
         elevation: 3,

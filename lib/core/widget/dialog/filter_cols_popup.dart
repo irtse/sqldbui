@@ -32,15 +32,11 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
       var dpItems = <DropdownMenuItem<String>>[];
       force = true;
       List<Widget> items = [];
-      double max = 0;
       if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
         for (var i in snapshot.data!.data!) { 
           filterConfs[i.label!] = i.fields;
           dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
         }
-      }
-      for (var fieldName in widget.schema.keys) {
-        if (widget.schema[fieldName]!.label.length * 30 > max) { max = widget.schema[fieldName]!.label.length * 25; }
       }
       if (!colsSchemaValid.containsKey(viewID)) {  colsSchemaValid[viewID!]= <String, ValueNotifier<bool>>{}; }
       for (var fieldName in widget.schema.keys) {
@@ -57,7 +53,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     activeColor: Colors.green, inactiveColor: Colors.grey,
                     activeChild: Text(label), inactiveChild: Text("$label <hide>"), 
                     borderRadius:  const BorderRadius.all(Radius.circular(15)),
-                    width: max, height: 30.0, disabledOpacity: 0.5,
+                    width: 200, height: 30.0, disabledOpacity: 0.5,
                     onChanged: (value) => colsSchemaValid[viewID!]![fieldName]!.value = value,)));
       }
       return PopupMenuButton(
