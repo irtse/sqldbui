@@ -238,7 +238,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
         }
       }
       var child = e.columnName != "description" ? ListTile(
-        onTap: () => globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false),
+        onTap: () {
+          globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false);
+        },
         title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).primaryColorLight))))
@@ -299,7 +301,7 @@ class GridColumnWidget extends StatefulWidget {
   double getWidth(bool avoid) {
     double width = (label.value.length * 17);
     if ((width * maxLength) <= getTotal() && !avoid && maxLength <= 8) { width = (getTotal() /  maxLength); }
-    if (width < 130) { width = 130; }
+    if (width < 200) { width = 200; }
     return width;
   }
 

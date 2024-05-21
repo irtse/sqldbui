@@ -44,8 +44,7 @@ class AppRouter {
     ),
   ];  
   static void navigateWith(String path) {
-    viewID = null;
-    globalMainViewKey.currentState?.refreshUrl(path, null, false);  
+    globalMainViewKey.currentState?.refreshUrl(path, subViewID, false);  
   }
   static void navigateTo(String path) {
     var splitted = path.replaceAll("#", "/").replaceAll(":", "/").split("/");

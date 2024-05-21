@@ -28,7 +28,10 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
           decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).splashColor, ))),
           child: Column(children: [
           Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: TextButton( onPressed: () { 
-            AppRouter.navigateTo(notif.ref); 
+            var splitted = notif.ref.replaceAll("#", "/").replaceAll(":", "/").split("/");
+            viewID = splitted.length > 1 ? splitted[1] : null;
+            subViewID=splitted.length > 2 ? splitted[2] : null;
+            AppRouter.navigateWith(notif.dataPath); 
             Future.delayed(const Duration(seconds: 1), () => setState(() { APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), null); }));
           }, 
           child: Row(

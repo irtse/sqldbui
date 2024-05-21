@@ -1,4 +1,3 @@
-import 'package:flutter_login/flutter_login.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -32,7 +31,7 @@ class _ManyToManyState extends State<ManyToManyWidget> {
   var schema =  widget.component.widget.view!.schema;
   var scheme = schema[widget.name];
   if (scheme == null) { return Container(); }
-  var readOnly = (!view.actions.contains("post") && !view.actions.contains("put")) || mainForm.currentState!.widget.view!.readOnly;
+  var readOnly = widget.readOnly || (!view.actions.contains("post") && !view.actions.contains("put")) || mainForm.currentState!.widget.view!.readOnly;
   if (readOnly) {
       List<Container> tags = <Container>[];
       if (widget.value != null && widget.value is List) {

@@ -127,7 +127,7 @@ class FormWidgetState extends State<DataFormWidget> {
           }
           if (refItem.valuesMany.containsKey(fieldName)) { value = refItem.valuesMany[fieldName]!; }
           if (refItem.valuesManyPath.containsKey(fieldName)) { value = refItem.valuesManyPath[fieldName]!; }
-          var readOnly = (field.readonly || mainForm.currentState!.widget.view!.readOnly) && !widget.view!.isEmpty;
+          var readOnly = (field.readonly || mainForm.currentState!.widget.view!.readOnly || refItem.readonly) && !widget.view!.isEmpty;
           if (newCacheEntry[fieldName] == null) { newCacheEntry[fieldName]=value; } 
           if ((fieldName == "name" && field.readonly && (refItem.values.containsKey("name") && refItem.values["name"] != null))
           || (fieldName == "description" && field.readonly && (refItem.values.containsKey("description") && refItem.values["description"] != null)) ) { continue; }
@@ -141,7 +141,7 @@ class FormWidgetState extends State<DataFormWidget> {
                                               field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
               var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0,  top: 11.0 , bottom: 11.0),
-              child: SizedBox( width: widget.subForm && !field.type.contains("bool") ? max - 50 : max, 
+              child: SizedBox( width: widget.subForm ? max - 50 : max, 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);
             }

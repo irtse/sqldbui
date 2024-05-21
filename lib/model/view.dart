@@ -66,12 +66,14 @@ class Item extends SerializerDeserializer<Item> {
     this.values = emptyDyn,
     this.valuesMany = emptyManyValues,
     this.workflow,
+    this.readonly = false,
   });
   Map<String,dynamic> valuesManyPath;
   Map<String,dynamic> values;
   String linkPath = "";
   String dataPath = "";
   Workflow? workflow;
+  bool readonly;
   Map<String,Shallowed> valuesShallow;
   Map<String,List<Shallowed>>valuesMany;
 
@@ -79,6 +81,7 @@ class Item extends SerializerDeserializer<Item> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      readonly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,
       valuesShallow: json.containsKey("values_shallow") && json["values_shallow"] != null ? fromMapJson<Shallowed>(json["values_shallow"], Shallowed()) : <String, Shallowed>{}, 
       dataPath: json.containsKey("data_path") && json["data_path"] != null ? json["data_path"] : "", 
       valuesMany: json.containsKey("values_many") && json["values_many"] != null ? fromMapListJson<Shallowed>(json["values_many"], Shallowed()) : <String, List<Shallowed>>{}, 
@@ -127,6 +130,7 @@ class Workflow extends SerializerDeserializer<Workflow> {
   Workflow({
     this.id = "",
     this.current = "",
+    this.position = "",
     this.currentHub = false,
     this.isClose = false,
     this.currentClose = false,
@@ -138,6 +142,7 @@ class Workflow extends SerializerDeserializer<Workflow> {
   bool isClose = false;
   bool isDismiss = false;
   String current = "";
+  String position = "";
   bool currentHub = false;
   bool currentClose = false;
   bool currentDismiss = false;
@@ -149,6 +154,7 @@ class Workflow extends SerializerDeserializer<Workflow> {
   @override deserialize(Map<String, dynamic> json) {
     return  Workflow(
       id :json.containsKey("id") && json["id"] != null ? json["id"] : "", 
+      position: json.containsKey("position") && json["position"] != null ? json["position"] : "", 
       current: json.containsKey("current") && json["current"] != null ? json["current"] : "", 
       currentDismiss: json.containsKey("current_dismiss") && json["current_dismiss"] != null ? json["current_dismiss"] : false, 
       currentClose: json.containsKey("current_close") && json["current_close"] != null ? json["current_close"] : false, 
@@ -248,7 +254,7 @@ class View extends SerializerDeserializer<View> {
   }
   @override Map<String, dynamic> serialize() => { };
 }
-
+const emptyFilter = <Filter>[];
 class Shallowed extends SerializerDeserializer<Shallowed> {
   Shallowed({
     this.id,
@@ -262,7 +268,8 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.schemaName = "",
     this.order = emptyStr, 
     this.workflow,
-    this.fields = emptyStr,
+    this.selected = false,
+    this.fields = emptyFilter,
   });
   String? label;
   String? name;
@@ -275,14 +282,15 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   List<dynamic> actions;
   Map<String, SchemaField> schema;
   Workflow? workflow;
-  List<dynamic> fields;
+  List<Filter> fields;
+  bool selected;
 
   @override deserialize(Map<String, dynamic> json) {
-    developer.log("Shallowed $json", name: "Shallowed");
     return Shallowed(
     id: json.containsKey("id") ? json["id"] : null, 
-    fields: json.containsKey("fields") ? json["fields"] : <String>[],
-    name: json.containsKey("name") ? json["name"] : null,
+    selected: json.containsKey("is_selected") ? json["is_selected"] : false,
+    fields: json.containsKey("filter_fields") ? fromListJson(json["filter_fields"], Filter()) : <Filter>[],
+    name: json.containsKey("name") ?  json["name"] : null,
     label: json.containsKey("label") ? json["label"] : null,
     workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
     readOnly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,  
@@ -296,5 +304,39 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   @override Map<String, dynamic> serialize() => {
     "id" : id,
     "name" : name,
+  };
+}
+
+class Filter extends SerializerDeserializer<Filter> {
+  Filter({
+    this.id,
+    this.name,
+    this.value,
+    this.opera,
+    this.separator = "",
+    this.dir = "asc",
+  });
+  int? id;
+  String? name;
+  dynamic value;
+  String? opera;
+  String? separator;
+  String? dir;
+
+  @override deserialize(Map<String, dynamic> json) {
+    return Filter(
+    id: json.containsKey("id") ? json["id"] : null, 
+    name: json.containsKey("name") ? json["name"] : null,
+    value: json.containsKey("value") ? json["value"] : null,
+    separator: json.containsKey("separator") && json["separator"] != null ? json["separator"] : "",
+    dir: json.containsKey("dir") && json["dir"] != null ? json["dir"] : "" );
+  }
+  @override Map<String, dynamic> serialize() => {
+    "id" : id,
+    "name" : name,
+    "value" : value,
+    "operator": opera,
+    "separator" : separator,
+    "dir" : dir,
   };
 }

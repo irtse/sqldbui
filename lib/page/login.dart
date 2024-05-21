@@ -24,7 +24,6 @@ class _LoginWidgetState extends State<LoginScreen> {
   Duration get loginTime => const Duration(milliseconds: 2250);
 
   Future<String?> _authUser(LoginData data) async {
-    debugPrint('Name: ${data.name}, Password: ${data.password}');
     return Future.delayed(loginTime).then((_) async {
       await service.login(data.name, data.password);
       if (service.error != null) { return service.error; }
@@ -33,14 +32,12 @@ class _LoginWidgetState extends State<LoginScreen> {
   }
 
   Future<String?> _signupUser(SignupData data) {
-    debugPrint('Signup Name: ${data.name}, Password: ${data.password}');
     return Future.delayed(loginTime).then((_) {
       return null;
     });
   }
 
   Future<String> _recoverPassword(String name) {
-    debugPrint('Name: $name');
     return Future.delayed(loginTime).then((_) {
       return "Not implemented";
     });

@@ -9,6 +9,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 // ignore: must_be_immutable
 Map<String, String?> filterView = <String, String?>{};
+Map<String, int> filterViewIDName = <String, int>{};
 Map<String, Map<String, ValueNotifier<bool>>> colsSchemaValid = <String, Map<String, ValueNotifier<bool>>>{};
 GlobalKey<FilterColsPopUpState> filterColsPopUpKey = GlobalKey<FilterColsPopUpState>();
 // ignore: must_be_immutable
@@ -21,31 +22,44 @@ class FilterColsPopUpWidget extends StatefulWidget{
 }
 
 class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
-  Map<String, List<dynamic>> filterConfs = {};
+  Map<String, List<model.Filter>> filterConfs = {};
   bool force = false;
+  bool noSelection =false;
   @override Widget build(BuildContext context) {
     if (viewID == null) { return Container(); }
     if (filterView.containsKey(viewID) && filterView[viewID] != null && filterView[viewID] != "") { 
       widget.currentFilter = filterView[viewID!]!; 
     }
-    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", firstAPI || force, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
+    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", firstAPI | force, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
       var dpItems = <DropdownMenuItem<String>>[];
       force = true;
       List<Widget> items = [];
+      List<dynamic> order = [];
       if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
         for (var i in snapshot.data!.data!) { 
+          if (i.selected && !noSelection) { 
+            widget.currentFilter = i.label ?? ""; 
+            filterView[viewID!] = i.label ?? "";
+          }
+          filterViewIDName[i.label!] = i.id!;
           filterConfs[i.label!] = i.fields;
+          order = i.order;
           dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
         }
       }
       if (!colsSchemaValid.containsKey(viewID)) {  colsSchemaValid[viewID!]= <String, ValueNotifier<bool>>{}; }
-      for (var fieldName in widget.schema.keys) {
-        var label = widget.schema[fieldName]!.label;
+      for (var fieldName in order) {
+        if (widget.schema[fieldName] == null) { continue; }
+        var scheme =  widget.schema[fieldName]!;
+        var label = scheme.label;
         if (!colsSchemaValid[viewID!]!.containsKey(fieldName) || widget.currentFilter == "") { 
-          colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(widget.schema[fieldName]!.active); 
+          colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(scheme.active); 
         } 
         if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
-          colsSchemaValid[viewID!]![fieldName]!.value = filterConfs[widget.currentFilter]!.contains(fieldName);
+          try {
+            filterConfs[widget.currentFilter]!.where((element) => element.name == fieldName).first;
+            colsSchemaValid[viewID!]![fieldName]!.value = true;
+          } catch (e) { colsSchemaValid[viewID!]![fieldName]!.value = false; }
         }
         items.add(Padding( padding: const EdgeInsets.symmetric(vertical:  10), child: AdvancedSwitch(
                     initialValue: colsSchemaValid[viewID!]![fieldName]!.value,
@@ -80,11 +94,16 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                       filterView[viewID!] = value ?? "";
                       for (var fieldName in widget.schema.keys) {
                         if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
-                          colsSchemaValid[viewID!]![fieldName]!.value = filterConfs[widget.currentFilter]!.contains(fieldName);
+                          try {
+                            filterConfs[widget.currentFilter]!.where((element) => element.name == fieldName).first;
+                            colsSchemaValid[viewID!]![fieldName]!.value = true;
+                          } catch (e) { colsSchemaValid[viewID!]![fieldName]!.value = false; }
                         }
                       } 
+                      APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterViewIDName[value]}"), <String, dynamic> { "is_selected" : true }, null);
                       globalOffset = 0; 
                       rects.remove(viewID);
+                      noSelection=false;
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                     },
                     dropdownColor: Theme.of(context).highlightColor,
@@ -138,7 +157,9 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                   filterView.containsKey(viewID) && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () { 
-                    filterView[viewID!]="";
+                    APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterViewIDName[widget.currentFilter]}"), <String, dynamic> { "is_selected" : false }, null);
+                    filterView.remove(viewID!);
+                    noSelection=true;
                     widget.currentFilter = "";
                     for (var fieldName in widget.schema.keys) {
                       colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(widget.schema[fieldName]!.active);

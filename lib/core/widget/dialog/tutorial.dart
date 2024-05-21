@@ -49,7 +49,7 @@ var slide2 = (BuildContext context) => Container( decoration: BoxDecoration(colo
 
 var slide3 = (BuildContext context) => Container( decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor,
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]), child: Stack(children: [ 
-      Container( margin: const EdgeInsets.only(top: 180), child: Image( image: AssetImage('assets/images/slide3.png'), height: MediaQuery.of(context).size.height - 260, width: MediaQuery.of(context).size.width - 200, fit: BoxFit.cover, )),
+      Container( margin: const EdgeInsets.only(top: 180), child: Image( image: const AssetImage('assets/images/slide3.png'), height: MediaQuery.of(context).size.height - 260, width: MediaQuery.of(context).size.width - 200, fit: BoxFit.cover, )),
       Container( height: 180, padding: const EdgeInsets.all(40), decoration: BoxDecoration(color: Colors.white,
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]),
          child: Column( children: [
@@ -150,15 +150,16 @@ class TutorialPopUpState extends State<TutorialPopUpWidget> {
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
         title: const Text('TUTORIAL - HOW TO START', style: TextStyle(color: Colors.white),)),
-      body: Container( height: MediaQuery.of(context).size.height, color: Theme.of(context).primaryColorLight,
-          child: CarouselSlider(
+      body: Container( width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height, color: Theme.of(context).primaryColorLight,
+          child: Center( child: CarouselSlider(
         options: CarouselOptions(
           aspectRatio: 2.0,
           enlargeCenterPage: true,
           scrollDirection: Axis.horizontal,
         ),
         items: list,
-      )),
+      ))),
     );
   }
 }

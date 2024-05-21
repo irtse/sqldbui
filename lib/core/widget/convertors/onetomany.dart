@@ -39,7 +39,7 @@ class OneToManyState extends State<OneToManyWidget> {
           List<Widget> items = <Widget>[];
           if (snap.data != null) {
             for (var data in snap.data!.data!) {
-              widget.readOnly = (!data.actions.contains("put") || mainForm.currentState!.widget.view!.readOnly);
+              widget.readOnly = widget.readOnly || (!data.actions.contains("put") || mainForm.currentState!.widget.view!.readOnly);
               widget.canPost = data.actions.contains("post");
               for (var item in data.items) {
                 var isDeleted = false;
@@ -48,12 +48,13 @@ class OneToManyState extends State<OneToManyWidget> {
                   if ("${deleted.view!.id}" == "${item.values["id"]}") { isDeleted = true; break; }
                 }
                 if (isDeleted) { continue; }
+                item.readonly = widget.readOnly;
                 var view = model.View(id: int.parse(item.values["id"]), name: data.name, readOnly: widget.readOnly,
                                   workflow: data.workflow,
                                   actions: data.actions, actionPath: data.actionPath, schemaName: data.schemaName,
                                   schema: data.schema, order: data.order, isEmpty: false, items: <model.Item>[item]);
                 var dataForm = widget.flashed.containsKey(int.parse(item.values["id"])) ? widget.flashed[int.parse(item.values["id"])]! 
-                : DataFormWidget(view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName,);
+                : DataFormWidget(view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
                 widget.flashed[dataForm.view!.id] = dataForm;
                 if (!widget.readOnly && data.actions.contains("delete")) {
                   var w = Stack(children: [dataForm,
@@ -81,11 +82,11 @@ class OneToManyState extends State<OneToManyWidget> {
     List<Widget> rows = [Padding( padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
                                   child: Text("related ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")),]; 
     
-    if (!readOnly && canPost || widget.component.widget.view != null && widget.component.widget.view!.isEmpty) {
+    print(readOnly);
+    if (!readOnly && (canPost || widget.component.widget.view != null) || widget.component.widget.view!.isEmpty) {
         var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
           widget.component.widget.detectChange = true;
-          print(widget.component.widget.view?.name);
           var mapped = <String, dynamic>{};
           List<String> order = <String>[];
           for (var fieldName in scheme.schema.keys) { 

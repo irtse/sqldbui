@@ -55,8 +55,6 @@ class ActionService {
         }
       return views;
     }
-    print(form.view!.name);
-    print(form.detectChange);
     if (form.oneToManiesForm.where((element) => element.detectChange).isNotEmpty) { form.detectChange = true; }
     if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
         form.detectChange = true;
@@ -91,7 +89,6 @@ class ActionService {
       if (form.view!.actions.contains(method.toLowerCase())) {
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
-          print("change BLBLBL");
           if (value.data != null && value.data!.isNotEmpty) {
             views.add(value.data![0]); 
             form.cacheForm["id"]=value.data![0].items[0].values["id"];
@@ -105,7 +102,6 @@ class ActionService {
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
-          print("change ERROR");
           errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}");
           listSubForms(schema, form.cacheForm, method, schemaName, context, true);
           APIResponse<model.View>(data: null);
@@ -155,10 +151,7 @@ class ActionService {
   static Future<List<model.View>> formSubForms(List<DataFormWidget> widgets, Map<String, dynamic> values, String method, 
                                                  String schemaName, BuildContext context, bool add, bool delete) async {
     List<model.View> views = [];
-    print(schemaName);
-    print(widgets);
     for (var many in widgets) { 
-      developer.log("many ${many.view!.name} && ${many.view!.actionPath}", name: "ActionService");
       if (delete && many.view != null && many.view!.actions.contains("delete") && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null
                                  ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });

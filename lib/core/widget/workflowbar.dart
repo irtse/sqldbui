@@ -15,12 +15,16 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
     List<Widget> items = [];
     var curr = 0;
     try { curr = int.parse(widget.workflow.current);  } catch(e) { /* */ }
+    var pos = 0;
+    try { pos = int.parse(widget.workflow.position);  } catch(e) { /* */ }
     if (widget.workflow.steps.isNotEmpty) {
       var active = false;
-      try { active = widget.workflow.current != "" && int.parse(widget.workflow.current) >= 0;  } catch(e) { /* */ }
+      try { active = widget.workflow.position != "" && int.parse(widget.workflow.position) >= 0;  } catch(e) { /* */ }
       items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), width: 100, gotBefore: false,
         current: widget.workflow.current != "" && curr == 0,
-        isDismissible: widget.workflow.isDismiss, beforeDismissible: widget.workflow.isDismiss, active: active));
+        doing: widget.workflow.position != "" && pos == 0,
+        isDismissible: widget.workflow.isDismiss, beforeDismissible: widget.workflow.isDismiss, 
+        active: active));
     }
     for (var i = 0; i < widget.workflow.steps.length; i++) {
       items.add(StepWidget( content: Text("step ${ i + 1 }", style: const TextStyle(color: Colors.white)),
@@ -31,7 +35,8 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
         beforeActive: widget.workflow.isClose || widget.workflow.current != "" && curr >= i + 1,
         isDismissible: widget.workflow.isDismiss || widget.workflow.currentDismiss && widget.workflow.current != "" && curr == i + 1, 
         beforeDismissible: widget.workflow.isDismiss || widget.workflow.currentDismiss && widget.workflow.current != "" && curr >= i + 1,
-        active: widget.workflow.isClose || widget.workflow.current != "" && curr > ( i + 1 )));
+        doing: widget.workflow.position != "" && pos > ( i ),
+        active: widget.workflow.isClose || widget.workflow.position != "" && pos > ( i + 1 )));
     }
     if (widget.workflow.steps.isNotEmpty) {
       items.add(StepWidget(content : Padding(padding: const EdgeInsets.only(left: 10), 
@@ -62,10 +67,10 @@ class StepWidget extends StatefulWidget{
   bool current = false;
   bool beforeDismissible = false;
   bool isDismissible = false;
-
+  bool doing = false;
   List<model.Step>? steps = [];
   StepWidget ({ Key? key, required this.content, required this.width, this.steps, required this.gotBefore,
-    this.beforeActive = false, this.active = false, this.beforeCurrent = false, this.current = false, 
+    this.beforeActive = false, this.active = false, this.doing = false, this.beforeCurrent = false, this.current = false, 
     this.isDismissible = false, this.beforeDismissible = false }): super(key: key);
   @override StepWidgetState createState() => StepWidgetState();
 }
@@ -139,7 +144,7 @@ class StepWidgetState extends State<StepWidget> {
           decoration: BoxDecoration(
             border: const Border(right: BorderSide(width: 2, color: Colors.white),),
             color: widget.current ? Theme.of(context).primaryColor : (
-              widget.isDismissible ? Colors.red : ( widget.active ?  Colors.green : Theme.of(context).splashColor)),
+              widget.isDismissible ? Colors.red : ( widget.active ?  Colors.green : (widget.doing ? Colors.orange : Theme.of(context).splashColor))),
           ),
           child: Center(child: widget.content,), ),
       ...icons,

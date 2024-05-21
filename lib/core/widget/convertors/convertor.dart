@@ -23,7 +23,7 @@ class Convertor {
       } else if (type.contains("bool")) {
     if (form[name] != null) { value = form[name]; }
         ValueNotifier<bool> ctrl = ValueNotifier(value ?? false);
-        return AdvancedSwitch(
+        return Padding( padding: const EdgeInsets.symmetric(horizontal: 60), child: AdvancedSwitch(
                     initialValue: value ?? false,
                     enabled: !readOnly,
                     controller: ctrl,
@@ -36,7 +36,7 @@ class Convertor {
                       comp.widget.detectChange = true;
                       form[name]=value;
                       ctrl.value = value;
-                    },);
+                    },));
     } else if (type.contains("time") || type.contains("date")) { 
         return DateWidget(form : form, type: type, schemaName: schemaName, require: require, name: name,readOnly: readOnly, value: value, label: label, component: comp,);
     } else if ((url != null && type.contains("int")) || type.contains("enum") ) {

@@ -120,7 +120,8 @@ class _DropDownState extends State<DropDownWidget> {
                 var t = items.where((element) => element.value == v);
                 if (!mapped.containsKey(v) && t.isEmpty){
                   mapped[v]=item;
-                  if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
+                  if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
+                  && items.where((element) => element.value == v,).isEmpty) {
                     items.add(DropdownMenuItem<String>(value: v, child: Text(v, overflow: TextOverflow.ellipsis,),));
                   }
                 }

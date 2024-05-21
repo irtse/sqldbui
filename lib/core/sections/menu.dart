@@ -189,6 +189,5 @@ class MenuWidgetState extends State<MenuWidget> {
     if (nullable) { Future.delayed(const Duration(microseconds: 500), () => currentView = null);  }
     if(full) { refresh(false); }
     globalMainViewKey.currentState?.refresh(viewID, null, category, currentView, true);
-    setState(() {});
   }
 }

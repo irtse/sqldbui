@@ -1,11 +1,10 @@
 import 'dart:io';
+import 'package:sqldbui2/main.dart';
 import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -81,7 +80,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             child: TextWidget(form : cache, schemaName: "", name: "filename", readOnly: false, value: null, label: "filename", 
             require: true, type: "varchar", component: null, isDark: true,)),
             DropDownWidget(form : cache, schemaName: "", name: "format", readOnly: false, value: widget.format, label: "format", 
-              require: true, type: "enum:csv", component: null, url: null, isDark: true,)
+              require: true, type: "enum__csv", component: null, url: null, isDark: true,)
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Divider(color: Theme.of(context).splashColor,))]);
       } else {
@@ -136,8 +135,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),
           ])),
-        content: Wrap(alignment: WrapAlignment.center, children : [...items, SingleChildScrollView(scrollDirection: Axis.vertical,
-          child: Wrap(alignment: WrapAlignment.center, children: mapping))]),
+        content: Wrap(alignment: WrapAlignment.center, children : [...items, Container( 
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5), child: SingleChildScrollView(scrollDirection: Axis.vertical,
+          child: Wrap(alignment: WrapAlignment.center, children: mapping)))]),
         actions: <Widget>[
               Padding( padding: const EdgeInsets.only(bottom: 10), 
               child: TextButton(style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),

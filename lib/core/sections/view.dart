@@ -35,7 +35,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       if ((currentView == null || currentView != null && currentView!.id.toString() != viewID 
       || AppRouter.routedSubID != null) || firstAPI || widget.url != null) {
         return FutureBuilder<APIResponse<model.View>>(
-          future: view != null && view.isList ? APIService().getWithOffset<model.View>("${widget.url ?? view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
+          future: view != null && view.isList && subViewID == null ? APIService().getWithOffset<model.View>("${widget.url ?? view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
           : APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : ""), firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
@@ -55,22 +55,21 @@ class MainViewWidgetState extends State<MainViewWidget> {
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
               } catch(e) { /* */ }
             }
-            firstAPI = false;
+            Future.delayed(const Duration(seconds:5), () => firstAPI = false);
             if ((subViewID != null || AppRouter.routedSubID != null) 
             && currentView != null && widget.url == null) {
               var subID = AppRouter.routedSubID ?? subViewID;
               try {
                 model.Item item = currentView!.items.firstWhere((v) => v.values['id'] == subID);
-                if (item.linkPath != "") { 
-                  Future.delayed( const Duration(seconds: 1), () => refreshUrl(item.linkPath, subID, true));  
-                } 
+                if (item.linkPath != "") { Future.delayed( const Duration(seconds: 1), () => refreshUrl(item.linkPath, subID, true)); } 
               } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }
             }
+            widget.url = null;
             return ViewWidget(view: currentView, views: widget.views);
         });
       } 
     }
-    if (currentView == null) { 
+    if (currentView == null) {   
       viewID=null;
       subViewID=null;
       category=null;

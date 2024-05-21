@@ -15,6 +15,7 @@ import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:sqldbui2/model/view.dart';
 
 var firstAPI = false;
 class APIConstants {
@@ -80,12 +81,19 @@ class APIService {
     var dir = "";
     if (url.contains("?") && AppRouter.routedSubID == null) {
       if (globalOrder.containsKey(viewID)) {
+        var f = ""; var d = "";
         for (var order in globalOrder[viewID]!.keys) {
-          if (orderBy.isEmpty) { orderBy += "&orderby=$order"; 
-          } else { orderBy += ",$order";  }
-          if (dir.isEmpty) { dir += "&dir=${globalOrder[viewID]![order]}"; 
-           } else { dir += ",${globalOrder[viewID]![order]}";  }
+          if (orderBy.isEmpty) { 
+            orderBy += "&orderby="; 
+            f = order;
+          } else { f = "$f,$order";  }
+          if (dir.isEmpty) { 
+            dir += "&dir="; 
+            d = globalOrder[viewID]![order]!;
+           } else { d = "$d,${globalOrder[viewID]![order]}";  }
         }
+        orderBy += f;
+        dir += d;
       }
     }
     return orderBy + dir;
@@ -111,10 +119,11 @@ class APIService {
       if (globalFilter.containsKey(viewID)) {
         for (var f in globalFilter[viewID]!.keys) {  
           if (globalFilter[viewID]![f] != null && "${globalFilter[viewID]![f]}" != "") { 
-            filter += "&$f=";
+            String ff = "&$f=";
             for (var f in globalFilter[viewID]![f]!) {
-              filter += "%25${f.value}%25${f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "")}"; 
+              ff += "%25${f.value}%25${f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "")}"; 
             }
+            filter = "$ff$filter";
           }
         }
       }
@@ -129,7 +138,6 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      print("$url $force");
       if (cache.containsKey(url) && !force && cache[url] != null) { 
         if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
         } else { return cache[url]! as APIResponse<T>; } 
@@ -138,11 +146,11 @@ class APIService {
         dio.options.headers["authorization"] = auth;
         var orderBy = getOrderDir(url);
         var filter = getFilter(url, isFilter);
-        print(filter);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
+          if (method == "delete") { cache.remove(url); return APIResponse<T>(); }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
             if (method == "get") { 

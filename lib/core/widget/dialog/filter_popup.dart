@@ -196,7 +196,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
                   suffixIcon: const Icon(Icons.search),
                   hintText: "filter ${widget.label}...",
-                  labelText: "",
+                  labelText: "value LIKE",
                   errorStyle: const TextStyle(fontSize: 0,),
                 ),
                 onChanged: (String? value) {  widget.searchValue = value; },

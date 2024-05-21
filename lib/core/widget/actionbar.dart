@@ -38,22 +38,6 @@ class ActionBarState extends State<ActionBarWidget> {
         ));
       }
       if (widget.gridKey != null) {
-        if (isFilter()) {
-          actions.add( Column( children: [IconButton( constraints: const BoxConstraints(),
-                tooltip: "reset filter",
-                style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.pressed)) { return Colors.green; }
-                        return Theme.of(context).primaryColor;
-                }), ), icon: Icon( Icons.filter_alt_off, color: Theme.of(context).highlightColor, size: 20 ), 
-                onPressed: () async { 
-                  globalOrder.remove(viewID);
-                  globalFilter.remove(viewID);
-                  globalNew = false;
-                  globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
-                }),],
-          )
-        );
-      }
       actions.add(
           Column(
             children: [IconButton( constraints: const BoxConstraints(),
