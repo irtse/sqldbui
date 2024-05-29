@@ -266,7 +266,6 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.schema = emptySchema,
     this.linkPath = "",
     this.schemaName = "",
-    this.order = emptyStr, 
     this.workflow,
     this.selected = false,
     this.fields = emptyFilter,
@@ -277,7 +276,6 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   bool readOnly;
   String linkPath;
   String schemaName;
-  List<dynamic> order;
   String actionPath;
   List<dynamic> actions;
   Map<String, SchemaField> schema;
@@ -297,7 +295,6 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
     actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
     schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
-    order: json.containsKey("order") && json["order"] != null ? json["order"] : <String>[],  
     linkPath: json.containsKey("link_path") && json["link_path"] != null ? json["link_path"] : "",
     schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{});
   }

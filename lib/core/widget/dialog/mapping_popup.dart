@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:sqldbui2/main.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
@@ -109,18 +111,17 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
           readOnly: false, value: scheme, label: "${currentView!.schema[scheme]!.label} as label", 
           require: false, type: "varchar", component: null, isDark: true,);
         mapping.add(Padding(padding: const EdgeInsets.only(bottom: 10), 
-                    child: Container( width: 400,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                    child: Container( width: 300,
+                    decoration: BoxDecoration( borderRadius: BorderRadius.circular(10),
                     ), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10), child: f,))));
       }
     }
     return FutureBuilder(future: Platform.isAndroid ? (getExternalStorageDirectory()) : (getDownloadsDirectory()), 
       builder: (BuildContext c, AsyncSnapshot snap) {
         directory = snap.hasData && directory == "/" ? snap.data.path : directory;
-        return AlertDialog(backgroundColor: Theme.of(context).secondaryHeaderColor,
-        title: Padding( padding: const EdgeInsets.only(left: 20, right: 20, top: 10), 
-          child: Row( children: [
+        return Padding( padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30), child: Column( children : [
+          Padding( padding: const EdgeInsets.only(left: 20, right: 20, top: 10), 
+          child: Row(children: [
             Padding( padding: const EdgeInsets.only(right: 10, top: 5), 
             child:Icon(widget.isExport ? Icons.download : Icons.upload, color: Theme.of(context).splashColor, size: 30,)),
             Text("${widget.isExport ? "Export" : "Import"} ${currentView!.schemaName.replaceAll("db", "").replaceAll("_", " ")} datas with custom mapping",
@@ -135,10 +136,11 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),
           ])),
-        content: Wrap(alignment: WrapAlignment.center, children : [...items, Container( 
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5), child: SingleChildScrollView(scrollDirection: Axis.vertical,
-          child: Wrap(alignment: WrapAlignment.center, children: mapping)))]),
-        actions: <Widget>[
+        SizedBox( child: Wrap(alignment: WrapAlignment.center, children : [...items, Container( 
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 3), 
+          child: SingleChildScrollView(scrollDirection: Axis.vertical,
+          child: Wrap(alignment: WrapAlignment.center, children: mapping)))])),
+        Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : <Widget>[
               Padding( padding: const EdgeInsets.only(bottom: 10), 
               child: TextButton(style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
                 child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text('Cancel', style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
@@ -157,9 +159,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                       } else { return; }
                     }
                     widget.isExport ? APIService().getWithDownload(currentView!.actionPath, cache["format"], newCacheEntry, "$directory/${cache["filename"]}.${cache["format"]}", context) : null; 
-                    if (widget.isExport) {
-                      setState(() { isLoading = true; });
-                    }
+                    if (widget.isExport) { setState(() { isLoading = true; }); }
                   }
                   if (widget.files.isNotEmpty) {
                     for (var file in widget.files) {
@@ -171,8 +171,8 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                     }
                   }
                 })),
-            ],
-          );
+            ] )),
+          ]));
     });
   }
 }

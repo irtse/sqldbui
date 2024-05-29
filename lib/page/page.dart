@@ -1,5 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
@@ -42,6 +44,7 @@ class PageWidgetState extends State<PageWidget> {
         child: IconButton( iconSize: 30, color: Theme.of(context).splashColor,
           icon: Icon(isMenu ? Icons.close :  Icons.menu), 
       onPressed: () { 
+        rects.remove(viewID);
         globalHomeViewKey.currentState?.setState(() {});
         setState(() { isMenu = !isMenu;  });
       })

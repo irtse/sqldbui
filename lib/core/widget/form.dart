@@ -140,7 +140,7 @@ class FormWidgetState extends State<DataFormWidget> {
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
                                               field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
-              var w = Padding(padding: EdgeInsets.only(left: 10.0, right: 10.0,  top: 11.0 , bottom: 11.0),
+              var w = Padding(padding: const EdgeInsets.only(left: 10.0, right: 10.0,  top: 11.0 , bottom: 11.0),
               child: SizedBox( width: widget.subForm ? max - 50 : max, 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);

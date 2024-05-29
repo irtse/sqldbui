@@ -34,7 +34,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
       var dpItems = <DropdownMenuItem<String>>[];
       force = true;
       List<Widget> items = [];
-      List<dynamic> order = [];
+      List<dynamic> order = currentView != null ? currentView!.order : [];
       if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
         for (var i in snapshot.data!.data!) { 
           if (i.selected && !noSelection) { 
@@ -42,12 +42,12 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
             filterView[viewID!] = i.label ?? "";
           }
           filterViewIDName[i.label!] = i.id!;
-          filterConfs[i.label!] = i.fields;
-          order = i.order;
+          filterConfs[i.label!] = i.fields;          
           dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
         }
       }
       if (!colsSchemaValid.containsKey(viewID)) {  colsSchemaValid[viewID!]= <String, ValueNotifier<bool>>{}; }
+     
       for (var fieldName in order) {
         if (widget.schema[fieldName] == null) { continue; }
         var scheme =  widget.schema[fieldName]!;
@@ -94,11 +94,8 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                       filterView[viewID!] = value ?? "";
                       for (var fieldName in widget.schema.keys) {
                         if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
-                          try {
-                            filterConfs[widget.currentFilter]!.where((element) => element.name == fieldName).first;
                             colsSchemaValid[viewID!]![fieldName]!.value = true;
-                          } catch (e) { colsSchemaValid[viewID!]![fieldName]!.value = false; }
-                        }
+                        } else { colsSchemaValid[viewID!]![fieldName]!.value = false; }
                       } 
                       APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterViewIDName[value]}"), <String, dynamic> { "is_selected" : true }, null);
                       globalOffset = 0; 

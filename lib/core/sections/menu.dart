@@ -122,7 +122,10 @@ class MenuWidgetState extends State<MenuWidget> {
                       child: Material(type: MaterialType.transparency,
                         child: ListTile(
                           selected: "${catIndex.id}" == viewID,
-                          onTap: () async { refreshView("${catIndex.id}", cat, false, false, false); },
+                          onTap: () async { 
+                            refreshView("${catIndex.id}", cat, false, false, false); 
+                            setState(() {});
+                          },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
                           title: Text(catIndex.label ?? catIndex.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
@@ -138,7 +141,7 @@ class MenuWidgetState extends State<MenuWidget> {
                                 for (var k in catIndex.favorizeBody.keys) { urlPath += "&$k=${catIndex.favorizeBody[k]}"; }
                               }
                               setState(() {});
-                              APIService().call(urlPath, catIndex.isFavorize ? "post" : "delete", catIndex.favorizeBody, true, null);
+                              APIService().call<model.View>(urlPath, catIndex.isFavorize ? "post" : "delete", catIndex.favorizeBody, true, null);
                             }, child: Icon( catIndex.isFavorize ? Icons.favorite : Icons.favorite_border, size: 14))),
                           leading: catIndex.isList ? const Icon(Icons.list) : const Icon(Icons.edit_document),
                       )))), ...badge] ); 

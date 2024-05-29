@@ -57,9 +57,10 @@ class GridWidget extends StatefulWidget {
   Color backgroundColor; 
   double borderWidth; 
   Color borderColor;
+  bool isEnum;
   int maxLength; double contextWidth;
   GridWidget({ Key? key, required this.columns, required this.source,
-    required this.maxLength, required this.contextWidth,
+    required this.maxLength, required this.contextWidth, this.isEnum = false,
     this.showCheckboxColumn = false, this.showColumnHeaderIconOnHover = false,
     required this.links, required this.contentShallowed, this.viewKey,
     this.borderWidth = 1, this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent }): super(key: key);
@@ -163,7 +164,7 @@ class GridWidgetState extends State<GridWidget> {
   List<GridRowWidget> buildRows(List<GridColumnWidget> columns, List<Map<String, dynamic>> datas) {
     return datas.map<GridRowWidget>((mapped) {
       return GridRowWidget( borderWidth: widget.borderWidth, borderColor: widget.borderColor, isSelected: widget.isSelected, 
-        maxLength: widget.maxLength, contextWidth: widget.contextWidth,
+        maxLength: widget.maxLength, contextWidth: widget.contextWidth, isEnum : widget.isEnum,
         cells: columns.map<GridCell>((column) {
           if (column.columnName == "id" && widget.isSelected && !globalGridWidgetKey.currentState!.widget.selected.contains(mapped[column.columnName])) {
             globalGridWidgetKey.currentState!.widget.selected.add(mapped[column.columnName]);
@@ -176,12 +177,12 @@ class GridWidgetState extends State<GridWidget> {
 }
 // ignore: must_be_immutable
 class GridRowWidget extends StatefulWidget {
-  var isHovered = false;
+  var isHovered = false; var isEnum = false;
   GlobalKey<ViewWidgetState>? viewKey; double borderWidth; Color borderColor; bool isSelected; int maxLength; double contextWidth;
   Map<String,String> links; Map<String, model.Shallowed> contentShallowed;
   List<GridCell> cells;  bool showCheckboxColumn; 
   GridRowWidget ({ Key? key, required this.cells, required this.links, required this.contentShallowed, this.isSelected = true,
-    required this.maxLength, required this.contextWidth,
+    required this.maxLength, required this.contextWidth, this.isEnum = false,
     this.showCheckboxColumn = false, this.viewKey, this.borderColor = Colors.grey, this.borderWidth = 1 }): super(key: key);
   @override GridRowWidgetState createState() => GridRowWidgetState();
 }
@@ -238,13 +239,14 @@ class GridRowWidgetState extends State<GridRowWidget> {
         }
       }
       var child = e.columnName != "description" ? ListTile(
+        enabled: !widget.isEnum,
         onTap: () {
-          globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false);
+          if (!widget.isEnum) { globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false); }
         },
         title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).primaryColorLight))))
-      ) : Padding(padding: const EdgeInsets.only(top: 4,), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
+      ) : Padding(padding: const EdgeInsets.only(top: 4, bottom: 2), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
                   icon: const Icon(Icons.info), onPressed: () {},));
       List<Widget> badges = [];
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }

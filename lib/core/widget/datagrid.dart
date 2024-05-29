@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -106,29 +107,31 @@ class DatagridWidgetState extends State<DatagridWidget> {
       datas.sort( (a, b) =>  (b["id"] != null ? int.parse( b["id"]) : 0) -  (a["id"] != null ? int.parse(a["id"]) : 0) );
     } 
     var buttons = <Widget>[];
-    if ( currentView!.actions.contains("post") ) {
-      if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
-        buttons.add(Column( children: [IconButton( constraints: const BoxConstraints(),
-          tooltip: "upload datas file", style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.pressed)) { return Colors.green; }
-            return Theme.of(context).primaryColor; }), ),
-          icon: Icon( Icons.upload, color: Theme.of(context).highlightColor, ),
-          onPressed: () {  showDialog<void>(context: context,
-                      builder: (BuildContext context) { return MappingPopUpWidget(isExport: false, format: "csv"); });
-          })]));
-      }
-      buttons.add(Column(
-            children: [IconButton( constraints: const BoxConstraints(),
-              tooltip: "export ${currentView!.isList ? "selected " : ""}rows",
-              style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
-                          if (states.contains(MaterialState.pressed)) { return Colors.green; } }), ),
-              icon: Icon( Icons.file_download, color: Theme.of(context).highlightColor, ),
-              onPressed: () {  
-                showDialog<void>( context: context,  builder: (BuildContext context) { return MappingPopUpWidget(isExport: true, format: "csv"); }, );
-              },
-            )],
-          ));
+    if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
+      buttons.add(Column( children: [ PopupMenuButton(
+          constraints: BoxConstraints.tightFor( width: MediaQuery.of(context).size.width / 1.1),
+          color: Theme.of(context).secondaryHeaderColor, tooltip: "upload datas file",
+          icon: Icon(size: 20, Icons.upload, color: Theme.of(context).highlightColor),
+          onSelected: (value) { },
+          itemBuilder: (BuildContext bc) {
+            return [
+              PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
+                    return MappingPopUpWidget(isExport: false, format: "csv");
+            })) ]; 
+          }) ]));
     }
+    buttons.add(Column( children: [ PopupMenuButton(
+          constraints: BoxConstraints.tightFor( width: MediaQuery.of(context).size.width / 1.1),
+          color: Theme.of(context).secondaryHeaderColor, tooltip:  "export ${currentView!.isList ? "selected " : ""}rows",
+          icon: Icon(size: 20, Icons.file_download, color: Theme.of(context).highlightColor),
+          onSelected: (value) { },
+          itemBuilder: (BuildContext bc) {
+            return [
+              PopupMenuItem(enabled: false, child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return MappingPopUpWidget(isExport: true, format: "csv");
+                  })) ]; 
+        }) ]));
     var len = widget.filterWidget.isNotEmpty ? widget.filterWidget.length - 1 : 0;
     var t = (len * 45 < 138 ? len * 45 : 138);
     return Column( children: [
@@ -143,6 +146,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
             for (var i in snapshot.data!.data!) { 
               filterIDName[i.label!] = i.id!;
               filterConfs[i.label!] = i.fields;
+              print(" FILTER $filterConfs");
               if (i.selected && !isDelete) { filterRestr[viewID!] = i.label!; }
               if (i.selected && viewID != null && filterRestr[viewID!] == i.label!) { 
                 globalFilter[viewID!] = <String, List<Filter>>{};
@@ -290,6 +294,19 @@ class DatagridWidgetState extends State<DatagridWidget> {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( viewID != null && globalFilter.containsKey(viewID) && globalFilter[viewID!]!.isNotEmpty ? Icons.filter_alt_off : Icons.close, size: 18, color: Theme.of(context).highlightColor, ),
           onPressed: () async { 
+            print(filterRestr[viewID]);
+            if (filterRestr[viewID] == null || filterRestr[viewID] == "") {
+              widget.filterWidget = []; 
+                dpItems = [];
+                filterRestr.remove(viewID);
+                if (viewID != null && globalFilter.containsKey(viewID)) { 
+                  globalOrder.remove(viewID);
+                  globalFilter.remove(viewID);
+                  globalNew = false;
+                }
+                globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+              return;
+            }
             APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), <String, dynamic> { "is_selected" : false }, null).then((value) {
               setState(() { 
                 widget.filterWidget = []; 
@@ -312,7 +329,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
       height: MediaQuery.of(context).size.height - (120 + t) > 0 ? MediaQuery.of(context).size.height - (120 + t) : 0,
       width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
       decoration: BoxDecoration( color:  Theme.of(context).highlightColor), child : GridWidget(
-          key: globalGridKey, links: links, 
+          key: globalGridKey, links: links, isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
           contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
           maxLength: maxCount(schema), contentShallowed: contentShallowed,   borderColor: Theme.of(context).splashColor,
           viewKey: widget.viewKey, showCheckboxColumn: true, showColumnHeaderIconOnHover: true,
