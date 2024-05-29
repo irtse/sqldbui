@@ -31,6 +31,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
             var splitted = notif.ref.replaceAll("#", "/").replaceAll(":", "/").split("/");
             viewID = splitted.length > 1 ? splitted[1] : null;
             subViewID=splitted.length > 2 ? splitted[2] : null;
+            AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
             AppRouter.navigateWith(notif.dataPath); 
             Future.delayed(const Duration(seconds: 1), () => setState(() { APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), null); }));
           }, 

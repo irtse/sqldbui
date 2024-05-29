@@ -158,6 +158,7 @@ class MenuWidgetState extends State<MenuWidget> {
               child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); });
   }
   void refresh(bool getView) {
+      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
       if (widget.views == null || getView || firstAPI) {
           APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
           if (value.data != null) { widget.views = value.data; }

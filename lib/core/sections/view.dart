@@ -73,6 +73,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       viewID=null;
       subViewID=null;
       category=null;
+      AppRouter.setRouteCookie("");
     }
     return ViewWidget(view: currentView, views: widget.views); 
   }
@@ -81,6 +82,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     globalLoading = load;
     firstAPI = true;
     setState(() { widget.url = path;});
+    AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
   }
   void refresh(String? id, String? subID, String? cat, model.View? view, bool forceFirstAPI) {
     setState(() {
@@ -93,6 +95,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       subViewID=subID;
       globalLoading = true;
       firstAPI =  forceFirstAPI || globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
+      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
     });
   }
 }

@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
@@ -11,6 +12,19 @@ class AppRouter {
   static final AppRouter _instance = AppRouter._internal();
   factory AppRouter() { return _instance; }
   AppRouter._internal() { /* logic*/}    
+
+
+  static Future<String?> getRouteCookie() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    print("GETTING route cookie ${prefs.getString("url")}");
+    return prefs.getString("url");
+  }
+
+  static setRouteCookie( String path ) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    print("Setting route cookie $path");
+    prefs.setString("url", path);
+  }
 
   final APIService service = APIService(); 
   String currentRoute = "/home";    

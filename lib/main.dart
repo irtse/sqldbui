@@ -56,7 +56,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => HomeScreenState();
 }
 class HomeScreenState extends State<HomeScreen> {
-  void refresh(String? id, bool isFilterreset) {
+  void refresh(String? id, bool isHome) {
     viewID = id;
     subViewID = null;
     APIService.cache = <String, APIResponse<dynamic>>{};
@@ -65,6 +65,7 @@ class HomeScreenState extends State<HomeScreen> {
     resetAllFilter();
     notNew = {};
     setState(() {});
+    if (isHome) { AppRouter.setRouteCookie(""); }
   }
   @override
   Widget build(BuildContext context) {
@@ -76,7 +77,16 @@ class HomeScreenState extends State<HomeScreen> {
     // than having to individually change instances of widgets.
     AuthService();
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
-    AppRouter.navigateTo("#$viewID");
+    
+    AppRouter.getRouteCookie().then((value) {
+      print("Route cookie $value");
+        if (value != null && value != "") {
+          var splitted = value.replaceAll("#", "/").replaceAll(":", "/").split("/");
+          viewID = splitted.length > 1 ? splitted[1] : null;
+          subViewID = splitted.length > 2 ? splitted[2] : null;
+        } 
+        AppRouter.navigateTo("#$viewID${subViewID != null ? ":$subViewID" : ""}");
+    });
     var scaffoldKey = GlobalKey<ScaffoldState>();
     // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
     return Scaffold(

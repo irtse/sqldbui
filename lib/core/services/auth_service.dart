@@ -15,7 +15,7 @@ class AuthService extends ChangeNotifier {
   AuthService._internal() { 
     if (timeBomb == 10) {
       refresh(true).then((value) {
-        if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, true); }
+        if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, false); }
       }); 
     } else { timer(); }
   }
@@ -50,7 +50,7 @@ class AuthService extends ChangeNotifier {
 
   void authenticate(User logUser) {
     authenticateShallow(logUser);
-    homeKey.currentState!.refresh(null, true);
+    homeKey.currentState!.refresh(null, false);
   }
   void authenticateShallow(User logUser) {
     _isAuthenticated = true; 
