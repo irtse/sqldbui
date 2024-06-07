@@ -3,6 +3,7 @@ import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
@@ -14,23 +15,9 @@ import 'package:sqldbui2/core/widget/fork/tranformablebox.dart' as fork;
 double maxWidth = 0;
 String? isNew;
 Map<String, List<String>> notNew = {};
-class Filter {
-  dynamic value;
-  String? connector;
-  Filter({required this.value, this.connector});
-}
-bool globalNew = false;
-Map<String, Map<String,List<Filter>>> globalFilter = <String, Map<String,List<Filter>>>{};
-Map<String, Map<String,String>> globalOrder = <String, Map<String,String>>{};
-void resetFilter(String columnName) {
-  globalOrder[viewID]!.remove(columnName); 
-  globalFilter[viewID]!.remove(columnName);  
-  globalNew = false;
-  globalOffset = 0;
-}
 bool isFilter() {
   return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
-  && (globalOrder[viewID]!.isNotEmpty || globalFilter[viewID]!.isNotEmpty || globalNew);
+  && (globalOrder[viewID]!.isNotEmpty || (globalFilter[viewID] != null && globalFilter[viewID]!.size() > 0) || globalNew);
 }
 void resetAllFilter() {
   if (currentView != null && globalFilter.containsKey(viewID) && globalOrder.containsKey(viewID)) {
@@ -59,7 +46,7 @@ class GridWidget extends StatefulWidget {
   Color borderColor;
   bool isEnum;
   int maxLength; double contextWidth;
-  GridWidget({ Key? key, required this.columns, required this.source,
+  GridWidget({ Key? key,required this.columns, required this.source,
     required this.maxLength, required this.contextWidth, this.isEnum = false,
     this.showCheckboxColumn = false, this.showColumnHeaderIconOnHover = false,
     required this.links, required this.contentShallowed, this.viewKey,
@@ -115,6 +102,7 @@ class GridWidgetState extends State<GridWidget> {
       controller: _horizontal,
       thumbVisibility: true,
       trackVisibility: true,
+      thickness: 10,
       interactive: !globalLoading,
       child: SingleChildScrollView(
         controller: _horizontal,
@@ -235,18 +223,17 @@ class GridRowWidgetState extends State<GridRowWidget> {
       List<dynamic> ids = [];
       if (categories[category] != null) {
         for( var v in categories[category]!) {
-          if (homeKey.currentState != null && "${v.id}" == viewID) { ids=v.newIds; break; }
+          if ("${v.id}" == viewID) { ids=v.newIds; break; }
         }
       }
       var child = e.columnName != "description" ? ListTile(
-        enabled: !widget.isEnum,
-        onTap: () {
+        enabled: !widget.isEnum, onTap: () {
           if (!widget.isEnum) { globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false); }
         },
-        title :  SizedBox(height: maxheight != null ? maxheight - 20 : null, 
+        title : SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
                         textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).primaryColorLight))))
-      ) : Padding(padding: const EdgeInsets.only(top: 4, bottom: 2), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
+      ) : Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
                   icon: const Icon(Icons.info), onPressed: () {},));
       List<Widget> badges = [];
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
@@ -289,15 +276,16 @@ class GridCell {
 // ignore: must_be_immutable
 class GridColumnWidget extends StatefulWidget {
   final BuildContext context;
+  List<DropdownMenuItem<String>> items = [];
   GridWidgetState? grid; GlobalKey<GridColumnWidgetState>? nextColumn; bool last = false;
   double width; bool allowSorting;  bool allowFiltering; bool show = false;
   String type;  String columnName; GridValueWidget label; int maxLength; double contextWidth;
   double borderWidth; Color iconColor;  Color borderColor; Color backgroundColor;
   GridColumnWidget ({ required this.columnName, required this.type, this.width = 300.0, required this.context,
-                                this.allowSorting = false, required this.maxLength, required this.contextWidth,
-                                this.allowFiltering = false, required this.label, this.borderWidth = 1, this.iconColor = Colors.grey,
-                                this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent }): 
-                                super(key: GlobalKey<GridColumnWidgetState>());
+    required this.items, this.allowSorting = false, required this.maxLength, required this.contextWidth,
+    this.allowFiltering = false, required this.label, this.borderWidth = 1, this.iconColor = Colors.grey,
+    this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent }): 
+      super(key: GlobalKey<GridColumnWidgetState>());
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
@@ -333,10 +321,6 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
   @override Widget build(BuildContext context) {
     var width = widget.getWidth(false);
     List<Widget> buttons = [];
-    if (currentView !=  null) {
-      if (!globalFilter.containsKey(viewID) && viewID != null) { globalFilter[viewID!] = {}; }
-      if (!globalOrder.containsKey(viewID) && viewID != null) { globalOrder[viewID!] = {}; }
-    }
     if (widget.allowSorting) { 
       buttons.add(IconButton(onPressed: () async { 
         if (currentView !=  null && viewID != null) {
@@ -354,10 +338,10 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,)));
     } 
     if (widget.allowFiltering) { 
-      buttons.add(FilterPopUpWidget(label: widget.label.value, columnName: widget.columnName, component: this,)); }
+      buttons.add(FilterPopUpWidget(items: widget.items, label: widget.label.value, columnName: widget.columnName, type: widget.type, component: this,)); }
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
       if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
-      || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.containsKey(widget.columnName)) || globalNew))) { 
+      || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName)) || globalNew))) { 
         buttons.add(IconButton(onPressed: () async { 
           resetFilter(widget.columnName);
           globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);

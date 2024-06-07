@@ -20,6 +20,8 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
       child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20,)),
         Text("Notifications", style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 15,),) ]))];
     for ( var notif in AuthService.user!.notifications ) {
+        var name = notif.name;
+        var desc = notif.description;
         notifs.add(Stack( children : [ 
           Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisSize: MainAxisSize.min, children: [ Container(
@@ -37,15 +39,15 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
           }, 
           child: Row(
                   children: [Icon(Icons.message, color: Theme.of(context).splashColor), Padding( padding: const EdgeInsets.only(left: 10), 
-                  child: Text(notif.name[0].toUpperCase()
-                  + notif.name.substring(1, len > notif.name.length ? notif.name.length : len).toLowerCase() 
-                  + (len > notif.name.length ? "" : "...")
+                  child: Text(name[0].toUpperCase()
+                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() 
+                  + (len > name.length ? "" : "...")
                   , overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
                 ],))),
           Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
-            child: Row( children: [Text(notif.description == "" ? "" : notif.description[0] 
-            + notif.description.substring(1, len > notif.description.length ? notif.description.length : len).toLowerCase() 
-            + (len > notif.description.length ? "" : "..."), 
+            child: Row( children: [Text(desc == "" ? "" : desc[0] 
+            + desc.substring(1, len > desc.length ? desc.length : len).toLowerCase() 
+            + (len > desc.length ? "" : "..."), 
               style: TextStyle(color: Theme.of(context).splashColor), overflow: TextOverflow.ellipsis,)])),
         ]))])),
         Positioned(right: 10, top: 11, child: IconButton(icon: const Icon(Icons.close), 

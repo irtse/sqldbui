@@ -1,5 +1,6 @@
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -22,7 +23,6 @@ class FilterColsPopUpWidget extends StatefulWidget{
 }
 
 class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
-  Map<String, List<model.Filter>> filterConfs = {};
   bool force = false;
   bool noSelection =false;
   @override Widget build(BuildContext context) {
@@ -42,7 +42,6 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
             filterView[viewID!] = i.label ?? "";
           }
           filterViewIDName[i.label!] = i.id!;
-          filterConfs[i.label!] = i.fields;          
           dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
         }
       }
@@ -57,7 +56,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
         } 
         if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
           try {
-            filterConfs[widget.currentFilter]!.where((element) => element.name == fieldName).first;
+            filterConfs[widget.currentFilter]!.where((element) => element.column == fieldName).first;
             colsSchemaValid[viewID!]![fieldName]!.value = true;
           } catch (e) { colsSchemaValid[viewID!]![fieldName]!.value = false; }
         }
@@ -65,7 +64,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     initialValue: colsSchemaValid[viewID!]![fieldName]!.value,
                     controller: colsSchemaValid[viewID!]![fieldName],
                     activeColor: Colors.green, inactiveColor: Colors.grey,
-                    activeChild: Text(label), inactiveChild: Text("$label <hide>"), 
+                    activeChild: Text(label), inactiveChild: Text("${label} <${"hide"}>"), 
                     borderRadius:  const BorderRadius.all(Radius.circular(15)),
                     width: 200, height: 30.0, disabledOpacity: 0.5,
                     onChanged: (value) => colsSchemaValid[viewID!]![fieldName]!.value = value,)));
@@ -87,7 +86,7 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                   // select all
                   DropdownButtonFormField<String>( items: dpItems, 
                     value: widget.currentFilter != "" ? widget.currentFilter : null,
-                    hint: const Text("select an existing view filter...", overflow: TextOverflow.ellipsis,),
+                    hint: Text("select an existing view filter...", overflow: TextOverflow.ellipsis,),
                     style: const TextStyle(fontSize: 14, color: Colors.black),
                     onChanged: (value) {
                       widget.currentFilter = value ?? ""; 
@@ -149,8 +148,8 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                       globalOffset = 0; 
                       rects.remove(viewID);
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
-                    child: Text("APPLY", style: TextStyle(color: Colors.white, fontSize: 12))))),
+                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
+                    child: Text("APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))))),
                   filterView.containsKey(viewID) && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () { 
@@ -162,8 +161,8 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                       colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(widget.schema[fieldName]!.active);
                     }
                     setState((){});
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
-                    child: Text("CANCEL", style: TextStyle(color: Colors.white, fontSize: 12))),))
+                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
+                    child: Text("CANCEL", style: const TextStyle(color: Colors.white, fontSize: 12))),))
                    : TextButton(onPressed: () {
                     List<Map<String, dynamic>> fields = [];
                     for (var fieldName in widget.schema.keys) {
@@ -181,8 +180,8 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                       dpItems.add(DropdownMenuItem<String>(value: widget.currentFilter, child: Text(widget.currentFilter, overflow: TextOverflow.ellipsis,),));
                       setState((){});
                     });
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
-                    child: Text("SAVE & APPLY", style: TextStyle(color: Colors.white, fontSize: 12))),) ])
+                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
+                    child: Text("SAVE & APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
       ]); } ) )) ]; });
     }); 
   }

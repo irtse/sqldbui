@@ -1,14 +1,14 @@
 // import 'package:cookie_consent/cookie_consent.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-
+import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:sqldbui2/page/page.dart';
@@ -20,7 +20,27 @@ final ThemeData myTheme = ThemeData(
   shadowColor: const Color.fromRGBO(98, 114, 164  , 1),
 );
 
-void main() { runApp(const MyApp()); }
+
+/*
+class MyI18n {
+  static var translations = Translations.byLocale('en');
+
+  static Future<void> loadTranslations() async {
+    translations +=
+        await GettextImporter().fromAssetDirectory('assets/locales');
+  }
+}
+
+extension Localization on String {
+  String get i18n => localize(this, MyI18n.translations);
+  String plural(value) => localizePlural(value, this, MyI18n.translations);
+  String fill(List<Object> params) => localizeFill(this, params);
+}
+*/
+
+void main() async { 
+  runApp(const MyApp()); 
+}
 final _authProvider = AuthService();          
 final _appRouter = AppRouter();   
 
@@ -42,7 +62,6 @@ String? category;
 GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
-  
   HomeScreen({ Key? key }): super(key: homeKey);
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -56,13 +75,20 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => HomeScreenState();
 }
 class HomeScreenState extends State<HomeScreen> {
+  late Future<void> loadAsync;
+  /*@override
+  void initState() {
+    super.initState();
+    loadAsync = MyI18n.loadTranslations();
+  }*/
+
   void refresh(String? id, bool isHome) {
     viewID = id;
     subViewID = null;
     APIService.cache = <String, APIResponse<dynamic>>{};
     currentView = null;
     beforeView = null;
-    resetAllFilter();
+    resetAllFilter(); 
     notNew = {};
     setState(() {});
     if (isHome) { AppRouter.setRouteCookie(""); }
@@ -77,19 +103,22 @@ class HomeScreenState extends State<HomeScreen> {
     // than having to individually change instances of widgets.
     AuthService();
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
-    
+    globalFilter = <String, Filters>{};
     AppRouter.getRouteCookie().then((value) {
-      print("Route cookie $value");
+        print("Route cookie $value");
         if (value != null && value != "") {
           var splitted = value.replaceAll("#", "/").replaceAll(":", "/").split("/");
           viewID = splitted.length > 1 ? splitted[1] : null;
           subViewID = splitted.length > 2 ? splitted[2] : null;
+          var f = Filters();
+          f.isEmpty = true;
+          globalFilter[viewID!] = f; 
+          globalOrder[viewID!] = <String, String>{};
         } 
         AppRouter.navigateTo("#$viewID${subViewID != null ? ":$subViewID" : ""}");
     });
     var scaffoldKey = GlobalKey<ScaffoldState>();
-    // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
-    return Scaffold(
+    var home = Scaffold(
       key: scaffoldKey,
       floatingActionButton: FloatingActionButton(backgroundColor: Theme.of(context).primaryColor,
         onPressed: () => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },), child: Icon(Icons.question_mark, color: Colors.white,)),
@@ -106,6 +135,7 @@ class HomeScreenState extends State<HomeScreen> {
             InkWell( onTap: () {
               viewID = "";
               subViewID = null;
+              AppRouter.setRouteCookie("");
               setState(() {});
             }, child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
             Flexible( child: Container(padding: const EdgeInsets.only(left: 30), 
@@ -114,7 +144,7 @@ class HomeScreenState extends State<HomeScreen> {
                 Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
                 child: MediaQuery.of(context).size.width > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
                 Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
-                  child: MediaQuery.of(context).size.width > 600 ? Text("${AuthService.user != null ? AuthService.user!.name : "unknown"} - ${AuthService.user != null ? AuthService.user!.email : ""}",
+                  child: MediaQuery.of(context).size.width > 600 ? Text("${AuthService.user != null ? "${AuthService.user!.name} - " : "unknown" }${AuthService.user != null ? AuthService.user!.email : ""}",
                   overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)) : null)),
               ],)
         )),         
@@ -136,6 +166,16 @@ class HomeScreenState extends State<HomeScreen> {
       body: PageWidget(key: globalPageKey),
       backgroundColor: Theme.of(context).secondaryHeaderColor,
     );
+    // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
+    return home;
+    /*return FutureBuilder(
+        future: loadAsync,
+        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return I18n( initialLocale: Locale('en', 'US'), child: home);
+          }
+          return home;
+      });*/
   }
 }
 class NotificationWidget extends StatefulWidget {

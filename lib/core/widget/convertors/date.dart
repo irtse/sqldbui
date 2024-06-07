@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
 import 'package:date_field/date_field.dart';
 import 'package:sqldbui2/core/widget/form.dart';
@@ -28,7 +28,7 @@ class _DateState extends State<DateWidget> {
         dateValue = DateTime.parse(widget.value);
       }
       return DateTimeField(
-        dateFormat: DateFormat('y-M-dd'),
+        dateFormat: intl.DateFormat('y-M-dd'),
         mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
         style: const TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
@@ -56,4 +56,10 @@ class _DateState extends State<DateWidget> {
         },
       );
   }
+}
+
+class DateSaveTimeField extends DateTimeField {
+  VoidCallback? onSaved;
+  DateSaveTimeField({required DateTime? value, required DateTime? lastDate, required DateTimeFieldPickerMode mode, required intl.DateFormat dateFormat, required InputDecoration decoration, required TextStyle style, required void Function(DateTime?) onChanged})
+      : super(value: value, lastDate: lastDate, mode: mode, dateFormat: dateFormat, decoration: decoration, style: style, onChanged: onChanged);
 }

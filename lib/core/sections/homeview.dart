@@ -28,17 +28,18 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                   child: Image( image: AssetImage('assets/images/default.png'), height: 150, width: 280, fit: BoxFit.cover, ),
                 )),
                 Padding(padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), child: ListTile(
-                  title: Text( view.name[0].toUpperCase() + view.name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
+                  title: Text( "${view.name[0].toUpperCase()}${view.name.substring(1).toLowerCase()}", overflow: TextOverflow.ellipsis,
                   style:  TextStyle( color: Theme.of(context).primaryColor, fontSize: 17), ),
-                  trailing: const Text("go to view", style: TextStyle(fontSize: 9, color: Colors.grey) ),
-                  subtitle: view.description == "" ? null : Text(view.description[0].toUpperCase() + view.description.substring(1).toLowerCase(), style: const TextStyle( fontSize: 10), ),
+                  trailing: Text("go to view", style: const TextStyle(fontSize: 9, color: Colors.grey) ),
+                  subtitle: view.description == "" ? null : Text("${view.description[0].toUpperCase()}${view.description.substring(1).toLowerCase()}", 
+                  style: const TextStyle( fontSize: 10), ),
                 )),
           ],)) )));
       }
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),
           Padding( padding: const EdgeInsets.only(right: 20),
-          child: Text(cat[0].toUpperCase() + cat.substring(1).toLowerCase(),
+          child: Text("${cat[0].toUpperCase()}${cat.substring(1).toLowerCase()}",
           style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
             Expanded( child: Divider(color: Theme.of(context).splashColor,))],),
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))

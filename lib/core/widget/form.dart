@@ -140,8 +140,9 @@ class FormWidgetState extends State<DataFormWidget> {
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
                                               field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
-              var w = Padding(padding: const EdgeInsets.only(left: 10.0, right: 10.0,  top: 11.0 , bottom: 11.0),
-              child: SizedBox( width: widget.subForm ? max - 50 : max, 
+              var w = Padding(padding: EdgeInsets.only(left: field.type.contains("bool") ? ((widget.subForm ? max - 230 : max - 180) / 2) : 10.0, 
+                right: field.type.contains("bool") ? ((widget.subForm ? max - 230 : max - 180) / 2) : 10.0,  top: 11.0 , bottom: 11.0),
+              child: SizedBox( width: field.type.contains("bool") ? 200 : (widget.subForm ? max - 50 : max), 
                 height: field.type.contains("text") ? 100 : 30, child: f));
               fields.add(w);
             }
@@ -176,7 +177,7 @@ class FormWidgetState extends State<DataFormWidget> {
           head.add(Padding( padding: const EdgeInsets.only(left: 30, top: 20, bottom: 10),
                 child: Stack( children: [ Row( children: [ Padding(padding: const EdgeInsets.only(right: 15, top: 1), 
                     child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 20,)), 
-                    Flexible( child: Text(name[0].toUpperCase() + name.substring(1).toLowerCase(), overflow: TextOverflow.ellipsis,
+                    Flexible( child: Text("${name[0].toUpperCase()}${name.substring(1).toLowerCase()}", overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) ]),
                   fields.isEmpty ? Container() : Positioned(right: 20, top: -17.5, child: IconButton(onPressed: () => { setState(() => show = !show )}, 
                     icon: Icon(show ?  Icons.arrow_drop_down_sharp : Icons.arrow_drop_up_sharp, 

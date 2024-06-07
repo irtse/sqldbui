@@ -1,12 +1,10 @@
-import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
 import 'package:sqldbui2/main.dart';
 
 bool isMenu = true;
@@ -80,7 +78,7 @@ class MenuWidgetState extends State<MenuWidget> {
       ];
       for (var cat in categories.keys) {
         var count = 0;
-        initiallyExpanded[cat] = category == cat;
+        initiallyExpanded[cat] = widget.views != null ? widget.views!.where((element) => "${element.id}" == viewID && element.category == cat).isNotEmpty : false;
         if (categories[cat]!.isNotEmpty) {
           for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
           List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 190 - ("$count".length * 8), top: 13, child: Container(
@@ -99,7 +97,8 @@ class MenuWidgetState extends State<MenuWidget> {
             initiallyExpanded: initiallyExpanded[cat]!,
             backgroundColor: Theme.of(context).secondaryHeaderColor,
             title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
-              Flexible( child: Padding( padding: EdgeInsets.only(right: "$count".isNotEmpty ? (("$count".length + 1) * 7) : 0), child: Text(cat.toUpperCase(), overflow: TextOverflow.ellipsis,
+              Flexible( child: Padding( padding: EdgeInsets.only(right: "$count".isNotEmpty ? (("$count".length + 1) * 7) : 0), 
+              child: Text(cat.toUpperCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11)))) ]), 
             iconColor: isMenu ? Theme.of(context).highlightColor : Colors.transparent, 
             collapsedIconColor: isMenu ? Theme.of(context).highlightColor : Colors.transparent,
@@ -114,7 +113,7 @@ class MenuWidgetState extends State<MenuWidget> {
                     overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))))] : [];
                   return Stack( alignment: Alignment.topRight, children: [
                     Container(decoration: BoxDecoration(
-                        border: Border(top: BorderSide(color: Colors.black, width: index == 0 ? .5 : .25), bottom: BorderSide(color: Colors.black, width: .25)),
+                        border: Border(top: BorderSide(color: Colors.black, width: index == 0 ? .5 : .25), bottom: const BorderSide(color: Colors.black, width: .25)),
                         color: "${catIndex.id}" == viewID ? Theme.of(context).primaryColorLight : Colors.transparent ),
                       child:  Container(decoration: BoxDecoration(
                         border: Border(left: BorderSide(color: Theme.of(context).primaryColor, width: 10)),
@@ -128,7 +127,8 @@ class MenuWidgetState extends State<MenuWidget> {
                           },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
-                          title: Text(catIndex.label ?? catIndex.name, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
+                          title: Text((catIndex.label ?? catIndex.name), 
+                            overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
                           visualDensity: const VisualDensity(vertical: -4), // to compact
                           textColor: Colors.white,
                           selectedColor: Colors.white,
@@ -182,7 +182,11 @@ class MenuWidgetState extends State<MenuWidget> {
   }
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
     AppRouter.routedSubID = null;
-    globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.isNotEmpty || globalOrder.containsKey(id) && globalFilter[id]!.isNotEmpty ;
+    if (id != null && !globalFilter.containsKey(id)) { 
+      globalFilter[id] = Filters(); 
+      globalOrder[id] = <String, String>{};
+    }
+    globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
     firstAPI = isFirst;
     globalOffset = 0;
     category=cat;

@@ -55,6 +55,9 @@ dependencies:
   shared_preferences: ^2.2.3
   cookie_consent: ^1.0.0
   carousel_slider: ^4.2.1
+  uuid: ^4.4.0
+  i18n_extension: ^11.0.9
+  toggle_switch: ^2.3.0
 
 dev_dependencies:
   flutter_test:

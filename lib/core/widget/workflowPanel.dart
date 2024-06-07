@@ -42,7 +42,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
             Wrap(alignment: WrapAlignment.center, 
             children: [
               const Padding( padding: EdgeInsets.only(right: 10, top: 5), child: Icon(Icons.account_tree, color: Colors.grey)),
-              const Padding( padding: EdgeInsets.only(right: 20, top: 5), child: Text("next optionnal steps:", style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
+              Padding( padding: const EdgeInsets.only(right: 20, top: 5), child: Text("next optionnal steps:", style: const TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
       } catch(e) { /* empty */ } 
     }
     return Container(width: 0,);

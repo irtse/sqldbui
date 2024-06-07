@@ -2,6 +2,8 @@ import 'package:sqldbui2/model/abstract.dart';
 import 'dart:developer' as developer;
 import 'dart:convert';
 
+import 'package:sqldbui2/model/filter.dart';
+
 const emptyStr = <String>[];
 const emptySchema = <String, SchemaField>{};
 
@@ -301,39 +303,5 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   @override Map<String, dynamic> serialize() => {
     "id" : id,
     "name" : name,
-  };
-}
-
-class Filter extends SerializerDeserializer<Filter> {
-  Filter({
-    this.id,
-    this.name,
-    this.value,
-    this.opera,
-    this.separator = "",
-    this.dir = "asc",
-  });
-  int? id;
-  String? name;
-  dynamic value;
-  String? opera;
-  String? separator;
-  String? dir;
-
-  @override deserialize(Map<String, dynamic> json) {
-    return Filter(
-    id: json.containsKey("id") ? json["id"] : null, 
-    name: json.containsKey("name") ? json["name"] : null,
-    value: json.containsKey("value") ? json["value"] : null,
-    separator: json.containsKey("separator") && json["separator"] != null ? json["separator"] : "",
-    dir: json.containsKey("dir") && json["dir"] != null ? json["dir"] : "" );
-  }
-  @override Map<String, dynamic> serialize() => {
-    "id" : id,
-    "name" : name,
-    "value" : value,
-    "operator": opera,
-    "separator" : separator,
-    "dir" : dir,
   };
 }

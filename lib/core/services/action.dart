@@ -36,7 +36,11 @@ class ActionService {
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add) async {  
     if (method != "delete") {
-      if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) {  return []; 
+      if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) {  
+        if (form.formKey.currentState != null && form.subForm) {
+          errors = ["form is not valid !"]; 
+        }
+        return []; 
       } else { form.formKey.currentState!.save(); }
     }                                                   
     var body = <String, dynamic>{};

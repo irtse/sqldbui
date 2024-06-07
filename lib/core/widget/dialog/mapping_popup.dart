@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:sqldbui2/main.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
@@ -9,10 +7,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/convertors/text.dart';
 import 'package:sqldbui2/core/widget/convertors/dropdown.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+
 
 // ignore: must_be_immutable
 class MappingPopUpWidget extends StatefulWidget{
@@ -26,6 +26,7 @@ class MappingPopUpWidget extends StatefulWidget{
 class MappingPopUpState extends State<MappingPopUpWidget> {
   bool isLoading = false;
   String directory = "/";
+  bool isWeb = false;
   @override Widget build(BuildContext context) {
     var mapped = <String, dynamic>{};
           List<String> order = <String>[];
@@ -38,29 +39,20 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
     var formKey = GlobalKey<FormState>();
     List<Widget> items = <Widget>[];
     List<Widget> mapping = <Widget>[];
+    isWeb = kIsWeb;
     if (isLoading) {
-      items.add(Center(
-        child: ValueListenableBuilder(
-            valueListenable: APIService.downloadProgressNotifier,
-            builder: (context, value, snapshot) {
+      items.add(Center( child: ValueListenableBuilder(
+            valueListenable: APIService.downloadProgressNotifier, builder: (context, value, snapshot) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(
-                    height: 32,
-                  ),
-                  CircularPercentIndicator(
-                    radius: 50.0,
-                    lineWidth: 10.0,
+                children: [ const SizedBox( height: 32, ),
+                  CircularPercentIndicator( radius: 50.0, lineWidth: 10.0,
                     // animation: true,
                     percent: APIService.downloadProgressNotifier.value / 100,
                     center: Text(
                       "${APIService.downloadProgressNotifier.value}%",
-                      style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).highlightColor),
+                      style: TextStyle( fontSize: 20.0, fontWeight: FontWeight.w600, color: Theme.of(context).highlightColor),
                     ),
                     backgroundColor: Theme.of(context).splashColor,
                     circularStrokeCap: CircularStrokeCap.round,
@@ -96,7 +88,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 for (var file in files!.files) { widget.files.add(file); }
                 setState(() {});
               },
-              child: Stack( children: [Container(constraints: BoxConstraints(minWidth: 200), 
+              child: Stack( children: [Container(constraints: const BoxConstraints(minWidth: 200), 
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(7),
                   color: Theme.of(context).primaryColorLight,),
               height: 200, child: Center(child: Icon(Icons.upload_file, color: Theme.of(context).splashColor, size: 50,))),
@@ -116,20 +108,17 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                     ), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10), child: f,))));
       }
     }
-    return FutureBuilder(future: Platform.isAndroid ? (getExternalStorageDirectory()) : (getDownloadsDirectory()), 
-      builder: (BuildContext c, AsyncSnapshot snap) {
-        directory = snap.hasData && directory == "/" ? snap.data.path : directory;
-        return Padding( padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30), child: Column( children : [
+    Widget w = Padding( padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30), child: Column( children : [
           Padding( padding: const EdgeInsets.only(left: 20, right: 20, top: 10), 
           child: Row(children: [
             Padding( padding: const EdgeInsets.only(right: 10, top: 5), 
             child:Icon(widget.isExport ? Icons.download : Icons.upload, color: Theme.of(context).splashColor, size: 30,)),
-            Text("${widget.isExport ? "Export" : "Import"} ${currentView!.schemaName.replaceAll("db", "").replaceAll("_", " ")} datas with custom mapping",
+            Text("${widget.isExport ? "Export" : "Import" } ${currentView!.schemaName.replaceAll("db", "").replaceAll("_", " ")} datas with custom mapping",
             style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 20, fontWeight: FontWeight.bold)),
             Padding( padding: const EdgeInsets.only(left: 20, top: 5), 
-            child: Text( widget.isExport ? "saved to folder : $directory" : "allowed format : ${widget.importFormat.join(",")}",
+            child: Text( widget.isExport && !isWeb ? "${"saved to folder"} : $directory" : "${"allowed format"} : ${widget.importFormat.join(",")}",
               style: TextStyle(color: Theme.of(context).splashColor, fontSize: 12))), 
-            widget.isExport ? Padding( padding: const EdgeInsets.only(left: 5, top: 5), 
+            widget.isExport && !isWeb ? Padding( padding: const EdgeInsets.only(left: 5, top: 5), 
             child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20,), 
               onPressed: () async {
                 String? newDirectory = await FilePicker.platform.getDirectoryPath();
@@ -140,13 +129,12 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 3), 
           child: SingleChildScrollView(scrollDirection: Axis.vertical,
           child: Wrap(alignment: WrapAlignment.center, children: mapping)))])),
-        Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : <Widget>[
+        Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : isLoading ? [] : <Widget>[
               Padding( padding: const EdgeInsets.only(bottom: 10), 
               child: TextButton(style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
                 child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text('Cancel', style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
               Padding( padding: const EdgeInsets.only(right: 20, bottom: 10), 
-              child: TextButton(
-                style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge, backgroundColor: Theme.of(context).primaryColor),
+              child: TextButton( style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge, backgroundColor: Theme.of(context).primaryColor),
                 child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text(widget.isExport ? "Export" : "Import", style: TextStyle(color: Theme.of(context).highlightColor))), 
                 onPressed: () async { 
                   if (widget.isExport && formKey.currentState!.validate()) {
@@ -158,21 +146,24 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                         path = path.replaceAll("rows=all", "rows=${globalGridWidgetKey.currentState!.widget.selected.join(",")}");
                       } else { return; }
                     }
-                    widget.isExport ? APIService().getWithDownload(currentView!.actionPath, cache["format"], newCacheEntry, "$directory/${cache["filename"]}.${cache["format"]}", context) : null; 
+                    widget.isExport ? APIService().getWithDownload(currentView!.actionPath, cache["format"], newCacheEntry, "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
                     if (widget.isExport) { setState(() { isLoading = true; }); }
                   }
                   if (widget.files.isNotEmpty) {
                     for (var file in widget.files) {
                       if (file.path == null) { continue; }
                       await APIService().sendFile<model.View>(currentView!.actionPath, File(file.path!), context);
-                      homeKey.currentState?.refresh(viewID, true);
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, currentView, false); // TO REMOVE
                       // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();
                     }
                   }
-                })),
-            ] )),
-          ]));
-    });
+                }))] )) ]));
+    if (!isWeb) {
+      (Platform.isIOS ? getApplicationDocumentsDirectory() : (Platform.isAndroid ? (getExternalStorageDirectory()) : (getDownloadsDirectory()))).then((value) {
+        Future.delayed(const Duration(milliseconds: 500), () => setState(() { directory = value != null && directory == "/" ? value.path : directory; }));
+      });
+    }
+    return w;
   }
 }

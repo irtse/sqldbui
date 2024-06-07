@@ -58,7 +58,7 @@ class OneToManyState extends State<OneToManyWidget> {
                 widget.flashed[dataForm.view!.id] = dataForm;
                 if (!widget.readOnly && data.actions.contains("delete")) {
                   var w = Stack(children: [dataForm,
-                            Positioned(top: 10,  left: MediaQuery.of(context).size.width - 640, 
+                            Positioned(top: 10,  right: 100, 
                             child: IconButton(onPressed: () {
                               widget.component.widget.detectChange = true;
                               setState(() {
@@ -80,7 +80,7 @@ class OneToManyState extends State<OneToManyWidget> {
 
   List<Widget> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) {
     List<Widget> rows = [Padding( padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
-                                  child: Text("related ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")),]; 
+                                  child: Text("${"related"} ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")),]; 
     
     print(readOnly);
     if (!readOnly && (canPost || widget.component.widget.view != null) || widget.component.widget.view!.isEmpty) {

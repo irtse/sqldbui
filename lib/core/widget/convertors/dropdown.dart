@@ -57,7 +57,7 @@ class _DropDownState extends State<DropDownWidget> {
 
       return DropdownButtonFormField<String>( items: items, 
         isExpanded: true,
-        hint: Text("select a ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
+        hint: Text("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
         value: widget.value,
         style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
         onChanged: (value) {
@@ -130,7 +130,7 @@ class _DropDownState extends State<DropDownWidget> {
           }
           return DropdownButtonFormField<String>(
               isExpanded: true,
-              hint: Text("select a ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
+              hint: Text("${"select a "}${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
               value: widget.value,
               items: items, 
               dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,

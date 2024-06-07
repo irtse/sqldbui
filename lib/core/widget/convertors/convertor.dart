@@ -21,8 +21,7 @@ class Convertor {
       } else if (type.contains("bool")) {
     if (form[name] != null) { value = form[name]; }
         ValueNotifier<bool> ctrl = ValueNotifier(value ?? false);
-        return AdvancedSwitch(
-                    width: (label.length * 29).toDouble(),
+        return AdvancedSwitch( width : 200,
                     initialValue: value ?? false,
                     enabled: !readOnly,
                     controller: ctrl,
