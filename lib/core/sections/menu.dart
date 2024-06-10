@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
 
@@ -48,7 +51,7 @@ class MenuWidgetState extends State<MenuWidget> {
           border: const Border(bottom: BorderSide(color: Colors.black, width: 0.5))
         ),
         child: Padding( padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10), child : Container(
-                        height: 30, width: (menuSize - 20) > 0 ? (menuSize - 20) : 0, child:TextFormField(
+                        height: 30, width: (menuSize - 20) > 0 ? (menuSize - 20) : 0, child: TextFormField(
                         cursorHeight: 15,
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
                         controller: controller,
@@ -74,7 +77,8 @@ class MenuWidgetState extends State<MenuWidget> {
         InkWell( onTap: () { setState(() { isFavorite = true; });}, child: Container(decoration: BoxDecoration(
             color: isFavorite ? Theme.of(context).primaryColor : Theme.of(context).secondaryHeaderColor,
             border: const Border(bottom: BorderSide(color: Colors.black, width: 0.4))),
-          alignment: Alignment.center, height: 40, width: menuSize > 0 ? menuSize / 2 : 0, child: Icon(Icons.favorite_border, color: Theme.of(context).highlightColor))),],)
+          alignment: Alignment.center, height: 40, width: menuSize > 0 ? menuSize / 2 : 0, 
+            child: Icon(Icons.favorite_border, color: Theme.of(context).highlightColor))),],)
       ];
       for (var cat in categories.keys) {
         var count = 0;
@@ -96,7 +100,7 @@ class MenuWidgetState extends State<MenuWidget> {
             shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
             initiallyExpanded: initiallyExpanded[cat]!,
             backgroundColor: Theme.of(context).secondaryHeaderColor,
-            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor,),), 
+            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10), child: Icon(cat.toUpperCase().contains("DATAS") ? Icons.grid_on : Icons.bookmark, color: Theme.of(context).splashColor,),), 
               Flexible( child: Padding( padding: EdgeInsets.only(right: "$count".isNotEmpty ? (("$count".length + 1) * 7) : 0), 
               child: Text(cat.toUpperCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11)))) ]), 
@@ -106,7 +110,7 @@ class MenuWidgetState extends State<MenuWidget> {
               child: ListView.builder(itemBuilder: (builder, index) {
                 if (categories[cat] == null || categories[cat]!.length <= index) { return null; }
                 var catIndex = categories[cat]![index];
-                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(left: 220 - ("${catIndex.newIds.length}".length * 8), top: 8, child: Container(
+                List<Widget> badge = catIndex.newIds.isNotEmpty ? [Positioned(right: 20, top: 8, child: Container(
                   decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(7)),
                     color: Theme.of(context).primaryColor),
                   child: Padding(padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
@@ -127,19 +131,14 @@ class MenuWidgetState extends State<MenuWidget> {
                           },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
-                          title: Text((catIndex.label ?? catIndex.name), 
-                            overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
+                          title: Text((catIndex.label ?? catIndex.name), overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
                           visualDensity: const VisualDensity(vertical: -4), // to compact
-                          textColor: Colors.white,
-                          selectedColor: Colors.white,
-                          hoverColor: Theme.of(context).primaryColorLight,
+                          textColor: Colors.white, selectedColor: Colors.white, hoverColor: Theme.of(context).primaryColorLight,
                           trailing: Padding( padding: EdgeInsets.only(right: catIndex.newIds.isNotEmpty ? (("${catIndex.newIds.length}".length + 1) * 10) : 0), 
                             child: InkWell( onTap: () {
                               catIndex.isFavorize = !catIndex.isFavorize;
                               var urlPath = catIndex.favorizePath;
-                              if (!catIndex.isFavorize) {
-                                for (var k in catIndex.favorizeBody.keys) { urlPath += "&$k=${catIndex.favorizeBody[k]}"; }
-                              }
+                              for (var k in catIndex.favorizeBody.keys.where((element) => !catIndex.isFavorize)) { urlPath += "&$k=${catIndex.favorizeBody[k]}"; }
                               setState(() {});
                               APIService().call<model.View>(urlPath, catIndex.isFavorize ? "post" : "delete", catIndex.favorizeBody, true, null);
                             }, child: Icon( catIndex.isFavorize ? Icons.favorite : Icons.favorite_border, size: 14))),
@@ -149,16 +148,11 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     firstAPI = false;
-    menuSize = isMenu && MediaQuery.of(context).size.width > 250 ? 250 : 0;
-    return FutureBuilder<void>(future: Future.delayed(const Duration(seconds: 2)), 
-      builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-        return  Column(  children : [ ...header, Container( padding: const EdgeInsets.only(bottom: 55),
-            height: MediaQuery.of(context).size.height - 121 > 0 ? MediaQuery.of(context).size.height - 121 : 0, 
-            child: SingleChildScrollView(
-              child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps ),),)] ); });
+    return Column( children : [ ...header, Container( height: MediaQuery.of(context).size.height - 172 > 0 ? MediaQuery.of(context).size.height - 172 : 0,
+      child: SingleChildScrollView( child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps )))]);
   }
   void refresh(bool getView) {
-      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
+      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}", context);
       if (widget.views == null || getView || firstAPI) {
           APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
           if (value.data != null) { widget.views = value.data; }
@@ -168,8 +162,8 @@ class MenuWidgetState extends State<MenuWidget> {
             }
           }
           setState(() {}); 
-          globalMainViewKey.currentState?.setState(() {}); 
         });
+        globalMainViewKey.currentState?.setState(() {}); 
       } else {
         for (var view in widget.views!) {
           if (view.id.toString() == viewID && subViewID != null) {
@@ -194,7 +188,9 @@ class MenuWidgetState extends State<MenuWidget> {
     currentView = null;
     viewID=id.toString();
     widget.url = null;
-    if (nullable) { Future.delayed(const Duration(microseconds: 500), () => currentView = null);  }
+    if (nullable) { Future.delayed(const Duration(microseconds: 500), () {
+      currentView = null;
+    });  }
     if(full) { refresh(false); }
     globalMainViewKey.currentState?.refresh(viewID, null, category, currentView, true);
   }

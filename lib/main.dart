@@ -1,5 +1,7 @@
 // import 'package:cookie_consent/cookie_consent.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/page.dart';
+import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -10,8 +12,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
-import 'package:sqldbui2/page/login.dart';
-import 'package:sqldbui2/page/page.dart';
+
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -62,7 +63,8 @@ String? category;
 GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
-  HomeScreen({ Key? key }): super(key: homeKey);
+  bool fromUrl = false;
+  HomeScreen({ Key? key, this.fromUrl = false }): super(key: homeKey);
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -82,16 +84,15 @@ class HomeScreenState extends State<HomeScreen> {
     loadAsync = MyI18n.loadTranslations();
   }*/
 
-  void refresh(String? id, bool isHome) {
+  void refresh(String? id, String? subID, bool isHome) {
     viewID = id;
-    subViewID = null;
+    subViewID = subID;
     APIService.cache = <String, APIResponse<dynamic>>{};
     currentView = null;
-    beforeView = null;
     resetAllFilter(); 
     notNew = {};
     setState(() {});
-    if (isHome) { AppRouter.setRouteCookie(""); }
+    if (isHome) { AppRouter.setRouteCookie("", context); }
   }
   @override
   Widget build(BuildContext context) {
@@ -105,17 +106,18 @@ class HomeScreenState extends State<HomeScreen> {
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     globalFilter = <String, Filters>{};
     AppRouter.getRouteCookie().then((value) {
-        print("Route cookie $value");
-        if (value != null && value != "") {
-          var splitted = value.replaceAll("#", "/").replaceAll(":", "/").split("/");
-          viewID = splitted.length > 1 ? splitted[1] : null;
-          subViewID = splitted.length > 2 ? splitted[2] : null;
-          var f = Filters();
-          f.isEmpty = true;
-          globalFilter[viewID!] = f; 
-          globalOrder[viewID!] = <String, String>{};
-        } 
-        AppRouter.navigateTo("#$viewID${subViewID != null ? ":$subViewID" : ""}");
+      print("Route cookie $value");
+      if (value != null && value != "") {
+        var splitted = value.replaceAll("#", "/").replaceAll(":", "/").split("/");
+        viewID = splitted.length > 1 ? splitted[1] : null;
+        subViewID = splitted.length > 2 ? splitted[2] : null;
+        var f = Filters();
+        f.isEmpty = true;
+        globalFilter[viewID!] = f; 
+        globalOrder[viewID!] = <String, String>{};
+        AppRouter.setRouteCookie(value, context);
+      } else { AppRouter.setRouteCookie("home", context); }
+      AppRouter.navigateTo("#$viewID${subViewID != null ? ":$subViewID" : ""}");
     });
     var scaffoldKey = GlobalKey<ScaffoldState>();
     var home = Scaffold(
@@ -132,16 +134,17 @@ class HomeScreenState extends State<HomeScreen> {
         // the App.build method, and use it to set our appbar title.
         title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
           child: SizedBox(child: Row(children: [
+            MediaQuery.of(context).size.width > 400 ? RouterWidget(key: routerKey) : Container(),
             InkWell( onTap: () {
               viewID = "";
               subViewID = null;
-              AppRouter.setRouteCookie("");
+              AppRouter.setRouteCookie("", context);
               setState(() {});
             }, child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
-            Flexible( child: Container(padding: const EdgeInsets.only(left: 30), 
+            Flexible( child: Container(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width > 600 ? 30 : 0), 
               child: MediaQuery.of(context).size.width > 600 ? Text("SOFTWARE NAME", overflow: TextOverflow.ellipsis,
                 style: TextStyle( color: Theme.of(context).highlightColor,),) : null)),
-                Padding(padding: const EdgeInsets.only(left: 50, right: 10), 
+                Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width > 600 ?  50 : 0, right: MediaQuery.of(context).size.width > 600 ?  10 : 0), 
                 child: MediaQuery.of(context).size.width > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
                 Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
                   child: MediaQuery.of(context).size.width > 600 ? Text("${AuthService.user != null ? "${AuthService.user!.name} - " : "unknown" }${AuthService.user != null ? AuthService.user!.email : ""}",
@@ -164,8 +167,7 @@ class HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: PageWidget(key: globalPageKey),
-      backgroundColor: Theme.of(context).secondaryHeaderColor,
-    );
+      backgroundColor: Theme.of(context).secondaryHeaderColor);
     // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
     return home;
     /*return FutureBuilder(

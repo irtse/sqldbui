@@ -39,7 +39,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
   late Map<String, double> columnWidths = {};
   List<DropdownMenuItem<String>> dpItems = <DropdownMenuItem<String>>[];
   int maxCount(Map<String, model.SchemaField> schema) {
-    return schema.keys.where((element) => !schema[element]!.type.contains("many") && schema[element]!.active).length;
+    return schema.keys.where((element) => !schema[element]!.type.contains("many") && schema[element]!.active).length + 1;
   }
   @override Widget build(BuildContext context) {
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};

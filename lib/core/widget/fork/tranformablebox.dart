@@ -221,7 +221,7 @@ class TransformableBox extends StatefulWidget {
 
   /// Whether to paint the handle's bounds for debugging purposes.
   final bool debugPaintHandleBounds;
-
+  final double handleTapLeftSize;
   /// Creates a [TransformableBox] widget.
   const TransformableBox({
     super.key,
@@ -230,6 +230,7 @@ class TransformableBox extends StatefulWidget {
     this.cornerHandleBuilder = _defaultCornerHandleBuilder,
     this.sideHandleBuilder = _defaultSideHandleBuilder,
     this.handleTapSize = 24,
+    this.handleTapLeftSize = 24,
     this.allowContentFlipping = true,
     this.handleAlignment = HandleAlignment.center,
     this.enabledHandles = const {...HandlePosition.values},
@@ -561,7 +562,7 @@ class _TransformableBoxState extends State<TransformableBox> {
         fit: StackFit.expand,
         children: [
           Positioned(
-            left: widget.handleAlignment.offset(widget.handleTapSize),
+            left: widget.handleAlignment.offset(widget.handleTapLeftSize),
             top: widget.handleAlignment.offset(widget.handleTapSize),
             width: rect.width,
             height: rect.height,

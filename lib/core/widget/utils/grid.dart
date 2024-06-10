@@ -1,4 +1,6 @@
 import 'dart:developer' as developer;
+import 'package:go_router/go_router.dart';
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
@@ -228,7 +230,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
       }
       var child = e.columnName != "description" ? ListTile(
         enabled: !widget.isEnum, onTap: () {
-          if (!widget.isEnum) { globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false); }
+          if (!widget.isEnum) { 
+            globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false); 
+          }
         },
         title : SizedBox(height: maxheight != null ? maxheight - 20 : null, 
                       child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
@@ -289,10 +293,12 @@ class GridColumnWidget extends StatefulWidget {
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
-    double width = (label.value.length * 17);
-    if ((width * maxLength) <= getTotal() && !avoid && maxLength <= 8) { width = (getTotal() /  maxLength); }
-    if (width < 200) { width = 200; }
-    return width;
+    double width = (getTotal() /  maxLength); 
+    if (width < 200) { 
+      width = (label.value.length * 17); 
+      if (width < 200) { width = 200; }
+    }
+    return width - 1;
   }
 
   bool isLower() {

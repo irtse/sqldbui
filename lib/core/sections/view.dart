@@ -1,20 +1,18 @@
-import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
-import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
 import 'dart:developer' as developer;
 
-model.View? beforeView;
 model.View? currentView;
 String? currentCat;
 GlobalKey<MainViewWidgetState> globalMainViewKey = GlobalKey<MainViewWidgetState>();
@@ -74,7 +72,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       viewID=null;
       subViewID=null;
       category=null;
-      AppRouter.setRouteCookie("");
+      AppRouter.setRouteCookie("", context);
     }
     return ViewWidget(view: currentView, views: widget.views); 
   }
@@ -83,7 +81,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     globalLoading = load;
     firstAPI = true;
     setState(() { widget.url = path;});
-    AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
+    AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}", context);
   }
   void refresh(String? id, String? subID, String? cat, model.View? view, bool forceFirstAPI) {
     setState(() {
@@ -96,7 +94,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       subViewID=subID;
       globalLoading = true;
       firstAPI =  forceFirstAPI || globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
-      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}");
+      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}", context);
     });
   }
 }

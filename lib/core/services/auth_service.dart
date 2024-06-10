@@ -15,7 +15,7 @@ class AuthService extends ChangeNotifier {
   AuthService._internal() { 
     if (timeBomb == 10) {
       refresh(true).then((value) {
-        if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, false); }
+        if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, null, false); }
       }); 
     } else { timer(); }
   }
@@ -45,12 +45,12 @@ class AuthService extends ChangeNotifier {
     user = null;
     error = null;
     SharedPreferences.getInstance().then((value) => value.setString("token", ""));
-    homeKey.currentState!.refresh(null, true);
+    homeKey.currentState!.refresh(null, null, true);
   }
 
   void authenticate(User logUser) {
     authenticateShallow(logUser);
-    homeKey.currentState!.refresh(null, false);
+    homeKey.currentState!.refresh(null, null, false);
   }
   void authenticateShallow(User logUser) {
     _isAuthenticated = true; 
