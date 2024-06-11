@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/main.dart';

@@ -100,7 +100,7 @@ class MenuWidgetState extends State<MenuWidget> {
             shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
             initiallyExpanded: initiallyExpanded[cat]!,
             backgroundColor: Theme.of(context).secondaryHeaderColor,
-            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10), child: Icon(cat.toUpperCase().contains("DATAS") ? Icons.grid_on : Icons.bookmark, color: Theme.of(context).splashColor,),), 
+            title: Row( children: [Padding(padding: const EdgeInsets.only(right: 10), child: Icon(cat.toUpperCase().contains("DATA") ? Icons.grid_on : Icons.bookmark, color: Theme.of(context).splashColor,),), 
               Flexible( child: Padding( padding: EdgeInsets.only(right: "$count".isNotEmpty ? (("$count".length + 1) * 7) : 0), 
               child: Text(cat.toUpperCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11)))) ]), 

@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/services/action.dart';
 import 'package:sqldbui2/core/widget/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
@@ -11,6 +12,7 @@ import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/convertors/convertor.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
@@ -44,6 +46,7 @@ class FormWidgetState extends State<DataFormWidget> {
       List<Widget> head = [];
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
+      List<Widget> positionnedBar = [];
       String name = "Unknown Name";
       String description = "no description";
       model.Workflow? wf;
@@ -65,17 +68,7 @@ class FormWidgetState extends State<DataFormWidget> {
         if (refItem.values.containsKey("description") && refItem.values["description"] != null) { description = refItem.values["description"].toLowerCase(); }
         if (refItem.dataPath != "") { widget.wrappersURL["relatedDatas"] = refItem.dataPath; }
         var schema = widget.view!.schema;
-        List<Widget> title = [];
-        var len = (MediaQuery.of(context).size.width - 150) > 300 ? (300 ~/ 4.2) : ((MediaQuery.of(context).size.width - 150) ~/ 15);
-        title.add(Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
-          children: [ Flexible( child: Text(name[0].toUpperCase()
-                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() + (len > name.length ? "" : "..."),
-            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))) ])));
-        if (description != "" && !description.contains("no description")) {
-            title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
-                children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
-                    Flexible( child: Text(overflow: TextOverflow.ellipsis, description, style: const TextStyle(color: Colors.grey, fontSize: 12)))] )));
-        }
+        List<Widget> states = [];
         widget.wrappers = [];
         additionnal = [];
         if (currentView != null && currentView!.isEmpty && widget.subForm) { widget.wrappersURL = {}; }
@@ -128,6 +121,25 @@ class FormWidgetState extends State<DataFormWidget> {
           if (refItem.valuesMany.containsKey(fieldName)) { value = refItem.valuesMany[fieldName]!; }
           if (refItem.valuesManyPath.containsKey(fieldName)) { value = refItem.valuesManyPath[fieldName]!; }
           var readOnly = (field.readonly || mainForm.currentState!.widget.view!.readOnly || refItem.readonly) && !widget.view!.isEmpty;
+          if (field.label == "state") { // TODO to remove if change its mind
+            readOnly = true; 
+            if (widget.view!.actions.contains("put") && !widget.view!.isEmpty && value != "completed" && value != "dismiss") {
+                positionnedBar.add(MouseRegion(cursor: SystemMouseCursors.click, child:
+                  Container( width: 500, margin: const EdgeInsets.only(bottom: 20), child: ToggleSwitch( initialLabelIndex: null,
+                  fontSize: 15, dividerColor: Colors.white, inactiveFgColor: Colors.grey, customWidths: const [250, 250],
+                  totalSwitches: 2, labels: const ["VALIDATE", "DISMISS"], inactiveBgColor: Theme.of(context).splashColor,
+                  onToggle: (index) async {
+                    widget.detectChange = true;
+                    widget.cacheForm[fieldName] = index == 0 ? "completed" : "dismiss";
+                    ActionService.pressed(null, false, currentView!.schemaName, currentView!.actionPath, <String>["id"], currentView!.schema, "put", context)(); },
+                ))
+              ));
+            }
+            states.add(Padding(padding: const EdgeInsets.only(top: 3, left: 12), child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                decoration: BoxDecoration( borderRadius: BorderRadius.circular(30), color: value == "completed" ? Colors.green : (value == "dismiss" ? Colors.red : Colors.orange)),
+                child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 10)))));
+            continue;
+          } // to remove if change its mind
           if (newCacheEntry[fieldName] == null) { newCacheEntry[fieldName]=value; } 
           if ((fieldName == "name" && field.readonly && (refItem.values.containsKey("name") && refItem.values["name"] != null))
           || (fieldName == "description" && field.readonly && (refItem.values.containsKey("description") && refItem.values["description"] != null)) ) { continue; }
@@ -152,6 +164,17 @@ class FormWidgetState extends State<DataFormWidget> {
                   child: Container( decoration: BoxDecoration(  borderRadius: BorderRadius.circular(10), color: Theme.of(context).splashColor,
                   ), child: Padding(padding: const EdgeInsets.all(10), child: f!,)))); 
             }
+        }
+        List<Widget> title = [];
+        var len = (MediaQuery.of(context).size.width - 150) > 300 ? (300 ~/ 4.2) : ((MediaQuery.of(context).size.width - 150) ~/ 15);
+        title.add(Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
+          children: [ Flexible( child: Text(name[0].toUpperCase()
+                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() + (len > name.length ? "" : "..."),
+            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))), ...states ])));
+        if (description != "" && !description.contains("no description")) {
+            title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
+                children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
+                    Flexible( child: Text(overflow: TextOverflow.ellipsis, description, style: const TextStyle(color: Colors.grey, fontSize: 12)))] )));
         }
         widget.cacheForm = newCacheEntry;
         List<Widget> actions = [];
@@ -197,7 +220,8 @@ class FormWidgetState extends State<DataFormWidget> {
         child: Container(margin: EdgeInsets.only(top: wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)), 
         height: MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) > 0 ? 
           MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) : 0,
-           child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head])
+           child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head, 
+           Positioned( bottom: 20, left: ((MediaQuery.of(context).size.width - menuSize) / 2) - 250, child: Row(children: positionnedBar,))])
       : Container( margin: EdgeInsets.only(bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
         decoration: BoxDecoration(boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))],
           color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),)),

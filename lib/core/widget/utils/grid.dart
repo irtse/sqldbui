@@ -56,6 +56,7 @@ class GridWidget extends StatefulWidget {
   @override GridWidgetState createState() => GridWidgetState();
 }
 class GridWidgetState extends State<GridWidget> {
+  final min = 160;
   final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
   @override Widget build(BuildContext context) { 
     if (viewID == null) { return Container(); }
@@ -105,7 +106,7 @@ class GridWidgetState extends State<GridWidget> {
       thumbVisibility: true,
       trackVisibility: true,
       thickness: 10,
-      interactive: !globalLoading,
+      notificationPredicate: (notif) => notif.depth > -1,
       child: SingleChildScrollView(
         controller: _horizontal,
         scrollDirection: Axis.horizontal, 
@@ -279,6 +280,7 @@ class GridCell {
 }
 // ignore: must_be_immutable
 class GridColumnWidget extends StatefulWidget {
+  final double minimal = 165;
   final BuildContext context;
   List<DropdownMenuItem<String>> items = [];
   GridWidgetState? grid; GlobalKey<GridColumnWidgetState>? nextColumn; bool last = false;
@@ -294,16 +296,16 @@ class GridColumnWidget extends StatefulWidget {
   GridColumnWidgetState createState() => GridColumnWidgetState();
   double getWidth(bool avoid) {
     double width = (getTotal() /  maxLength); 
-    if (width < 200) { 
+    if (width < minimal) { 
       width = (label.value.length * 17); 
-      if (width < 200) { width = 200; }
+      if (width < minimal) { width = minimal; }
     }
     return width - 1;
   }
 
   bool isLower() {
-    var width = (label.value.length * 20);
-    if (width < 200) { width = 200; }
+    double width = (label.value.length * 20);
+    if (width < minimal) { width = minimal; }
     return (width * maxLength) <= getTotal();
   }
 
@@ -367,7 +369,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
       allowFlippingWhileResizing: false,
       draggable: false,
       flip: null,
-      constraints: widget.show ? BoxConstraints(maxHeight: 55, minWidth: (((buttons.length + 1) * 40) + 60) > 0 ? (((buttons.length + 1) * 40) + 60) : 0) : null,
+      constraints: BoxConstraints(maxHeight: 55, minWidth: widget.minimal),
       resizeModeResolver: () => ResizeMode.symmetric,
       visibleHandles: const {HandlePosition.right},
       enabledHandles: delayed || (widget.last && widget.isLower()) ? {} : const {HandlePosition.right},

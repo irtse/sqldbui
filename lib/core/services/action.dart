@@ -2,9 +2,11 @@ import 'dart:developer' as developer;
 import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/widget/workflowPanel.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
@@ -15,21 +17,25 @@ import 'package:sqldbui2/core/services/api_service.dart';
 List<String> errors = <String>[];
 @lazySingleton
 class ActionService {
-  static void Function() pressed(ButtonWidgetState widget, bool isList, String schemaName, String url, 
+  static void Function() pressed(ButtonWidgetState? widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, String method, BuildContext context) {
       errors = [];
       return pressedForm(widget, mainForm, schemaName, url, schema, method, context);
     }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
-  static void Function() pressedForm(ButtonWidgetState widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
+  static void Function() pressedForm(ButtonWidgetState? widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context,) { 
       return () async {
-        widget.loading();
+        widget?.loading();
         if (mainForm.currentState != null) {
           await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, {});
         }
-        widget.loaded();
+        widget?.loaded();
+        
+        if (widget == null) { 
+          globalMainViewKey.currentState!.refresh(viewID, subViewID, category, null, true); 
+        }
       };
   }
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
@@ -42,7 +48,7 @@ class ActionService {
         }
         return []; 
       } else { form.formKey.currentState!.save(); }
-    }                                                   
+    }         
     var body = <String, dynamic>{};
     List<model.View> views = [];
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false);

@@ -64,6 +64,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         }
       }
       schema = widget.view!.schema;
+      print(currentView!.order);
       for (var fieldName in ["id", ...currentView!.order]) {
         var label = fieldName == "id" ? "id" : schema[fieldName]!.label;
         var type = fieldName == "id" ? "integer" : schema[fieldName]!.type;

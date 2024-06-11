@@ -306,7 +306,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                         isNull = value;
                     }); },),
               Padding( padding: const EdgeInsets.only(bottom: 20), child:  Divider(color: Theme.of(context).splashColor,)),
-              isNull ? Container() : Container( width: 220, margin: const EdgeInsets.only(bottom: 20), child: ToggleSwitch(
+              isNull ? Container() : Container( width: toggles.length * 55, margin: const EdgeInsets.only(bottom: 20), child: ToggleSwitch(
                 initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == widget.connector.toLowerCase()),
                 fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey,
                 totalSwitches: toggles.length, labels: toggles, inactiveBgColor: Theme.of(context).splashColor,

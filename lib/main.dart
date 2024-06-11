@@ -122,8 +122,6 @@ class HomeScreenState extends State<HomeScreen> {
     var scaffoldKey = GlobalKey<ScaffoldState>();
     var home = Scaffold(
       key: scaffoldKey,
-      floatingActionButton: FloatingActionButton(backgroundColor: Theme.of(context).primaryColor,
-        onPressed: () => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },), child: Icon(Icons.question_mark, color: Colors.white,)),
       endDrawer: const NotificationDrawerWidget(),
       appBar: AppBar(
         elevation: 3,
@@ -160,7 +158,11 @@ class HomeScreenState extends State<HomeScreen> {
              },),
              NotificationWidget(key: appBarKey,),
           ],),
-          Padding(padding: const EdgeInsets.only(left: 25, right: 50), 
+          Padding(padding: const EdgeInsets.only(left: 12.5, right: 0), 
+            child: IconButton(icon: const Icon( Icons.info_outline, color: Colors.white, ), tooltip: "tutorial",
+                              onPressed: () async => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },), )
+          ),
+          Padding(padding: const EdgeInsets.only(left: 12.5, right: 50), 
             child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
                               onPressed: () async { await _authProvider.logOut(context); }, )
           )
