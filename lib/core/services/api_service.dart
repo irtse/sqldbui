@@ -4,22 +4,21 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/model/filter.dart';
-import 'package:sqldbui2/model/view.dart';
 import 'package:alert_banner/exports.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/services/html.dart' if (kIsWeb) 'dart:html' as http;
 
 var firstAPI = false;
+var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
 class APIConstants {
   static String mainEndpost = '/main';
   static String genericEndpost = '/generic/';
@@ -31,7 +30,7 @@ class APIService {
   static String auth = "";
   static final dio = Dio(
     BaseOptions(
-      baseUrl: '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1', // you can keep this blank
+      baseUrl: baseURL, // you can keep this blank
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
     ),
   )..interceptors.add(LogInterceptor( requestHeader: true, ),);
@@ -89,7 +88,7 @@ class APIService {
   String getOrderDir(String url) {
     var orderBy = "";
     var dir = "";
-    if (url.contains("?") && AppRouter.routedSubID == null) {
+    if (url.contains("?")) {
       if (globalOrder.containsKey(viewID)) {
         var f = ""; var d = "";
         for (var order in globalOrder[viewID]!.keys) {
@@ -112,12 +111,9 @@ class APIService {
   String getColumns(String url, bool isFilter) {
     if (!isFilter) { return ""; }
     var columns = "";
-    if (url.contains("?") && AppRouter.routedSubID == null &&
-   colsSchemaValid.containsKey(viewID)) {
+    if (url.contains("?") && filterOrderView.containsKey(viewID)) {
       columns += "&columns=";
-      for (var column in colsSchemaValid[viewID]!.keys) { 
-        if (colsSchemaValid[viewID]![column]!.value) {  columns += "$column,"; }
-      }
+      for (var column in filterOrderView[viewID] ?? []) { columns += "$column,"; }
       columns = columns.substring(0, columns.length - 1);
     }
     return columns;
@@ -131,14 +127,17 @@ class APIService {
         for (var f in globalFilter[viewID]!.sort()) {  
           if (f.column == "") { continue; } 
           if (f.comparator == "=") { filter += "${f.column}%3A${f.value}"; 
+          } else if (f.comparator == "!=") { filter += "${f.column}%3C%3E${f.value}"; 
           } else if (f.comparator == "like") { filter += "${f.column}~%25${f.value}%25"; 
+          } else if (f.comparator == "not like") { filter += "${f.column}%3C%3E~%25${f.value}%25"; 
+          } else if (f.comparator == "<=") { filter += "${f.column}%3C%3A${f.value}";
+          } else if (f.comparator == ">=") { filter += "${f.column}%3E%3A${f.value}";
           } else { filter += "${f.column}${f.comparator == "<" ? "%3C" : "%3E"}${f.value}"; }
           filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "");
         }
       }
-      if (globalNew) { filter += "&new=enable"; }
+      if (globalNew[viewID] != null && globalNew[viewID] != "all") { filter += "&filter_new=${globalNew[viewID]}"; }
     }
-    print(filter);
     return filter;
   }
 
@@ -148,9 +147,8 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      if (cache.containsKey(url) && !force && cache[url] != null) { 
-        if (offset != null && cache[url]!.offset <= offset) { return cache[url]! as APIResponse<T>; 
-        } else { return cache[url]! as APIResponse<T>; } 
+      if ((!force || noReload) && cache.containsKey(url) && cache[url] != null ) { 
+        return cache[url]! as APIResponse<T>;
       }
       try {
         dio.options.headers["authorization"] = auth;
@@ -159,7 +157,6 @@ class APIService {
         var filter = getFilter(url, isFilter);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
-        print("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
         var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
           if (method == "delete") { cache.remove(url); return APIResponse<T>(); }

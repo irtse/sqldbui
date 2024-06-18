@@ -6,9 +6,9 @@ import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/view.dart';
 
-bool globalNew = false;
-Map<String, Filters> globalFilter = {};
-Map<String, Map<String,String>> globalOrder = <String, Map<String,String>>{};
+Map<String?, String> globalNew = {};
+Map<String?, Filters> globalFilter = {};
+Map<String?, Map<String,String>> globalOrder = {};
 
 class Filters {
   bool isEmpty = false;
@@ -78,31 +78,38 @@ class Filters {
 
   void removeFilter() {
     filterRowsWidget = [];
-    globalNew = false;
     globalOffset = 0;
-    globalOrder.remove(viewID);
     noFilterRetrieval = true;
-    globalFilter[viewID!] = Filters();
+    globalNew[viewID] = "all";
+    globalOrder.remove(viewID);
+    globalFilter[viewID] = Filters();
   }
 
   void resetFilter(String columnName) {
     globalOrder[viewID]?.remove(columnName); 
     globalFilter[viewID]?.remove(columnName);  
-    globalNew = false;
     globalOffset = 0;
     noFilterRetrieval = true;
     List<FilterRowWidget> toRemove = filterRowsWidget.where((element) => element.columnName == columnName).toList();
     for (var filter in toRemove) { filterRowsWidget.remove(filter); }
   }
 
+  void clearFilter() {
+    filterRowsWidget = [];
+    globalOffset = 0;
+    globalNew = {};
+    globalFilter = {}; 
+    globalOrder = {};
+  }
+
   void refreshFilter(List<Filter> fields) {
-    globalFilter[viewID!] = Filters(); 
-    globalOrder[viewID!] = <String, String>{};
+    globalFilter[viewID] = Filters(); 
+    globalOrder[viewID] = {};
     for (var field in fields) {
-        globalFilter[viewID!]!.add(field.column ?? "", Filter(type: field.type,
+        globalFilter[viewID]!.add(field.column ?? "", Filter(type: field.type,
           column: field.column, index: field.index,  comparator: field.comparator, 
           value: field.value, connector: field.connector));
-        globalOrder[viewID!]![field.column!] = field.dir;
+        globalOrder[viewID]![field.column!] = field.dir;
     }
     filterRowsWidget = [];
     noFilterRetrieval = true;

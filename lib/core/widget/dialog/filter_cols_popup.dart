@@ -1,6 +1,6 @@
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -9,13 +9,12 @@ import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 // ignore: must_be_immutable
-Map<String, String?> filterView = <String, String?>{};
-Map<String, int> filterViewIDName = <String, int>{};
-Map<String, Map<String, ValueNotifier<bool>>> colsSchemaValid = <String, Map<String, ValueNotifier<bool>>>{};
+Map<String?, List<dynamic>> filterOrderView = <String?, List<dynamic>>{};
+Map<String?, String?> filterView = <String?, String?>{};
+Map<String?, int> filterViewIDName = <String, int>{};
 GlobalKey<FilterColsPopUpState> filterColsPopUpKey = GlobalKey<FilterColsPopUpState>();
 // ignore: must_be_immutable
 class FilterColsPopUpWidget extends StatefulWidget{
-  String currentFilter = "";
   Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
   FilterColsPopUpWidget ({ Key? key, required this.schema }): super(key: key);
   @override
@@ -24,50 +23,21 @@ class FilterColsPopUpWidget extends StatefulWidget{
 
 class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
   bool force = false;
-  bool noSelection =false;
   @override Widget build(BuildContext context) {
     if (viewID == null) { return Container(); }
-    if (filterView.containsKey(viewID) && filterView[viewID] != null && filterView[viewID] != "") { 
-      widget.currentFilter = filterView[viewID!]!; 
-    }
-    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", firstAPI | force, null), builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
+    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", firstAPI | force, null), 
+    builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
       var dpItems = <DropdownMenuItem<String>>[];
       force = true;
-      List<Widget> items = [];
-      List<dynamic> order = currentView != null ? currentView!.order : [];
       if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
         for (var i in snapshot.data!.data!) { 
-          if (i.selected && !noSelection) { 
-            widget.currentFilter = i.label ?? ""; 
-            filterView[viewID!] = i.label ?? "";
+          if (filterView[viewID] == "") { filterView[viewID] = i.label ?? ""; }
+          if (i.selected && (i.label ?? i.name) == filterView[viewID]) { 
+            filterOrderView[viewID] = i.fields.map((e) => e.column).toList();
           }
           filterViewIDName[i.label!] = i.id!;
           dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
         }
-      }
-      if (!colsSchemaValid.containsKey(viewID)) {  colsSchemaValid[viewID!]= <String, ValueNotifier<bool>>{}; }
-     
-      for (var fieldName in order) {
-        if (widget.schema[fieldName] == null) { continue; }
-        var scheme =  widget.schema[fieldName]!;
-        var label = scheme.label;
-        if (!colsSchemaValid[viewID!]!.containsKey(fieldName) || widget.currentFilter == "") { 
-          colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(scheme.active); 
-        } 
-        if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
-          try {
-            filterConfs[widget.currentFilter]!.where((element) => element.column == fieldName).first;
-            colsSchemaValid[viewID!]![fieldName]!.value = true;
-          } catch (e) { colsSchemaValid[viewID!]![fieldName]!.value = false; }
-        }
-        items.add(Padding( padding: const EdgeInsets.symmetric(vertical:  10), child: AdvancedSwitch(
-                    initialValue: colsSchemaValid[viewID!]![fieldName]!.value,
-                    controller: colsSchemaValid[viewID!]![fieldName],
-                    activeColor: Colors.green, inactiveColor: Colors.grey,
-                    activeChild: Text(label), inactiveChild: Text("${label} <${"hide"}>"), 
-                    borderRadius:  const BorderRadius.all(Radius.circular(15)),
-                    width: 200, height: 30.0, disabledOpacity: 0.5,
-                    onChanged: (value) => colsSchemaValid[viewID!]![fieldName]!.value = value,)));
       }
       return PopupMenuButton(
       color: Colors.white,
@@ -76,7 +46,24 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
       onSelected: (value) { },
       itemBuilder: (BuildContext bc) { 
         return [ PopupMenuItem(enabled: false, 
-            child: Padding(padding: const EdgeInsets.only(top: 20, bottom: 20), child: StatefulBuilder(
+            child: MenuColsPopUpWidget(items: dpItems, schema: widget.schema,)) ]; });
+    }); 
+  }
+}
+
+class MenuColsPopUpWidget extends StatefulWidget{
+  List<DropdownMenuItem<String>> items = [];
+  Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
+  MenuColsPopUpWidget ({ Key? key, required this.schema, required this.items }): super(key: key);
+  @override
+  MenuColsPopUpState createState() => MenuColsPopUpState();
+}
+
+class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
+  bool force = false;
+  bool noSelection =false;
+  @override Widget build(BuildContext context) {
+    return Padding(padding: const EdgeInsets.only(top: 20, bottom: 20), child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Column( children: [ 
                   Padding( padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), 
@@ -84,23 +71,123 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     Text("LIST VIEW COLUMNS", style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
                   Divider(color: Theme.of(context).splashColor,),
                   // select all
-                  DropdownButtonFormField<String>( items: dpItems, 
-                    value: widget.currentFilter != "" ? widget.currentFilter : null,
-                    hint: Text("select an existing view filter...", overflow: TextOverflow.ellipsis,),
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                    onChanged: (value) {
-                      widget.currentFilter = value ?? ""; 
-                      filterView[viewID!] = value ?? "";
-                      for (var fieldName in widget.schema.keys) {
-                        if (filterConfs.containsKey(widget.currentFilter) && filterConfs[widget.currentFilter] != null) {
-                            colsSchemaValid[viewID!]![fieldName]!.value = true;
-                        } else { colsSchemaValid[viewID!]![fieldName]!.value = false; }
-                      } 
-                      APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterViewIDName[value]}"), <String, dynamic> { "is_selected" : true }, null);
+                  ColsPopUpWidget(schema: widget.schema, items: widget.items, comp: this),
+                  Padding(padding: const EdgeInsets.only(bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
+                  Row( mainAxisAlignment: MainAxisAlignment.center, children : [ Padding( padding: const EdgeInsets.only(right: 10), 
+                    child: TextButton(onPressed: () { 
+                      if (filterView[viewID] != null && filterView[viewID] != "") { filterView[viewID] = filterView[viewID];  }
                       globalOffset = 0; 
                       rects.remove(viewID);
-                      noSelection=false;
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), 
+                    child: const Padding( padding: EdgeInsets.all(10), 
+                      child: Text("APPLY", style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
+                  filterView[viewID] != null && filterView[viewID] != "" ? 
+                  Padding( padding: const EdgeInsets.only(right: 10), 
+                    child: TextButton(onPressed: () async { 
+                    await APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", 
+                      "rows=${filterViewIDName[filterView[viewID]]}"), <String, dynamic> { "is_selected" : false }, null);
+                      setState((){
+                        filterView[viewID] = "";
+                        filterOrderView.remove(viewID);
+                        noSelection=true;
+                      });
+                      Future.delayed(const Duration(seconds: 1), () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true) );
+                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
+                  child: Text("CANCEL", style: TextStyle(color: Colors.white, fontSize: 12))),))
+                  : TextButton(onPressed: () {
+                    List<Map<String, dynamic>> fields = [];
+                    for (var (index, fieldName) in filterOrderView[viewID]!.indexed) {
+                      fields.add(<String, dynamic>{ "name" : fieldName, "index" : index });
+                    }
+                    var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
+                    APIService().post<model.View>(currentView!.filterPath, body, null).then((value) { 
+                      globalOffset = 0; 
+                      rects.remove(viewID);
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                      if (value.data != null && value.data!.isNotEmpty && value.data![0].items.isNotEmpty) { 
+                        filterView[viewID] = value.data![0].items[0].values["name"];
+                      }
+                      widget.items.add(DropdownMenuItem<String>(value: filterView[viewID], 
+                                        child: Text(filterView[viewID] ?? "", overflow: TextOverflow.ellipsis,),));
+                      setState((){});
+                    });
+                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
+                  child: Text("SAVE & APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
+      ]); } ) );
+  }
+}
+
+class ColsPopUpWidget extends StatefulWidget{
+  Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
+  List<DropdownMenuItem<String>> items = [];
+  MenuColsPopUpState comp;
+  ColsPopUpWidget ({ Key? key, required this.schema, required this.items, required this.comp }): super(key: key);
+  @override
+  ColsPopUpState createState() => ColsPopUpState();
+}
+
+class ColsPopUpState extends State<ColsPopUpWidget> {
+  bool force = false;
+  bool noSelection =false;
+  @override Widget build(BuildContext context) {
+    List<Widget> items = [];
+    if (filterOrderView[viewID] == null) { filterOrderView[viewID] = currentView != null ? currentView!.order : []; }
+    var t = widget.schema.keys.where((element) => !filterOrderView[viewID]!.contains(element)).toList();
+    var list = [...filterOrderView[viewID]!, ...t];
+    for (var (index,fieldName) in list.indexed) {
+        var scheme =  widget.schema[fieldName]!; 
+        var label = scheme.label;
+        items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), child:  Row( children : [ 
+          index == 0 ? Container(width: 44,) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
+            onTap: () {
+              var tmp = filterOrderView[viewID]!;
+              var i = tmp.removeAt(index);
+              var b = tmp.sublist(0, index - 1);
+              b.add(i);
+              b.addAll(tmp.sublist(index - 1, tmp.length));
+              setState(() { filterOrderView[viewID] = b; }); 
+            }, child: const Icon(Icons.arrow_upward))),
+          Padding( padding: const EdgeInsets.only(right: 10), 
+          child: AdvancedSwitch(
+            initialValue: filterOrderView[viewID]!.contains(fieldName),
+            activeColor: Colors.green, inactiveColor: Colors.grey,
+            activeChild: Text(label), inactiveChild: Text(label), 
+            borderRadius:  const BorderRadius.all(Radius.circular(15)),
+            width: 165, height: 30.0, disabledOpacity: 0.5,
+            onChanged: (value) { 
+              if (value) { filterOrderView[viewID]?.add(fieldName); } else { filterOrderView[viewID]?.remove(fieldName); }
+            },)),
+          index == list.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child:  InkWell(onTap: () {
+              var tmp = filterOrderView[viewID]!;
+              var i = tmp.removeAt(index);
+              var b = tmp.sublist(0, index + 1);
+              b.add(i);
+              b.addAll(tmp.sublist(index + 1, tmp.length));
+              setState(() { filterOrderView[viewID] = b; }); 
+            }, child: Icon(Icons.arrow_downward))),
+        ]))));
+      }
+    return Column(children: [
+      DropdownButtonFormField<String>( items: widget.items, 
+                    value: filterView[viewID] != null && filterView[viewID] != "" ? filterView[viewID] : null,
+                    hint: const Text("select an existing view filter...", overflow: TextOverflow.ellipsis,),
+                    style: const TextStyle(fontSize: 14, color: Colors.black),
+                    onChanged: (value) async {
+                      await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
+                        "rows=all", "rows=${filterViewIDName[value]}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
+                        globalOffset = 0; 
+                        rects.remove(viewID);
+                        filterView[viewID] = value;
+                        filterOrderView.remove(viewID);
+                        noSelection=false;
+                        if (v.data != null && v.data!.isNotEmpty) { 
+                          filterOrderView[viewID] = v.data![0].fields.map((e) => e.column).toList();
+                        } 
+                        setState((){});
+                        widget.comp.setState((){});
+                        globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                      });
                     },
                     dropdownColor: Theme.of(context).highlightColor,
                     decoration: InputDecoration(
@@ -118,71 +205,29 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
                     ),
                     validator: (String? value) { return null; },
                   ),
-                  Row(mainAxisAlignment: MainAxisAlignment.center, children: widget.currentFilter != "" ? [
+                  Row(mainAxisAlignment: MainAxisAlignment.center, 
+                    children: filterView[viewID] != null && filterView[viewID] != "" ? [
                     IconButton(onPressed: () {
                       List<Map<String, dynamic>> fields = [];
-                      for (var fieldName in widget.schema.keys) {
-                        if (colsSchemaValid[viewID!]![fieldName]!.value) { fields.add(<String, dynamic>{ "name" : fieldName }); }
-                      }
-                      var body = <String, dynamic>{ "name" : widget.currentFilter, "link" : currentView!.schemaName, "view_fields" : fields  };
+                      var body = <String, dynamic>{ "name" : filterView[viewID], "link" : currentView!.schemaName, "view_fields" : fields  };
                       APIService().put<model.View>(currentView!.filterPath, body, null);
                     }, icon: const Icon(Icons.save), color: Theme.of(context).secondaryHeaderColor),
                     IconButton(onPressed: () { 
-                      APIService().delete<model.View>("${currentView!.filterPath}&name=${widget.currentFilter}", null).then((value) {
-                        dpItems.removeWhere((element) => element.value == widget.currentFilter);
-                        widget.currentFilter = "";
-                        filterView[viewID!] = "";
-                        for (var fieldName in widget.schema.keys) {
-                          colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(widget.schema[fieldName]!.active);
-                        }
-                        Future.delayed(const Duration(milliseconds: 500), () => setState((){ force = true; }));
-                      },);
+                      showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
+                        APIService().delete<model.View>("${currentView!.filterPath}".replaceAll("rows=all", "rows=${filterViewIDName[filterView[viewID]]}"), null).then((value) {
+                          widget.items.removeWhere((element) => element.value == filterView[viewID]);
+                          setState((){
+                            filterView[viewID] = "";
+                            filterOrderView.remove(viewID);
+                            noSelection=true;
+                          });
+                          Future.delayed(const Duration(milliseconds: 500), () => setState((){ force = true; }));
+                        },);
+                      }));
                     }, icon: const Icon(Icons.delete), color: Theme.of(context).secondaryHeaderColor),
                   ] : [],),
                   Divider(color: Theme.of(context).splashColor,),
-                  Container( constraints: const BoxConstraints(maxHeight: 200), child: SingleChildScrollView( child: Column(children: items))),
-                  Padding(padding: const EdgeInsets.only(bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
-                  Row( mainAxisAlignment: MainAxisAlignment.center, children : [ Padding( padding: const EdgeInsets.only(right: 10), 
-                    child: TextButton(onPressed: () { 
-                      if (widget.currentFilter != "") { filterView[viewID!] = widget.currentFilter;  }
-                      globalOffset = 0; 
-                      rects.remove(viewID);
-                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text("APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))))),
-                  filterView.containsKey(viewID) && filterView[viewID] != "" ? 
-                  Padding( padding: const EdgeInsets.only(right: 10), 
-                    child: TextButton(onPressed: () { 
-                    APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterViewIDName[widget.currentFilter]}"), <String, dynamic> { "is_selected" : false }, null);
-                    filterView.remove(viewID!);
-                    noSelection=true;
-                    widget.currentFilter = "";
-                    for (var fieldName in widget.schema.keys) {
-                      colsSchemaValid[viewID!]![fieldName]= ValueNotifier<bool>(widget.schema[fieldName]!.active);
-                    }
-                    setState((){});
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text("CANCEL", style: const TextStyle(color: Colors.white, fontSize: 12))),))
-                   : TextButton(onPressed: () {
-                    List<Map<String, dynamic>> fields = [];
-                    for (var fieldName in widget.schema.keys) {
-                      if (colsSchemaValid[viewID!]![fieldName]!.value) { fields.add(<String, dynamic>{ "name" : fieldName }); }
-                    }
-                    var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
-                    APIService().post<model.View>(currentView!.filterPath, body, null).then((value) { 
-                      globalOffset = 0; 
-                      rects.remove(viewID);
-                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
-                      if (value.data != null && value.data!.isNotEmpty && value.data![0].items.isNotEmpty) { 
-                        widget.currentFilter = value.data![0].items[0].values["name"];
-                        filterView[viewID!] = value.data![0].items[0].values["name"];
-                      }
-                      dpItems.add(DropdownMenuItem<String>(value: widget.currentFilter, child: Text(widget.currentFilter, overflow: TextOverflow.ellipsis,),));
-                      setState((){});
-                    });
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text("SAVE & APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
-      ]); } ) )) ]; });
-    }); 
+                  Container( constraints: const BoxConstraints(maxHeight: 200), child: SingleChildScrollView( child: Column(children: items,))),
+    ]);
   }
 }

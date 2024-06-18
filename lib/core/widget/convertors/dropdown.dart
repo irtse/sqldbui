@@ -1,4 +1,5 @@
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -14,11 +15,12 @@ class DropDownWidget extends StatefulWidget {
   final bool readOnly;
   final bool require;
   dynamic value;
+  final String path;
   final String? url;
   final String type;
   final String label;
   bool isDark = false;
-  DropDownWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
+  DropDownWidget ({ Key? key, required this.form, required this.schemaName, required this.name, required this.path,
                       required this.readOnly, required this.value, required this.label, this.isDark = false,
                       required this.require, required this.type, required this.url, required this.component}): super(key: key);
   @override
@@ -34,7 +36,10 @@ class _DropDownState extends State<DropDownWidget> {
                       style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
                       decoration: InputDecoration(
                         filled: true,
-                        suffixIcon: widget.type.contains("enum") ? const Icon(Icons.format_list_numbered) : const Icon(Icons.link),
+                        suffixIcon: InkWell( mouseCursor: widget.path != "" ? null : MouseCursor.defer,
+                          onTap: () { if (widget.path != "") { AppRouter.navigateTo(widget.path); } }, child: 
+                          widget.type.contains("enum") ? Icon(Icons.format_list_numbered, color: Theme.of(context).secondaryHeaderColor) 
+                          : Icon(Icons.link, color: widget.path == "" ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,)),
                         errorStyle: const TextStyle(height: -2),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
@@ -54,7 +59,6 @@ class _DropDownState extends State<DropDownWidget> {
           items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));
         }
       }
-
       return DropdownButtonFormField<String>( items: items, 
         isExpanded: true,
         hint: Text("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
@@ -75,7 +79,7 @@ class _DropDownState extends State<DropDownWidget> {
           errorStyle: const TextStyle(height: -2),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           filled: true,
-          constraints: BoxConstraints(minWidth: 0),
+          constraints: const BoxConstraints(minWidth: 0),
           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
           enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
           fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),

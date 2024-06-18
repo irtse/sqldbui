@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -11,16 +10,22 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/utils/filterRow.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:toggle_switch/toggle_switch.dart';
+
+bool isFilter() {
+  return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
+  && (globalOrder[viewID]!.isNotEmpty || (globalFilter[viewID] != null && globalFilter[viewID]!.size() > 0));
+}
 
 bool tempRemoval = false;
 bool noFilterRetrieval = false;
 int globalLimit = 20;
 int globalOffset = 0;
-Map<String, List<Filter>> filterConfs = {};
-Map<String, int> filterIDName = <String, int>{};
-Map<String, String> filterRestr = <String, String>{};
+Map<String?, int> filterIDName = <String, int>{};
+Map<String?, String> filterRestr = <String, String>{};
 GlobalKey<GridWidgetState> globalGridKey = GlobalKey<GridWidgetState>();
 GlobalKey<DatagridWidgetState> globalGridWidgetKey = GlobalKey<DatagridWidgetState>();
 // ignore: must_be_immutable
@@ -64,15 +69,19 @@ class DatagridWidgetState extends State<DatagridWidget> {
         }
       }
       schema = widget.view!.schema;
-      print(currentView!.order);
-      for (var fieldName in ["id", ...currentView!.order]) {
-        var label = fieldName == "id" ? "id" : schema[fieldName]!.label;
+      var order = filterOrderView[viewID] != null ? filterOrderView[viewID]! : widget.view!.order;
+      for (var fieldName in ["id", ...order]) {
+        if (schema[fieldName] == null && fieldName != "id") { continue; }
+        var lab = schema[fieldName]?.label != null ? schema[fieldName]!.label : fieldName;
+        var label = fieldName == "id" ? "id" : lab;
         var type = fieldName == "id" ? "integer" : schema[fieldName]!.type;
         var sch = fieldName == "id" ? null : schema[fieldName]!.schema;
         var active = fieldName == "id" ? true : schema[fieldName]!.active;
         if (type.contains("many") || !active) { continue; }
+        String? url;
+        if (schema[fieldName]?.valuesPath != "") { url = schema[fieldName]?.valuesPath; }
         schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(label, overflow: TextOverflow.ellipsis,)));
-        columns.add(GridColumnWidget(context: context, items: schemeItems,
+        columns.add(GridColumnWidget(context: context, items: schemeItems, url: url,
               type: sch != null && sch.isNotEmpty && type.contains("int") ? "link" : type,
               contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
               width: columnWidths.containsKey(fieldName) ? columnWidths[fieldName]! : double.nan,
@@ -105,8 +114,8 @@ class DatagridWidgetState extends State<DatagridWidget> {
             return [ PopupMenuItem(enabled: false, child: StatefulBuilder(  builder: (BuildContext context, StateSetter setState) {
                     return MappingPopUpWidget(isExport: true, format: "csv"); })) ]; 
         }) ]));
-    Filters? filterMain = globalFilter[viewID!];
-    if (filterRestr[viewID!] != null && filterRestr[viewID!] != "" && !tempRemoval) { // THERE IS A FILTER
+    Filters? filterMain = globalFilter[viewID];
+    if (filterRestr[viewID] != null && filterRestr[viewID] != "" && !tempRemoval) { // THERE IS A FILTER
       filterRowsWidget = filterMain?.toRow(schemeItems, schema) ?? [];
     } else if (tempRemoval) { tempRemoval = false; }
     var t = show ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : 0;
@@ -118,11 +127,11 @@ class DatagridWidgetState extends State<DatagridWidget> {
       }
       index++;
     }
+    var toggles = ["all", "new", "old"];
     return Column( children: [ Container( color: Theme.of(context).primaryColorLight, constraints: const BoxConstraints(minHeight: 40), 
       width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
       child: Column( children: [ Stack( children: [ 
         MediaQuery.of(context).size.width > 1000 ? Positioned( top: 3.5, left: 32, child: Row( children: [ 
-          
         Padding( padding: const EdgeInsets.only(right: 10), child : InkWell( child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
           color: show ? Colors.white : Theme.of(context).splashColor, size: 20), onTap: () { setState(() { show = !show; }); },),
         ),
@@ -132,30 +141,34 @@ class DatagridWidgetState extends State<DatagridWidget> {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.save, size: 18, color: Theme.of(context).splashColor, ),
           onPressed: () async { 
-            globalFilter[viewID!] = Filters(); // empty filter to refill with new
+            globalFilter[viewID] = Filters(); // empty filter to refill with new
             for (var filter in filterRowsWidget) {
               if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
-              globalFilter[viewID!]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
+              globalFilter[viewID]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
                 type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
             }
             noFilterRetrieval = true;
-            var body = { "link" : widget.view?.schemaName, "is_selected" : true, "filter_fields" : globalFilter[viewID!]?.serialize() }; 
+            var body = { "link" : widget.view?.schemaName, "elder" : globalNew[viewID] ?? "all", "is_selected" : true, "filter_fields" : globalFilter[viewID]?.serialize() }; 
             if (currentView == null) { return; }
             (viewID != null && filterRestr[viewID] != null ? APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), body, context) :
             APIService().post<model.Shallowed>(currentView!.filterPath, body, context)).then((value) => refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []));
           })) : Container(),
-        filterRestr[viewID!] != null && filterRestr[viewID!] != "" ? Padding(padding: const EdgeInsets.only(left: 5), 
+        filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), 
         tooltip: "delete filter", style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon(Icons.delete, size: 18, color: Theme.of(context).splashColor, ),
-          onPressed: () { setState(() { 
-            APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), context).then((value) {
-              removeFilter(); 
-              filterRestr[viewID!] = ""; 
-              Future.delayed(const Duration(seconds: 1), 
-              () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true));
-            },); });  })) : Container() ,
+          onPressed: () { 
+            showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
+                      setState(() { 
+                        APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), context).then((value) {
+                        removeFilter(); 
+                        filterRestr[viewID] = ""; 
+                        Future.delayed(const Duration(seconds: 1), 
+                        () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true));
+                      },); });
+                    }));
+              })) : Container() ,
         FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", true, null), 
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
           if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) { 
@@ -163,25 +176,28 @@ class DatagridWidgetState extends State<DatagridWidget> {
               if (dpItems.where((element) => element.value == i.label).isEmpty) {
                 dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
               }
-              filterIDName[i.label!] = i.id!; filterConfs[i.label!] = i.fields;
-              if (i.selected && filterRestr[viewID!] != "") {  filterRestr[viewID!] = i.label!;  }
-              if ((i.selected && (filterMain == null || filterMain.isEmpty) && filterRestr[viewID!] != ""
-              && filterRestr[viewID!] != null && !noFilterRetrieval)
-              || (filterRowsWidget.isEmpty && i.fields.isNotEmpty && filterRestr[viewID!] != "" && filterRestr[viewID!] != null)) { 
-                Future.delayed(const Duration(milliseconds: 500), () => refreshFilter(i.fields)); 
+              filterIDName[i.label!] = i.id!;
+              if (i.selected && filterRestr[viewID] != "") { filterRestr[viewID] = i.label!; }
+              if ((i.selected && (filterMain == null || filterMain.isEmpty) && filterRestr[viewID] != ""
+              && filterRestr[viewID] != null && !noFilterRetrieval)
+              || (filterRowsWidget.isEmpty && i.fields.isNotEmpty && filterRestr[viewID] != "" && filterRestr[viewID] != null)) { 
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  globalNew[viewID] = i.elder;
+                  refreshFilter(i.fields);
+                }); 
               }
-              if (filterRestr[viewID!] == "") { filterRestr.remove(viewID); }
+              if (filterRestr[viewID] == "") { filterRestr.remove(viewID); }
             }
           } 
           return SizedBox( height: 25, width: (MediaQuery.of(context).size.width - menuSize) / 3, 
-            child: DropdownButtonFormField<String>( items: dpItems, value: filterRestr[viewID!],
+            child: DropdownButtonFormField<String>( items: dpItems, value: filterRestr[viewID],
                     hint: Text("select an existing filter...", overflow: TextOverflow.ellipsis, 
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                     onChanged: (value) async {
                       if (value == null) { return; }
                       noFilterRetrieval = false;
-                      filterRestr[viewID!] = value; 
+                      filterRestr[viewID] = value; 
                       APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[value]}"), 
                         <String, dynamic> { "is_selected" : true }, null).then( (value) => refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []));
                     }, dropdownColor: Theme.of(context).secondaryHeaderColor,
@@ -207,39 +223,41 @@ class DatagridWidgetState extends State<DatagridWidget> {
           style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor, ),
           onPressed: () {
-            globalFilter[viewID!] = Filters(); // empty filter to refill with new
+            globalFilter[viewID] = Filters(); // empty filter to refill with new
             for (var filter in filterRowsWidget) {
               if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
-              globalFilter[viewID!]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
+              globalFilter[viewID]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
                 type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
             }
             noFilterRetrieval = true;
             globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
           })),
-        filterRowsWidget.isNotEmpty || (filterRestr[viewID!] != null && filterRestr[viewID!] != "" ) || globalNew ? Padding(padding: const EdgeInsets.only(left: 5), 
+        filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), tooltip: "reset filter", style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.filter_alt_off, size: 18, color: Theme.of(context).highlightColor, ),
           onPressed: () async { 
             removeFilter();
             if (filterRestr[viewID] == null || filterRestr[viewID] == "") { 
-              filterRestr[viewID!] = ""; 
+              filterRestr[viewID] = ""; 
               return Future.delayed(const Duration(seconds: 1), 
                 () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true)); 
             }
             APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), <String, dynamic> { "is_selected" : false }, null).then((value) {
-              filterRestr[viewID!] = "";
+              filterRestr[viewID] = "";
               Future.delayed(const Duration(seconds: 1), 
                 () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true));
           });  })) : Container(),
           Padding(padding: const EdgeInsets.only(left: 10), 
-        child: AdvancedSwitch( width: 140, initialValue: globalNew, activeColor: Colors.green, inactiveColor: Theme.of(context).secondaryHeaderColor,
-                    activeChild: Text("only new"), inactiveChild: Text("not only new", style: TextStyle(color: Theme.of(context).splashColor)),  
-                    borderRadius:  const BorderRadius.all(Radius.circular(15)), height: 25.0, disabledOpacity: 0.5,
-                    onChanged: (value) { 
-                      globalNew = value; 
-                      Future.delayed(const Duration(seconds: 1), () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true));
-                    },),
+            child: ToggleSwitch( labels: toggles, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
+                initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == globalNew[viewID]?.toLowerCase()),
+                dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
+                totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
+                onToggle: (index) { 
+                    globalNew[viewID] = toggles[index ?? 0]; 
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                  },
+              ),
         )
       ] )) : Container(),
       Row( mainAxisAlignment: MainAxisAlignment.end, children : [ Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
@@ -251,7 +269,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
       height: MediaQuery.of(context).size.height - (120 + t) > 0 ? MediaQuery.of(context).size.height - (120 + t) : 0,
       width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
       decoration: BoxDecoration( color:  Theme.of(context).highlightColor), child : GridWidget(
-          key: globalGridKey, links: links, isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
+          key: globalGridKey, schemaID: "${currentView?.schemaID}", isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
           contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
           maxLength: maxCount(schema), contentShallowed: contentShallowed,   borderColor: Theme.of(context).splashColor,
           viewKey: widget.viewKey, showCheckboxColumn: true, showColumnHeaderIconOnHover: true,

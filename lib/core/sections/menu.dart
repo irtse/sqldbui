@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -37,8 +35,8 @@ class MenuWidgetState extends State<MenuWidget> {
         var cat = view.category == "" ? "general" : view.category;
         if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
         if (eldestCat.containsKey(cat)) {
-          try { 
-            view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.newIds.length < v.newIds.length - 1 && view.items.isNotEmpty).newIds;
+          try { view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).newIds.where(
+            (element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
           } catch(e) { /* */ }     
         }
         categories[cat]!.add(view);
@@ -53,9 +51,9 @@ class MenuWidgetState extends State<MenuWidget> {
         child: Padding( padding: const EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10), child : Container(
                         height: 30, width: (menuSize - 20) > 0 ? (menuSize - 20) : 0, child: TextFormField(
                         cursorHeight: 15,
-                        style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
                         controller: controller,
-                        onChanged: (value) => viewID == "" || viewID == null ? homeKey.currentState?.setState(() {}) : setState(() { }),
+                        style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
+                        onChanged: (value) => viewID == null ? homeKey.currentState?.setState(() {}) : setState(() { }),
                         decoration: InputDecoration(
                         filled: true,
                         labelStyle: TextStyle(color: Theme.of(context).highlightColor),
@@ -82,7 +80,7 @@ class MenuWidgetState extends State<MenuWidget> {
       ];
       for (var cat in categories.keys) {
         var count = 0;
-        initiallyExpanded[cat] = widget.views != null ? widget.views!.where((element) => "${element.id}" == viewID && element.category == cat).isNotEmpty : false;
+        initiallyExpanded[cat] = widget.views != null ? widget.views!.where((element) => viewID != null && viewID!.isNotEmpty && "${element.id}" == viewID!.substring(1)).isNotEmpty : false;
         if (categories[cat]!.isNotEmpty) {
           for (var catIndex in categories[cat]!) { count += catIndex.newIds.length; }
           List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [Positioned(left: 190 - ("$count".length * 8), top: 13, child: Container(
@@ -115,20 +113,16 @@ class MenuWidgetState extends State<MenuWidget> {
                     color: Theme.of(context).primaryColor),
                   child: Padding(padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
                     overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))))] : [];
-                  return Stack( alignment: Alignment.topRight, children: [
-                    Container(decoration: BoxDecoration(
+                  return Stack( alignment: Alignment.topRight, children: [ Container(decoration: BoxDecoration(
                         border: Border(top: BorderSide(color: Colors.black, width: index == 0 ? .5 : .25), bottom: const BorderSide(color: Colors.black, width: .25)),
-                        color: "${catIndex.id}" == viewID ? Theme.of(context).primaryColorLight : Colors.transparent ),
+                        color: "${catIndex.id}" == viewID?.substring(1) ? Theme.of(context).primaryColorLight : Colors.transparent ),
                       child:  Container(decoration: BoxDecoration(
                         border: Border(left: BorderSide(color: Theme.of(context).primaryColor, width: 10)),
-                        color: "${catIndex.id}" == viewID ? Theme.of(context).primaryColorLight : Colors.transparent ), 
+                        color: "${catIndex.id}" == viewID?.substring(1) ? Theme.of(context).primaryColorLight : Colors.transparent ), 
                       child: Material(type: MaterialType.transparency,
                         child: ListTile(
-                          selected: "${catIndex.id}" == viewID,
-                          onTap: () async { 
-                            refreshView("${catIndex.id}", cat, false, false, false); 
-                            setState(() {});
-                          },
+                          selected: "${catIndex.id}" == viewID?.substring(1),
+                          onTap: () async { setState(() { refreshView("#${catIndex.id}", cat, true, false, false);  }); },
                           tileColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).splashColor,
                           title: Text((catIndex.label ?? catIndex.name), overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13.0,)),
@@ -148,16 +142,17 @@ class MenuWidgetState extends State<MenuWidget> {
       }
     }
     firstAPI = false;
-    return Column( children : [ ...header, Container( height: MediaQuery.of(context).size.height - 172 > 0 ? MediaQuery.of(context).size.height - 172 : 0,
+    noReload = false;
+    var height = MediaQuery.of(context).size.height - 172;
+    return Column( children : [ ...header, SizedBox( height: height > 0 ? height : 0,
       child: SingleChildScrollView( child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps )))]);
   }
   void refresh(bool getView) {
-      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}", context);
       if (widget.views == null || getView || firstAPI) {
           APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
           if (value.data != null) { widget.views = value.data; }
           for (var view in widget.views!) {
-            if (view.id.toString() == viewID && subViewID != null) {
+            if (view.id.toString() == viewID?.substring(1) && subViewID != null) {
               try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
             }
           }
@@ -166,7 +161,7 @@ class MenuWidgetState extends State<MenuWidget> {
         globalMainViewKey.currentState?.setState(() {}); 
       } else {
         for (var view in widget.views!) {
-          if (view.id.toString() == viewID && subViewID != null) {
+          if (viewID != null && view.id.toString() == viewID?.substring(1) && subViewID != null) {
             try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
           }
         }
@@ -175,23 +170,21 @@ class MenuWidgetState extends State<MenuWidget> {
       }
   }
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
-    AppRouter.routedSubID = null;
     if (id != null && !globalFilter.containsKey(id)) { 
+      globalNew[id] = "all";
       globalFilter[id] = Filters(); 
       globalOrder[id] = <String, String>{};
     }
-    globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
     firstAPI = isFirst;
     globalOffset = 0;
     category=cat;
+    viewID=id;
     subViewID=null;
-    currentView = null;
-    viewID=id.toString();
     widget.url = null;
-    if (nullable) { Future.delayed(const Duration(microseconds: 500), () {
-      currentView = null;
-    });  }
-    if(full) { refresh(false); }
+    currentView = null;
+    if(full) { refresh(true); }
+    AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
+    globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
     globalMainViewKey.currentState?.refresh(viewID, null, category, currentView, true);
   }
 }

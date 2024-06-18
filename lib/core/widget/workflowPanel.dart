@@ -2,11 +2,11 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
-  const WorkflowPanelWidget ({ Key? key, required this.workflow }): super(key: key);
+  final bool readOnly;
+  const WorkflowPanelWidget ({ Key? key, required this.workflow, this.readOnly = false }): super(key: key);
   @override WorkflowPanelWidgetState createState() => WorkflowPanelWidgetState();
 }
 GlobalKey<WorkflowPanelWidgetState> globalWorkflowPanelWidgetKey = GlobalKey<WorkflowPanelWidgetState>();
@@ -24,7 +24,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
             Padding( padding: const EdgeInsets.symmetric(horizontal: 5), child: AdvancedSwitch(
               initialValue: hub.isSet,
               controller: hubs[hub.workflow!.id],
-              enabled: hub.optionnal && !currentView!.readOnly,
+              enabled: hub.optionnal && !widget.readOnly,
               activeColor: Colors.green,
               inactiveColor: Colors.grey,
               activeChild: Text(hub.name),
@@ -42,7 +42,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
             Wrap(alignment: WrapAlignment.center, 
             children: [
               const Padding( padding: EdgeInsets.only(right: 10, top: 5), child: Icon(Icons.account_tree, color: Colors.grey)),
-              Padding( padding: const EdgeInsets.only(right: 20, top: 5), child: Text("next optionnal steps:", style: const TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
+              const Padding( padding: EdgeInsets.only(right: 20, top: 5), child: Text("next optionnal steps:", style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
       } catch(e) { /* empty */ } 
     }
     return Container(width: 0,);

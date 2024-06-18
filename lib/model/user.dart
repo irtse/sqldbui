@@ -7,20 +7,17 @@ class Notification extends SerializerDeserializer<Notification> {
     this.description = "",
     this.ref = "", // todo something at least protected
     this.linkPath = "",
-    this.dataPath = ""
   });
   String id;
   String name;
   String description;
   String ref;
   String linkPath;
-  String dataPath;
 
   @override deserialize(Map<String, dynamic> json) => Notification(
     id: json.containsKey("id") ? json["id"] : "", 
     name: json.containsKey("name") ? json["name"] : "unknown user", 
     description: json.containsKey("description") ? json["description"] : "", 
-    dataPath: json.containsKey("data_path") ? json["data_path"] : "", 
     ref: json.containsKey("data_ref") ? json["data_ref"] : "", 
     linkPath: json.containsKey("link_path") ? json["link_path"] : "",  );
   @override Map<String, dynamic> serialize() => {};

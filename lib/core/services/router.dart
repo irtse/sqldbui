@@ -28,15 +28,23 @@ class RouterWidgetState extends State<RouterWidget> {
 class AppRouter { 
   static List<String> history = [];
   static List<String> realHistory = [];
-  static String? routedSubID;
   static final AppRouter _instance = AppRouter._internal();
   factory AppRouter() { return _instance; }
-  AppRouter._internal() { /* logic*/}    
+  AppRouter._internal() { 
+    SharedPreferences.getInstance().then((prefs) {
+      if (prefs.containsKey("history")) {
+        realHistory = prefs.getString("history")!.split(",");
+        history = prefs.getString("history")!.split(",");
+        routerKey.currentState?.setState(() { });
+      }
+    });
+  }    
 
 
   static Future<String?> getRouteCookie() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("url");
+    print("<${prefs.getString("url")}>");
+    return prefs.getString("url") != "" ? prefs.getString("url") : null;
   }
 
   static removeRouteCookie() async {
@@ -54,16 +62,27 @@ class AppRouter {
       } catch (e) { /* */ }
       realHistory.add(path);
       history.add(path);
+      if (history.length > 10) { 
+        realHistory.removeAt(0); 
+        history.removeAt(0);
+      }
+      prefs.setString("history", realHistory.join(","));
       routerKey.currentState?.setState(() { });
     }
   }
 
   static back() async {
     if (realHistory.length <= 1) { return; }
+    globalLoading = true;
     realHistory.removeLast();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("url", realHistory.last);
-    homeKey.currentState?.setState(() { });
+    prefs.setString("history", realHistory.join(","));
+    var splitted = realHistory.last.split(":");
+    viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
+    subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
+    routerKey.currentState?.setState(() { });
+    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
   }
   static bool canForward() {
     try {
@@ -74,11 +93,17 @@ class AppRouter {
   }
   static forward() async {
     if (canForward()) { 
+      globalLoading = true;
       var index = history.indexOf(realHistory.last);
       realHistory.add(history[index + 1]); 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString("url", realHistory.last);
-      homeKey.currentState?.setState(() { });
+      var splitted = realHistory.last.split(":");
+      viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
+      subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
+      prefs.setString("history", realHistory.join(","));
+      routerKey.currentState?.setState(() { });
+      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
     }
   }
 
@@ -94,35 +119,17 @@ class AppRouter {
       builder: (BuildContext context, GoRouterState state) {
         return HomeScreen();
       },
-    ),
-    GoRoute(
-      name: "view",
-      path: '/:id',
-      builder: (BuildContext context, GoRouterState state) {
-        viewID = state.pathParameters['id'];
-        subViewID = null;
-        return HomeScreen(fromUrl: true,);
-      },
-    ),
-    GoRoute(
-          name: "subview",
-          path: '/:id/:subid',
-          builder: (BuildContext context, GoRouterState state) {
-            viewID = state.pathParameters['id'];
-            subViewID = state.pathParameters['subid'];
-            return HomeScreen(fromUrl: true,);
-          },
-    ),
+    )
   ];  
-  static void navigateWith(String path) {
-    globalMainViewKey.currentState?.refreshUrl(path, subViewID, false);  
-  }
   static void navigateTo(String path) {
-    var splitted = path.replaceAll("#", "/").replaceAll(":", "/").split("/");
-    viewID = splitted.length > 1 ? splitted[1] : null;
-    routedSubID=splitted.length > 2 ? splitted[2] : null;
+    setRouteCookie(path, globalMainViewKey.currentContext!);
+    var splitted = path.split(":");
+    viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
+    subViewID=splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
     currentView = null;
-    globalMenuKey.currentState?.refresh(false);
+    globalLoading = true;
+    print("NAVIGATE TO $viewID $subViewID");
+    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
   }
 }   
 // ROUTER SHOULD INVOKE MAIN TO ACCESS VIEW, VIEW ARE MENU SECTION

@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -32,7 +33,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logOut(BuildContext context) async {
-    await service.get<User>("/auth/logout", true, context).then((value) => unAuthenticate()
+    await service.get<User>("/auth/logout", true, null).then((value) => unAuthenticate()
                                                          ).catchError((e) => unAuthenticate());
   }
   
@@ -44,6 +45,7 @@ class AuthService extends ChangeNotifier {
     _isAuthenticated = false; 
     user = null;
     error = null;
+    APIService.cache = <String, APIResponse<dynamic>>{};
     SharedPreferences.getInstance().then((value) => value.setString("token", ""));
     homeKey.currentState!.refresh(null, null, true);
   }
@@ -58,6 +60,7 @@ class AuthService extends ChangeNotifier {
     user = logUser;
     error = null;
     APIService.auth = logUser.token;
+    APIService.cache = <String, APIResponse<dynamic>>{};
     SharedPreferences.getInstance().then((value) => value.setString("token", logUser.token));
     refresh(false);
   }
@@ -75,7 +78,7 @@ class AuthService extends ChangeNotifier {
           var d = value.data;
           SharedPreferences.getInstance().then((value) => value.setString("token", d![0].token));
           if (isLoggedIn) {
-              appBarKey.currentState?.setState(() {
+            appBarKey.currentState?.setState(() {
               user!.token = d![0].token;
               user!.notifications = value.data![0].notifications;
             });

@@ -20,7 +20,8 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
     if (widget.workflow.steps.isNotEmpty) {
       var active = false;
       try { active = widget.workflow.position != "" && int.parse(widget.workflow.position) >= 0;  } catch(e) { /* */ }
-      items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), width: 100, gotBefore: false,
+      items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), 
+        width: 100, gotBefore: false,
         current: widget.workflow.current != "" && curr == 0,
         doing: widget.workflow.position != "" && pos == 0,
         isDismissible: widget.workflow.isDismiss, beforeDismissible: widget.workflow.isDismiss, 
@@ -30,6 +31,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
       items.add(StepWidget( content: Text("step ${ i + 1 }", style: const TextStyle(color: Colors.white)),
         width: itemWidth, gotBefore: true, 
         steps: widget.workflow.steps.containsKey("${ i + 1 }") ? widget.workflow.steps["${ i + 1 }"] : null,
+        beforeDoing: widget.workflow.position != "" && pos > ( i - 1 ),
         beforeCurrent: !widget.workflow.isClose && widget.workflow.current != "" && curr == i,
         current: widget.workflow.current != "" && curr == i + 1 && !widget.workflow.isClose,
         beforeActive: widget.workflow.isClose || widget.workflow.current != "" && curr >= i + 1,
@@ -60,6 +62,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
 class StepWidget extends StatefulWidget{
   final Widget content; final double width; 
   final bool gotBefore;
+  bool beforeDoing = false;
   bool beforeActive = false;
   bool active = false;
 
@@ -69,7 +72,8 @@ class StepWidget extends StatefulWidget{
   bool isDismissible = false;
   bool doing = false;
   List<model.Step>? steps = [];
-  StepWidget ({ Key? key, required this.content, required this.width, this.steps, required this.gotBefore,
+  StepWidget ({ Key? key, required this.content, this.beforeDoing = false,
+    required this.width, this.steps, required this.gotBefore,
     this.beforeActive = false, this.active = false, this.doing = false, this.beforeCurrent = false, this.current = false, 
     this.isDismissible = false, this.beforeDismissible = false }): super(key: key);
   @override StepWidgetState createState() => StepWidgetState();
@@ -79,8 +83,8 @@ class StepWidgetState extends State<StepWidget> {
     List<Widget> icons = [];
     if (widget.steps != null && widget.steps!.isNotEmpty) {
       double maxLength = 0;
-      for ( var step in widget.steps! ) { 
-        if (step.name.length > maxLength) { maxLength = step.name.length.toDouble(); }
+      for ( var step in widget.steps!.where( (step) => step.name.length > maxLength) ) { 
+        maxLength = step.name.length.toDouble();
       }
       icons.add(Positioned(
         left: widget.width - 50,
@@ -130,7 +134,8 @@ class StepWidgetState extends State<StepWidget> {
             clipper: TriangleClipper(),
             child: Container(
               color: widget.beforeCurrent ? Theme.of(context).primaryColor : ( 
-                widget.beforeDismissible ? Colors.red : ( widget.beforeActive ? Colors.green : Theme.of(context).splashColor)),
+                widget.beforeDismissible ? Colors.red : ( widget.beforeDoing ? Colors.orange : (
+                   widget.beforeActive ? Colors.green : Theme.of(context).splashColor))),
               height: 14,
               width: 30,
             ),
@@ -144,7 +149,8 @@ class StepWidgetState extends State<StepWidget> {
           decoration: BoxDecoration(
             border: const Border(right: BorderSide(width: 2, color: Colors.white),),
             color: widget.current ? Theme.of(context).primaryColor : (
-              widget.isDismissible ? Colors.red : ( widget.active ?  Colors.green : (widget.doing ? Colors.orange : Theme.of(context).splashColor))),
+              widget.isDismissible ? Colors.red : (
+                 widget.active ?  Colors.green : (widget.doing ? Colors.orange : Theme.of(context).splashColor))),
           ),
           child: Center(child: widget.content,), ),
       ...icons,

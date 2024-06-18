@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form.dart';
@@ -34,12 +35,12 @@ class OneToManyState extends State<OneToManyWidget> {
     var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
     if (widget.value != null) {
       return FutureBuilder<APIResponse<model.View>>(
-        future: APIService().get(widget.value, firstAPI, null), 
+        future: APIService().get(widget.value, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
           List<Widget> items = <Widget>[];
           if (snap.data != null) {
             for (var data in snap.data!.data!) {
-              widget.readOnly = widget.readOnly || (!data.actions.contains("put") || mainForm.currentState!.widget.view!.readOnly);
+              widget.readOnly = widget.readOnly || !data.actions.contains("put");
               widget.canPost = data.actions.contains("post");
               for (var item in data.items) {
                 var isDeleted = false;
@@ -60,11 +61,13 @@ class OneToManyState extends State<OneToManyWidget> {
                   var w = Stack(children: [dataForm,
                             Positioned(top: 10,  right: 100, 
                             child: IconButton(onPressed: () {
-                              widget.component.widget.detectChange = true;
-                              setState(() {
-                                var w = widget.component.widget.oneToManiesFormDelete;
-                                w.add(dataForm);
-                              }); }, icon: const Icon(Icons.delete, color: Colors.grey,)))],);
+                              showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete occurency", validate: () {
+                                widget.component.widget.detectChange = true;
+                                setState(() {
+                                  var w = widget.component.widget.oneToManiesFormDelete;
+                                  w.add(dataForm);
+                                });
+                              })); }, icon: const Icon(Icons.delete, color: Colors.grey,)))],);
                   items.add(w);
                 } else {  items.add(dataForm); }
                 var e = widget.component.widget.existingOneToManiesForm;
@@ -81,8 +84,6 @@ class OneToManyState extends State<OneToManyWidget> {
   List<Widget> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) {
     List<Widget> rows = [Padding( padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
                                   child: Text("${"related"} ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")),]; 
-    
-    print(readOnly);
     if (!readOnly && (canPost || widget.component.widget.view != null) || widget.component.widget.view!.isEmpty) {
         var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 

@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
-import 'package:date_field/date_field.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form.dart';
 
 class DateWidget extends StatefulWidget {
@@ -21,15 +21,18 @@ class DateWidget extends StatefulWidget {
 }
 class _DateState extends State<DateWidget> {
   @override Widget build(BuildContext context) {
-    var date = DateTime.now();
       DateTime? dateValue;
       if (widget.form[widget.name] != null) { 
         widget.value = widget.form[widget.name]; 
         dateValue = DateTime.parse(widget.value);
       }
       return DateTimeField(
-        dateFormat: intl.DateFormat('y-M-dd'),
-        mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
+        validator: (DateTime? value) {
+          if (widget.require && value == null) { return ""; }
+          return null;
+        },
+        initialValue: dateValue,
+        format: intl.DateFormat('y-M-dd'),
         style: const TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
             suffixIcon: const Icon(Icons.calendar_month, size: 20,),
@@ -38,6 +41,7 @@ class _DateState extends State<DateWidget> {
             helperStyle: const TextStyle(height: -2),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,
+            errorStyle: const TextStyle(fontSize: 0),
             fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
             hintStyle: const TextStyle(fontSize: 12, ),
             border: const OutlineInputBorder(),
@@ -45,8 +49,12 @@ class _DateState extends State<DateWidget> {
             hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase()}",
             labelText: "${widget.label.toLowerCase()}${widget.require ? '*' : ''}",
           ),
-        value: dateValue,
-        lastDate: DateTime(date.year + 10, date.month, date.day),
+        onShowPicker: (context, currentValue) { return showDatePicker(
+              context: context,
+              firstDate: DateTime(1900),
+              initialDate: dateValue ?? currentValue,
+              lastDate: DateTime(2100));
+        },
         onChanged: (DateTime? value) { 
           widget.component?.widget.detectChange = true;
           setState(() {
@@ -56,10 +64,4 @@ class _DateState extends State<DateWidget> {
         },
       );
   }
-}
-
-class DateSaveTimeField extends DateTimeField {
-  VoidCallback? onSaved;
-  DateSaveTimeField({required DateTime? value, required DateTime? lastDate, required DateTimeFieldPickerMode mode, required intl.DateFormat dateFormat, required InputDecoration decoration, required TextStyle style, required void Function(DateTime?) onChanged})
-      : super(value: value, lastDate: lastDate, mode: mode, dateFormat: dateFormat, decoration: decoration, style: style, onChanged: onChanged);
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -27,47 +29,38 @@ class MainViewWidget extends StatefulWidget{
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     model.View? view; 
-    try { view = currentView ?? widget.views?.firstWhere((v) => '${v.id}' == viewID  && viewID != ""); 
-    } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }
-    if (view != null || widget.url != null) {
-      if (APIService.cache.containsKey(view?.linkPath) && !firstAPI && widget.url == null) { globalLoading = false; }
-      if ((currentView == null || currentView != null && currentView!.id.toString() != viewID 
-      || AppRouter.routedSubID != null) || firstAPI || widget.url != null) {
+    try { view = currentView ?? widget.views?.firstWhere((v) => '${v.id}' == viewID?.substring(1) && (viewID != null && !viewID!.contains("@"))); } catch (e) { /* */ }
+    if (viewID == null) { return ViewWidget(view: currentView, views: widget.views); }
+    bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
+    bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@"));
+    print("HEY $isList $reForge ${viewID} ${subViewID}");
+    if (isList || reForge) {
+        print("WIDGET : ${widget.url} ${viewID} ${subViewID}");
+        var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${viewID!.substring(1)}?rows=${subViewID != null ? "$subViewID" : "all"}" : "";
         return FutureBuilder<APIResponse<model.View>>(
-          future: view != null && view.isList && subViewID == null ? APIService().getWithOffset<model.View>("${widget.url ?? view.linkPath}${AppRouter.routedSubID != null ? "&id=%25${AppRouter.routedSubID}%" : ""}", firstAPI || AppRouter.routedSubID != null, context)
-          : APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : ""), firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
+          future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), firstAPI, context) : 
+          APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
-              currentView = snap.data!.data![0]; 
-              currentView!.isList = subViewID == null && !currentView!.isEmpty;
+              currentView = snap.data!.data![0];  
+              currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.length > 1 && currentView!.isList) {
                 for (var view in snap.data!.data!.sublist(1)) { 
                   for (var item in view.items) { 
-                    if (currentView!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { 
-                      currentView!.items.add(item); 
-                    }
+                    if (currentView!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { currentView!.items.add(item); }
                   }
                 }
               }
               try { 
-                var v = widget.views?.firstWhere((element) => "${element.id}" == viewID);
+                var v = widget.views?.firstWhere((element) => "${element.id}" == viewID?.substring(1));
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
               } catch(e) { /* */ }
-            }
+            } else { currentView = null; }
             Future.delayed(const Duration(seconds:5), () => firstAPI = false);
-            if ((subViewID != null || AppRouter.routedSubID != null) 
-            && currentView != null && widget.url == null) {
-              var subID = AppRouter.routedSubID ?? subViewID;
-              try {
-                model.Item item = currentView!.items.firstWhere((v) => v.values['id'] == subID);
-                if (item.linkPath != "") { Future.delayed( const Duration(seconds: 1), () => refreshUrl(item.linkPath, subID, true)); } 
-              } catch (e) { developer.log("View not found $e", name: "MainViewWidget"); }
-            }
             widget.url = null;
             return ViewWidget(view: currentView, views: widget.views);
         });
-      } 
-    }
+    } 
     if (currentView == null) {   
       viewID=null;
       subViewID=null;
@@ -81,20 +74,18 @@ class MainViewWidgetState extends State<MainViewWidget> {
     globalLoading = load;
     firstAPI = true;
     setState(() { widget.url = path;});
-    AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}", context);
+    AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
   }
   void refresh(String? id, String? subID, String? cat, model.View? view, bool forceFirstAPI) {
     setState(() {
       widget.url = null;
       globalOffset = 0;
       currentView = view;
-      AppRouter.routedSubID = null;
       category=cat;
       viewID=id;
       subViewID=subID;
       globalLoading = true;
       firstAPI =  forceFirstAPI || globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
-      AppRouter.setRouteCookie("${viewID != null ? "#$viewID" : ""}${subViewID != null ? ":$subViewID" : ""}", context);
     });
   }
 }
@@ -109,6 +100,7 @@ class ViewWidgetState extends State<ViewWidget> {
   @override Widget build(BuildContext context) { return Container(child: _build(context));  }
   Widget _build(BuildContext context) {
     List<Widget> comps = <Widget>[];
+    Future.delayed(const Duration(seconds: 2), () => globalLoading = false);
     if (MediaQuery.of(context).size.width < 600 ) {
       return Stack( children: [ 
           Container( margin: const EdgeInsets.only(top: 40),
@@ -120,7 +112,7 @@ class ViewWidgetState extends State<ViewWidget> {
     }
     comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
     if (widget.view != null) {
-      if (widget.view!.isList == true && subViewID == null) { 
+      if (widget.view!.isList && subViewID == null) { 
         DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view,);
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 40), child: w),
@@ -129,8 +121,7 @@ class ViewWidgetState extends State<ViewWidget> {
         DataFormWidget w =  DataFormWidget(key: mainForm, view: widget.view);
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 25), child: w),
-          ActionBarWidget(key: globalActionBar, view: widget.view,  form: w ),  ...comps
-        ] ); }
+          ActionBarWidget(key: globalActionBar, view: widget.view,  form: w ),  ...comps] ); }
     }
     if (viewID != null) { 
       return Stack( children: [ 
@@ -138,13 +129,14 @@ class ViewWidgetState extends State<ViewWidget> {
             margin: const EdgeInsets.only(top: 40),
             width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
             height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
-                decoration: BoxDecoration(color: Theme.of(context).highlightColor),
-                child: null),
+                decoration: BoxDecoration(color: globalLoading ? Colors.white : Theme.of(context).primaryColor),
+                child: globalLoading ? null : const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : [
+                  Icon(Icons.error, color: Colors.white, size: 100.0,),
+                  Padding(padding: EdgeInsets.all(10), child: Text("Seems pretty lost... go on another page please :)", style: TextStyle(color: Colors.white, fontSize: 20.0)),)
+                ]))),
           ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]);
     }
-    globalLoading = false;
-    return Stack( children: [ HomeViewWidget(key: globalHomeViewKey), 
-      ActionBarWidget(key: globalActionBar, view: widget.view, ), ], );
+    return Stack( children: [ HomeViewWidget(key: globalHomeViewKey), ActionBarWidget(key: globalActionBar, view: widget.view, ), ], );
   }
 }
 

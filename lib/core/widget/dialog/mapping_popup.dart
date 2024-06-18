@@ -74,7 +74,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             child: TextWidget(form : cache, schemaName: "", name: "filename", readOnly: false, value: null, label: "filename", 
             require: true, type: "varchar", component: null, isDark: true,)),
             DropDownWidget(form : cache, schemaName: "", name: "format", readOnly: false, value: widget.format, label: "format", 
-              require: true, type: "enum__csv", component: null, url: null, isDark: true,)
+              require: true, type: "enum__csv", component: null, url: null, isDark: true, path: "")
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Divider(color: Theme.of(context).splashColor,))]);
       } else {

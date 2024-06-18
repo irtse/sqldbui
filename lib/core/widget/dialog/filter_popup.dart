@@ -1,14 +1,17 @@
 import 'dart:developer' as developer;
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:date_field/date_field.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/utils/grid.dart';
 import 'package:sqldbui2/core/widget/utils/filterRow.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 // ignore: must_be_immutable
@@ -20,7 +23,6 @@ class FilterPopUpWidget extends StatefulWidget{
   bool? ascOrder;
   bool? descOrder;
   String? searchValue;
-  bool isNew = false;
   List<DropdownMenuItem<String>> items;
   FilterPopUpWidget ({ Key? key, required this.items,
   required this.columnName, required this.component, required this.label, required this.type }): super(key: key);
@@ -28,10 +30,10 @@ class FilterPopUpWidget extends StatefulWidget{
 }
 class FilterPopUpState extends State<FilterPopUpWidget> {
   List<FilterSearchWidget> advancedSearch = <FilterSearchWidget>[];
+  
   @override Widget build(BuildContext context) {
     StateSetter? stateSort;
     StateSetter? stateFilter;
-    StateSetter? stateKind;
     return PopupMenuButton(
       color: Colors.white,
       icon: const Icon(size: 18, Icons.filter_alt, color: Colors.grey),
@@ -43,7 +45,6 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
             if(globalOrder[viewID]![widget.columnName] == "desc") { widget.descOrder = true; }
           }
         }
-        widget.isNew = globalNew; 
         return [
           PopupMenuItem(enabled: false, 
             child: Padding(padding: const EdgeInsets.only(top: 20, bottom: 20), child: StatefulBuilder(
@@ -79,7 +80,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                         } else { widget.descOrder = null; }
                       }); 
                     }, )),
-                Divider(color: Theme.of(context).splashColor,)
+                Padding( padding: const EdgeInsets.only(top: 10), child: Divider(color: Theme.of(context).splashColor,)),
               ]); }),)),
           PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
             if (currentView != null && globalFilter.containsKey(viewID)) {
@@ -101,34 +102,18 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                 advancedSearch.remove(advancedSearch.first);
             }
             stateFilter = setState;
-            return Container( 
+          return Container( 
               constraints: const BoxConstraints(maxHeight: 200),
-              child: SingleChildScrollView( child: Column(children: advancedSearch))); })),
-          PopupMenuItem(enabled: false, child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) { 
-                stateKind = setState;
-                var rows1 = [
-                      const Icon(Icons.fiber_new, color: Color.fromARGB(255, 129, 79, 79), size: 30,), 
-                      Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), child: Text("only new datas")),
-                    ];
-                if (widget.isNew == true) { rows1.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
-                return Column(children: [
-                  Padding(padding: const EdgeInsets.only(left: 20, right: 20),
-                    child: Container(color: Colors.transparent, child: 
-                    TextButton(
-                    child: Row(children: rows1), 
-                    onPressed: () { setState(() { widget.isNew = !widget.isNew;  }); },  
-                  ))),
-                  Divider(color: Theme.of(context).splashColor,)
-                ]); })),
-          PopupMenuItem(enabled: false, child: StatefulBuilder(
+              child: SingleChildScrollView( child: Column(children: [...advancedSearch, 
+                                  Divider(color: Theme.of(context).splashColor,)]))); })),
+              PopupMenuItem(enabled: false, child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return Padding( padding: const EdgeInsets.only(bottom: 30, top: 10), child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                return Padding( padding: const EdgeInsets.only(bottom: 30, top: 10), 
+                  child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Padding( padding: const EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
                     if (viewID != null) { 
                       if (widget.ascOrder != null) { globalOrder[viewID]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
                       if (widget.descOrder != null) { globalOrder[viewID]![widget.columnName]=widget.descOrder! ? "desc" : "asc"; }
-                      globalNew = widget.isNew;
                       if (widget.ascOrder == null && widget.descOrder == null) { globalOrder[viewID]?.remove(widget.columnName); }
                       globalFilter[viewID]!.remove(widget.columnName);
                       var founded = filterRowsWidget.where((element) => element.columnName == widget.columnName).toList();
@@ -153,30 +138,27 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                           }
                         }
                       }
-                      stateSort!(() {}); stateKind!(() {}); stateFilter!(() {});
+                      stateSort!(() {}); stateFilter!(() {});
                     }
                     noFilterRetrieval = true;  
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                   },
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text("APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))),)),
+                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
+                    child: Text("APPLY", style: TextStyle(color: Colors.white, fontSize: 12))),)),
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
-                    globalMainViewKey.currentState?.refresh(viewID!, subViewID, category, null, true);
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
                     stateSort!(() { widget.ascOrder=null;  widget.descOrder=null; });
-                    stateKind!(() { widget.isNew=false; });
                     stateFilter!(() { advancedSearch = []; });
                   }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), 
-                  child: Padding( padding: EdgeInsets.all(10), child: Text("CLEAR",  style: const TextStyle(color: Colors.white, fontSize: 12
-                  ))))
+                  child: const Padding( padding: EdgeInsets.all(10), child: Text("CLEAR",  style: TextStyle(color: Colors.white, fontSize: 12
+            ))))
           ],)); } )) 
         ];
       },
     );
   }
 }
-
-// ignore: must_be_immutable
 // ignore: must_be_immutable
 class FilterSearchWidget extends StatefulWidget{
   String columnName; 
@@ -185,35 +167,53 @@ class FilterSearchWidget extends StatefulWidget{
   String? searchValue;
   String connector = "";
   String comparator = "like";
+  String? url;
   FilterPopUpState filter;
   int innerIndex;
   int? index;
   StateSetter state;
   var globalKey = GlobalKey<FormFieldState<dynamic>>();
   var fieldText = TextEditingController();
-  FilterSearchWidget ({ Key? key, required this.state, required this.columnName, required this.filter, this.comparator = "like",
+  FilterSearchWidget ({ Key? key, required this.state, this.url,
+  required this.columnName, required this.filter, this.comparator = "like",
   required this.type, required this.innerIndex, required this.label, this.connector = "", this.searchValue }): super(key: key);
   @override
   FilterSearchState createState() => FilterSearchState();
 }
 class FilterSearchState extends State<FilterSearchWidget> {
   bool isNull = false;
+  bool isMath = false;
+  Widget connectorButton(String conn) {
+    return TextButton(onPressed: () {
+        if (widget.filter.advancedSearch.length <= widget.innerIndex + 1) { 
+          widget.filter.advancedSearch.add(FilterSearchWidget(filter: widget.filter, state: widget.state,
+          innerIndex: widget.filter.advancedSearch.length, type: widget.type, columnName: widget.columnName, label: widget.label));
+        }
+        widget.connector =  widget.connector = widget.connector == conn ? "" :  conn; 
+        if (widget.connector == "") { 
+          widget.filter.advancedSearch.removeRange(widget.innerIndex + 1, widget.filter.advancedSearch.length); 
+        }
+        widget.state(() { setState(() {});}); 
+      }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(widget.connector == conn ? Theme.of(context).primaryColor : Colors.transparent)), 
+      child: Padding( padding: const EdgeInsets.all(10), child: Text(conn.toUpperCase(),  
+        style: TextStyle(color: widget.connector == conn ? Colors.white : Colors.grey, fontSize: 11))));
+  }
+
   @override Widget build(BuildContext context) {
     var additionnal = <Widget>[];
     if (widget.innerIndex > 0) {
       additionnal.add(TextButton(onPressed: () {
-                    widget.filter.advancedSearch.removeRange(widget.innerIndex, widget.filter.advancedSearch.length);
-                    widget.state(() { }); 
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.transparent)), 
-                  child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text("DELETE",  style: const TextStyle(color: Colors.grey, fontSize: 11
-                  )))));
+        widget.filter.advancedSearch.removeRange(widget.innerIndex, widget.filter.advancedSearch.length);
+        widget.state(() { }); 
+      }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.transparent)), 
+        child: const Padding( padding: EdgeInsets.all(10), 
+          child: Text("DELETE",  style: TextStyle(color: Colors.grey, fontSize: 11)))));
     }
+    print(widget.type);
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
     Widget w = Container();
     if (isText || widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("money") || widget.type.contains("decimal") || widget.type.contains("int")) { 
         if (widget.searchValue != null && widget.searchValue != "") { widget.fieldText.text = widget.searchValue!; }
-        bool isInt = widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("money") || widget.type.contains("decimal") || widget.type.contains("int");
         w = TextFormField( key: widget.globalKey, controller: widget.fieldText, style: const TextStyle(fontSize: 14,),
                 enabled: true,  autocorrect: true,  decoration: InputDecoration(
                   enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
@@ -221,14 +221,15 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   isDense: true, hintStyle: const TextStyle(fontSize: 12), // you need this
                   floatingLabelBehavior: FloatingLabelBehavior.always, filled: true,  fillColor: Colors.white,
                   contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                  suffixIcon: const Icon(Icons.search),  hintText: "filter ${widget.label}...",  labelText: "value ${isInt ? "(numeric)" : ""} ${widget.comparator.toUpperCase()}",
+                  suffixIcon: const Icon(Icons.search),  hintText: "filter ${widget.label}...",  
+                  labelText: "value ${isText ? "" : "(numeric)"}",
                   errorStyle: const TextStyle(fontSize: 0,),
                 ),
                 onChanged: (String? value) { widget.searchValue = value; },
                 onSaved: (String? value) {  widget.searchValue = value; },
                 validator: (String? value) {
                   if (value == null) { return "please enter a filter value..."; }  
-                  if (isInt) {
+                  if (!isText) {
                     if (value.isEmpty || !RegExp(r'^-?[0-9]*\.?[0-9]*$').hasMatch(value)) { return "please enter a valid number..."; }
                   }
                   return null; 
@@ -243,28 +244,41 @@ class FilterSearchState extends State<FilterSearchWidget> {
                     onChanged: (value) {
                       widget.searchValue = value == true ? "true" : "false";
                       ctrl.value = value; },);
-    }else if (widget.type.contains("time") || widget.type.contains("date")) { 
-      var date = DateTime.now();
-      w = DateTimeField( key: widget.globalKey,
-        dateFormat: intl.DateFormat('y-M-dd'),
-        mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
-        style: const TextStyle(fontSize: 14, height: 1.5, color: Colors.black),
+    } else if (widget.type.contains("time") || widget.type.contains("date")) { 
+      w = DateTimeField(
+        initialValue: widget.searchValue == null ? null : DateTime.parse(widget.searchValue!),
+        validator: (DateTime? value) {
+          if (value == null) { return ""; }
+          return null;
+        },
+        format: intl.DateFormat('y-M-dd'),
+        // mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
+        style: const TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
-            hintMaxLines: 1,
             suffixIcon: const Icon(Icons.calendar_month, size: 20,),
             suffixIconColor: Theme.of(context).primaryColor,
             enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-            helperStyle: const TextStyle(height: -2), floatingLabelBehavior: FloatingLabelBehavior.always,
-            filled: true, fillColor: Colors.white, labelText: "value ${widget.comparator.toUpperCase()}",
-            hintStyle: const TextStyle(fontSize: 12), border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.only(top: 10, left: 20.0, right: 20.0, bottom: 20),
+            helperStyle: const TextStyle(height: -2),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            filled: true,
+            errorStyle: const TextStyle(fontSize: 0),
+            fillColor: Colors.white,
+            hintStyle: const TextStyle(fontSize: 12, ),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: "",
+            labelText: widget.label.toLowerCase(),
           ),
-        value: widget.searchValue == null ? null : DateTime.parse(widget.searchValue!),
-        lastDate: DateTime(date.year + 10, date.month, date.day),
+        onShowPicker: (context, currentValue) { return showDatePicker(
+              context: context,
+              firstDate: DateTime(1900),
+              initialDate: widget.searchValue == null ? currentValue : DateTime.parse(widget.searchValue!),
+              lastDate: DateTime(2100));
+        },
         onChanged: (DateTime? value) { 
           setState(() { widget.searchValue = value?.toIso8601String(); });  
-        });
+        },
+      );
     } else if (widget.type.contains("enum") ) {
         var items = <DropdownMenuItem<String>>[];
       var values = widget.type.replaceAll("enum__", "").split("_");
@@ -294,31 +308,31 @@ class FilterSearchState extends State<FilterSearchWidget> {
         ),
       );
     }
-    var toggles = ["LIKE", '='];
-    if (widget.connector == "") { widget.connector = "like"; }
-    if (!widget.type.contains("enum") && !isText) { toggles.addAll(['>', '<']); }
+    var togglesMode = ["VALUE", 'NULL'];
+    if (!isText) { togglesMode.add("MATH"); }
+    var toggles = isMath ? [">", "<", '<=', ">=" ] :  ["LIKE", "!LIKE", '=', "!=" ];
+    if (widget.comparator == "") { widget.comparator = "like"; }
     return Column(children: [ 
-              AdvancedSwitch( width: 170, initialValue: isNull, 
-                    activeColor: Colors.green, inactiveColor: Colors.grey,
-                    activeChild: Text("null mode"), inactiveChild: Text("value mode"),  
-                    borderRadius:  const BorderRadius.all(Radius.circular(15)), height: 30.0, disabledOpacity: 0.5,
-                    onChanged: (value) { setState(() {
-                        isNull = value;
-                    }); },),
-              Padding( padding: const EdgeInsets.only(bottom: 20), child:  Divider(color: Theme.of(context).splashColor,)),
-              isNull ? Container() : Container( width: toggles.length * 55, margin: const EdgeInsets.only(bottom: 20), child: ToggleSwitch(
-                initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == widget.connector.toLowerCase()),
-                fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey,
-                totalSwitches: toggles.length, labels: toggles, inactiveBgColor: Theme.of(context).splashColor,
-                onToggle: (index) { widget.connector = toggles[index ?? 0]; },
-              )),
-              Padding(padding: const EdgeInsets.only(left: 20, right: 20 , bottom: 20.0), child: isNull ? DropdownButtonFormField<String>( items: [
+      /*CheckboxListTileFormField( title: Text("null mode"),
+        onChanged: (bool value) { setState(() { isNull = value; }); }, initialValue: isNull, ),*/
+      Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch( minHeight: 25,
+          initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : "value")),
+          fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / togglesMode.length,
+          totalSwitches: togglesMode.length, labels: togglesMode, inactiveBgColor: Theme.of(context).splashColor,
+          onToggle: (index) { setState(() {
+            isNull = togglesMode[index ?? 0].toLowerCase().contains("null");
+            isMath = togglesMode[index ?? 0].toLowerCase().contains("math");
+          });  
+        })),
+      Row( children : [
+        SizedBox( width: 255, child: Padding(
+          padding: const EdgeInsets.only(left: 20, right: 20 , bottom: 20.0), 
+          child: isNull ? DropdownButtonFormField<String>( items: const [
                   DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                   DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,)) 
-                ], key: widget.globalKey,
-                isExpanded: true,
+                ], key: widget.globalKey, isExpanded: true,
                 hint: Text("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
-                value: widget.searchValue,
+                value: widget.searchValue == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return "please select a value..."; } return null; },
                 style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
                 onChanged: (value) { widget.searchValue = value; }, 
@@ -333,35 +347,18 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   fillColor:Colors.white, hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                   border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                   labelText: "value ${widget.comparator.toUpperCase()}",
-                ),
-              ) :  w), 
+                )) :  w)) ]), 
+              isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(
+                initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == (widget.comparator.toLowerCase() == "not like" ? "!like" : widget.comparator)),
+                fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / toggles.length,
+                customWidths: !isMath && !isNull ? [44, 88, 44, 44] : null,
+                totalSwitches: toggles.length, labels: toggles, inactiveBgColor: Theme.of(context).splashColor,
+                onToggle: (index) { widget.comparator = toggles[index ?? 0].toLowerCase() == "!like" ? "not like" : toggles[index ?? 0].toLowerCase(); },)),
+              Divider(color: Theme.of(context).splashColor,),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Padding( padding: const EdgeInsets.only(right: 10), child: TextButton(
-                  onPressed: () {
-                    if (widget.filter.advancedSearch.length <= widget.innerIndex + 1) { 
-                      widget.filter.advancedSearch.add(FilterSearchWidget(filter: widget.filter, 
-                      innerIndex: widget.filter.advancedSearch.length, state: widget.state, type: widget.type,
-                      columnName: widget.columnName, label: widget.label));
-                    }
-                    widget.connector = widget.connector == "and" ? "" : "and"; 
-                    if (widget.connector == "") { widget.filter.advancedSearch.removeRange(widget.innerIndex + 1, widget.filter.advancedSearch.length); }
-                    widget.state(() { setState(() {}); }); 
-                  },
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(widget.connector == "and" ? Theme.of(context).primaryColor : Colors.transparent)), child: Padding( padding: const EdgeInsets.all(10), 
-                    child: Text("AND", style: TextStyle(color: widget.connector == "and" ? Colors.white :Colors.grey, fontSize: 11))),)),
-                  TextButton(onPressed: () {
-                    if (widget.filter.advancedSearch.length <= widget.innerIndex + 1) { 
-                      widget.filter.advancedSearch.add(FilterSearchWidget(filter: widget.filter, state: widget.state,
-                      innerIndex: widget.filter.advancedSearch.length, type: widget.type, columnName: widget.columnName, label: widget.label));
-                    }
-                    widget.connector =  widget.connector = widget.connector == "or" ? "" :  "or"; 
-                    if (widget.connector == "") { widget.filter.advancedSearch.removeRange(widget.innerIndex + 1, widget.filter.advancedSearch.length); }
-                    widget.state(() { setState(() {});}); 
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(widget.connector == "or" ? Theme.of(context).primaryColor : Colors.transparent)), 
-                  child: Padding( padding: const EdgeInsets.all(10), 
-                    child: Text("OR",  style: TextStyle(color: widget.connector == "or" ? Colors.white : Colors.grey, fontSize: 11
-                  )))), ...additionnal
+                  Padding( padding: const EdgeInsets.only(right: 10), child: connectorButton("and")),
+                  connectorButton("or"), ...additionnal
               ],),
-              Padding( padding: const EdgeInsets.only(top: 10), child: Divider(color: Theme.of(context).splashColor,))] ); 
+    ] ); 
   }
 }

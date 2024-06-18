@@ -34,7 +34,7 @@ class ActionService {
         widget?.loaded();
         
         if (widget == null) { 
-          globalMainViewKey.currentState!.refresh(viewID, subViewID, category, null, true); 
+          globalMainViewKey.currentState!.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
         }
       };
   }
@@ -116,12 +116,10 @@ class ActionService {
           listSubForms(schema, form.cacheForm, method, schemaName, context, true);
           APIResponse<model.View>(data: null);
         });      
-        formSubForms(form.oneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-        formSubForms(form.existingOneToManiesForm, {}, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
-        formSubForms(form.oneToManiesFormDelete, {}, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
+        formSubForms(form.oneToManiesForm, body, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+        formSubForms(form.existingOneToManiesForm, body, method, schemaName, context, false, false); // ignore: use_build_context_synchronously
+        formSubForms(form.oneToManiesFormDelete, body, method, schemaName, context, false, true); // ignore: use_build_context_synchronously
       }
-      
-      if (form.view!.id == mainForm.currentState!.widget.view!.id) { APIService.cache = {}; }
       Future.delayed(const Duration(seconds: 1), () {
         for (var state in form.oneToManiesStateForm.values) { state.setState(() { form.oneToManiesForm = []; }); }
         form.oneToManiesStateForm = {};
@@ -143,7 +141,7 @@ class ActionService {
       if (values[fieldName] is List) {
         if(values["id"] != null) {
           await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", null
-                                 ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
+            ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
         }
         for (var item in values[fieldName] as List) {
           var newBody = <String, dynamic> {};
@@ -168,8 +166,9 @@ class ActionService {
       } else if (many.view != null && many.view!.actions.contains(method)) {
         if (add) { views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}));
-        } else { await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
-                                         many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {});
+        } else { 
+          await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
+                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {});
         } 
       }
     }

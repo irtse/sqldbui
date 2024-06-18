@@ -1,10 +1,12 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
+import 'package:flutter_awesome_alert_box/flutter_awesome_alert_box.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/action.dart';
 import 'package:sqldbui2/core/widget/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/convertors/onetomany.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/workflowPanel.dart';
 import 'package:sqldbui2/core/widget/workflowbar.dart';
@@ -54,13 +56,13 @@ class FormWidgetState extends State<DataFormWidget> {
         if (widget.view!.isList) { return Container(
           width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
           height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
-          decoration: BoxDecoration(color: Theme.of(context).highlightColor),
+          decoration: BoxDecoration(color: Theme.of(context).primaryColor),
           child: null); }
         var refItem = widget.view!.items[0];
         if (refItem.workflow != null) { 
           wf = refItem.workflow; 
           header.add(WorkflowBarWidget(workflow: refItem.workflow!));
-          header.add(WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, workflow: refItem.workflow!));  
+          header.add(WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, workflow: refItem.workflow!, readOnly: refItem.readonly));  
         }
         name = widget.view!.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
         description = widget.view!.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
@@ -89,7 +91,8 @@ class FormWidgetState extends State<DataFormWidget> {
                       workflow: data.workflow,
                       linkPath: data.linkPath, schema: data.schema, order: data.order, 
                       actionPath: data.actionPath.contains(data.schemaName) ? data.actionPath : data.linkPath,
-                      actions: data.actions, readOnly: data.readOnly, schemaName: data.schemaName, 
+                      actions: data.actions, readOnly: widget.view!.readOnly || refItem.readonly || data.readOnly, 
+                      schemaName: data.schemaName, 
                       items: data.items.isNotEmpty && !widget.view!.isEmpty ? data.items : <model.Item>[model.Item()] );
                     newView.isEmpty = widget.view!.isEmpty;
                     GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
@@ -111,29 +114,43 @@ class FormWidgetState extends State<DataFormWidget> {
           counter++;
         }
         for (var fieldName in widget.view!.order) {
-          if (schema[fieldName] == null || (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { continue; }
+          if (schema[fieldName] == null || ["id", "description"].contains(fieldName) ||
+          (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { continue; }
           var field = schema[fieldName]!; 
           var value = refItem.values.containsKey(fieldName) ? refItem.values[fieldName] : null;
+          String path = "";
           if (refItem.valuesShallow.containsKey(fieldName)) { 
             var v = refItem.valuesShallow[fieldName]!;
             value = v.label ?? v.name ?? v.id;
+            path = v.ref ?? "";
           }
           if (refItem.valuesMany.containsKey(fieldName)) { value = refItem.valuesMany[fieldName]!; }
           if (refItem.valuesManyPath.containsKey(fieldName)) { value = refItem.valuesManyPath[fieldName]!; }
-          var readOnly = (field.readonly || mainForm.currentState!.widget.view!.readOnly || refItem.readonly) && !widget.view!.isEmpty;
+          var readOnly = (field.readonly || widget.view!.readOnly || refItem.readonly) && !widget.view!.isEmpty;
+          if (!((widget.view!.actions.contains("post") && widget.view!.isEmpty) || widget.view!.actions.contains("put"))) { 
+            readOnly = true; 
+          }
           if (field.label == "state") { // TODO to remove if change its mind
             readOnly = true; 
             if (widget.view!.actions.contains("put") && !widget.view!.isEmpty && value != "completed" && value != "dismiss") {
-                positionnedBar.add(MouseRegion(cursor: SystemMouseCursors.click, child:
-                  Container( width: 500, margin: const EdgeInsets.only(bottom: 20), child: ToggleSwitch( initialLabelIndex: null,
-                  fontSize: 15, dividerColor: Colors.white, inactiveFgColor: Colors.grey, customWidths: const [250, 250],
-                  totalSwitches: 2, labels: const ["VALIDATE", "DISMISS"], inactiveBgColor: Theme.of(context).splashColor,
-                  onToggle: (index) async {
-                    widget.detectChange = true;
-                    widget.cacheForm[fieldName] = index == 0 ? "completed" : "dismiss";
-                    ActionService.pressed(null, false, currentView!.schemaName, currentView!.actionPath, <String>["id"], currentView!.schema, "put", context)(); },
-                ))
-              ));
+                positionnedBar.add(Padding( padding: const EdgeInsets.only(right: 20), child: FloatingActionButton(
+                  tooltip: "Dismiss",
+                  onPressed: () {
+                    showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "dismiss task", validate: () {
+                      widget.detectChange = true;
+                      widget.cacheForm[fieldName] = "dismiss";
+                      ActionService.pressed(null, false, currentView!.schemaName, currentView!.actionPath, <String>["id"], currentView!.schema, "put", context)();
+                    }));
+                }, child: const Icon(Icons.close, color: Colors.white), backgroundColor: Colors.red,)));
+                positionnedBar.add(FloatingActionButton(tooltip: "Validate",
+                  onPressed: () {
+                  showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "validate task", validate: () {
+                      widget.detectChange = true;
+                      widget.cacheForm[fieldName] = "completed";
+                      ActionService.pressed(null, false, currentView!.schemaName, currentView!.actionPath, <String>["id"], currentView!.schema, "put", context)();
+                    }));
+                }, child: const Icon(Icons.check, color: Colors.white,), backgroundColor: Colors.green,));
+                
             }
             states.add(Padding(padding: const EdgeInsets.only(top: 3, left: 12), child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
                 decoration: BoxDecoration( borderRadius: BorderRadius.circular(30), color: value == "completed" ? Colors.green : (value == "dismiss" ? Colors.red : Colors.orange)),
@@ -145,12 +162,12 @@ class FormWidgetState extends State<DataFormWidget> {
           || (fieldName == "description" && field.readonly && (refItem.values.containsKey("description") && refItem.values["description"] != null)) ) { continue; }
           String? url;
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
-          // if(!(readOnly && value == null)) { 
+          if(!(readOnly && value == null)) { 
             double max = (counter > 1 ?
                   ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.5)
                   : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
-                                              field.require, readOnly, widget.view!.isEmpty ? null : value, url, max, this);
+                                              field.require, readOnly, widget.view!.isEmpty ? null : value, url, path, max, this);
             if (f != null && f.runtimeType != OneToManyWidget && f.runtimeType != ManyToManyWidget && show) {
               var w = Padding(padding: EdgeInsets.only(left: field.type.contains("bool") ? ((widget.subForm ? max - 230 : max - 180) / 2) : 10.0, 
                 right: field.type.contains("bool") ? ((widget.subForm ? max - 230 : max - 180) / 2) : 10.0,  top: 11.0 , bottom: 11.0),
@@ -164,9 +181,10 @@ class FormWidgetState extends State<DataFormWidget> {
                   child: Container( decoration: BoxDecoration(  borderRadius: BorderRadius.circular(10), color: Theme.of(context).splashColor,
                   ), child: Padding(padding: const EdgeInsets.all(10), child: f!,)))); 
             }
+          }
         }
         List<Widget> title = [];
-        var len = (MediaQuery.of(context).size.width - 150) > 300 ? (300 ~/ 4.2) : ((MediaQuery.of(context).size.width - 150) ~/ 15);
+        int len = (MediaQuery.of(context).size.width - menuSize) ~/ 20;
         title.add(Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
           children: [ Flexible( child: Text(name[0].toUpperCase()
                   + name.substring(1, len > name.length ? name.length : len).toLowerCase() + (len > name.length ? "" : "..."),
@@ -180,7 +198,7 @@ class FormWidgetState extends State<DataFormWidget> {
         List<Widget> actions = [];
         if (!widget.subForm) {
           if (widget.view != null && !widget.view!.readOnly) {
-            if (widget.view!.actions.contains("post") || widget.view!.actions.contains("put")) {
+            if ((widget.view!.actions.contains("post") && widget.view!.isEmpty) || widget.view!.actions.contains("put")) {
               actions.add(ButtonWidget(method: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "post" : "put", 
                 text: !widget.view!.actions.contains("put") || widget.view!.isEmpty ? "SUBMIT" : "SAVE", color: Theme.of(context).primaryColor));
             }
@@ -210,18 +228,15 @@ class FormWidgetState extends State<DataFormWidget> {
           head.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
         }
       }
-      var form = Padding(padding: widget.subForm ? const EdgeInsets.all(40) : const EdgeInsets.only(top: 30), 
-      child: Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, child: Container(alignment: Alignment.center,
-            decoration: const BoxDecoration( color: Colors.transparent, borderRadius: BorderRadius.only(bottomLeft: Radius.circular(7),)),
-            child: Wrap(alignment: WrapAlignment.center, children: [ Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
-              child: Wrap( alignment: WrapAlignment.center, children : fields)), ...bottomFields, ...additionnal]))));
+      var form = Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, child: Wrap(alignment: WrapAlignment.center, children: [ Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
+              child: Container( padding: EdgeInsets.only(top: widget.subForm ? 0 : 30), child: Wrap( alignment: WrapAlignment.center, children : fields))), ...bottomFields, ...additionnal]));
       return widget.scroll ? Stack( children: [ Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
         width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
         child: Container(margin: EdgeInsets.only(top: wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)), 
         height: MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) > 0 ? 
           MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) : 0,
            child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head, 
-           Positioned( bottom: 20, left: ((MediaQuery.of(context).size.width - menuSize) / 2) - 250, child: Row(children: positionnedBar,))])
+           Positioned( bottom: 30, right: 30, child: Row(children: positionnedBar,))])
       : Container( margin: EdgeInsets.only(bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
         decoration: BoxDecoration(boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))],
           color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),)),

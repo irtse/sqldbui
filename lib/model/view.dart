@@ -260,6 +260,7 @@ const emptyFilter = <Filter>[];
 class Shallowed extends SerializerDeserializer<Shallowed> {
   Shallowed({
     this.id,
+    this.ref,
     this.name,
     this.label,
     this.readOnly = false,
@@ -271,10 +272,13 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.workflow,
     this.selected = false,
     this.fields = emptyFilter,
+    this.elder = "all"
   });
   String? label;
   String? name;
   int? id;
+  String? ref;
+  String elder;
   bool readOnly;
   String linkPath;
   String schemaName;
@@ -288,8 +292,10 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   @override deserialize(Map<String, dynamic> json) {
     return Shallowed(
     id: json.containsKey("id") ? json["id"] : null, 
+    ref: json.containsKey("data_ref") ? json["data_ref"] : "",
     selected: json.containsKey("is_selected") ? json["is_selected"] : false,
     fields: json.containsKey("filter_fields") ? fromListJson(json["filter_fields"], Filter()) : <Filter>[],
+    elder: json.containsKey("elder") ? json["elder"] : "all",
     name: json.containsKey("name") ?  json["name"] : null,
     label: json.containsKey("label") ? json["label"] : null,
     workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 

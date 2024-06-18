@@ -1,13 +1,15 @@
 
-import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/main.dart';
-
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 
 Map<String, List<GlobalKey<FormState>>> formRowFilterKeys = <String,List<GlobalKey<FormState>>>{};
 
@@ -25,7 +27,8 @@ class FilterRowWidget extends StatefulWidget {
   Map<String, dynamic> schema;
   bool isNull = false;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  FilterRowWidget ({ Key? key, required this.schema, required this.items, this.label, this.type = "text", this.ref, this.comparator = "like",
+  FilterRowWidget ({ Key? key, required this.schema, required this.items,
+  this.label, this.type = "text", this.ref, this.comparator = "like",
   required this.index, this.dir = "asc", this.columnName, this.value, this.connector = ""}): super(key: key);
   @override FilterRowWidgetState createState() => FilterRowWidgetState();
 }
@@ -34,14 +37,17 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     if (viewID == null || MediaQuery.of(context).size.width < 1000) { return SizedBox(height: 45, width: MediaQuery.of(context).size.width - menuSize,); }
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
     Widget w = Container();
-    if (isText || widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("money") || widget.type.contains("decimal") || widget.type.contains("int")) { 
+    if (isText || widget.type.contains("double") || widget.type.contains("float") 
+    || widget.type.contains("money") || widget.type.contains("decimal") || widget.type.contains("int")) { 
         w = TextFormField(
                 initialValue: widget.value, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                 onChanged: (value) { widget.value = value; },
                 validator: (value) { 
                   if (value == null) { return "please enter a filter value..."; } 
                   if (!isText) {
-                    if (value.isEmpty || !RegExp(r'^-?[0-9]*\.?[0-9]*$').hasMatch(value)) { return "please enter a valid number..."; }
+                    if (value.isEmpty || !RegExp(r'^-?[0-9]*\.?[0-9]*$').hasMatch(value)) { 
+                      return "please enter a valid number..."; 
+                    }
                   }
                   return null; 
                 },
@@ -68,25 +74,40 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                       ctrl.value = value;
                     },);
     } else if (widget.type.contains("time") || widget.type.contains("date")) { 
-      var date = DateTime.now();
-      w = DateTimeField(  dateFormat: intl.DateFormat('y-M-dd'),
-        mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
-        style: const TextStyle(fontSize: 14, height: 1.5, color: Colors.black),
+      w = DateTimeField(
+        validator: (DateTime? value) {
+          if (value == null) { return ""; }
+          return null;
+        },
+        initialValue: widget.value == null ? null : DateTime.parse(widget.value!),
+        format: intl.DateFormat('y-M-dd'),
+        // mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
+        style: const TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
-            hintMaxLines: 1,
             suffixIcon: const Icon(Icons.calendar_month, size: 20,),
             suffixIconColor: Theme.of(context).primaryColor,
-            errorStyle: const TextStyle(fontSize: 0,),
             enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-            helperStyle: const TextStyle(height: -2), floatingLabelBehavior: FloatingLabelBehavior.always,
-            filled: true, fillColor: Colors.white, labelText: "value ${widget.comparator.toUpperCase()}",
-            hintStyle: const TextStyle(fontSize: 12), border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.only(top: 10, left: 20.0, right: 20.0, bottom: 20),
+            helperStyle: const TextStyle(height: -2),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            filled: true,
+            errorStyle: const TextStyle(fontSize: 0),
+            fillColor: Colors.white,
+            hintStyle: const TextStyle(fontSize: 12, ),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: "",
+            labelText: "value ${widget.comparator.toUpperCase()}",
           ),
-        value: widget.value == null ? null : DateTime.parse(widget.value!),
-        lastDate: DateTime(date.year + 10, date.month, date.day),
-        onChanged: (DateTime? value) { setState(() { widget.value = value!.toIso8601String(); });  });
+        onShowPicker: (context, currentValue) { return showDatePicker(
+              context: context,
+              firstDate: DateTime(1900),
+              initialDate: widget.value == null ? currentValue : DateTime.parse(widget.value!),
+              lastDate: DateTime(2100));
+        },
+        onChanged: (DateTime? value) { 
+          setState(() { widget.value = value!.toIso8601String(); });  
+        },
+      );
     } else if (widget.type.contains("enum") ) {
         var items = <DropdownMenuItem<String>>[];
       var values = widget.type.replaceAll("enum__", "").split("_");
@@ -100,9 +121,8 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
         hint: Text("${"select a"} ${widget.label?.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
         value: widget.value,
         style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
-        onChanged: (value) { 
-          widget.value = value ?? "$value"; 
-        }, dropdownColor: Theme.of(context).highlightColor,
+        onChanged: (value) {  widget.value = value ?? "$value"; }, 
+        dropdownColor: Theme.of(context).highlightColor,
         validator: (value) { if (value == null) { return "please select a filter value..."; } return null; },
         decoration: InputDecoration( isDense: true,
           suffixIconColor: Theme.of(context).primaryColor,
@@ -119,11 +139,16 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     }
     if(widget.value == "NULL" || widget.value == "NOT NULL") { widget.isNull = true; }
     var conn = [ DropdownMenuItem<String>(value: "like", child: Text("like", overflow: TextOverflow.ellipsis,)),
-                 DropdownMenuItem<String>(value: "=", child: Text("=", overflow: TextOverflow.ellipsis,)) ];
+                 DropdownMenuItem<String>(value: "not like", child: Text("like", overflow: TextOverflow.ellipsis,)),
+                 DropdownMenuItem<String>(value: "=", child: Text("=", overflow: TextOverflow.ellipsis,)),
+                 DropdownMenuItem<String>(value: "!=", child: Text("!=", overflow: TextOverflow.ellipsis,))
+                ];
     if (!isText) {
       conn.addAll([
         DropdownMenuItem<String>(value: "<", child: Text("<", overflow: TextOverflow.ellipsis,)),
-        DropdownMenuItem<String>(value: ">", child: Text(">", overflow: TextOverflow.ellipsis,))
+        DropdownMenuItem<String>(value: ">", child: Text(">", overflow: TextOverflow.ellipsis,)),
+        DropdownMenuItem<String>(value: "<=", child: Text("<", overflow: TextOverflow.ellipsis,)),
+        DropdownMenuItem<String>(value: ">=", child: Text(">", overflow: TextOverflow.ellipsis,))
       ]);
     }
     return Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, 

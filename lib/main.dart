@@ -1,5 +1,8 @@
 // import 'package:cookie_consent/cookie_consent.dart';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
@@ -76,6 +79,9 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => HomeScreenState();
 }
+
+bool noReload = false;
+double homeWidth = 0;
 class HomeScreenState extends State<HomeScreen> {
   late Future<void> loadAsync;
   /*@override
@@ -87,9 +93,8 @@ class HomeScreenState extends State<HomeScreen> {
   void refresh(String? id, String? subID, bool isHome) {
     viewID = id;
     subViewID = subID;
-    APIService.cache = <String, APIResponse<dynamic>>{};
     currentView = null;
-    resetAllFilter(); 
+    clearFilter();
     notNew = {};
     setState(() {});
     if (isHome) { AppRouter.setRouteCookie("", context); }
@@ -103,21 +108,33 @@ class HomeScreenState extends State<HomeScreen> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     AuthService();
+    if (homeWidth == 0) { homeWidth = MediaQuery.of(context).size.width; 
+    } else if (homeWidth != MediaQuery.of(context).size.width) { 
+      homeWidth = MediaQuery.of(context).size.width; 
+      noReload = true;
+    } else {
+      noReload = false;
+    }
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     globalFilter = <String, Filters>{};
+    rects = {};
     AppRouter.getRouteCookie().then((value) {
       print("Route cookie $value");
       if (value != null && value != "") {
-        var splitted = value.replaceAll("#", "/").replaceAll(":", "/").split("/");
-        viewID = splitted.length > 1 ? splitted[1] : null;
-        subViewID = splitted.length > 2 ? splitted[2] : null;
+        var splitted = value.split(":");
+        print("Route $splitted");
+        viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
+        subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
         var f = Filters();
         f.isEmpty = true;
-        globalFilter[viewID!] = f; 
-        globalOrder[viewID!] = <String, String>{};
-        AppRouter.setRouteCookie(value, context);
-      } else { AppRouter.setRouteCookie("home", context); }
-      AppRouter.navigateTo("#$viewID${subViewID != null ? ":$subViewID" : ""}");
+        if (viewID != null) { 
+          if (globalNew[viewID] == null) { globalNew[viewID] = "all"; }
+          globalFilter[viewID] = f; 
+          globalOrder[viewID] = {};
+        } 
+      }
+      AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
+      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
     });
     var scaffoldKey = GlobalKey<ScaffoldState>();
     var home = Scaffold(
@@ -134,7 +151,7 @@ class HomeScreenState extends State<HomeScreen> {
           child: SizedBox(child: Row(children: [
             MediaQuery.of(context).size.width > 400 ? RouterWidget(key: routerKey) : Container(),
             InkWell( onTap: () {
-              viewID = "";
+              viewID = null;
               subViewID = null;
               AppRouter.setRouteCookie("", context);
               setState(() {});
@@ -164,7 +181,10 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           Padding(padding: const EdgeInsets.only(left: 12.5, right: 50), 
             child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
-                              onPressed: () async { await _authProvider.logOut(context); }, )
+                              onPressed: () async { 
+                                showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "disconnect your account", validate: () {
+                                  _authProvider.logOut(context);
+                                })); }, )
           )
         ],
       ),

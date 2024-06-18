@@ -68,14 +68,14 @@ class ActionBarState extends State<ActionBarWidget> {
         }
       }
       var row = <Widget>[];
-      if (subViewID != null && AppRouter.routedSubID == null) {
+      if (subViewID != null) {
         row.add(IconButton(tooltip: "back to list", constraints: const BoxConstraints(),
           style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
             if (states.contains(MaterialState.pressed)) { return Colors.green; }
             return Theme.of(context).primaryColor;
           }), ), icon: Icon( Icons.arrow_back, color: Theme.of(context).highlightColor, ),
-          onPressed: () {  
-            globalMainViewKey.currentState?.refresh(viewID, null, category, null, true); 
+          onPressed: () { 
+            AppRouter.back();
           }));
       }
       row.addAll([Flexible(child: Text(overflow: TextOverflow.ellipsis,
@@ -87,10 +87,10 @@ class ActionBarState extends State<ActionBarWidget> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ))),],);
       String path = "";
-      if (viewID != null) { path += "#$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
+      if (viewID != null) { path += "$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
       var controller = TextEditingController(text: path);
-      if (widget.view != null) {
-        if (globalLoading) { Future.delayed(const Duration(seconds: 1), () { globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); }); }
+      if (widget.view != null && globalLoading) { 
+        Future.delayed(const Duration(seconds: 1), () { globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); }); 
       }
       List<Widget> rows = [];
       if (MediaQuery.of(context).size.width > 700) {
@@ -102,28 +102,16 @@ class ActionBarState extends State<ActionBarWidget> {
                         cursorHeight: 15,
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
                         controller: controller,
-                        onSaved: (value) {
-                          var split = controller.text.split('/');
-                          if (split.length > 1) {
-                            viewID = split[1];
-                            if (split.length > 2) { subViewID = split[2]; }
-                          }
-                          globalMainViewKey.currentState?.refresh(
-                            split.length > 1 ? split[1] : null, 
-                            split.length > 2 ? split[1] : null, 
-                            null, null, true);
-                        },
-                        decoration: InputDecoration(
-                        filled: true,
-                        labelStyle: TextStyle(color: Theme.of(context).splashColor),
-                        hintStyle: TextStyle(color: Theme.of(context).splashColor),
-                        contentPadding: const EdgeInsets.all(1),
-                        fillColor: Theme.of(context).secondaryHeaderColor,
-                        iconColor: Theme.of(context).highlightColor,
-                        prefixIcon: const Icon(Icons.account_tree),      
-                        hintText: 'actual url...',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
-                                                   borderSide: BorderSide(color: Theme.of(context).primaryColor))
+                        decoration: InputDecoration( filled: true,
+                          labelStyle: TextStyle(color: Theme.of(context).splashColor),
+                          hintStyle: TextStyle(color: Theme.of(context).splashColor),
+                          contentPadding: const EdgeInsets.all(1),
+                          fillColor: Theme.of(context).secondaryHeaderColor,
+                          iconColor: Theme.of(context).highlightColor,
+                          prefixIcon: const Icon(Icons.account_tree),      
+                          hintText: 'actual url...',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                                                     borderSide: BorderSide(color: Theme.of(context).primaryColor))
                     ))),
                   ),
                   IconButton( constraints: const BoxConstraints(),

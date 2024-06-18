@@ -1,11 +1,10 @@
 import 'dart:developer' as developer;
-import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
@@ -16,28 +15,14 @@ import 'package:sqldbui2/core/widget/fork/tranformablebox.dart' as fork;
 
 double maxWidth = 0;
 String? isNew;
-Map<String, List<String>> notNew = {};
-bool isFilter() {
-  return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
-  && (globalOrder[viewID]!.isNotEmpty || (globalFilter[viewID] != null && globalFilter[viewID]!.size() > 0) || globalNew);
-}
-void resetAllFilter() {
-  if (currentView != null && globalFilter.containsKey(viewID) && globalOrder.containsKey(viewID)) {
-    globalOrder.clear();
-    globalFilter.clear();
-    rects.clear(); 
-  }
-  globalNew = false;
-  globalOffset = 0;
-}
+Map<String?, List<String>> notNew = {};
 double refWidth = 0;
-Map<String, Map<String, Rect>> rects = {};
+Map<String?, Map<String, Rect>> rects = {};
 bool wait = false;
 // ignore: must_be_immutable
 class GridWidget extends StatefulWidget {
   GlobalKey<ViewWidgetState>? viewKey; 
   bool isSelected = true;
-  Map<String,String> links; 
   Map<String, model.Shallowed> contentShallowed;
   List<GridColumnWidget> columns; 
   List<Map<String, dynamic>> source;
@@ -47,11 +32,12 @@ class GridWidget extends StatefulWidget {
   double borderWidth; 
   Color borderColor;
   bool isEnum;
+  String schemaID;
   int maxLength; double contextWidth;
   GridWidget({ Key? key,required this.columns, required this.source,
     required this.maxLength, required this.contextWidth, this.isEnum = false,
     this.showCheckboxColumn = false, this.showColumnHeaderIconOnHover = false,
-    required this.links, required this.contentShallowed, this.viewKey,
+    required this.schemaID, required this.contentShallowed, this.viewKey,
     this.borderWidth = 1, this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent }): super(key: key);
   @override GridWidgetState createState() => GridWidgetState();
 }
@@ -61,13 +47,8 @@ class GridWidgetState extends State<GridWidget> {
   @override Widget build(BuildContext context) { 
     if (viewID == null) { return Container(); }
     List<Widget> additionnalContent = [];
-    if (currentView != null && viewID != null) { notNew[viewID!] = []; }
-    if (refWidth != MediaQuery.of(context).size.width) { 
-      rects = {};
-      refWidth = MediaQuery.of(context).size.width; 
-    }
+    if (currentView != null && viewID != null) { notNew[viewID] = []; }
     List<Widget> rows = buildRows(widget.columns, widget.source);
-
     if (widget.showCheckboxColumn) {
       additionnalContent.add(
         Padding(padding: const EdgeInsets.only(left: 5), child: Container(width: 75, height: 50, alignment: Alignment.center,
@@ -85,22 +66,21 @@ class GridWidgetState extends State<GridWidget> {
     var count = 0;
     maxWidth = 0;
     for (var col in widget.columns) { 
+      if(rects[viewID]?[col.columnName] == null) { rects.remove(viewID); break; }
+    }
+    for (var col in widget.columns) { 
       col.grid = this; 
-      if (count < widget.columns.length - 1) {
-        col.nextColumn = (widget.columns[count + 1].key! as GlobalKey<GridColumnWidgetState>);
-      }
+      if (count < widget.columns.length - 1) { col.nextColumn = (widget.columns[count + 1].key! as GlobalKey<GridColumnWidgetState>); }
       if (count == widget.columns.length - 1) {  col.last = true;  }
       col.prefetch();  
       count++; 
     }
-    if (maxWidth < MediaQuery.of(context).size.width - 350) { 
-      Future.delayed(const Duration(microseconds: 100), () { 
-        globalMainViewKey.currentState?.setState(() { 
-          globalOffset = 0; 
-          rects.remove(viewID);
-        });
-      } );
+    if ((maxWidth < MediaQuery.of(context).size.width - 350)) { 
+      rects.remove(viewID); 
+      for (var col in widget.columns) { col.prefetch(); }
     }
+    var t = show ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : 0;
+
     return  Padding( padding: EdgeInsets.only(left: rows.isEmpty ? 0 : 3), child:  Scrollbar(
       controller: _horizontal,
       thumbVisibility: true,
@@ -134,8 +114,8 @@ class GridWidgetState extends State<GridWidget> {
                   child: rows.isEmpty ? 
                   Container(decoration: BoxDecoration( color: Theme.of(context).splashColor, borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7))),
                     width: maxWidth + 81.5, 
-                    height: MediaQuery.of(context).size.height - 165 > 0 ? MediaQuery.of(context).size.height - 165 : 0, 
-                   child: Center(child: Text("EMPTY DATAS", style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor),)))
+                    height: MediaQuery.of(context).size.height - (180 + t) > 0 ? MediaQuery.of(context).size.height - (180 + t) : 0, 
+                   child: Center(child: Text("EMPTY DATA", style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor),)))
                   : Column(children: [...rows,const SizedBox(height: 10, child: null)])),),)),
       Container(  
         decoration: BoxDecoration(
@@ -157,12 +137,13 @@ class GridWidgetState extends State<GridWidget> {
       return GridRowWidget( borderWidth: widget.borderWidth, borderColor: widget.borderColor, isSelected: widget.isSelected, 
         maxLength: widget.maxLength, contextWidth: widget.contextWidth, isEnum : widget.isEnum,
         cells: columns.map<GridCell>((column) {
-          if (column.columnName == "id" && widget.isSelected && !globalGridWidgetKey.currentState!.widget.selected.contains(mapped[column.columnName])) {
+          if (column.columnName == "id" && widget.isSelected && mapped[column.columnName] != null
+          && !globalGridWidgetKey.currentState!.widget.selected.contains(mapped[column.columnName])) {
             globalGridWidgetKey.currentState!.widget.selected.add(mapped[column.columnName]);
           }
         return GridCell( width: column.width, borderWidth: widget.borderWidth, borderColor: widget.borderColor,
           backgroundColor: widget.backgroundColor, columnName: column.columnName, value: mapped[column.columnName], );
-      }, ).toList(), showCheckboxColumn: widget.showCheckboxColumn, contentShallowed: widget.contentShallowed, links: widget.links, viewKey: widget.viewKey,);
+      }, ).toList(), showCheckboxColumn: widget.showCheckboxColumn, contentShallowed: widget.contentShallowed, schemaID: widget.schemaID, viewKey: widget.viewKey,);
     }).toList();
   }
 }
@@ -170,21 +151,39 @@ class GridWidgetState extends State<GridWidget> {
 class GridRowWidget extends StatefulWidget {
   var isHovered = false; var isEnum = false;
   GlobalKey<ViewWidgetState>? viewKey; double borderWidth; Color borderColor; bool isSelected; int maxLength; double contextWidth;
-  Map<String,String> links; Map<String, model.Shallowed> contentShallowed;
+  String schemaID; Map<String, model.Shallowed> contentShallowed;
   List<GridCell> cells;  bool showCheckboxColumn; 
-  GridRowWidget ({ Key? key, required this.cells, required this.links, required this.contentShallowed, this.isSelected = true,
+  GridRowWidget ({ Key? key, required this.cells, required this.schemaID, required this.contentShallowed, this.isSelected = true,
     required this.maxLength, required this.contextWidth, this.isEnum = false,
     this.showCheckboxColumn = false, this.viewKey, this.borderColor = Colors.grey, this.borderWidth = 1 }): super(key: key);
   @override GridRowWidgetState createState() => GridRowWidgetState();
 }
 class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
-    List<Widget> additionnalContent = [];
+    return MouseRegion(
+          onEnter: (b) { setState(() { widget.isHovered = true; }); },
+          onExit: (b) { setState(() { widget.isHovered = false; }); },
+          child: Row(children: getCellsContent(context)),);
+  }
+
+  List<Widget> getCellsContent(BuildContext context) {
+    if (widget.cells.isEmpty) { return []; }
+    String cellID = '${widget.cells[0].value}';
+    List<Widget> widgets = [];
+    double maxheight = 48;
+    for (var e in widget.cells) {
+      if (currentView == null || !rects.containsKey(viewID)) { continue; }
+      double? h = rects[viewID]![e.columnName] != null && ("${e.value}".length * 18) > (rects[viewID]![e.columnName]!.width) 
+                  ? (("${e.value}".length * 18) / (rects[viewID]![e.columnName]!.width) * 27.5) : null;
+      if (h != null && (maxheight < h)) { maxheight = h; }
+    }
+    if (maxheight < 48) { maxheight = 48; }
+    var first = true;
     if (widget.showCheckboxColumn) {
       if (globalGridWidgetKey.currentState!.widget.selected.contains(widget.cells.first.value)) { widget.isSelected = true; }
-      additionnalContent.add(
+      widgets.add(
         Padding(padding: const EdgeInsets.only(left: 5), 
-        child: Container(width: 73, height: 50, alignment: Alignment.center,
+        child: Container( width: 73, height: maxheight, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
           child: CheckboxListTile(value: widget.isSelected, onChanged: (value) {
             widget.isSelected=value ?? false;
@@ -199,65 +198,45 @@ class GridRowWidgetState extends State<GridRowWidget> {
           },)
         ))); 
     }
-    return MouseRegion(
-          onEnter: (b) { setState(() { widget.isHovered = true; }); },
-          onExit: (b) { setState(() { widget.isHovered = false; }); },
-          child: Row(children: additionnalContent..addAll(getCellsContent(context)),));
-  }
-
-  List<Widget> getCellsContent(BuildContext context) {
-    if (widget.cells.isEmpty) { return []; }
-    String cellID = '${widget.cells[0].value}';
-    List<Widget> widgets = [];
-    double? maxheight;
-    for (var e in widget.cells) {
-      if (currentView != null && rects.containsKey(viewID)) {
-        double? h = rects[viewID]![e.columnName] != null && ("${e.value}".length * 55) > (rects[viewID]![e.columnName]!.width) 
-         ? 500 : null;
-        if (h != null && (maxheight == null || maxheight < h)) { 
-          maxheight = h; 
-          if (( 48 - maxheight) < 20 ) { maxheight = 48; }
-        }
-      }
-    }
-    var first = true;
     for (var e in widget.cells) {
       var shal = widget.contentShallowed["${e.columnName}:$cellID"];
       List<dynamic> ids = [];
       if (categories[category] != null) {
-        for( var v in categories[category]!) {
-          if ("${v.id}" == viewID) { ids=v.newIds; break; }
+        for( var v in categories[category]!.where( (v) => "${v.id}" == viewID?.substring(1))) {
+          ids=v.newIds.where((element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
         }
       }
-      var child = e.columnName != "description" ? ListTile(
-        enabled: !widget.isEnum, onTap: () {
-          if (!widget.isEnum) { 
-            globalMainViewKey.currentState!.refreshUrl(widget.links[cellID], cellID, false); 
-          }
-        },
-        title : SizedBox(height: maxheight != null ? maxheight - 20 : null, 
-                      child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...", 
-                        textAlign: TextAlign.center, style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).primaryColorLight))))
-      ) : Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
-                  icon: const Icon(Icons.info), onPressed: () {},));
+      var transform = e.value != null ? e.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...";
+      var child = ListTile( enabled: !widget.isEnum, onTap: () {
+          if (!widget.isEnum) { return; }
+          try {
+            var v = (categories[category] ?? []).firstWhere( (v) => "${v.id}" == viewID?.substring(1));
+            if (isNew == cellID) { isNew = null; }
+            if (!notNew.containsKey(viewID)) { notNew[viewID] = [cellID]; } else { notNew[viewID]!.add(cellID); }
+            v.newIds.remove(cellID); 
+          } catch (e) { /* */ }
+          globalMenuKey.currentState!.setState(() {});
+          AppRouter.navigateTo("@${widget.schemaID}:$cellID");
+        }, title : e.columnName == "description" ? IconButton( tooltip: e.value != null ? e.value.toString() : "no info...", 
+          icon: const Icon(Icons.info), onPressed: () {},) : SizedBox(height: maxheight - 20, 
+        child: Center(child: Text(shal != null ? (shal.label ?? shal.name ?? "${shal.id}") : transform, textAlign: TextAlign.center, 
+          style: TextStyle(fontSize: e.fontSize, color: widget.isHovered ? Colors.white : Theme.of(context).primaryColorLight))))
+      );
       List<Widget> badges = [];
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
       if (ids.contains(cellID) && first || isNew == cellID && first) {
         first = false;
         badges.add(Positioned(left: 10, top: 5, child: Container(
-                          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)),
-                                                    color: Theme.of(context).primaryColor),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), child: Text("NEW", 
-                            style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),))
-                        )));
+          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
+          child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
+            child: Text("NEW", style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),)))));
       }
       widgets.add(Stack(
-        children: [Container( alignment: Alignment.center,
-          decoration: BoxDecoration(color: ids.contains(cellID) || isNew == cellID ? (widget.isHovered ? Colors.grey : Theme.of(context).splashColor  ) : (widget.isHovered ? Colors.grey : Colors.white),
-          border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth),)),
-          width: currentView != null && rects.containsKey(viewID) && rects[viewID]!.containsKey(e.columnName) ? rects[viewID]![e.columnName]!.width : 300, 
-          height: maxheight,
+        children: [Container( alignment: Alignment.center, height: maxheight,
+          decoration: BoxDecoration( color: ids.contains(cellID) || isNew == cellID ? 
+            (widget.isHovered ? Colors.grey : Theme.of(context).splashColor  ) : (widget.isHovered ? Colors.grey : Colors.white),
+            border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth), bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
+          width: currentView != null && rects.containsKey(viewID) && rects[viewID]!.containsKey(e.columnName) ? rects[viewID]![e.columnName]!.width : 200, 
           child: child), ...badges] ));
     }  
     return widgets;
@@ -284,13 +263,13 @@ class GridColumnWidget extends StatefulWidget {
   final BuildContext context;
   List<DropdownMenuItem<String>> items = [];
   GridWidgetState? grid; GlobalKey<GridColumnWidgetState>? nextColumn; bool last = false;
-  double width; bool allowSorting;  bool allowFiltering; bool show = false;
+  double width; bool allowSorting; bool allowFiltering; bool show = false; String? url;
   String type;  String columnName; GridValueWidget label; int maxLength; double contextWidth;
   double borderWidth; Color iconColor;  Color borderColor; Color backgroundColor;
   GridColumnWidget ({ required this.columnName, required this.type, this.width = 300.0, required this.context,
     required this.items, this.allowSorting = false, required this.maxLength, required this.contextWidth,
     this.allowFiltering = false, required this.label, this.borderWidth = 1, this.iconColor = Colors.grey,
-    this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent }): 
+    this.borderColor = Colors.grey, this.backgroundColor = Colors.transparent, this.url }): 
       super(key: GlobalKey<GridColumnWidgetState>());
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();
@@ -300,11 +279,11 @@ class GridColumnWidget extends StatefulWidget {
       width = (label.value.length * 17); 
       if (width < minimal) { width = minimal; }
     }
-    return width - 1;
+    return width;
   }
 
   bool isLower() {
-    double width = (label.value.length * 20);
+    double width = (label.value.length * 18);
     if (width < minimal) { width = minimal; }
     return (width * maxLength) <= getTotal();
   }
@@ -312,7 +291,7 @@ class GridColumnWidget extends StatefulWidget {
   double getTotal() { return contextWidth - (80 + maxLength); }
 
   void prefetch() {
-    if (currentView != null && !rects.containsKey(viewID) && viewID != null) { rects[viewID!] = {}; }
+    if (currentView != null && !rects.containsKey(viewID) && viewID != null) { rects[viewID] = {}; }
     if (rects[viewID] != null && !rects[viewID]!.containsKey(columnName)) {
       double width = getWidth(false);
       late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
@@ -346,10 +325,11 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,)));
     } 
     if (widget.allowFiltering) { 
-      buttons.add(FilterPopUpWidget(items: widget.items, label: widget.label.value, columnName: widget.columnName, type: widget.type, component: this,)); }
+      buttons.add(FilterPopUpWidget(items: widget.items, label: widget.label.value, 
+        columnName: widget.columnName, type: widget.type, component: this, )); }
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
       if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
-      || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName)) || globalNew))) { 
+      || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName))))) { 
         buttons.add(IconButton(onPressed: () async { 
           resetFilter(widget.columnName);
           globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
@@ -357,11 +337,10 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
       } 
     }
     widget.width = width + 42;
-    if (viewID != null && !rects.containsKey(viewID)) { rects[viewID!] = {}; }
+    if (viewID != null && !rects.containsKey(viewID)) { rects[viewID] = {}; }
     late Rect rect = rects[viewID]!.containsKey(widget.columnName) ? rects[viewID]![widget.columnName]! : Rect.fromCenter(
       center: MediaQuery.of(context).size.center(Offset.zero), width: width.isNaN ? 300 : width + 42, height: 55 );
     if (currentView != null && rects.containsKey(viewID)) { rects[viewID]![widget.columnName] = rect; }
-    
     return Container(width: rects[viewID] != null && rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
     decoration: BoxDecoration( color: widget.backgroundColor, border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
     child: fork.TransformableBox(

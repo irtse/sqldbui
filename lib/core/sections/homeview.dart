@@ -15,14 +15,13 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     for (var cat in categories.keys) {
       for (var view in categories[cat]!) {
         views.add(
-          InkWell( onTap: () { globalMenuKey.currentState?.refreshView("${view.id}", cat, false, false, false); },
+          InkWell( onTap: () { globalMenuKey.currentState?.refreshView("#${view.id}", cat, false, false, false); },
               child: Container(
             margin: const EdgeInsets.all(10),
             decoration: BoxDecoration(color: Colors.white,
-              boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5),
-                      spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ],
-              borderRadius: const BorderRadius.all(Radius.circular(7)),),
-            child: Container( width: 300, child: Column(children: [
+              boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ],
+              borderRadius: const BorderRadius.all(Radius.circular(7))),
+            child: SizedBox( width: 300, child: Column(children: [
                 Container(margin: const EdgeInsets.only(top: 10), child: const ClipRRect(
                   borderRadius:  BorderRadius.only(topLeft: Radius.circular(7), topRight: Radius.circular(7)),
                   child: Image( image: AssetImage('assets/images/default.png'), height: 150, width: 280, fit: BoxFit.cover, ),
