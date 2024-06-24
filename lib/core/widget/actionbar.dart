@@ -2,13 +2,13 @@ import 'dart:developer' as developer;
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
@@ -32,6 +32,7 @@ class ActionBarState extends State<ActionBarWidget> {
               }), ), icon: Icon( Icons.refresh, color: Theme.of(context).highlightColor, ),
               onPressed: () {  
                 globalOffset = 0;
+                
                 globalMenuKey.currentState?.refresh(true);
                 globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
                   : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID, true); },

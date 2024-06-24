@@ -2,6 +2,9 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:sqldbui2/core/widget/datagrid/functions/functionMathRow.dart';
+import 'package:sqldbui2/core/widget/datagrid/functions/functionsSelector.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:alert_banner/exports.dart';
@@ -10,10 +13,9 @@ import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/services/html.dart' if (kIsWeb) 'dart:html' as http;
 
@@ -54,7 +56,7 @@ class APIService {
     switch (method.toLowerCase()) {
       case 'get' : return await dio.get(url, options: options);
       case 'post' : return await dio.post(url, data:body, options: options);
-      case 'put' : return await dio.put(url, data:body!, options: options);
+      case 'put' : return await dio.put(url, data: body!, options: options);
       case 'delete' : return await dio.delete(url, options: options);
       default : return await dio.get(url, options: options);
     }
@@ -64,17 +66,21 @@ class APIService {
     try {
       downloadProgressNotifier.value = 0;
       dio.options.headers["authorization"] = auth;
+      var columns = getColumns(url, true);
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter);
+      var command = "";
+      if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
-        dio.get("$url${extend ?? ""}$orderBy$filter").then((value) {
+        dio.get("$url${extend ?? ""}$columns$command$orderBy$filter").then((value) {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
           Future.delayed(const Duration(seconds: 1), () { Navigator.of(context).pop(); });
         });
       } else {
-        dio.download("$url${extend ?? ""}$orderBy$filter", savePath, onReceiveProgress: (actualBytes, int totalBytes) {
+        print("$url${extend ?? ""}$columns$command$orderBy$filter");
+        dio.download("$url${extend ?? ""}$columns$command$orderBy$filter", savePath, onReceiveProgress: (actualBytes, int totalBytes) {
           Future.delayed(const Duration(seconds: 1), () {
             downloadProgressNotifier.value = (actualBytes / totalBytes * 100).floor();
             if (downloadProgressNotifier.value == 100) { Navigator.of(context).pop(); }
@@ -113,7 +119,12 @@ class APIService {
     var columns = "";
     if (url.contains("?") && filterOrderView.containsKey(viewID)) {
       columns += "&columns=";
-      for (var column in filterOrderView[viewID] ?? []) { columns += "$column,"; }
+      for (var column in filterOrderView[viewID] ?? []) { 
+        var type = currentView!.schema[column]?.type ?? "";
+        if (type.contains("many") || (isEditMode[viewID] == true &&  editMode[viewID] == "math" && !(
+          type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int")))) { continue; }
+        columns += "$column,"; 
+      }
       columns = columns.substring(0, columns.length - 1);
     }
     return columns;
@@ -157,7 +168,9 @@ class APIService {
         var filter = getFilter(url, isFilter);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
-        var response = await request("$url$cols${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
+        var command = "";
+        if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
+        var response = await request("$url$cols$command${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
           if (method == "delete") { cache.remove(url); return APIResponse<T>(); }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 

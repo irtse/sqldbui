@@ -6,10 +6,10 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/homeview.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
-import 'package:sqldbui2/core/widget/fork/tranformablebox.dart' as fork;
+import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 
 /// Flutter code sample for [FutureBuilder].
 GlobalKey<PageWidgetState> globalPageKey = GlobalKey<PageWidgetState>();

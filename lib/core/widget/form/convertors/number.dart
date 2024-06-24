@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
 
-import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 
 class NumberWidget extends StatefulWidget {
   final FormWidgetState component;

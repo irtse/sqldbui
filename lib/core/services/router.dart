@@ -1,6 +1,8 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -40,10 +42,8 @@ class AppRouter {
     });
   }    
 
-
   static Future<String?> getRouteCookie() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    print("<${prefs.getString("url")}>");
     return prefs.getString("url") != "" ? prefs.getString("url") : null;
   }
 
@@ -73,7 +73,10 @@ class AppRouter {
 
   static back() async {
     if (realHistory.length <= 1) { return; }
+    cacheChanges = {};
+    detectChanges = {};
     globalLoading = true;
+    selectedGrid = []; unselectedGrid = [];
     realHistory.removeLast();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("url", realHistory.last);
@@ -93,7 +96,10 @@ class AppRouter {
   }
   static forward() async {
     if (canForward()) { 
+      cacheChanges = {};
+      detectChanges = {};
       globalLoading = true;
+      selectedGrid = []; unselectedGrid = [];
       var index = history.indexOf(realHistory.last);
       realHistory.add(history[index + 1]); 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -126,9 +132,11 @@ class AppRouter {
     var splitted = path.split(":");
     viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
     subViewID=splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
+    cacheChanges = {};
+    detectChanges = {};
     currentView = null;
     globalLoading = true;
-    print("NAVIGATE TO $viewID $subViewID");
+    selectedGrid = []; unselectedGrid = [];
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
   }
 }   

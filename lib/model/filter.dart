@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/core/widget/utils/filterRow.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/view.dart';

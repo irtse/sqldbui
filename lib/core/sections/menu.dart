@@ -1,7 +1,8 @@
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -10,7 +11,6 @@ import 'package:sqldbui2/main.dart';
 
 bool isMenu = true;
 double menuSize = 250;
-bool cantRefresh = false;
 Map<String, List<model.View>> categories = <String, List<model.View>>{};
 GlobalKey<MenuWidgetState> globalMenuKey = GlobalKey<MenuWidgetState>();
 // ignore: must_be_immutable
@@ -148,6 +148,10 @@ class MenuWidgetState extends State<MenuWidget> {
       child: SingleChildScrollView( child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps )))]);
   }
   void refresh(bool getView) {
+      filterRowsWidget = []; functionMathRowsWidget = [];
+      selectedGrid = []; unselectedGrid = [];
+      detectChanges = {};
+      cacheChanges = {};
       if (widget.views == null || getView || firstAPI) {
           APIService().get<model.View>(APIConstants.mainEndpost, true, null).then((value) {
           if (value.data != null) { widget.views = value.data; }
@@ -175,6 +179,9 @@ class MenuWidgetState extends State<MenuWidget> {
       globalFilter[id] = Filters(); 
       globalOrder[id] = <String, String>{};
     }
+    cacheChanges = {};
+    detectChanges = {};
+    selectedGrid = []; unselectedGrid = [];
     firstAPI = isFirst;
     globalOffset = 0;
     category=cat;
@@ -182,6 +189,7 @@ class MenuWidgetState extends State<MenuWidget> {
     subViewID=null;
     widget.url = null;
     currentView = null;
+    filterRowsWidget = []; functionMathRowsWidget = [];
     if(full) { refresh(true); }
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;

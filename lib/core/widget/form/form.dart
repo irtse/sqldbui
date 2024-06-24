@@ -1,20 +1,18 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:flutter_awesome_alert_box/flutter_awesome_alert_box.dart';
 import 'package:sqldbui2/core/sections/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/action.dart';
-import 'package:sqldbui2/core/widget/convertors/manytomany.dart';
-import 'package:sqldbui2/core/widget/convertors/onetomany.dart';
+import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
+import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
-import 'package:sqldbui2/core/widget/workflowPanel.dart';
-import 'package:sqldbui2/core/widget/workflowbar.dart';
+import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
+import 'package:sqldbui2/core/widget/workflow/workflowbar.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/widget/convertors/convertor.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
@@ -53,21 +51,19 @@ class FormWidgetState extends State<DataFormWidget> {
       String description = "no description";
       model.Workflow? wf;
       if (widget.view != null && widget.view!.items.isNotEmpty) {
-        if (widget.view!.isList) { return Container(
-          width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-          height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
-          decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-          child: null); }
         var refItem = widget.view!.items[0];
         if (refItem.workflow != null) { 
           wf = refItem.workflow; 
           header.add(WorkflowBarWidget(workflow: refItem.workflow!));
-          header.add(WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, workflow: refItem.workflow!, readOnly: refItem.readonly));  
+          header.add(WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, 
+            workflow: refItem.workflow!, readOnly: refItem.readonly));  
         }
         name = widget.view!.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
         description = widget.view!.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
-        if (refItem.values.containsKey("name") && refItem.values["name"] != null) { name += ": ${refItem.values["name"].toUpperCase()}"; }
-        if (refItem.values.containsKey("description") && refItem.values["description"] != null) { description = refItem.values["description"].toLowerCase(); }
+        if (refItem.values.containsKey("name") && refItem.values["name"] != null) { 
+          name += ": ${refItem.values["name"].toUpperCase()}"; }
+        if (refItem.values.containsKey("description") && refItem.values["description"] != null) { 
+          description = refItem.values["description"].toLowerCase(); }
         if (refItem.dataPath != "") { widget.wrappersURL["relatedDatas"] = refItem.dataPath; }
         var schema = widget.view!.schema;
         List<Widget> states = [];
@@ -127,9 +123,7 @@ class FormWidgetState extends State<DataFormWidget> {
           if (refItem.valuesMany.containsKey(fieldName)) { value = refItem.valuesMany[fieldName]!; }
           if (refItem.valuesManyPath.containsKey(fieldName)) { value = refItem.valuesManyPath[fieldName]!; }
           var readOnly = (field.readonly || widget.view!.readOnly || refItem.readonly) && !widget.view!.isEmpty;
-          if (!((widget.view!.actions.contains("post") && widget.view!.isEmpty) || widget.view!.actions.contains("put"))) { 
-            readOnly = true; 
-          }
+          if (!((widget.view!.actions.contains("post") && widget.view!.isEmpty) || widget.view!.actions.contains("put"))) { readOnly = true; }
           if (field.label == "state") { // TODO to remove if change its mind
             readOnly = true; 
             if (widget.view!.actions.contains("put") && !widget.view!.isEmpty && value != "completed" && value != "dismiss") {

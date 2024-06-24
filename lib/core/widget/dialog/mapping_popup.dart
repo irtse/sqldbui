@@ -6,19 +6,21 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/convertors/text.dart';
-import 'package:sqldbui2/core/widget/convertors/dropdown.dart';
+import 'package:sqldbui2/core/widget/form/convertors/text.dart';
+import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 
 // ignore: must_be_immutable
 class MappingPopUpWidget extends StatefulWidget{
-  bool isExport = true; String format = "csv"; List<String> importFormat = ["csv", "xlsx"];
+  bool isExport = true; String format = "csv"; 
+  List<String> importFormat = ["csv", "xlsx"];
+  Map<String, model.SchemaField>? forcedSchema;
   List<PlatformFile> files = [];
-  MappingPopUpWidget ({ Key? key, this.isExport = true, required this.format, }): super(key: key);
+  MappingPopUpWidget ({ Key? key, this.isExport = true, required this.format, this.forcedSchema }): super(key: key);
   @override
   MappingPopUpState createState() => MappingPopUpState();
 }
@@ -97,10 +99,10 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
           Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
         ]);
       }
-      
-      for (var scheme in currentView!.schema.keys) {
+      var schema = widget.forcedSchema ?? currentView!.schema;
+      for (var scheme in schema.keys) {
         var f = TextWidget(form : newCacheEntry, schemaName: currentView!.schemaName, name: scheme, 
-          readOnly: false, value: scheme, label: "${currentView!.schema[scheme]!.label} as label", 
+          readOnly: false, value: scheme, label: "${schema[scheme]!.label} as label", 
           require: false, type: "varchar", component: null, isDark: true,);
         mapping.add(Padding(padding: const EdgeInsets.only(bottom: 10), 
                     child: Container( width: 300,
@@ -140,14 +142,34 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                   if (widget.isExport && formKey.currentState!.validate()) {
                     formKey.currentState!.save();
                     var path = currentView!.actionPath;
-                    if (globalGridWidgetKey.currentState != null 
-                    && !(globalGridKey.currentState != null && globalGridKey.currentState!.widget.isSelected)) {
-                      if (globalGridWidgetKey.currentState!.widget.selected.isNotEmpty) {
-                        path = path.replaceAll("rows=all", "rows=${globalGridWidgetKey.currentState!.widget.selected.join(",")}");
-                      } else { return; }
+                    if (!globalGridKey.currentState!.widget.isSelected && selectedGrid.isNotEmpty) {
+                      try {
+                        var ids = selectedGrid.where( (e) => e.cells.isNotEmpty ).map( (e) => "${e.cells.first.value}" ).join(",");
+                        path = path.replaceAll("rows=all", "rows=$ids");
+                      } catch (e) { /* */ } 
+                    } else if (globalGridKey.currentState!.widget.isSelected && unselectedGrid.isNotEmpty) {
+                      path = "&filter_line=";
+                      var params = "";
+                      for (var row in unselectedGrid) {
+                        if (row.cells.isNotEmpty) { 
+                          if (params.isNotEmpty) { path += "|"; }
+                          params += "id%3C%3E${row.cells.first.value},";
+                        }
+                      }
+                      path += params;
                     }
-                    widget.isExport ? APIService().getWithDownload(currentView!.actionPath, cache["format"], newCacheEntry, "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
-                    if (widget.isExport) { setState(() { isLoading = true; }); }
+                    if (globalGridKey.currentState!.widget.isSelected || selectedGrid.isNotEmpty) {
+                      if (widget.isExport) { setState(() { isLoading = true; }); }
+                      if (widget.forcedSchema != null) {
+                        for (var key in newCacheEntry.keys) {
+                          if (!widget.forcedSchema!.containsKey(key)) { newCacheEntry.remove(key); }
+                        }
+                      }
+                      print(widget.isExport);
+                      widget.isExport ? await APIService().getWithDownload(path, cache["format"], newCacheEntry, 
+                                "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
+                      if (widget.isExport) { setState(() { isLoading = false; }); }
+                    }
                   }
                   if (widget.files.isNotEmpty) {
                     for (var file in widget.files) {
@@ -161,7 +183,10 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 }))] )) ]));
     if (!isWeb) {
       (Platform.isIOS ? getApplicationDocumentsDirectory() : (Platform.isAndroid ? (getExternalStorageDirectory()) : (getDownloadsDirectory()))).then((value) {
-        Future.delayed(const Duration(milliseconds: 500), () => setState(() { directory = value != null && directory == "/" ? value.path : directory; }));
+        Future.delayed(const Duration(milliseconds: 500), () {
+          var val = value != null && directory == "/" ? value.path : directory;
+          if (directory != val) { setState(() { directory = val; });  }
+        });
       });
     }
     return w;

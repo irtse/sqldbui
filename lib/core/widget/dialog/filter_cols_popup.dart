@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 // ignore: must_be_immutable
 Map<String?, List<dynamic>> filterOrderView = <String?, List<dynamic>>{};
+Map<String?, List<dynamic>> filterTempOrderView = <String?, List<dynamic>>{};
 Map<String?, String?> filterView = <String?, String?>{};
 Map<String?, int> filterViewIDName = <String, int>{};
 GlobalKey<FilterColsPopUpState> filterColsPopUpKey = GlobalKey<FilterColsPopUpState>();
@@ -135,7 +136,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
     if (filterOrderView[viewID] == null) { filterOrderView[viewID] = currentView != null ? currentView!.order : []; }
     var t = widget.schema.keys.where((element) => !filterOrderView[viewID]!.contains(element)).toList();
     var list = [...filterOrderView[viewID]!, ...t];
-    for (var (index,fieldName) in list.indexed) {
+    for (var (index,fieldName) in list.where( (el) => widget.schema[el] != null).indexed) {
         var scheme =  widget.schema[fieldName]!; 
         var label = scheme.label;
         items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), child:  Row( children : [ 

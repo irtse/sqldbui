@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 
 class DateWidget extends StatefulWidget {
   final FormWidgetState? component;

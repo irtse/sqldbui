@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 
 // ignore: must_be_immutable
 class TextWidget extends StatefulWidget {

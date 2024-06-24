@@ -1,19 +1,18 @@
-import 'dart:async';
-
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/widget/form.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
 import 'dart:developer' as developer;
+import 'dart:async';
 
 model.View? currentView;
 String? currentCat;
@@ -33,9 +32,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     if (viewID == null) { return ViewWidget(view: currentView, views: widget.views); }
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@"));
-    print("HEY $isList $reForge ${viewID} ${subViewID}");
     if (isList || reForge) {
-        print("WIDGET : ${widget.url} ${viewID} ${subViewID}");
         var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${viewID!.substring(1)}?rows=${subViewID != null ? "$subViewID" : "all"}" : "";
         return FutureBuilder<APIResponse<model.View>>(
           future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), firstAPI, context) : 
@@ -71,8 +68,8 @@ class MainViewWidgetState extends State<MainViewWidget> {
   }
   void refreshUrl(String? path, String? id, bool load) {
     subViewID = id;
-    globalLoading = load;
     firstAPI = true;
+    globalLoading = load;
     setState(() { widget.url = path;});
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
   }

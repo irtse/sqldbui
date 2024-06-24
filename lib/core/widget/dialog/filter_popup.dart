@@ -1,21 +1,16 @@
 import 'dart:developer' as developer;
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:sqldbui2/model/filter.dart';
-import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/datagrid.dart';
-import 'package:sqldbui2/core/widget/utils/grid.dart';
-import 'package:sqldbui2/core/widget/utils/filterRow.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
-import 'package:sqldbui2/model/response.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-
+import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 // ignore: must_be_immutable
-class FilterPopUpWidget extends StatefulWidget{
+class FilterPopUpWidget extends StatefulWidget {
   String columnName; 
   String label;
   String type;
@@ -87,7 +82,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
               if (globalFilter[viewID]!.has(widget.columnName) && advancedSearch.isEmpty) { 
                 for (var filter in globalFilter[viewID]!.get(widget.columnName)) {
                   advancedSearch.add(FilterSearchWidget(innerIndex: advancedSearch.length, state: setState, type: widget.type,
-                    filter: this, columnName: widget.columnName, label: widget.label, searchValue: filter.value, 
+                    filter: this, columnName: widget.columnName, label: widget.label, value: filter.value, 
                     connector: filter.connector, comparator: filter.comparator));
                 }
               }
@@ -97,7 +92,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                 type: widget.type, columnName: widget.columnName, label: widget.label));
             } else if (advancedSearch.length == 1) {
               advancedSearch.add(FilterSearchWidget(filter: this, innerIndex: 0, state: setState, type: widget.type,
-                columnName: widget.columnName, label: widget.label, searchValue: advancedSearch.first.searchValue,
+                columnName: widget.columnName, label: widget.label, value: advancedSearch.first.value,
                 comparator: advancedSearch.first.comparator,));
                 advancedSearch.remove(advancedSearch.first);
             }
@@ -118,21 +113,21 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       globalFilter[viewID]!.remove(widget.columnName);
                       var founded = filterRowsWidget.where((element) => element.columnName == widget.columnName).toList();
                       for (var search in advancedSearch) { 
-                        if (search.globalKey.currentState!.validate() && search.searchValue != null && search.searchValue != "") {
+                        if (search.globalKey.currentState!.validate() && search.value != null && search.value != "") {
                           if (filterRowsWidget.length > 1 && filterRowsWidget.last.connector == "") { filterRowsWidget.last.connector = "and"; }
                           if (founded.isEmpty) { 
                             filterRowsWidget.add(FilterRowWidget(schema: currentView!.schema, items: widget.items, columnName: search.columnName, type: search.type,
-                              value: search.searchValue, comparator: search.comparator, connector: search.connector,
+                              value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: filterRowsWidget.length));
                             globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
-                              type: search.type, value: search.searchValue, connector: search.connector, comparator: search.comparator)); 
+                              type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = globalFilter[viewID]!.size();
                           } else {
                             filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, items: widget.items, columnName: search.columnName, type: search.type,
-                              value: search.searchValue, comparator: search.comparator, connector: search.connector,
+                              value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);
                             globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 
-                              type: search.type, value: search.searchValue, connector: search.connector, comparator: search.comparator)); 
+                              type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = founded.first.index;
                             founded.remove(founded.first); 
                           }
@@ -160,11 +155,11 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
   }
 }
 // ignore: must_be_immutable
-class FilterSearchWidget extends StatefulWidget{
+class FilterSearchWidget extends StatefulWidget implements ConvertorWidget {
+  @override dynamic value;
   String columnName; 
   String label;
   String type;
-  String? searchValue;
   String connector = "";
   String comparator = "like";
   String? url;
@@ -174,9 +169,18 @@ class FilterSearchWidget extends StatefulWidget{
   StateSetter state;
   var globalKey = GlobalKey<FormFieldState<dynamic>>();
   var fieldText = TextEditingController();
-  FilterSearchWidget ({ Key? key, required this.state, this.url,
-  required this.columnName, required this.filter, this.comparator = "like",
-  required this.type, required this.innerIndex, required this.label, this.connector = "", this.searchValue }): super(key: key);
+  FilterSearchWidget ({ Key? key, 
+    required this.state, 
+    this.url,
+    this.value,
+    required this.columnName, 
+    required this.filter, 
+    this.comparator = "like",
+    required this.type, 
+    required this.innerIndex, 
+    required this.label, 
+    this.connector = "", 
+  }): super(key: key);
   @override
   FilterSearchState createState() => FilterSearchState();
 }
@@ -187,14 +191,18 @@ class FilterSearchState extends State<FilterSearchWidget> {
     return TextButton(onPressed: () {
         if (widget.filter.advancedSearch.length <= widget.innerIndex + 1) { 
           widget.filter.advancedSearch.add(FilterSearchWidget(filter: widget.filter, state: widget.state,
-          innerIndex: widget.filter.advancedSearch.length, type: widget.type, columnName: widget.columnName, label: widget.label));
+            innerIndex: widget.filter.advancedSearch.length, 
+            type: widget.type, 
+            columnName: widget.columnName, 
+            label: widget.label));
         }
         widget.connector =  widget.connector = widget.connector == conn ? "" :  conn; 
         if (widget.connector == "") { 
           widget.filter.advancedSearch.removeRange(widget.innerIndex + 1, widget.filter.advancedSearch.length); 
         }
         widget.state(() { setState(() {});}); 
-      }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(widget.connector == conn ? Theme.of(context).primaryColor : Colors.transparent)), 
+      }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(
+        widget.connector == conn ? Theme.of(context).primaryColor : Colors.transparent)), 
       child: Padding( padding: const EdgeInsets.all(10), child: Text(conn.toUpperCase(),  
         style: TextStyle(color: widget.connector == conn ? Colors.white : Colors.grey, fontSize: 11))));
   }
@@ -205,116 +213,20 @@ class FilterSearchState extends State<FilterSearchWidget> {
       additionnal.add(TextButton(onPressed: () {
         widget.filter.advancedSearch.removeRange(widget.innerIndex, widget.filter.advancedSearch.length);
         widget.state(() { }); 
-      }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.transparent)), 
-        child: const Padding( padding: EdgeInsets.all(10), 
-          child: Text("DELETE",  style: TextStyle(color: Colors.grey, fontSize: 11)))));
+      }, 
+      style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.transparent)), 
+      child: const Padding( padding: EdgeInsets.all(10), 
+        child: Text("DELETE",  style: TextStyle(color: Colors.grey, fontSize: 11)))));
     }
-    print(widget.type);
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
-    Widget w = Container();
-    if (isText || widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("money") || widget.type.contains("decimal") || widget.type.contains("int")) { 
-        if (widget.searchValue != null && widget.searchValue != "") { widget.fieldText.text = widget.searchValue!; }
-        w = TextFormField( key: widget.globalKey, controller: widget.fieldText, style: const TextStyle(fontSize: 14,),
-                enabled: true,  autocorrect: true,  decoration: InputDecoration(
-                  enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
-                  border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor)),
-                  isDense: true, hintStyle: const TextStyle(fontSize: 12), // you need this
-                  floatingLabelBehavior: FloatingLabelBehavior.always, filled: true,  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                  suffixIcon: const Icon(Icons.search),  hintText: "filter ${widget.label}...",  
-                  labelText: "value ${isText ? "" : "(numeric)"}",
-                  errorStyle: const TextStyle(fontSize: 0,),
-                ),
-                onChanged: (String? value) { widget.searchValue = value; },
-                onSaved: (String? value) {  widget.searchValue = value; },
-                validator: (String? value) {
-                  if (value == null) { return "please enter a filter value..."; }  
-                  if (!isText) {
-                    if (value.isEmpty || !RegExp(r'^-?[0-9]*\.?[0-9]*$').hasMatch(value)) { return "please enter a valid number..."; }
-                  }
-                  return null; 
-                });
-      } else if (widget.type.contains("bool")) {
-        ValueNotifier<bool> ctrl = ValueNotifier(widget.searchValue == "true");
-        w = AdvancedSwitch( key: widget.globalKey, 
-                    width: 200, initialValue: false, controller: ctrl,
-                    activeColor: Colors.green, inactiveColor: Colors.grey,
-                    activeChild: Text("active"), inactiveChild: Text("not active"),  
-                    borderRadius:  const BorderRadius.all(Radius.circular(15)), height: 30.0, disabledOpacity: 0.5,
-                    onChanged: (value) {
-                      widget.searchValue = value == true ? "true" : "false";
-                      ctrl.value = value; },);
-    } else if (widget.type.contains("time") || widget.type.contains("date")) { 
-      w = DateTimeField(
-        initialValue: widget.searchValue == null ? null : DateTime.parse(widget.searchValue!),
-        validator: (DateTime? value) {
-          if (value == null) { return ""; }
-          return null;
-        },
-        format: intl.DateFormat('y-M-dd'),
-        // mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
-        style: const TextStyle(fontSize: 14, color: Colors.black),
-        decoration: InputDecoration(
-            suffixIcon: const Icon(Icons.calendar_month, size: 20,),
-            suffixIconColor: Theme.of(context).primaryColor,
-            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-            helperStyle: const TextStyle(height: -2),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            filled: true,
-            errorStyle: const TextStyle(fontSize: 0),
-            fillColor: Colors.white,
-            hintStyle: const TextStyle(fontSize: 12, ),
-            border: const OutlineInputBorder(),
-            contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: "",
-            labelText: widget.label.toLowerCase(),
-          ),
-        onShowPicker: (context, currentValue) { return showDatePicker(
-              context: context,
-              firstDate: DateTime(1900),
-              initialDate: widget.searchValue == null ? currentValue : DateTime.parse(widget.searchValue!),
-              lastDate: DateTime(2100));
-        },
-        onChanged: (DateTime? value) { 
-          setState(() { widget.searchValue = value?.toIso8601String(); });  
-        },
-      );
-    } else if (widget.type.contains("enum") ) {
-        var items = <DropdownMenuItem<String>>[];
-      var values = widget.type.replaceAll("enum__", "").split("_");
-      for (var item in values) { 
-        if (items.where((element) => element.value == item).isEmpty) {
-          items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));
-        }
-      }
-      w = DropdownButtonFormField<String>( items: items, key: widget.globalKey,
-        isExpanded: true,
-        hint: Text("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
-        value: widget.searchValue,
-        validator: (values) { if (values == null) { return "please select a value..."; } return null; },
-        style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
-        onChanged: (value) { widget.searchValue = value; }, 
-        dropdownColor: Theme.of(context).highlightColor,
-        decoration: InputDecoration( isDense: true,
-          suffixIconColor: Theme.of(context).primaryColor,
-          errorStyle: const TextStyle(height: -2),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          filled: true, constraints: const BoxConstraints(minWidth: 0),
-          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-          fillColor:Colors.white, hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-          border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-          labelText: "value ${widget.comparator.toUpperCase()}",
-        ),
-      );
-    }
+    String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
+    Widget w = Convertor.filterFieldByType(
+      context, widget as ConvertorWidget, widget.type, "value to filter on...", this, false, false, url, "");
     var togglesMode = ["VALUE", 'NULL'];
     if (!isText) { togglesMode.add("MATH"); }
-    var toggles = isMath ? [">", "<", '<=', ">=" ] :  ["LIKE", "!LIKE", '=', "!=" ];
-    if (widget.comparator == "") { widget.comparator = "like"; }
+    var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") ? ['=', "!=" ] : ["LIKE", "!LIKE", '=', "!=" ]);
+    if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
     return Column(children: [ 
-      /*CheckboxListTileFormField( title: Text("null mode"),
-        onChanged: (bool value) { setState(() { isNull = value; }); }, initialValue: isNull, ),*/
       Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch( minHeight: 25,
           initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : "value")),
           fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / togglesMode.length,
@@ -332,10 +244,10 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,)) 
                 ], key: widget.globalKey, isExpanded: true,
                 hint: Text("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
-                value: widget.searchValue == "NULL" ? "NULL" : "NOT NULL",
+                value: widget.value == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return "please select a value..."; } return null; },
                 style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
-                onChanged: (value) { widget.searchValue = value; }, 
+                onChanged: (value) { widget.value = value; }, 
                 dropdownColor: Theme.of(context).highlightColor,
                 decoration: InputDecoration( isDense: true,
                   suffixIconColor: Theme.of(context).primaryColor,
@@ -347,18 +259,19 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   fillColor:Colors.white, hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                   border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                   labelText: "value ${widget.comparator.toUpperCase()}",
-                )) :  w)) ]), 
-              isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(
-                initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == (widget.comparator.toLowerCase() == "not like" ? "!like" : widget.comparator)),
-                fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / toggles.length,
-                customWidths: !isMath && !isNull ? [44, 88, 44, 44] : null,
-                totalSwitches: toggles.length, labels: toggles, inactiveBgColor: Theme.of(context).splashColor,
-                onToggle: (index) { widget.comparator = toggles[index ?? 0].toLowerCase() == "!like" ? "not like" : toggles[index ?? 0].toLowerCase(); },)),
-              Divider(color: Theme.of(context).splashColor,),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                )) : w)) 
+      ]), 
+      isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(
+        initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == (widget.comparator.toLowerCase() == "not like" ? "!like" : widget.comparator)),
+        fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / toggles.length,
+        customWidths: !isMath && !isNull ? [44, 88, 44, 44] : null,
+        totalSwitches: toggles.length, labels: toggles, inactiveBgColor: Theme.of(context).splashColor,
+        onToggle: (index) { widget.comparator = toggles[index ?? 0].toLowerCase() == "!like" ? "not like" : toggles[index ?? 0].toLowerCase(); },)),
+      Divider(color: Theme.of(context).splashColor,),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Padding( padding: const EdgeInsets.only(right: 10), child: connectorButton("and")),
                   connectorButton("or"), ...additionnal
-              ],),
-    ] ); 
+      ],),
+    ]); 
   }
 }
