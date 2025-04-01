@@ -4,7 +4,6 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
 
 // ignore: must_be_immutable
 class OneToManyWidget extends StatefulWidget {
@@ -20,9 +19,9 @@ class OneToManyWidget extends StatefulWidget {
   var isFilled = true;
   var flashed = <int, DataFormWidget>{};
   final FormWidgetState component;
-  OneToManyWidget ({ Key? key, required this.schemaName, required this.name,
+  OneToManyWidget ({ super.key, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
-                      required this.require, required this.type, required this.url, required this.component}): super(key: key);
+                      required this.require, required this.type, required this.url, required this.component});
   @override
   // ignore: library_private_types_in_public_api
   OneToManyState createState() => OneToManyState();
@@ -99,7 +98,8 @@ class OneToManyState extends State<OneToManyWidget> {
           widget.component.widget.detectChange = true;
           setState(() { 
             var k = GlobalKey<FormWidgetState>();
-            widget.component.widget.oneToManiesForm.add(DataFormWidget(key: k, view: newView, scroll: false, subForm: true, superFormSchemaName: widget.schemaName)); 
+            widget.component.widget.oneToManiesForm.add(DataFormWidget(key: k, view: newView, scroll: false, subForm: true, 
+                                                                       superFormSchemaName: widget.schemaName)); 
             widget.component.widget.oneToManiesStateForm[widget.component.widget.oneToManiesForm.last]=this; 
           });
         },));

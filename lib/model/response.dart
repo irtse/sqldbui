@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -10,6 +9,7 @@ Map<Type, SerializerDeserializer> refs = <Type, SerializerDeserializer> {
   View : View(),
   Shallowed : Shallowed(),
   SchemaField : SchemaField(),
+  RawData : RawData(),
 };
 
 class APIResponse<T extends SerializerDeserializer> {
@@ -30,6 +30,12 @@ class APIResponse<T extends SerializerDeserializer> {
   }
 
   APIResponse<T> deserialize(Map<String, dynamic> j) {
+    if (refs[T] == null || j["data"] == null) {
+      return APIResponse<T>(
+        data: null, 
+        error: j.containsKey("error") && j["error"] != null ? j["error"] : "",
+      );
+    }
     return APIResponse<T>(
       data: fromListJson<T>(j["data"], refs[T]!), 
       error: j.containsKey("error") && j["error"] != null ? j["error"] : "",

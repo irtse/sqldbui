@@ -113,7 +113,7 @@ class Filters {
     }
     filterRowsWidget = [];
     noFilterRetrieval = true;
-    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }
 
 class Filter extends SerializerDeserializer<Filter> {
@@ -127,6 +127,7 @@ class Filter extends SerializerDeserializer<Filter> {
     this.dir = "asc",
     this.column,
     this.label,
+    this.width,
   });
   dynamic value;
   int index;
@@ -137,11 +138,13 @@ class Filter extends SerializerDeserializer<Filter> {
   int? id;
   String? column;
   String? label;
+  double? width;
 
   @override deserialize(Map<String, dynamic> json) {
     return Filter(
     id: json.containsKey("id") ? json["id"] : null, 
     column: json.containsKey("name") ? json["name"] : null,
+    width: json.containsKey("width") ? json["width"].toDouble() : null,
     label: json.containsKey("label") ? json["label"] : null,
     type: json.containsKey("type") ? json["type"] : "text",
     value: json.containsKey("value") ? json["value"] : null,

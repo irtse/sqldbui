@@ -1,7 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;

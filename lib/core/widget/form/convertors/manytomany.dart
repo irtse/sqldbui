@@ -4,8 +4,8 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
 
+// ignore: must_be_immutable
 class ManyToManyWidget extends StatefulWidget {
   final Map<String, dynamic> form;
   final String schemaName;
@@ -18,10 +18,11 @@ class ManyToManyWidget extends StatefulWidget {
   final String type;
   final String label;
   var isFilled = true;
-  ManyToManyWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
+  ManyToManyWidget ({ super.key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
-                      required this.require, required this.type, required this.url, required this.component}): super(key: key);
+                      required this.require, required this.type, required this.url, required this.component});
   @override
+  // ignore: library_private_types_in_public_api
   _ManyToManyState createState() => _ManyToManyState();
 }
 class _ManyToManyState extends State<ManyToManyWidget> {
@@ -37,51 +38,53 @@ class _ManyToManyState extends State<ManyToManyWidget> {
       if (widget.value != null && widget.value is List) {
         for (var val in widget.value) {
         val = val as model.Shallowed;
-        tags.add(Container( margin: const EdgeInsets.only(top:5, left: 10, right: 10), child: TextButton(onPressed: (){}, 
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor),
-            mouseCursor: MaterialStateProperty.all(MouseCursor.uncontrolled),
-          ),
-          child: Text(val.label ?? val.name ?? "${val.id}", style: const TextStyle(color: Colors.white)), )));
+        tags.add(Container( margin: const EdgeInsets.only(top:5, left: 10, right: 10), 
+          child: TextButton(onPressed: (){}, 
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor),
+              mouseCursor: WidgetStateProperty.all(MouseCursor.uncontrolled),
+            ),
+            child: Text(val.label ?? val.name ?? "${val.id}", 
+              style: const TextStyle(color: Colors.white))
+            )
+          ));
         }
       }
       return Padding(padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),child: Column(children: [
         Row(children: [Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}:", 
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
-        Row(children: [Wrap(children: tags,)]) ]),);
+        Row(children: [Wrap(children: tags)]) ]),);
     } else {
       String url = scheme.valuesPath;
       return FutureBuilder<APIResponse<model.Shallowed>>(
-      future: APIService().get(url, true, null), 
-      builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-        List<MultiSelectItem> items = <MultiSelectItem>[];
-        widget.form[widget.name] = <dynamic>[];
-        if (snap.hasData && snap.data!.data != null) {
-          for (var item in snap.data!.data!) {
-            var v = item.label ?? item.name ?? "${item.id}";
-            var ser = item.serialize();
-            items.add(MultiSelectItem(ser, v.toLowerCase()));
-            if (widget.value != null) { 
-              for (var val in widget.value as List<model.Shallowed>) {
+        future: APIService().get(url, true, null), 
+        builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+          List<MultiSelectItem> items = <MultiSelectItem>[];
+          widget.form[widget.name] = <dynamic>[];
+          if (snap.hasData && snap.data!.data != null) {
+            for (var item in snap.data!.data!) {
+              var v = item.label ?? item.name ?? "${item.id}";
+              var ser = item.serialize();
+              items.add(MultiSelectItem(ser, v.toLowerCase()));
+              for (var val in (widget.value ?? []) as List<model.Shallowed>) {
                 if (val.id == item.id) { widget.form[widget.name].add(ser); }
               }
             }
           }
-        }
-        return Padding( padding: const EdgeInsets.only(left: 25, right: 25, bottom: 15), child: MultiSelectDialogField(
-          initialValue: widget.form[widget.name],
-          validator: (value) => (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'do not leave empty' : null,
-          title: Padding(padding: const EdgeInsets.only(left: 30), child: Text( "${widget.label.toUpperCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Theme.of(context).primaryColor ), )),
-          buttonText: Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Colors.black, fontSize: 14, ), ),
-          items: items,
-          listType: MultiSelectListType.CHIP,
-          onConfirm: (values) { widget.form[widget.name]=values; },
-          onSaved: (values) { widget.form[widget.name]=values; },
-          onSelectionChanged: (values) { 
-            widget.component.widget.detectChange = true;
-            widget.form[widget.name]=values; 
-          },
-        ));
+          return Padding( padding: const EdgeInsets.only(left: 25, right: 25, bottom: 15), child: MultiSelectDialogField(
+            initialValue: widget.form[widget.name],
+            validator: (value) => (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'do not leave empty' : null,
+            title: Padding(padding: const EdgeInsets.only(left: 30), child: Text( "${widget.label.toUpperCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Theme.of(context).primaryColor ), )),
+            buttonText: Text("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Colors.black, fontSize: 14, ), ),
+            items: items,
+            listType: MultiSelectListType.CHIP,
+            onConfirm: (values) { widget.form[widget.name]=values; },
+            onSaved: (values) { widget.form[widget.name]=values; },
+            onSelectionChanged: (values) { 
+              widget.component.widget.detectChange = true;
+              widget.form[widget.name]=values; 
+            },
+          ));
         });
       }
     }

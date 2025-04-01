@@ -2,8 +2,8 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:sqldbui2/core/widget/datagrid/functions/functionMathRow.dart';
-import 'package:sqldbui2/core/widget/datagrid/functions/functionsSelector.dart';
+import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
+import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +18,7 @@ import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/services/html.dart' if (kIsWeb) 'dart:html' as http;
+import 'package:sqldbui2/model/view.dart';
 
 var firstAPI = false;
 var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
@@ -62,25 +63,25 @@ class APIService {
     }
   }
   static ValueNotifier downloadProgressNotifier = ValueNotifier(0);
-  Future mainDownload(String url, String method, bool isFilter, String? extend, String savePath, bool isWeb, BuildContext context) async {
+  Future mainDownload(String url, String format, String method, bool isFilter, String? extend, String savePath, bool isWeb, BuildContext context) async {
     try {
       downloadProgressNotifier.value = 0;
       dio.options.headers["authorization"] = auth;
+      var cmdCol = getCmdCol();
       var columns = getColumns(url, true);
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter);
       var command = "";
       if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
-        dio.get("$url${extend ?? ""}$columns$command$orderBy$filter").then((value) {
+        dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter").then((value) {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
           Future.delayed(const Duration(seconds: 1), () { Navigator.of(context).pop(); });
         });
       } else {
-        print("$url${extend ?? ""}$columns$command$orderBy$filter");
-        dio.download("$url${extend ?? ""}$columns$command$orderBy$filter", savePath, onReceiveProgress: (actualBytes, int totalBytes) {
+        dio.download("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter", savePath, onReceiveProgress: (actualBytes, int totalBytes) {
           Future.delayed(const Duration(seconds: 1), () {
             downloadProgressNotifier.value = (actualBytes / totalBytes * 100).floor();
             if (downloadProgressNotifier.value == 100) { Navigator.of(context).pop(); }
@@ -113,18 +114,33 @@ class APIService {
     }
     return orderBy + dir;
   }
-
+  String getCmdCol() {
+    var command = "";
+    for (var column in (filterTempOrderView[viewID] ?? [])) {
+      if (colFunction[viewID] != null && isEditMode[viewID] == true) {
+        if (colFunction[viewID]![column] != null && colFunction[viewID]![column] != "") {
+          command += "$column:${colFunction[viewID]![column]},";
+        }
+      }
+    }
+    if (isEditMode[viewID] == true) {
+      var col = mathColName[viewID] ?? "total";
+      if (colFunction[viewID] != null && colFunction[viewID]![col] != null && colFunction[viewID]![col] != "") {
+        command += "$col:${colFunction[viewID]![col]},";
+      }
+    }
+    if (command != "") {
+        command = command.substring(0, command.length - 1);
+        command = "&command_columns=$command";
+    }
+    return command;
+  }
   String getColumns(String url, bool isFilter) {
     if (!isFilter) { return ""; }
-    var columns = "";
+    var columns = ""; 
     if (url.contains("?") && filterOrderView.containsKey(viewID)) {
       columns += "&columns=";
-      for (var column in filterOrderView[viewID] ?? []) { 
-        var type = currentView!.schema[column]?.type ?? "";
-        if (type.contains("many") || (isEditMode[viewID] == true &&  editMode[viewID] == "math" && !(
-          type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int")))) { continue; }
-        columns += "$column,"; 
-      }
+      for (var column in (filterOrderView[viewID] ?? [])) { columns += "$column,"; }
       columns = columns.substring(0, columns.length - 1);
     }
     return columns;
@@ -164,13 +180,17 @@ class APIService {
       try {
         dio.options.headers["authorization"] = auth;
         dio.interceptors.clear(); 
+        var cmdCol = getCmdCol();
         var orderBy = getOrderDir(url);
         var filter = getFilter(url, isFilter);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var command = "";
-        if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
-        var response = await request("$url$cols$command${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
+        if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
+          command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
+        }
+        print("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
+        var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
           if (method == "delete") { cache.remove(url); return APIResponse<T>(); }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
@@ -207,6 +227,31 @@ class APIService {
     throw Exception(err);
   }
 
+  Future<APIResponse<RawData>> raw(String url, dynamic body, 
+                                                                String method,) async {
+    var err = ""; 
+    if (url != "") {
+      try {
+        dio.options.headers["authorization"] = auth;
+        dio.interceptors.clear(); 
+        var command = "";
+        if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
+        var response = await request("$url$command&rawview=enable", method, body, null);
+        if (response.statusCode != null && response.statusCode! < 400) {
+          if (method == "delete") { cache.remove(url); return APIResponse<RawData>(); }
+          APIResponse<RawData> resp = APIResponse<RawData>().deserialize(response.data as Map<String, dynamic>); 
+          if (resp.error == "") { return resp; }
+          err = resp.error ?? "internal error";
+        } 
+        if (response.statusCode == 401) { err = "not authorized"; }
+      } catch(e, s) {  
+        print(e); print(s);
+        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
+    } else { err = "no url"; }
+    if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
+    throw Exception(err);
+  }
+
   Future<APIResponse<T>> sendFile<T extends SerializerDeserializer>(String url, File file, BuildContext context) async {
     FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(file.path, filename:file.path.split("/").last),
@@ -221,7 +266,8 @@ class APIService {
     for (var key in cache.keys) {
       if (!asLabel.contains(key)) { asLabel += "&${key}_aslabel=${cache[key]!}"; }
     }
-    try { mainDownload(url, "get", true, "&export=$format$asLabel", savePath, isWeb, context);
+    try { mainDownload(url, format, "get", true, 
+      "${"&export=$format"}$asLabel", savePath, isWeb, context);
     } catch (e) { developer.log('LOG ERR PATH $e', name: 'my.app.category'); }
   }
 

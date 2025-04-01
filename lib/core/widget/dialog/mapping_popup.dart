@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:sqldbui2/main.dart';
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,11 +15,12 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 
 // ignore: must_be_immutable
 class MappingPopUpWidget extends StatefulWidget{
-  bool isExport = true; String format = "csv"; 
-  List<String> importFormat = ["csv", "xlsx"];
+  bool isExport = true; 
+  String format = "csv"; 
+  List<String> importFormat = ["csv", "json", "xlsx"];
   Map<String, model.SchemaField>? forcedSchema;
   List<PlatformFile> files = [];
-  MappingPopUpWidget ({ Key? key, this.isExport = true, required this.format, this.forcedSchema }): super(key: key);
+  MappingPopUpWidget ({ super.key, this.isExport = true, required this.format, this.forcedSchema });
   @override
   MappingPopUpState createState() => MappingPopUpState();
 }
@@ -44,26 +44,25 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
     isWeb = kIsWeb;
     if (isLoading) {
       items.add(Center( child: ValueListenableBuilder(
-            valueListenable: APIService.downloadProgressNotifier, builder: (context, value, snapshot) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [ const SizedBox( height: 32, ),
-                  CircularPercentIndicator( radius: 50.0, lineWidth: 10.0,
-                    // animation: true,
-                    percent: APIService.downloadProgressNotifier.value / 100,
-                    center: Text(
-                      "${APIService.downloadProgressNotifier.value}%",
-                      style: TextStyle( fontSize: 20.0, fontWeight: FontWeight.w600, color: Theme.of(context).highlightColor),
-                    ),
-                    backgroundColor: Theme.of(context).splashColor,
-                    circularStrokeCap: CircularStrokeCap.round,
-                    progressColor: Theme.of(context).primaryColor,
-                  ),
-                ],
-              );
-            }),
-      ));
+        valueListenable: APIService.downloadProgressNotifier, builder: (context, value, snapshot) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [ 
+              const SizedBox( height: 32, ),
+              CircularPercentIndicator( radius: 50.0, lineWidth: 10.0,
+                percent: APIService.downloadProgressNotifier.value / 100,
+                center: Text(
+                  "${APIService.downloadProgressNotifier.value}%",
+                  style: TextStyle( fontSize: 20.0, fontWeight: FontWeight.w600, color: Theme.of(context).highlightColor),
+                ),
+                backgroundColor: Theme.of(context).splashColor,
+                circularStrokeCap: CircularStrokeCap.round,
+                progressColor: Theme.of(context).primaryColor,
+              ),
+            ],
+          );
+    })));
     } else {
       if (widget.isExport) {
         items.addAll([
@@ -72,11 +71,29 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
           child: Form( key: formKey, 
           autovalidateMode: AutovalidateMode.always,
           child: Wrap( children : [
-            Padding(padding: const EdgeInsets.only( bottom: 10), 
-            child: TextWidget(form : cache, schemaName: "", name: "filename", readOnly: false, value: null, label: "filename", 
+            Padding(
+              padding: const EdgeInsets.only( bottom: 10), 
+            child: TextWidget(
+              form : cache, 
+              schemaName: "", 
+              name: "filename", 
+              readOnly: false, 
+              value: null, 
+              label: "filename", 
             require: true, type: "varchar", component: null, isDark: true,)),
-            DropDownWidget(form : cache, schemaName: "", name: "format", readOnly: false, value: widget.format, label: "format", 
-              require: true, type: "enum__csv", component: null, url: null, isDark: true, path: "")
+            DropDownWidget(
+              form : cache, 
+              schemaName: "", 
+              name: "format", 
+              readOnly: false, 
+              value: widget.format, 
+              label: "format", 
+              require: true, 
+              type: "enum__csv_json", 
+              component: null, 
+              url: null, 
+              isDark: true, 
+              path: "")
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Divider(color: Theme.of(context).splashColor,))]);
       } else {
@@ -85,8 +102,12 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
           Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), 
             child: InkWell( 
               onTap: () async {
-                var files = await FilePicker.platform.pickFiles(initialDirectory: directory, type: FileType.custom,
-                  allowedExtensions: widget.importFormat, allowMultiple: true);
+                var files = await FilePicker.platform.pickFiles(
+                  initialDirectory: directory, 
+                  type: FileType.custom,
+                  allowedExtensions: widget.importFormat, 
+                  allowMultiple: true
+                );
                 for (var file in files!.files) { widget.files.add(file); }
                 setState(() {});
               },
@@ -113,10 +134,15 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
     Widget w = Padding( padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30), child: Column( children : [
           Padding( padding: const EdgeInsets.only(left: 20, right: 20, top: 10), 
           child: Row(children: [
-            Padding( padding: const EdgeInsets.only(right: 10, top: 5), 
-            child:Icon(widget.isExport ? Icons.download : Icons.upload, color: Theme.of(context).splashColor, size: 30,)),
+            Padding( 
+              padding: const EdgeInsets.only(right: 10, top: 5), 
+              child: Icon(widget.isExport ? Icons.download : Icons.upload, 
+                color: Theme.of(context).splashColor, 
+                size: 30,)),
             Text("${widget.isExport ? "Export" : "Import" } ${currentView!.schemaName.replaceAll("db", "").replaceAll("_", " ")} datas with custom mapping",
-            style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 20, fontWeight: FontWeight.bold)),
+              style: TextStyle(color: Theme.of(context).highlightColor, 
+              fontSize: 20, 
+              fontWeight: FontWeight.bold)),
             Padding( padding: const EdgeInsets.only(left: 20, top: 5), 
             child: Text( widget.isExport && !isWeb ? "${"saved to folder"} : $directory" : "${"allowed format"} : ${widget.importFormat.join(",")}",
               style: TextStyle(color: Theme.of(context).splashColor, fontSize: 12))), 
@@ -165,8 +191,8 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                           if (!widget.forcedSchema!.containsKey(key)) { newCacheEntry.remove(key); }
                         }
                       }
-                      print(widget.isExport);
-                      widget.isExport ? await APIService().getWithDownload(path, cache["format"], newCacheEntry, 
+                      widget.isExport ? 
+                        await APIService().getWithDownload(path, cache["format"], newCacheEntry, 
                                 "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
                       if (widget.isExport) { setState(() { isLoading = false; }); }
                     }
@@ -175,7 +201,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                     for (var file in widget.files) {
                       if (file.path == null) { continue; }
                       await APIService().sendFile<model.View>(currentView!.actionPath, File(file.path!), context);
-                      globalMainViewKey.currentState?.refresh(viewID, subViewID, category, currentView, false); // TO REMOVE
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, currentView, false); // TO REMOVE
                       // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();
                     }

@@ -4,7 +4,6 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
 
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
@@ -20,9 +19,9 @@ class DropDownWidget extends StatefulWidget {
   final String type;
   final String label;
   bool isDark = false;
-  DropDownWidget ({ Key? key, required this.form, required this.schemaName, required this.name, required this.path,
+  DropDownWidget ({ super.key, required this.form, required this.schemaName, required this.name, required this.path,
                       required this.readOnly, required this.value, required this.label, this.isDark = false,
-                      required this.require, required this.type, required this.url, required this.component}): super(key: key);
+                      required this.require, required this.type, required this.url, required this.component});
   @override
   _DropDownState createState() => _DropDownState();
 }
@@ -30,7 +29,7 @@ class _DropDownState extends State<DropDownWidget> {
   @override Widget build(BuildContext context) {
     if (widget.type.contains("enum") || widget.url == null) {
       if (widget.readOnly) {
-      return SizedBox(width: 400, height: 30, child: TextFormField(
+        return SizedBox(width: 400, height: 30, child: TextFormField(
                       readOnly: true,
                       initialValue: widget.value,
                       style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
@@ -58,6 +57,10 @@ class _DropDownState extends State<DropDownWidget> {
         if (items.where((element) => element.value == item).isEmpty) {
           items.add(DropdownMenuItem<String>(value: item, child:  Text(item, overflow: TextOverflow.ellipsis,),));
         }
+      }
+      var found = items.where((element) => element.value == widget.value);
+      if (found.isEmpty && widget.value != null) {
+        items.add(DropdownMenuItem<String>(value: widget.value, child: Text(widget.value, overflow: TextOverflow.ellipsis,),));
       }
       return DropdownButtonFormField<String>( items: items, 
         isExpanded: true,

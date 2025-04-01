@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+// ignore: must_be_immutable
 class ConfirmBoxWidget extends StatefulWidget {
   String purpose = ""; 
   Function validate = () {};
-  ConfirmBoxWidget ({ Key? key, required this.purpose, required this.validate }): super(key: key);
+  ConfirmBoxWidget ({ super.key, required this.purpose, required this.validate });
   @override ConfirmBoxWidgetState createState() => ConfirmBoxWidgetState();
 }
 class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
@@ -22,9 +23,9 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
         Padding( padding: EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
           widget.validate();
           context.pop();
-        }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), 
+        }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text("YES", style: TextStyle(color: Colors.white, fontSize: 15),)))),
-        TextButton(onPressed: () => context.pop(), style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).splashColor)), 
+        TextButton(onPressed: () => context.pop(), style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).splashColor)), 
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text("NO", style: TextStyle(color: Colors.white, fontSize: 15),)))]))
     ],)));
   }

@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
@@ -76,7 +76,8 @@ class AppRouter {
     cacheChanges = {};
     detectChanges = {};
     globalLoading = true;
-    selectedGrid = []; unselectedGrid = [];
+    selectedGrid = []; 
+    unselectedGrid = [];
     realHistory.removeLast();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("url", realHistory.last);
@@ -85,7 +86,7 @@ class AppRouter {
     viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
     subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
     routerKey.currentState?.setState(() { });
-    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
+    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }
   static bool canForward() {
     try {
@@ -109,7 +110,7 @@ class AppRouter {
       subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
       prefs.setString("history", realHistory.join(","));
       routerKey.currentState?.setState(() { });
-      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
+      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
     }
   }
 
@@ -137,7 +138,7 @@ class AppRouter {
     currentView = null;
     globalLoading = true;
     selectedGrid = []; unselectedGrid = [];
-    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
+    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }
 }   
 // ROUTER SHOULD INVOKE MAIN TO ACCESS VIEW, VIEW ARE MENU SECTION

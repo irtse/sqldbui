@@ -1,26 +1,31 @@
-import 'dart:developer' as developer;
-import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
+import 'package:sqldbui2/core/widget/utils/text_button.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:sqldbui2/model/filter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 // ignore: must_be_immutable
 class FilterPopUpWidget extends StatefulWidget {
   String columnName; 
   String label;
   String type;
-  GridColumnWidgetState component; 
   bool? ascOrder;
   bool? descOrder;
   String? searchValue;
+  GridColumnWidgetState component; 
   List<DropdownMenuItem<String>> items;
-  FilterPopUpWidget ({ Key? key, required this.items,
-  required this.columnName, required this.component, required this.label, required this.type }): super(key: key);
+  FilterPopUpWidget ({ 
+    super.key, 
+    required this.items,
+    required this.columnName, 
+    required this.component, 
+    required this.label, 
+    required this.type 
+  });
   @override FilterPopUpState createState() => FilterPopUpState();
 }
 class FilterPopUpState extends State<FilterPopUpWidget> {
@@ -31,6 +36,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
     StateSetter? stateFilter;
     return PopupMenuButton(
       color: Colors.white,
+      padding: const EdgeInsets.all(0.0),
       icon: const Icon(size: 18, Icons.filter_alt, color: Colors.grey),
       onSelected: (value) { },
       itemBuilder: (BuildContext bc) {
@@ -47,7 +53,8 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
               stateSort = setState;
               var rows1 = [
                       const Icon(Icons.arrow_downward, color: Colors.grey, size: 18,), 
-                      Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), child: Text("SORT ASCENDANT")),
+                      Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), 
+                        child: Text("SORT ASCENDANT")),
                     ];
               var rows2 = [
                       const Icon(Icons.arrow_upward, color: Colors.grey, size: 18,), 
@@ -56,26 +63,26 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
               if (widget.ascOrder == true) { rows1.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
               if (widget.descOrder == true) { rows2.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
               return Column(children: [
-                Padding(padding: const EdgeInsets.only(left: 5, right: 5), child: TextButton(
-                    child: Row(children: rows1), 
-                    onPressed: () { 
-                      setState(() { 
-                        widget.ascOrder = widget.ascOrder != null ? !widget.ascOrder! : true; 
-                        if (widget.ascOrder == true) { widget.descOrder = !widget.ascOrder!; 
-                        } else { widget.ascOrder = null; }
-                      });
-                    },  
-                )),
-                Padding(padding: const EdgeInsets.only(left: 5, right: 5), child: TextButton(
-                  child: Row(children: rows2), 
+                TextButtonWidget(
                   onPressed: () { 
-                      setState(() { 
-                        widget.descOrder =  widget.descOrder != null ? !widget.descOrder! : true; 
-                        if (widget.descOrder == true) { widget.ascOrder = !widget.descOrder!; 
-                        } else { widget.descOrder = null; }
-                      }); 
-                    }, )),
-                Padding( padding: const EdgeInsets.only(top: 10), child: Divider(color: Theme.of(context).splashColor,)),
+                    setState(() { 
+                      widget.ascOrder = widget.ascOrder != null ? !widget.ascOrder! : true; 
+                      if (widget.ascOrder == true) { widget.descOrder = !widget.ascOrder!; 
+                      } else { widget.ascOrder = null; }
+                    });
+                  }, rows: rows1),
+                TextButtonWidget(
+                  onPressed: () { 
+                    setState(() { 
+                      widget.descOrder =  widget.descOrder != null ? !widget.descOrder! : true; 
+                      if (widget.descOrder == true) { widget.ascOrder = !widget.descOrder!; 
+                      } else { widget.descOrder = null; }
+                    });
+                  }, rows: rows2),
+                Padding( 
+                  padding: const EdgeInsets.only(top: 10), 
+                  child: Divider(color: Theme.of(context).splashColor)
+                ),
               ]); }),)),
           PopupMenuItem(enabled: false, child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
             if (currentView != null && globalFilter.containsKey(viewID)) {
@@ -136,16 +143,16 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       stateSort!(() {}); stateFilter!(() {});
                     }
                     noFilterRetrieval = true;  
-                    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
-                  style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
+                  style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
                     child: Text("APPLY", style: TextStyle(color: Colors.white, fontSize: 12))),)),
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
-                    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                     stateSort!(() { widget.ascOrder=null;  widget.descOrder=null; });
                     stateFilter!(() { advancedSearch = []; });
-                  }, style: ButtonStyle(backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)), 
+                  }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: const Padding( padding: EdgeInsets.all(10), child: Text("CLEAR",  style: TextStyle(color: Colors.white, fontSize: 12
             ))))
           ],)); } )) 
@@ -167,20 +174,22 @@ class FilterSearchWidget extends StatefulWidget implements ConvertorWidget {
   int innerIndex;
   int? index;
   StateSetter state;
-  var globalKey = GlobalKey<FormFieldState<dynamic>>();
+  var globalKey = GlobalKey<FormState>();
   var fieldText = TextEditingController();
-  FilterSearchWidget ({ Key? key, 
-    required this.state, 
+  FilterSearchWidget ({ 
+    super.key, 
     this.url,
     this.value,
-    required this.columnName, 
-    required this.filter, 
-    this.comparator = "like",
     required this.type, 
+    required this.label,
+    required this.state, 
+    required this.filter, 
     required this.innerIndex, 
-    required this.label, 
+    required this.columnName, 
+    
+    this.comparator = "like",
     this.connector = "", 
-  }): super(key: key);
+  });
   @override
   FilterSearchState createState() => FilterSearchState();
 }
@@ -236,13 +245,13 @@ class FilterSearchState extends State<FilterSearchWidget> {
             isMath = togglesMode[index ?? 0].toLowerCase().contains("math");
           });  
         })),
-      Row( children : [
+      Form( key: widget.globalKey, child: Row( children : [
         SizedBox( width: 255, child: Padding(
           padding: const EdgeInsets.only(left: 20, right: 20 , bottom: 20.0), 
           child: isNull ? DropdownButtonFormField<String>( items: const [
                   DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                   DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,)) 
-                ], key: widget.globalKey, isExpanded: true,
+                ], isExpanded: true,
                 hint: Text("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...", overflow: TextOverflow.ellipsis, softWrap: true,),
                 value: widget.value == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return "please select a value..."; } return null; },
@@ -260,7 +269,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                   labelText: "value ${widget.comparator.toUpperCase()}",
                 )) : w)) 
-      ]), 
+      ])), 
       isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(
         initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == (widget.comparator.toLowerCase() == "not like" ? "!like" : widget.comparator)),
         fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / toggles.length,

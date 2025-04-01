@@ -1,21 +1,14 @@
-// import 'package:cookie_consent/cookie_consent.dart';
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/model/filter.dart';
-import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
+import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
-import 'package:sqldbui2/core/sections/notifications.dart';
-
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -24,33 +17,13 @@ final ThemeData myTheme = ThemeData(
   shadowColor: const Color.fromRGBO(98, 114, 164  , 1),
 );
 
-
-/*
-class MyI18n {
-  static var translations = Translations.byLocale('en');
-
-  static Future<void> loadTranslations() async {
-    translations +=
-        await GettextImporter().fromAssetDirectory('assets/locales');
-  }
-}
-
-extension Localization on String {
-  String get i18n => localize(this, MyI18n.translations);
-  String plural(value) => localizePlural(value, this, MyI18n.translations);
-  String fill(List<Object> params) => localizeFill(this, params);
-}
-*/
-
 void main() async { 
   runApp(const MyApp()); 
 }
-final _authProvider = AuthService();          
 final _appRouter = AppRouter();   
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -62,7 +35,6 @@ class MyApp extends StatelessWidget {
 }
 String? viewID;
 String? subViewID;
-String? category;
 GlobalKey<HomeScreenState> homeKey = GlobalKey<HomeScreenState>();
 // ignore: must_be_immutable
 class HomeScreen extends StatefulWidget {
@@ -82,13 +54,9 @@ class HomeScreen extends StatefulWidget {
 
 bool noReload = false;
 double homeWidth = 0;
+bool firstLoad = true;
 class HomeScreenState extends State<HomeScreen> {
   late Future<void> loadAsync;
-  /*@override
-  void initState() {
-    super.initState();
-    loadAsync = MyI18n.loadTranslations();
-  }*/
 
   void refresh(String? id, String? subID, bool isHome) {
     viewID = id;
@@ -119,10 +87,8 @@ class HomeScreenState extends State<HomeScreen> {
     globalFilter = <String, Filters>{};
     rects = {};
     AppRouter.getRouteCookie().then((value) {
-      print("Route cookie $value");
       if (value != null && value != "") {
         var splitted = value.split(":");
-        print("Route $splitted");
         viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
         subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
         var f = Filters();
@@ -133,77 +99,16 @@ class HomeScreenState extends State<HomeScreen> {
           globalOrder[viewID] = {};
         } 
       }
+      // ignore: use_build_context_synchronously
       AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
-      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, null, true);
+      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
     });
-    var scaffoldKey = GlobalKey<ScaffoldState>();
-    var home = Scaffold(
-      key: scaffoldKey,
-      endDrawer: const NotificationDrawerWidget(),
-      appBar: AppBar(
-        elevation: 3,
-        automaticallyImplyLeading: false,
-        shadowColor: Theme.of(context).secondaryHeaderColor,
-        backgroundColor: Theme.of(context).secondaryHeaderColor,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Padding(padding: const EdgeInsets.only(left: 50, right: 50), 
-          child: SizedBox(child: Row(children: [
-            MediaQuery.of(context).size.width > 400 ? RouterWidget(key: routerKey) : Container(),
-            InkWell( onTap: () {
-              viewID = null;
-              subViewID = null;
-              AppRouter.setRouteCookie("", context);
-              setState(() {});
-            }, child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
-            Flexible( child: Container(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width > 600 ? 30 : 0), 
-              child: MediaQuery.of(context).size.width > 600 ? Text("SOFTWARE NAME", overflow: TextOverflow.ellipsis,
-                style: TextStyle( color: Theme.of(context).highlightColor,),) : null)),
-                Padding(padding: EdgeInsets.only(left: MediaQuery.of(context).size.width > 600 ?  50 : 0, right: MediaQuery.of(context).size.width > 600 ?  10 : 0), 
-                child: MediaQuery.of(context).size.width > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
-                Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
-                  child: MediaQuery.of(context).size.width > 600 ? Text("${AuthService.user != null ? "${AuthService.user!.name} - " : "unknown" }${AuthService.user != null ? AuthService.user!.email : ""}",
-                  overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)) : null)),
-              ],)
-        )),         
-        toolbarHeight: 40,
-        actions: <Widget>[
-          Stack( children: [
-             IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
-             onPressed: () { 
-              if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
-             },),
-             NotificationWidget(key: appBarKey,),
-          ],),
-          Padding(padding: const EdgeInsets.only(left: 12.5, right: 0), 
-            child: IconButton(icon: const Icon( Icons.info_outline, color: Colors.white, ), tooltip: "tutorial",
-                              onPressed: () async => showDialog(context: context, builder: (BuildContext context) { return TutorialPopUpWidget(); },), )
-          ),
-          Padding(padding: const EdgeInsets.only(left: 12.5, right: 50), 
-            child: IconButton(icon: const Icon( Icons.logout_outlined, color: Colors.white, ), tooltip: "logout",
-                              onPressed: () async { 
-                                showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "disconnect your account", validate: () {
-                                  _authProvider.logOut(context);
-                                })); }, )
-          )
-        ],
-      ),
-      body: PageWidget(key: globalPageKey),
-      backgroundColor: Theme.of(context).secondaryHeaderColor);
-    // showCookieConsent(context, cookiePolicyUrl: Uri.parse('https://www.irt-saintexupery.com/fr/credits-legal-notice/') );
-    return home;
-    /*return FutureBuilder(
-        future: loadAsync,
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return I18n( initialLocale: Locale('en', 'US'), child: home);
-          }
-          return home;
-      });*/
+    if (!kIsWeb) { DesktopWindow.setMinWindowSize(const Size(800, 600)); }
+    return PageWidget();
   }
 }
 class NotificationWidget extends StatefulWidget {
-  const NotificationWidget({ Key? key }): super(key: key);
+  const NotificationWidget({ super.key });
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -225,10 +130,9 @@ class NotificationWidgetState extends State<NotificationWidget> {
         decoration: BoxDecoration( shape: BoxShape.circle,
           color: const Color(0xffc32c37),
           border: Border.all(color: Colors.white, width: 1)),
-        child: Padding( padding: const EdgeInsets.all(0.0),
-          child: Center( child: Text( overflow: TextOverflow.ellipsis,
+        child: Center( child: Text( overflow: TextOverflow.ellipsis,
             AuthService.user!.notifications.length > 9 ? "+" : AuthService.user!.notifications.length.toString(),
             style: const TextStyle(fontSize: 9, color: Colors.white),
-    ))))));
+    )))));
   }
 }

@@ -1,9 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'dart:developer' as developer;
-
 import 'package:sqldbui2/core/widget/form/form.dart';
 
+// ignore: must_be_immutable
 class NumberWidget extends StatefulWidget {
   final FormWidgetState component;
   final Map<String, dynamic> form;
@@ -14,10 +13,11 @@ class NumberWidget extends StatefulWidget {
   dynamic value;
   final String type;
   final String label;
-  NumberWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
+  NumberWidget ({ super.key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
-                      required this.require, required this.type, required this.component}): super(key: key);
+                      required this.require, required this.type, required this.component});
   @override
+  // ignore: library_private_types_in_public_api
   _NumberState createState() => _NumberState();
 }
 class _NumberState extends State<NumberWidget> {

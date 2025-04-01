@@ -1,17 +1,16 @@
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
-import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
-import 'dart:developer' as developer;
 import 'dart:async';
 
 model.View? currentView;
@@ -22,14 +21,25 @@ GlobalKey<LoaderViewWidgetState> globalLoaderMainViewKey = GlobalKey<LoaderViewW
 class MainViewWidget extends StatefulWidget{
   List<model.View>? views;
   String? url;
-  MainViewWidget ({ Key? key, this.views }): super(key: key);
+  MainViewWidget ({ super.key, this.views });
   @override MainViewWidgetState createState() => MainViewWidgetState();
 }
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
+    if ((viewID ?? "").contains("dashboard")) {
+      return ViewWidget(view: currentView, views: widget.views);
+    }
     model.View? view; 
-    try { view = currentView ?? widget.views?.firstWhere((v) => '${v.id}' == viewID?.substring(1) && (viewID != null && !viewID!.contains("@"))); } catch (e) { /* */ }
-    if (viewID == null) { return ViewWidget(view: currentView, views: widget.views); }
+    try { 
+      view = currentView ?? widget.views?.firstWhere((v) => '${v.id}' == viewID?.substring(1) && (viewID != null && !viewID!.contains("@"))); 
+    } catch (e) { 
+      if ((viewID == null || viewID == "") && (widget.views?.length ?? 0 ) > 0) { 
+        view = widget.views?.first;
+        viewID = "#${view!.id}";
+        subViewID = null; 
+        AppRouter.setRouteCookie(viewID!, context);
+      }
+    }
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@"));
     if (isList || reForge) {
@@ -39,7 +49,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
           APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
-              currentView = snap.data!.data![0];  
+              currentView = snap.data!.data![0]; 
               currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.length > 1 && currentView!.isList) {
                 for (var view in snap.data!.data!.sublist(1)) { 
@@ -52,16 +62,17 @@ class MainViewWidgetState extends State<MainViewWidget> {
                 var v = widget.views?.firstWhere((element) => "${element.id}" == viewID?.substring(1));
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
               } catch(e) { /* */ }
-            } else { currentView = null; }
+            } 
             Future.delayed(const Duration(seconds:5), () => firstAPI = false);
             widget.url = null;
+            selectedGrid = [];
+            unselectedGrid = [];
             return ViewWidget(view: currentView, views: widget.views);
         });
     } 
     if (currentView == null) {   
       viewID=null;
       subViewID=null;
-      category=null;
       AppRouter.setRouteCookie("", context);
     }
     return ViewWidget(view: currentView, views: widget.views); 
@@ -73,12 +84,11 @@ class MainViewWidgetState extends State<MainViewWidget> {
     setState(() { widget.url = path;});
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
   }
-  void refresh(String? id, String? subID, String? cat, model.View? view, bool forceFirstAPI) {
+  void refresh(String? id, String? subID, model.View? view, bool forceFirstAPI) {
     setState(() {
       widget.url = null;
       globalOffset = 0;
       currentView = view;
-      category=cat;
       viewID=id;
       subViewID=subID;
       globalLoading = true;
@@ -90,23 +100,17 @@ class MainViewWidgetState extends State<MainViewWidget> {
 class ViewWidget extends StatefulWidget{
   List<model.View>? views;
   model.View? view;
-  ViewWidget ({ Key? key, required this.view, required this.views }): super(key: key);
+  ViewWidget ({ super.key, required this.view, required this.views });
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
   @override Widget build(BuildContext context) { return Container(child: _build(context));  }
   Widget _build(BuildContext context) {
+    if ((viewID ?? "").contains("dashboard")) {
+      return HomeViewWidget();
+    }
     List<Widget> comps = <Widget>[];
     Future.delayed(const Duration(seconds: 2), () => globalLoading = false);
-    if (MediaQuery.of(context).size.width < 600 ) {
-      return Stack( children: [ 
-          Container( margin: const EdgeInsets.only(top: 40),
-            width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-            height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
-                decoration: BoxDecoration( color: Theme.of(context).highlightColor),
-                child: null),
-          ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]);
-    }
     comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 
@@ -114,31 +118,40 @@ class ViewWidgetState extends State<ViewWidget> {
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 40), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, grid: w, gridKey: globalGridKey), ...comps]);
-      } else { 
+      } else if (widget.view!.items.isNotEmpty) { 
         DataFormWidget w =  DataFormWidget(key: mainForm, view: widget.view);
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 25), child: w),
-          ActionBarWidget(key: globalActionBar, view: widget.view,  form: w ),  ...comps] ); }
+          ActionBarWidget(key: globalActionBar, view: widget.view, form: w ), ...comps] ); 
+      }
     }
-    if (viewID != null) { 
-      return Stack( children: [ 
-          Container(
-            margin: const EdgeInsets.only(top: 40),
-            width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-            height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
-                decoration: BoxDecoration(color: globalLoading ? Colors.white : Theme.of(context).primaryColor),
-                child: globalLoading ? null : const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : [
-                  Icon(Icons.error, color: Colors.white, size: 100.0,),
-                  Padding(padding: EdgeInsets.all(10), child: Text("Seems pretty lost... go on another page please :)", style: TextStyle(color: Colors.white, fontSize: 20.0)),)
-                ]))),
-          ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]);
+    List<Widget> childs = [];
+    if (viewID == null) {
+      return Stack(children: [ 
+        HomeViewWidget(key: globalHomeViewKey), 
+        ActionBarWidget(key: globalActionBar, view: widget.view ) 
+      ]);
     }
-    return Stack( children: [ HomeViewWidget(key: globalHomeViewKey), ActionBarWidget(key: globalActionBar, view: widget.view, ), ], );
+    if (!firstLoad) {
+      childs = [
+        Icon(Icons.error, color: Colors.white, size: 100.0,),
+        Padding(padding: EdgeInsets.all(10),
+                child: Text("Seems pretty lost... go on another page please :)", 
+                style: TextStyle(color: Colors.white, fontSize: 20.0)),)
+      ];
+    }
+    return Stack( children: [ 
+      Container(margin: const EdgeInsets.only(top: 40),
+        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
+        height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
+        decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : childs))),
+      ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]); 
   }
 }
 
 class LoaderMainViewWidget extends StatefulWidget{
-  const LoaderMainViewWidget ({ Key? key,}): super(key: key);
+  const LoaderMainViewWidget ({ super.key,});
   @override LoaderViewWidgetState createState() => LoaderViewWidgetState();
 }
 class LoaderViewWidgetState extends State<LoaderMainViewWidget> {

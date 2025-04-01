@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -78,6 +77,7 @@ class AuthService extends ChangeNotifier {
           var d = value.data;
           SharedPreferences.getInstance().then((value) => value.setString("token", d![0].token));
           if (isLoggedIn) {
+            // ignore: invalid_use_of_protected_member
             appBarKey.currentState?.setState(() {
               user!.token = d![0].token;
               user!.notifications = value.data![0].notifications;

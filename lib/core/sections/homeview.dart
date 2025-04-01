@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
-import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
 class HomeViewWidget extends StatefulWidget{
-  const HomeViewWidget ({ Key? key}): super(key: key);
+  const HomeViewWidget ({ super.key });
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
@@ -13,7 +12,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     List<Widget> comps = [];
     List<Widget> views = [];
     for (var cat in categories.keys) {
-      for (var view in categories[cat]!) {
+      for (var view in categories[cat]!.where( (e) => e.isFavorize)) {
         views.add(
           InkWell( onTap: () { globalMenuKey.currentState?.refreshView("#${view.id}", cat, false, false, false); },
               child: Container(
@@ -44,12 +43,24 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))
       ],)));
     }
-    return Container(
-            margin: const EdgeInsets.only(top: 40),
+    return Column( children: [
+      Container( 
+        height: 40, 
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+        decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Flexible( child: Text("DASHBOARD", overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) )
+        ])),
+      Container(
             padding: const EdgeInsets.only(top: 30, right: 30, left: 30),
             width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
             height: MediaQuery.of(context).size.height - 80 > 0 ? MediaQuery.of(context).size.height - 80 : 0, 
                 decoration: BoxDecoration( color: Colors.grey[200]),
-                child: SingleChildScrollView(child: Wrap(alignment: WrapAlignment.center, children:views)));
+                child: SingleChildScrollView(child: Wrap(alignment: WrapAlignment.center, children:views)))
+    ]);
   }
 }

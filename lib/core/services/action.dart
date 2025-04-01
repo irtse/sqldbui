@@ -1,4 +1,3 @@
-import 'dart:developer' as developer;
 import 'package:alert_banner/exports.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
@@ -9,7 +8,7 @@ import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/services/api_service.dart';

@@ -1,6 +1,5 @@
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/action.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
@@ -24,6 +23,7 @@ class DataFormWidget extends StatefulWidget {
   final model.View? view;
   bool scroll;
   bool subForm;
+  bool isSplitted;
   bool detectChange = false;
   String superFormSchemaName;
   Map<String, String> wrappersURL = <String, String>{};
@@ -32,7 +32,12 @@ class DataFormWidget extends StatefulWidget {
   List<DataFormWidget> oneToManiesForm = <DataFormWidget>[];
   List<DataFormWidget> oneToManiesFormDelete = <DataFormWidget>[];
   final formKey = GlobalKey<FormState>();
-  DataFormWidget ({ Key? key, this.view, this.scroll = true, this.subForm = false, this.superFormSchemaName = "" }): super(key: key);
+  DataFormWidget ({ super.key, 
+    this.view, 
+    this.scroll = true, 
+    this.subForm = false, 
+    this.isSplitted = false,
+    this.superFormSchemaName = "" });
   @override FormWidgetState createState() => FormWidgetState();
 }
 class FormWidgetState extends State<DataFormWidget> {
@@ -50,6 +55,8 @@ class FormWidgetState extends State<DataFormWidget> {
       String name = "Unknown Name";
       String description = "no description";
       model.Workflow? wf;
+      bool isSplitted = (widget.isSplitted || (widget.view?.isWrapper ?? false)) && !currentView!.isEmpty;
+      double ratioSplit = isSplitted ? 0.7 : 1;
       if (widget.view != null && widget.view!.items.isNotEmpty) {
         var refItem = widget.view!.items[0];
         if (refItem.workflow != null) { 
@@ -71,6 +78,50 @@ class FormWidgetState extends State<DataFormWidget> {
         additionnal = [];
         if (currentView != null && currentView!.isEmpty && widget.subForm) { widget.wrappersURL = {}; }
         widget.wrappersGlobalKey = [];
+        if (widget.wrappersURL.isEmpty && widget.view!.isEmpty && !widget.subForm) {
+          additionnal.add(Container( decoration: BoxDecoration(
+            color: Theme.of(context).splashColor,
+            borderRadius: BorderRadius.circular(10)
+          ),
+          padding: const EdgeInsets.all(20), 
+          width: MediaQuery.of(context).size.width - menuSize - 80 > 0 ? MediaQuery.of(context).size.width - menuSize - 80 : 0,
+          child:  Wrap( 
+            alignment: WrapAlignment.center,
+            children: [
+              Padding( padding: const EdgeInsets.all(20), 
+                child: Container( 
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  width: MediaQuery.of(context).size.width / 3, height: 40 )),
+              Padding( padding: const EdgeInsets.all(20), child: Container( 
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                width: MediaQuery.of(context).size.width / 3, height: 40 )),
+              Padding( padding: const EdgeInsets.all(20), child: Container( 
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                width: MediaQuery.of(context).size.width / 3, height: 40)),
+              Padding( padding: const EdgeInsets.all(20), child: Container( 
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                width: MediaQuery.of(context).size.width / 3, height: 40 )),
+              Padding( padding: const EdgeInsets.all(20), child: Container( 
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                width: MediaQuery.of(context).size.width / 3, height: 40 )),
+            ],
+          )));
+        }
         for (var url in widget.wrappersURL.values) {
           additionnal.add(Container( decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             margin: const EdgeInsets.only(top: 15),
@@ -78,6 +129,7 @@ class FormWidgetState extends State<DataFormWidget> {
             child: Padding( padding: const EdgeInsets.only(bottom: 30), child: FutureBuilder<APIResponse<model.View>>(
               future: APIService().get<model.View>(url, firstAPI, null), 
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
+               
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
                     if (data.workflow != null && !workflowBars.containsKey(url)) { 
@@ -92,7 +144,7 @@ class FormWidgetState extends State<DataFormWidget> {
                       items: data.items.isNotEmpty && !widget.view!.isEmpty ? data.items : <model.Item>[model.Item()] );
                     newView.isEmpty = widget.view!.isEmpty;
                     GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
-                    var w = DataFormWidget(key: newViewKey, view: newView, scroll: false, subForm: true);
+                    var w = DataFormWidget(key: newViewKey, view: newView, scroll: false, isSplitted: isSplitted, subForm: true);
                     widget.wrappersGlobalKey.add(newViewKey);
                     widget.wrappers.add(w);
                     return w;
@@ -123,8 +175,8 @@ class FormWidgetState extends State<DataFormWidget> {
           if (refItem.valuesMany.containsKey(fieldName)) { value = refItem.valuesMany[fieldName]!; }
           if (refItem.valuesManyPath.containsKey(fieldName)) { value = refItem.valuesManyPath[fieldName]!; }
           var readOnly = (field.readonly || widget.view!.readOnly || refItem.readonly) && !widget.view!.isEmpty;
-          if (!((widget.view!.actions.contains("post") && widget.view!.isEmpty) || widget.view!.actions.contains("put"))) { readOnly = true; }
-          if (field.label == "state") { // TODO to remove if change its mind
+          readOnly = readOnly || !((widget.view!.actions.contains("post") && widget.view!.isEmpty) || widget.view!.actions.contains("put"));
+          if (field.label == "state") {
             readOnly = true; 
             if (widget.view!.actions.contains("put") && !widget.view!.isEmpty && value != "completed" && value != "dismiss") {
                 positionnedBar.add(Padding( padding: const EdgeInsets.only(right: 20), child: FloatingActionButton(
@@ -135,7 +187,7 @@ class FormWidgetState extends State<DataFormWidget> {
                       widget.cacheForm[fieldName] = "dismiss";
                       ActionService.pressed(null, false, currentView!.schemaName, currentView!.actionPath, <String>["id"], currentView!.schema, "put", context)();
                     }));
-                }, child: const Icon(Icons.close, color: Colors.white), backgroundColor: Colors.red,)));
+                }, backgroundColor: Colors.red, child: const Icon(Icons.close, color: Colors.white))));
                 positionnedBar.add(FloatingActionButton(tooltip: "Validate",
                   onPressed: () {
                   showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "validate task", validate: () {
@@ -143,7 +195,7 @@ class FormWidgetState extends State<DataFormWidget> {
                       widget.cacheForm[fieldName] = "completed";
                       ActionService.pressed(null, false, currentView!.schemaName, currentView!.actionPath, <String>["id"], currentView!.schema, "put", context)();
                     }));
-                }, child: const Icon(Icons.check, color: Colors.white,), backgroundColor: Colors.green,));
+                }, backgroundColor: Colors.green, child: const Icon(Icons.check, color: Colors.white)));
                 
             }
             states.add(Padding(padding: const EdgeInsets.only(top: 3, left: 12), child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
@@ -158,7 +210,8 @@ class FormWidgetState extends State<DataFormWidget> {
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
           if(!(readOnly && value == null)) { 
             double max = (counter > 1 ?
-                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / 2.5)
+                  ((MediaQuery.of(context).size.width - menuSize - 100 > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1) / (
+                    (isSplitted && (MediaQuery.of(context).size.width - menuSize < (widget.subForm ? 1000 : 800)) ? 1 : 3)))
                   : MediaQuery.of(context).size.width - menuSize - 100  > 0 ? MediaQuery.of(context).size.width - menuSize - 100 : 1);
             var f = Convertor.formFieldByType(newCacheEntry, context, widget.view!.schemaName, field.type, fieldName, field.label, field.description, 
                                               field.require, readOnly, widget.view!.isEmpty ? null : value, url, path, max, this);
@@ -204,7 +257,7 @@ class FormWidgetState extends State<DataFormWidget> {
             Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
             height: wf == null && header.isEmpty ? 112 : ( wf != null &&  wf.currentHub ? 203 : 152),
               decoration: BoxDecoration( color: Colors.white, boxShadow: [
-                BoxShadow(color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
+                BoxShadow(color: Colors.black.withOpacity(0.3), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
               ]), child: Stack(children: [ Padding(padding: EdgeInsets.only(top: 40, bottom: wf == null && header.isEmpty ? 25 :  0), 
                 child: Column(children: [...title, ...header],)), Positioned(top: 50, right: 50, child : Row( children : actions))]), )
           );
@@ -219,21 +272,71 @@ class FormWidgetState extends State<DataFormWidget> {
                   color: Theme.of(context).splashColor, size: 40,),
                   splashColor: Colors.transparent, highlightColor: Colors.transparent, hoverColor: Colors.transparent,))
                 ])));
-          head.add(Divider(thickness: 1, color: Theme.of(context).splashColor,));
+          head.add(Divider(thickness: 1, color: Colors.grey,));
         }
       }
-      var form = Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, child: Wrap(alignment: WrapAlignment.center, children: [ Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
-              child: Container( padding: EdgeInsets.only(top: widget.subForm ? 0 : 30), child: Wrap( alignment: WrapAlignment.center, children : fields))), ...bottomFields, ...additionnal]));
-      return widget.scroll ? Stack( children: [ Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        child: Container(margin: EdgeInsets.only(top: wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)), 
-        height: MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) > 0 ? 
-          MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) : 0,
-           child: SingleChildScrollView( scrollDirection: Axis.vertical, child: form ))), ...head, 
-           Positioned( bottom: 30, right: 30, child: Row(children: positionnedBar,))])
-      : Container( margin: EdgeInsets.only(bottom: widget.subForm ? 30 : 0, left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
-        decoration: BoxDecoration(boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))],
-          color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),)),
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, child: Column( children: [...head, fields.isEmpty ? Container() : form]));
+      var form = Form( key: widget.formKey, 
+        autovalidateMode: AutovalidateMode.always, 
+        child: Wrap( 
+          alignment: WrapAlignment.center,
+          children: [ 
+            Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
+              child: Container( 
+                padding: EdgeInsets.only(top: widget.subForm || (!widget.subForm && isSplitted) ? 0 : 30), 
+                child: Wrap( alignment: WrapAlignment.center, children : fields))
+            ),
+            ...bottomFields, 
+            ...(isSplitted ? [] : additionnal)
+          ]
+        )
+      );
+      if (!widget.scroll) {
+        return Container( margin: EdgeInsets.only(bottom: widget.subForm ? 30 : 0, top: 10,
+          left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0,),
+        decoration: BoxDecoration(boxShadow: [ 
+          BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3))
+        ],
+        color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0),)),
+        child: Column( children: [...head, fields.isEmpty ? Container() : form]));
+      }
+      
+      Widget formWrap = Container( decoration: BoxDecoration(color: Theme.of(context).highlightColor ),
+        width: ((MediaQuery.of(context).size.width - menuSize) * ratioSplit) > 0 ? 
+          ((MediaQuery.of(context).size.width - menuSize) * ratioSplit) : 0,
+        child: Container(
+          margin: EdgeInsets.only(top: wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)), 
+          height: MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) > 0 ? 
+            MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 200 :  152)) : 0,
+          child: SingleChildScrollView(  scrollDirection: Axis.vertical, 
+            child: isSplitted ? Wrap( alignment: WrapAlignment.center,  children: additionnal) : form)
+        )
+      );
+
+      return Stack( children: [ 
+        Row(children: [
+          formWrap,
+          ...(isSplitted ? [
+            Container( 
+              margin: EdgeInsets.only(top: wf == null && header.isEmpty ? 112 : ( wf != null && wf.currentHub ? 198 :  148)), 
+              height: MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 182 : ( wf != null && wf.currentHub ? 260 :  210)) > 0 ? 
+                MediaQuery.of(context).size.height - (wf == null && header.isEmpty ? 182 : ( wf != null && wf.currentHub ? 260 :  210)) : 0,
+              decoration: BoxDecoration(color: Theme.of(context).highlightColor, 
+                border: Border( left: BorderSide(color: Theme.of(context).splashColor, width: 1))),
+              width: ((MediaQuery.of(context).size.width - menuSize) * (1 - ratioSplit)) > 0 ? 
+                ((MediaQuery.of(context).size.width - menuSize) * (1 - ratioSplit)) : 0,
+              child: SingleChildScrollView(  scrollDirection: Axis.vertical,  child : Column( children: [
+                Padding( padding: const EdgeInsets.only(top: 25, bottom: 5),
+                  child: Text(currentView?.schemaName.replaceAll("db", "").toUpperCase() ?? "",
+                    style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
+                  )), 
+                Padding( padding: const EdgeInsets.only(bottom: 60), child: form)] )
+            ))
+          ] : [])
+        ]), 
+        ...head, 
+        Positioned( bottom: 30, right: 0, 
+          child: Container(width: (MediaQuery.of(context).size.width - menuSize) * (1 - ratioSplit), 
+          alignment: Alignment.center, child: Row( mainAxisAlignment: MainAxisAlignment.center, children: positionnedBar)))
+      ]);
     }
 }

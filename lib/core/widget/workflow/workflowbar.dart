@@ -1,6 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 // ignore: must_be_immutable
 class WorkflowBarWidget extends StatefulWidget{
@@ -60,8 +60,10 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
 
 // ignore: must_be_immutable
 class StepWidget extends StatefulWidget{
-  final Widget content; final double width; 
+  final Widget content; 
+  final double width; 
   final bool gotBefore;
+
   bool beforeDoing = false;
   bool beforeActive = false;
   bool active = false;
@@ -72,10 +74,21 @@ class StepWidget extends StatefulWidget{
   bool isDismissible = false;
   bool doing = false;
   List<model.Step>? steps = [];
-  StepWidget ({ Key? key, required this.content, this.beforeDoing = false,
-    required this.width, this.steps, required this.gotBefore,
-    this.beforeActive = false, this.active = false, this.doing = false, this.beforeCurrent = false, this.current = false, 
-    this.isDismissible = false, this.beforeDismissible = false }): super(key: key);
+  
+  StepWidget ({ 
+    super.key, 
+    required this.content, 
+    this.beforeDoing = false,
+    required this.width, 
+    this.steps, 
+    required this.gotBefore,
+    this.beforeActive = false, 
+    this.active = false, 
+    this.doing = false, 
+    this.beforeCurrent = false, 
+    this.current = false, 
+    this.isDismissible = false, 
+    this.beforeDismissible = false });
   @override StepWidgetState createState() => StepWidgetState();
 }
 class StepWidgetState extends State<StepWidget> {
@@ -134,8 +147,8 @@ class StepWidgetState extends State<StepWidget> {
             clipper: TriangleClipper(),
             child: Container(
               color: widget.beforeCurrent ? Theme.of(context).primaryColor : ( 
-                widget.beforeDismissible ? Colors.red : ( widget.beforeDoing ? Colors.orange : (
-                   widget.beforeActive ? Colors.green : Theme.of(context).splashColor))),
+                widget.beforeDismissible ? Colors.red : ( widget.beforeActive ? Colors.green : (
+                   widget.beforeDoing ? Colors.orange : Theme.of(context).splashColor))),
               height: 14,
               width: 30,
             ),

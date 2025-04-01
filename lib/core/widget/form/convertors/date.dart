@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 
+// ignore: must_be_immutable
 class DateWidget extends StatefulWidget {
   final FormWidgetState? component;
   final Map<String, dynamic> form;
@@ -13,10 +14,11 @@ class DateWidget extends StatefulWidget {
   dynamic value;
   final String label;
   final String type;
-  DateWidget ({ Key? key, required this.form, required this.schemaName, required this.name,
+  DateWidget ({ super.key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.type, required this.value, required this.label,
-                      required this.component, this.require = false}): super(key: key);
+                      required this.component, this.require = false});
   @override
+  // ignore: library_private_types_in_public_api
   _DateState createState() => _DateState();
 }
 class _DateState extends State<DateWidget> {
@@ -36,7 +38,7 @@ class _DateState extends State<DateWidget> {
         style: const TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
             suffixIcon: const Icon(Icons.calendar_month, size: 20,),
-            suffixIconColor: Theme.of(context).primaryColor,
+            suffixIconColor: widget.readOnly ? Colors.black : Theme.of(context).primaryColor,
             enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
             helperStyle: const TextStyle(height: -2),
             floatingLabelBehavior: FloatingLabelBehavior.always,

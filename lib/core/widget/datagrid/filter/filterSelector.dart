@@ -1,45 +1,51 @@
 
-import 'package:sqldbui2/core/sections/menu.dart';
+
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 
+// ignore: must_be_immutable
 class FilterSelectorWidget extends StatefulWidget {
   Filters? filterMain;
-  Map<String, dynamic> schema = {};
+  Map<String, model.SchemaField> schema = {};
   List<DropdownMenuItem<String>> dpItems = [];
   List<DropdownMenuItem<String>> schemeItems = [];
-  FilterSelectorWidget ({ Key? key, required this.dpItems, required this.filterMain, 
-  required this.schema, required this.schemeItems}): super(key: key);
+  FilterSelectorWidget ({ super.key, required this.dpItems, required this.filterMain, 
+  required this.schema, required this.schemeItems});
   @override FilterSelectorWidgetState createState() => FilterSelectorWidgetState();
 }
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
   @override Widget build(BuildContext context) {
     var toggles = ["all", "new", "old"];
     return Row( children: [ 
-        Padding( padding: const EdgeInsets.only(right: 10), child : InkWell( child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
-          color: show ? Colors.white : Theme.of(context).splashColor, size: 20), onTap: () { 
-            globalGridWidgetKey.currentState?.setState(() { show = !show; }); 
-          },),
+      Padding( 
+        padding: const EdgeInsets.only(right: 10), 
+        child : InkWell( 
+          child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
+            color: show ? Colors.white : Theme.of(context).splashColor, size: 20), 
+          onTap: () { globalGridWidgetKey.currentState?.setState(() { show = !show; }); }),
         ),
-        filterRestr[viewID] != "" && filterRestr[viewID] != null ? Padding(padding: const EdgeInsets.only(left: 5), 
-        child:  IconButton( constraints: const BoxConstraints(), tooltip: "save filter", 
-        style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+        filterRowsWidget.isNotEmpty ? Padding(
+          padding: const EdgeInsets.only(left: 5), 
+          child:  IconButton( constraints: const BoxConstraints(), tooltip: "save filter", 
+          style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.save, size: 18, color: Theme.of(context).splashColor, ),
           onPressed: () async { 
             globalFilter[viewID] = Filters(); // empty filter to refill with new
             for (var filter in filterRowsWidget) {
               if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
-              globalFilter[viewID]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
+              globalFilter[viewID]?.add(filter.columnName ?? "", Filter(
+                column: filter.columnName, label: filter.label ?? filter.columnName,
                 type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
             }
             noFilterRetrieval = true;
@@ -50,7 +56,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           })) : Container(),
         filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), 
-        tooltip: "delete filter", style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+        tooltip: "delete filter", style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon(Icons.delete, size: 18, color: Theme.of(context).splashColor, ),
           onPressed: () { 
@@ -60,7 +66,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         removeFilter(); 
                         filterRestr[viewID] = ""; 
                         Future.delayed(const Duration(seconds: 1), 
-                        () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true));
+                        () => globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true));
                       },); });
                     }));
               })) : Container() ,
@@ -73,7 +79,9 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                   DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
               }
               filterIDName[i.label!] = i.id!;
-              if (i.selected && filterRestr[viewID] != "") { filterRestr[viewID] = i.label!; }
+              if (i.selected && filterRestr[viewID] != "") { 
+                filterRestr[viewID] = i.label!;                 
+              }
               if ((i.selected && ( widget.filterMain == null || widget.filterMain!.isEmpty) && filterRestr[viewID] != ""
               && filterRestr[viewID] != null && !noFilterRetrieval)
               || (filterRowsWidget.isEmpty && i.fields.isNotEmpty && filterRestr[viewID] != "" && filterRestr[viewID] != null)) { 
@@ -86,7 +94,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             }
           } 
           return SizedBox( height: 25, width: (MediaQuery.of(context).size.width - menuSize) / 3, 
-            child: DropdownButtonFormField<String>( items: widget.dpItems, value: filterRestr[viewID],
+            child: DropdownButtonFormField<String>( items: widget.dpItems, value: filterRestr[viewID] == "" ? null : filterRestr[viewID],
                     hint: Text("select an existing filter...", overflow: TextOverflow.ellipsis, 
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
@@ -109,7 +117,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
         }), 
         filterRowsWidget.isEmpty ? Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), tooltip: "new filter", 
-        style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+        style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.add, size: 17, color: Theme.of(context).highlightColor, ),
           onPressed: () { 
@@ -120,7 +128,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           }); })) 
         : Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), tooltip: "apply filter", 
-          style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
+          style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor, ),
           onPressed: () {
             if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
@@ -131,10 +139,10 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
             }
             noFilterRetrieval = true;
-            globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+            globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
           })),
         filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
-        child: IconButton( constraints: const BoxConstraints(), tooltip: "reset filter", style: ButtonStyle( overlayColor: MaterialStateProperty.resolveWith((states) {
+        child: IconButton( constraints: const BoxConstraints(), tooltip: "reset filter", style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.filter_alt_off, size: 18, color: Theme.of(context).highlightColor, ),
           onPressed: () async { 
@@ -142,12 +150,12 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             if (filterRestr[viewID] == null || filterRestr[viewID] == "") { 
               filterRestr[viewID] = ""; 
               return Future.delayed(const Duration(seconds: 1), 
-                () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true)); 
+                () => globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true)); 
             }
             APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), <String, dynamic> { "is_selected" : false }, null).then((value) {
               filterRestr[viewID] = "";
               Future.delayed(const Duration(seconds: 1), 
-                () => globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true));
+                () => globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true));
           }); })) : Container(),
           Padding(padding: const EdgeInsets.only(left: 10), 
             child: ToggleSwitch( labels: toggles, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
@@ -156,7 +164,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
                 onToggle: (index) { 
                     globalNew[viewID] = toggles[index ?? 0]; 
-                    globalMainViewKey.currentState?.refresh(viewID, subViewID, category, null, true);
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
               ),
         )

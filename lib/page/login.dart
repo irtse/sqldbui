@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'dart:developer' as developer;
 
 // @RoutePage<bool>()
 class LoginScreen extends StatefulWidget {
     // final Function(bool?) onResult;
     const LoginScreen({super.key});
     @override
+    // ignore: library_private_types_in_public_api
     _LoginWidgetState createState() => _LoginWidgetState();
 }
 class _LoginWidgetState extends State<LoginScreen> {
@@ -57,9 +57,7 @@ class _LoginWidgetState extends State<LoginScreen> {
       onLogin: _authUser,
       onSignup: _signupUser,
       onSubmitAnimationCompleted: () {
-        setState(() {
-          if (AuthService.isLoggedIn) {  context.go("/"); } 
-        });    
+        if (AuthService.isLoggedIn) {  setState(() { context.go("/"); }); }   
       },
       onRecoverPassword: _recoverPassword,
     );
