@@ -22,7 +22,6 @@ class MenuTileWidget extends StatefulWidget {
 }
 class MenuTileWidgetState extends State<MenuTileWidget> {
   @override Widget build(BuildContext context) {
-    print("THERE");
     return Material(
       type: MaterialType.transparency,
       child: ListTile(

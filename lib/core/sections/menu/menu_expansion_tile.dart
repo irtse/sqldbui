@@ -67,7 +67,7 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
               return null; 
             }
             var catIndex = categories[widget.category]![index];
-            if (FavoriteConstants.isFavorite && categories[widget.category]![index].isFavorize) {
+            if (FavoriteConstants.isFavorite && !categories[widget.category]![index].isFavorize) {
               return null;
             }
             List<Widget> badge = catIndex.newIds.isNotEmpty ? [
