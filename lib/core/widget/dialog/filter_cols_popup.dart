@@ -10,8 +10,10 @@ import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
+bool setLatest = false;
 Map<String?, List<dynamic>> filterOrderView = <String?, List<dynamic>>{};
 Map<String?, List<dynamic>> filterTempOrderView = <String?, List<dynamic>>{};
 Map<String?, String?> filterView = <String?, String?>{};
@@ -30,13 +32,49 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
   bool force = false;
   @override Widget build(BuildContext context) {
     if (viewID == null) { return Container(); }
-    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", firstAPI | force, null), 
+    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", true, null), 
     builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
-      var dpItems = <DropdownMenuItem<String>>[];
       force = true;
       if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
-        for (var i in snapshot.data!.data!) { 
-          if (filterView[viewID] == "") { filterView[viewID] = i.label ?? ""; }
+        return FutureMenuColsPopUpWidget(comp: this, datas: snapshot.data!.data!, schema: widget.schema);
+      }
+      return FutureMenuColsPopUpWidget(comp: this, datas: [], schema: widget.schema);
+    }); 
+  }
+}
+
+class FutureMenuColsPopUpWidget extends StatefulWidget{
+  FilterColsPopUpState comp;
+  Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
+  List<model.Shallowed> datas = [];
+  FutureMenuColsPopUpWidget ({ 
+    super.key, 
+    required this.comp,
+    required this.schema, 
+    required this.datas });
+  @override
+  FutureMenuColsPopUpState createState() => FutureMenuColsPopUpState();
+}
+
+class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
+  bool force = false;
+  bool noSelection =false;
+  @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+      var dpItems = <DropdownMenuItem<String>>[];
+      force = true;
+        for (var i in widget.datas) { 
+          if (setLatest) {
+            filterView[viewID] = i.label ?? i.name;
+            setLatest = false;
+          }
           if (i.selected && (i.label ?? i.name) == filterView[viewID]) { 
             for (var field in i.fields) {
               if (filterTempOrderView[viewID] == null) { filterTempOrderView[viewID] = []; }
@@ -50,15 +88,17 @@ class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
             filterTempOrderView[viewID] = i.fields.map((e) => e.column).toList();
           }
           filterViewIDName[i.label!] = i.id!;
-          dpItems.add(DropdownMenuItem<String>(value: i.label, child: Text(i.label!, overflow: TextOverflow.ellipsis,),));
+          var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
+          dpItems.add(DropdownMenuItem<String>(value: await getOnFlow(i.label ?? i.name ?? ""), 
+            child: Text(filterLabel.toLowerCase(), overflow: TextOverflow.ellipsis,),));
         }
-      }
       return PopupButtonWidget(
-        tooltip:"filter view columns", 
+        color: Colors.white,
+        width: 280,
+        tooltip: TranslateConstants.filterViewPlaceholder.toLowerCase(), 
         icon: Icons.settings, 
-        widget: MenuColsPopUpWidget(comp: this, items: dpItems, schema: widget.schema),
-      );
-    }); 
+        widget: MenuColsPopUpWidget(comp: widget.comp, items: dpItems, schema: widget.schema,),
+      ); 
   }
 }
 
@@ -80,6 +120,14 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
   bool force = false;
   bool noSelection =false;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 20),
       child: StatefulBuilder(
@@ -88,23 +136,20 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
             Padding( 
               padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), 
               child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ const Padding( padding: EdgeInsets.only(right: 10), child: Icon(Icons.list)), 
-                    Text("LIST VIEW COLUMNS", style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
+                    Text(TranslateConstants.filterTitle.toUpperCase(), style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
                   Divider(color: Theme.of(context).splashColor,),
                   // select all
                   ColsPopUpWidget(schema: widget.schema, items: widget.items, comp: this),
                   Padding(padding: const EdgeInsets.only(bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
                   Row( mainAxisAlignment: MainAxisAlignment.center, children : [ Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () { 
-                      if (filterView[viewID] != null && filterView[viewID] != "") { 
-                        filterView[viewID] = filterView[viewID];  
-                      }
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
                       globalOffset = 0; 
                       rects.remove(viewID);
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
-                    child: const Padding( padding: EdgeInsets.all(10), 
-                      child: Text("APPLY", style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
+                    child: Padding( padding: EdgeInsets.all(10), 
+                      child: Text(TranslateConstants.filterApply.toUpperCase(), style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
                   filterView[viewID] != null && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () async { 
@@ -112,13 +157,14 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       "rows=${filterViewIDName[filterView[viewID]]}"), <String, dynamic> { "is_selected" : false }, null);
                       filterView[viewID] = null;
                       filterOrderView.remove(viewID);
-                      filterTempOrderView.remove(viewID);      
+                      filterTempOrderView.remove(viewID);  
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);    
                       Future.delayed(const Duration(seconds: 1), () {
-                        setState((){  });
-                        globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                        setState((){});
                       });
-                  }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: const Padding( padding: EdgeInsets.all(10), 
-                  child: Text("CANCEL", style: TextStyle(color: Colors.white, fontSize: 12))),))
+                  }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
+                  child: Padding( padding: EdgeInsets.all(10), 
+                  child: Text(TranslateConstants.filterCancel.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),))
                   : TextButton(onPressed: () {
                     List<Map<String, dynamic>> fields = [];
                     for (var (index, fieldName) in filterTempOrderView[viewID]!.indexed) {
@@ -126,21 +172,27 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     }
                     filterOrderView[viewID] = filterTempOrderView[viewID]!;
                     var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
-                    APIService().post<model.View>(currentView!.filterPath, body, null).then((value) { 
-                      globalOffset = 0; 
-                      rects.remove(viewID);
-                      widget.comp.setState((){  });
-                      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-                      if (value.data != null && value.data!.isNotEmpty && value.data![0].items.isNotEmpty) { 
-                        filterView[viewID] = value.data![0].items[0].values["name"];
-                      }
-                      widget.items.add(DropdownMenuItem<String>(value: filterView[viewID], 
-                        child: Text(filterView[viewID] ?? "", overflow: TextOverflow.ellipsis,),));
-                      setState((){});
+                    APIService().post<model.Shallowed>(currentView!.filterPath, body, null).then((v) async { 
+                        globalOffset = 0; 
+                        rects.remove(viewID);
+                        widget.comp.setState((){  });
+                        setLatest = true;
+                        if (v.data != null && v.data!.isNotEmpty) {
+                          var i = v.data?[0];
+                          filterView[viewID] = i!.label ?? i.name ?? "";
+                          var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
+                          widget.items.add(DropdownMenuItem<String>(value: i.label ?? i.name, child: Text(
+                            (await getOnFlow(filterLabel)), overflow: TextOverflow.ellipsis,),));
+                        }
+                        setState((){});
+                        Future.delayed( const Duration(seconds: 1), () {
+                          globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                        });
                     });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), 
-                  child: Text("SAVE & APPLY", style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
+                  child: Text(TranslateConstants.filterSave.toUpperCase(), 
+                    style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
       ]); } ) );
   }
 }
@@ -160,13 +212,27 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
   bool force = false;
   bool noSelection =false;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    String? fView;
+    if (filterView[viewID] != null) {
+      var f = await getOnFlow(filterView[viewID]!);
+      fView = f.toLowerCase();
+    }
+    
     List<Widget> items = [];
     if (filterTempOrderView[viewID] == null) { filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; }
     var list = currentView!.order.where( (fieldName) => !(widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")));
     for (var (index,fieldName) in list.where( (el) => widget.schema[el] != null).indexed) {
         if (widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")) { continue; }
         var scheme =  widget.schema[fieldName]!; 
-        var label = scheme.label;
+        var label = await getOnFlow(scheme.label);
         items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), child:  Row( children : [ 
           index == 0 ? Container(width: 44) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
             onTap: () {
@@ -181,7 +247,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
           child: AdvancedSwitch(
             initialValue: filterView[viewID] == null || filterView[viewID] == "" || filterTempOrderView[viewID]!.contains(fieldName),
             activeColor: Colors.green, inactiveColor: Colors.grey,
-            activeChild: Text(label), inactiveChild: Text(label), 
+            activeChild: Text(label.toLowerCase()), inactiveChild: Text(label.toLowerCase()), 
             borderRadius:  const BorderRadius.all(Radius.circular(15)),
             width: 165, height: 30.0, disabledOpacity: 0.5,
             onChanged: (value) { 
@@ -204,11 +270,11 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
             }, child: const Icon(Icons.arrow_downward))),
         ]))));
       }
-    var isDrop = widget.items.where((element) => element.value == filterView[viewID]);
     return Column(children: [
-      DropdownButtonFormField<String>( items: widget.items, 
-                    value: filterView[viewID] != null && filterView[viewID] != "" && isDrop.isNotEmpty ? filterView[viewID] : null,
-                    hint: const Text("select an existing view filter...", overflow: TextOverflow.ellipsis,),
+      DropdownButtonFormField<String>( 
+        items: widget.items, 
+                    value: fView,
+                    hint: Text(TranslateConstants.filterPlaceholder.toLowerCase(), overflow: TextOverflow.ellipsis,),
                     style: const TextStyle(fontSize: 14, color: Colors.black),
                     onChanged: (value) async {
                       await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
@@ -239,7 +305,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                       border: const OutlineInputBorder(),
                       contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                      labelText: "view filter",
+                      labelText: TranslateConstants.filterLabel.toLowerCase(),
                     ),
                     validator: (String? value) { return null; },
                   ),

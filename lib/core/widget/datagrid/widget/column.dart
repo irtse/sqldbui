@@ -12,6 +12,7 @@ import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/bottom_column.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class GridColumnWidget extends StatefulWidget {
   GlobalKey<GridBottomColumnResultWidgetState>? resultKey;
@@ -98,17 +99,28 @@ class GridColumnWidget extends StatefulWidget {
 class GridColumnWidgetState extends State<GridColumnWidget> {
   double height = 100; bool orderASC = true; bool delayed = false;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     var width = widget.getWidth(false);
     List<Widget> buttons = [];
     if (widget.allowSorting) { 
       buttons.add(SizedBox( 
         width: 30, 
         height: 30.0, 
+        child: Tooltip( message: currentView != null && globalOrder.containsKey(viewID) && (
+        (globalOrder[viewID]![widget.columnName] == "asc" && viewID != null && globalOrder[viewID] != null)
+        || globalOrder[viewID]![widget.columnName] == null) ? TranslateConstants.sortDesc : TranslateConstants.sortDesc, 
         child: IconButton(
           onPressed: () async { 
             if (currentView !=  null && viewID != null) {
               globalOffset = 0;
-              globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "desc" || globalOrder[viewID]![widget.columnName] == null  ? "asc" : "desc";
+              globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "asc" || globalOrder[viewID]![widget.columnName] == null  ? "asc" : "desc";
               APIService().get<model.View>(currentView!.linkPath, true, context).then((value){
                 if (value.data != null && value.data!.isNotEmpty) {
                   globalMainViewKey.currentState?.refresh(viewID, subViewID, value.data![0], false);
@@ -117,21 +129,22 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             }
           }, 
           icon: Icon( currentView != null && globalOrder.containsKey(viewID) && (
-        (globalOrder[viewID]![widget.columnName] == "desc" && viewID != null && globalOrder[viewID] != null)
-        || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 18,))
-      ));
+        (globalOrder[viewID]![widget.columnName] == "asc" && viewID != null && globalOrder[viewID] != null)
+        || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 15,))
+      )));
     } 
     if (widget.allowFiltering) { 
-      buttons.add(SizedBox( width: 30, height: 30.0,  child: FilterPopUpWidget(items: widget.items, label: widget.label.value, 
+      buttons.add(SizedBox( width: 30, height: 30.0,  child: FilterPopUpWidget(
+        items: widget.items, label: widget.label.value, 
         columnName: widget.columnName, type: widget.type, component: this, ))); }
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
       if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
       || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName))))) { 
-        buttons.add(SizedBox( width: 30, height: 30.0, child: IconButton(
+        buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( message: TranslateConstants.filterResetT.toLowerCase(),  child: IconButton(
         onPressed: () async { 
           resetFilter(widget.columnName);
           globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-        }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 18,))));
+        }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 15,)))));
       } 
     }
     widget.width = width + 32;
@@ -149,7 +162,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         if (!isDate) { t.addAll(["sum", "avg"]); }
       }
       for (var func in t) { dpItems.add(DropdownMenuItem<String>(value: func, 
-        child: Text(func, style: const TextStyle(color: Colors.white))));  }
+        child: Text(await getOnFlow(func), style: const TextStyle(color: Colors.white))));  }
     }
     return Column( mainAxisSize: MainAxisSize.min, children: [ 
       Container( 
@@ -164,8 +177,10 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             alignment: Alignment.center, items: dpItems, 
             icon: Icon(Icons.functions, color: Theme.of(context).splashColor, size: 14,),
             hint: Opacity( opacity: .5,
-              child: Text("no column function", textAlign: TextAlign.center, 
-                        overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
+              child: Text(TranslateConstants.funcColErr.toLowerCase(), 
+                textAlign: TextAlign.center, 
+                overflow: TextOverflow.ellipsis, 
+                style: TextStyle(color: Theme.of(context).highlightColor))),
             isExpanded: true, style: const TextStyle(fontSize: 14, color: Colors.white),
             validator: (value) { return null; },
             onChanged: (value) { setState(() { 

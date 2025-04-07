@@ -2,6 +2,7 @@
 
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
@@ -20,26 +21,26 @@ Map<String?, String> editMode = {};
 Map<String?, String> commands = {};
 // ignore: must_be_immutable
 class FunctionsSelectorWidget extends StatefulWidget {
-  String mode = "all"; 
+  String mode = TranslateConstants.edit.toLowerCase(); 
   var mathAllowed = true;
-  String value = "total";
+  String value = TranslateConstants.total.toLowerCase();
   List<DropdownMenuItem<String>> items = [];
   FunctionsSelectorWidget ({ super.key, required this.mathAllowed, required this.items });
   @override FunctionsSelectorWidgetState createState() => FunctionsSelectorWidgetState();
 }
 class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
   @override Widget build(BuildContext context) {
-    var toggles = ["all", "math"];
+    var toggles = [TranslateConstants.edit.toLowerCase(), TranslateConstants.math.toLowerCase()];
     Map<String, model.SchemaField> fields = {};
-    if (mathColName[viewID] == null) { mathColName[viewID] = "total"; 
-    } else { widget.value = mathColName[viewID] ?? "total"; }
-    if (editMode[viewID] == null) { editMode[viewID] = "all"; }
-    if (editMode[viewID] == "math") {
+    if (mathColName[viewID] == null) { mathColName[viewID] = TranslateConstants.total.toLowerCase(); 
+    } else { widget.value = mathColName[viewID] ?? TranslateConstants.total.toLowerCase(); }
+    if (editMode[viewID] == null) { editMode[viewID] = TranslateConstants.edit.toLowerCase(); }
+    if (editMode[viewID] == TranslateConstants.math.toLowerCase()) {
       for (var item in widget.items) {
         if (currentView!.schema[item.value] != null) { fields[item.value!] = currentView!.schema[item.value]!; 
         } else if (item.value != null) { fields[item.value!] = model.SchemaField(label: item.value!); }
       }
-      fields[mathColName[viewID] ?? "total"] = model.SchemaField(label: mathColName[viewID] ?? "total");
+      fields[mathColName[viewID] ?? TranslateConstants.total.toLowerCase()] = model.SchemaField(label: mathColName[viewID] ?? TranslateConstants.total.toLowerCase());
       if (functionMathRowsWidget.isEmpty) {
         functionMathRowsWidget.add(FunctionMathRowWidget(items: widget.items));
         Future.delayed(const Duration(milliseconds: 100), () { globalGridWidgetKey.currentState?.setState(() { }); });
@@ -53,7 +54,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
           onTap: () { globalGridWidgetKey.currentState?.setState(() { showFunctions[viewID] = !showFunctions[viewID]!; },); },
           child: Icon( showFunctions[viewID]! ? Icons.calculate : Icons.calculate_outlined, size: 25, color: Theme.of(context).splashColor) ),
       ),
-      widget.mathAllowed ? Padding(
+      Padding(
         padding: const EdgeInsets.only(left: 20, top: 2), 
         child: MouseRegion( 
           cursor: SystemMouseCursors.click,
@@ -72,8 +73,8 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
               editMode[viewID] = toggles[index ?? 0]; 
               globalGridWidgetKey.currentState?.setState(() { });
             }),
-      )) : Container(),
-      editMode[viewID] == "math" ? Container( margin: const EdgeInsets.only(left: 20, right: 10, top: 2), height: 25,  
+      )),
+      editMode[viewID] == TranslateConstants.math.toLowerCase() ? Container( margin: const EdgeInsets.only(left: 20, right: 10, top: 2), height: 25,  
         width: (MediaQuery.of(context).size.width - menuSize) / 4, 
           child: TextFormField( key: formKey,
           textAlign: TextAlign.start,
@@ -94,38 +95,38 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
             filled: true, fillColor: Theme.of(context).secondaryHeaderColor,
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
             suffixIcon: const Icon(Icons.text_fields), 
-            hintText: "enter result column name...",  
+            hintText: TranslateConstants.mathPlaceholder.toLowerCase(),  
             labelText: "",
             errorStyle: const TextStyle(fontSize: 0,),
           ),
           onChanged: (String? value) { 
             Future.delayed(const Duration(seconds: 2), () { 
               if (value == widget.value && formKey.currentState != null && formKey.currentState!.validate()) {
-                var keysToChange = cacheChanges.keys.where((element) => element.contains(mathColName[viewID] ?? "total")).toList();
+                var keysToChange = cacheChanges.keys.where((element) => element.contains(mathColName[viewID] ?? TranslateConstants.total.toLowerCase())).toList();
                 for (var key in keysToChange) {
-                  cacheChanges[key.replaceAll(mathColName[viewID] ?? "total", value ?? "total")] = cacheChanges[key];
+                  cacheChanges[key.replaceAll(mathColName[viewID] ?? TranslateConstants.total.toLowerCase(), value ?? TranslateConstants.total.toLowerCase())] = cacheChanges[key];
                   cacheChanges.remove(key);
                 }
-                mathColName[viewID] = value ?? "total";
+                mathColName[viewID] = value ?? TranslateConstants.total.toLowerCase();
                 globalGridWidgetKey.currentState?.setState(() { }); 
               }
             });
-            widget.value = value ?? "total"; 
+            widget.value = value ?? TranslateConstants.total.toLowerCase(); 
           },
           validator: (String? value) {
-            if (value == null) { return "please enter a result column value..."; }  
+            if (value == null) { return TranslateConstants.mathValuePlaceholder.toLowerCase(); }  
             if (currentView!.schema.containsKey(value) || value == "id") {
-              return "column name already exists in the schema... can't choose this name";
+              return TranslateConstants.mathError.toLowerCase();
             }
             return null; 
           }))
         : Container(),
-        editMode[viewID] == "math" ? Padding(
+        editMode[viewID] == TranslateConstants.math.toLowerCase() ? Padding(
           padding: const EdgeInsets.only(left: 5, top: 4), 
           child: SizedBox( 
             height: 25, 
             child: PopupButtonWidget(
-              tooltip: "export ${currentView!.isList ? "selected " : ""}rows with math operation...",
+              tooltip: (currentView!.isList ? TranslateConstants.exportMathList : TranslateConstants.exportMathList).toLowerCase(),
               icon: Icons.file_download,
               widget: MappingPopUpWidget(isExport: true, format: "csv", forcedSchema: fields),
             )

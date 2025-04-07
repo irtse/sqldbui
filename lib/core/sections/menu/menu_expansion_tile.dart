@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/menu/menu_tile.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class MenuExpansionTileWidget extends StatefulWidget {
@@ -26,6 +27,15 @@ class MenuExpansionTileWidget extends StatefulWidget {
 }
 class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    var category = await getOnFlow(widget.category);
     return ExpansionTile(
       shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
       initiallyExpanded: widget.isExpanded,
@@ -38,7 +48,7 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
         Flexible( 
           child: Padding( 
             padding: EdgeInsets.only(right: "${widget.count}".isNotEmpty ? (("${widget.count}".length + 1) * 7) : 0), 
-            child: Text(widget.category.toUpperCase(), overflow: TextOverflow.ellipsis,
+            child: Text(category.toUpperCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11))
           )
         ) 
@@ -56,18 +66,19 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
               bottom: const BorderSide(color: Colors.black, width: .25)),
             color: Theme.of(context).secondaryHeaderColor
           ),
-          child: MenuTileTextWidget( view: "dashboard", category: widget.category, refreshView: widget.refreshView)
+          child: MenuTileTextWidget( view: TranslateConstants.dashboard.toLowerCase(), 
+          category: widget.category, refreshView: widget.refreshView)
         ) : Container(),
         Container(
           width: noMenu ? 300 : menuSize, 
-          height: categories[widget.category]!.length * 40, 
+          height: (categories[widget.category]!.length * 41) + 10, 
           color: Theme.of(context).secondaryHeaderColor,
           child: ListView.builder(itemBuilder: (builder, index) {
             if (categories[widget.category] == null || categories[widget.category]!.length <= index) { 
               return null; 
             }
             var catIndex = categories[widget.category]![index];
-            if (FavoriteConstants.isFavorite && !categories[widget.category]![index].isFavorize) {
+            if (MenuConstants.isFavorite && !categories[widget.category]![index].isFavorize) {
               return null;
             }
             List<Widget> badge = catIndex.newIds.isNotEmpty ? [

@@ -5,6 +5,7 @@ import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class MenuTileWidget extends StatefulWidget {
@@ -22,6 +23,15 @@ class MenuTileWidget extends StatefulWidget {
 }
 class MenuTileWidgetState extends State<MenuTileWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    var label = await getOnFlow((widget.view.label ?? widget.view.name));
     return Material(
       type: MaterialType.transparency,
       child: ListTile(
@@ -32,7 +42,8 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
         }); },
         tileColor: Theme.of(context).secondaryHeaderColor,
         iconColor: Theme.of(context).splashColor,
-        title: Text((widget.view.label ?? widget.view.name), 
+        title: Text(
+          label.toLowerCase(), 
           overflow: TextOverflow.ellipsis, 
           style: const TextStyle(fontSize: 13.0)),
         visualDensity: const VisualDensity(vertical: -4), // to compact

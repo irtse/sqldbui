@@ -7,6 +7,7 @@ import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 String transform(String match, String prefix) {
   return match.replaceAll("$prefix(", "").replaceAll(")", "");
@@ -62,6 +63,14 @@ class FunctionMathRowWidget extends StatefulWidget implements ConvertorWidget {
 }
 class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     if (commands[viewID] != null && widget.value == "") { widget.value = commands[viewID]; }
     return Container( 
       height: 45,
@@ -72,7 +81,7 @@ class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
           height: 25,
           margin: const EdgeInsets.only(left: 10, right: 10), 
           width: (MediaQuery.of(context).size.width - menuSize) / 2, 
-          child: Convertor.filterFieldByType(context, widget, "varchar", "enter math operation", this, true, false, "", "")
+          child: await Convertor.filterFieldByType(context, widget, "varchar", "enter math operation", this, true, false, "", "")
         ),
         InkWell(onTap: () {
             commands[viewID] = widget.value;
@@ -88,7 +97,9 @@ class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
           child: DropdownButtonFormField<String>( 
               items: widget.items.where((element) => element.value != "id").toList(), 
               value: widget.addColumnName, 
-              hint: Text("select a column to filter...", overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
+              hint: Text(TranslateConstants.colFilter.toLowerCase(), 
+                overflow: TextOverflow.ellipsis, 
+                style: TextStyle(color: Theme.of(context).splashColor)),
               isExpanded: true, 
               style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
               validator: (value) { if (value == null) { return "select a column to add to command..."; } return null; },

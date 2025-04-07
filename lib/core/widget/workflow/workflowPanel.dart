@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/page/translate.dart';
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
   final bool readOnly;
@@ -42,7 +43,8 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
             Wrap(alignment: WrapAlignment.center, 
             children: [
               const Padding( padding: EdgeInsets.only(right: 10, top: 5), child: Icon(Icons.account_tree, color: Colors.grey)),
-              const Padding( padding: EdgeInsets.only(right: 20, top: 5), child: Text("next optionnal steps:", style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
+              Padding( padding: EdgeInsets.only(right: 20, top: 5), 
+                child: Text(TranslateConstants.nextOpt.toLowerCase(), style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
       } catch(e) { /* empty */ } 
     }
     return Container(width: 0,);

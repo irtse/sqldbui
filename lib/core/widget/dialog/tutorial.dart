@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 var slide1 = (BuildContext context) => Container( decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor,
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]), child: Stack(children: [ 
@@ -8,18 +9,19 @@ var slide1 = (BuildContext context) => Container( decoration: BoxDecoration(colo
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]),
          child: Column( children: [
         Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
-            children: [ Flexible( child: Text("How to create a data ?", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
+            children: [ Flexible( child: Text(TranslateConstants.howToCreate, 
+              style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
         Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
             children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "you need to access <submit page> from home page, \"MENU -> GENERAL -> SUBMIT DATAS\", or from any shortcut on pages.", style: const TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, TranslateConstants.needAccess, style: const TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
         Padding( padding: const EdgeInsets.only(left: 80), child: Row( 
             children: [ 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> then you will access to a formulary selector, that will show the data formulary depending the selected one.", style: const TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, TranslateConstants.needRule1, style: const TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
         Padding( padding: const EdgeInsets.only(left: 80), child: Row( 
             children: [ 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> fill, at least, all required fields and then you only have to submit ! if any workflow is engaged, it will triggered on submition.", style: const TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, TranslateConstants.needRule2, style: const TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
       ] ))
     ]));
@@ -31,18 +33,21 @@ var slide2 = (BuildContext context) => Container( decoration: BoxDecoration(colo
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]),
          child: Column( children: [
         Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
-            children: [ Flexible( child: Text("How to access my assigned activities ?", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
+            children: [ Flexible( child: Text(TranslateConstants.howToAssign, 
+              style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
         Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
             children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "you need to access <assigned activity page> from home page, \"MENU -> ACTIVITY -> ASSIGNED ACTIVITY\". notifications will allows you a quick access to your unread activities.", style: TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, TranslateConstants.needRule3, style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
         Padding( padding: const EdgeInsets.only(left: 80), child: Row( 
             children: [ 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> assigned activities concerns all your action to realise in the purpose of a current workflow, on closure, workflow will go to next activity (activity for you or another actor).", style: TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, 
+                TranslateConstants.needRule4, style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
         Padding( padding: const EdgeInsets.only(left: 80), child: Row( 
             children: [ 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> an activity can be stated as <pending,progressing,dismiss,completed>. completion will close it as successful. dismiss will close it as failed. when closed an activity can't be reopenned without superadmin action.", style: TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, 
+                TranslateConstants.needRule5, style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
       ] ))
     ]));
@@ -54,18 +59,21 @@ var slide3 = (BuildContext context) => Container( decoration: BoxDecoration(colo
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]),
          child: Column( children: [
         Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
-            children: [ Flexible( child: Text("How to access my requests ?", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
+            children: [ Flexible( child: Text(TranslateConstants.howToReq, 
+              style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
         Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
             children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
               const Flexible( child: Text(overflow: TextOverflow.ellipsis, "you need to access <validated/unvalidated request page> from home page, \"MENU -> ACTIVITY -> VALIDATED/UNVALIDATED REQUEST\".", style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
-        const Padding( padding: EdgeInsets.only(left: 80), child: Row( 
+        Padding( padding: EdgeInsets.only(left: 80), child: Row( 
             children: [ 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> requests concerns all your request or your hierarchical subordinate. you can monitor where your requests are stated. notification will warn you on closure", style: TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, 
+              TranslateConstants.needRule6, style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
-        const Padding( padding: EdgeInsets.only(left: 80), child: Row( 
+        Padding( padding: EdgeInsets.only(left: 80), child: Row( 
             children: [ 
-              Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> an request can be stated as <pending,progressing,dismiss,completed>. completion will close it as successful. dismiss will close it as rejected. when closed an activity can't be reopenned without superadmin action.", style: TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, 
+                TranslateConstants.needRule7, style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
       ] ))
     ]));
@@ -77,10 +85,11 @@ var slide4 = (BuildContext context) => Container( decoration: BoxDecoration(colo
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]),
          child: Column( children: [
         Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
-            children: [ Flexible( child: Text("How to filter by columns in a view list ? [ALPHA]", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
+            children: [ Flexible( child: Text(TranslateConstants.howToFilter, style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
         Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
             children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
-              const Flexible( child: Text(overflow: TextOverflow.ellipsis, "-> filter showed column by tapping on the <gear> icon to open a popup panel to choose columns. filter can be saved. [ALPHA] only register state on session.", style: TextStyle(color: Colors.grey, fontSize: 12)))
+              Flexible( child: Text(overflow: TextOverflow.ellipsis, 
+                TranslateConstants.needRule8, style: TextStyle(color: Colors.grey, fontSize: 12)))
         ])),
         const Padding( padding: EdgeInsets.only(left: 80), child: Row( 
             children: [ 
@@ -123,7 +132,7 @@ var slide4 = (BuildContext context) => Container( decoration: BoxDecoration(colo
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]),
          child: Column( children: [
         Padding( padding: const EdgeInsets.only(left: 53), child: Row( 
-            children: [ Flexible( child: Text("How to track progress of a workflow ?", style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
+            children: [ Flexible( child: Text(TranslateConstants.howToProgress, style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 30))) ])),
         Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
             children: [ Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.description, size: 20 , color: Theme.of(context).splashColor)), 
               const Flexible( child: Text(overflow: TextOverflow.ellipsis, "workflows are attached to a request. some request does not have a workflow to integrate data.", style: TextStyle(color: Colors.grey, fontSize: 12)))
@@ -149,7 +158,7 @@ class TutorialPopUpState extends State<TutorialPopUpWidget> {
     List<Widget> list = [slide1(context), slide2(context), slide3(context), slide4(context), slide5(context), slide6(context)];
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
-        title: const Text('TUTORIAL - HOW TO START', style: TextStyle(color: Colors.white),)),
+        title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
       body: Container( width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height, color: Theme.of(context).primaryColorLight,
           child: Center( child: CarouselSlider(

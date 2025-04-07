@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
-
+import 'package:sqldbui2/page/translate.dart';
 
 GlobalKey<RouterWidgetState> routerKey = GlobalKey<RouterWidgetState>();
 
@@ -20,11 +20,14 @@ class RouterWidget extends StatefulWidget {
 class RouterWidgetState extends State<RouterWidget> {
   @override Widget build(BuildContext context) {
     return Padding( padding: const EdgeInsets.only(right: 20), child: Row(children: [
-      IconButton(onPressed: () async => AppRouter.realHistory.length > 1 ? AppRouter.back() : null, icon: Icon(Icons.arrow_back, color: AppRouter.realHistory.length > 1 ? Colors.white : Theme.of(context).splashColor)),
-      IconButton(onPressed: () async => AppRouter.canForward() ? AppRouter.forward() : null, icon: Icon(Icons.arrow_forward, color: AppRouter.canForward() ? Colors.white : Theme.of(context).splashColor)),
+      Tooltip( 
+        message: TranslateConstants.back.toLowerCase(),
+        child: IconButton(onPressed: () async => AppRouter.realHistory.length > 1 ? AppRouter.back() : null, icon: Icon(Icons.arrow_back, color: AppRouter.realHistory.length > 1 ? Colors.white : Theme.of(context).splashColor))),
+      Tooltip( 
+        message: TranslateConstants.forward.toLowerCase(),
+        child: IconButton(onPressed: () async => AppRouter.canForward() ? AppRouter.forward() : null, icon: Icon(Icons.arrow_forward, color: AppRouter.canForward() ? Colors.white : Theme.of(context).splashColor))),
     ],));
-  }
-  
+  } 
 }
 
 class AppRouter { 

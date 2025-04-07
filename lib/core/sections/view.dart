@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
 import 'dart:async';
 
+import 'package:sqldbui2/page/translate.dart';
+
 model.View? currentView;
 String? currentCat;
 GlobalKey<MainViewWidgetState> globalMainViewKey = GlobalKey<MainViewWidgetState>();
@@ -26,7 +28,7 @@ class MainViewWidget extends StatefulWidget{
 }
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
-    if ((viewID ?? "").contains("dashboard")) {
+    if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
       return ViewWidget(view: currentView, views: widget.views);
     }
     model.View? view; 
@@ -106,7 +108,7 @@ class ViewWidget extends StatefulWidget{
 class ViewWidgetState extends State<ViewWidget> {
   @override Widget build(BuildContext context) { return Container(child: _build(context));  }
   Widget _build(BuildContext context) {
-    if ((viewID ?? "").contains("dashboard")) {
+    if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
       return HomeViewWidget();
     }
     List<Widget> comps = <Widget>[];
@@ -136,7 +138,7 @@ class ViewWidgetState extends State<ViewWidget> {
       childs = [
         Icon(Icons.error, color: Colors.white, size: 100.0,),
         Padding(padding: EdgeInsets.all(10),
-                child: Text("Seems pretty lost... go on another page please :)", 
+                child: Text(TranslateConstants.lost.toLowerCase(), 
                 style: TextStyle(color: Colors.white, fontSize: 20.0)),)
       ];
     }

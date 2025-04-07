@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class LinkBoxWidget extends StatefulWidget {
@@ -12,13 +13,13 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
   @override Widget build(BuildContext context) {
     return PopupMenuButton(
       color: Colors.white,
-      tooltip: "share data",
+      tooltip: TranslateConstants.share.toLowerCase(),
       icon: Icon(size: 18, Icons.share, color: Theme.of(context).primaryColor),
       onSelected: (value) { },
       itemBuilder: (BuildContext bc) { 
         return [ PopupMenuItem(enabled: false, 
             child: Padding( padding: EdgeInsets.all(20), child: Column(children: [  
-              const Text("path to copy in software navigator :", 
+              Text(TranslateConstants.pathToCopy.toLowerCase(), 
               style: TextStyle(fontSize: 12.5, color: Colors.grey),),
               Row( children : [ 
                 SizedBox( 
@@ -45,7 +46,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                 }, icon: const Icon(Icons.copy, size: 20, color: Colors.grey))),
               ]),
               ...(widget.success ? [
-                Text( "successfully copied to clipboard", 
+                Text( TranslateConstants.successCopy, 
                   style: TextStyle(fontSize: 12.5, color: Colors.green),)
               ] : []),
             ]))) ]; 

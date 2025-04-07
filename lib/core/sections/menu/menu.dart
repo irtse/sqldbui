@@ -11,6 +11,7 @@ import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 bool isMenu = true;
 double menuSize = 250;
@@ -29,21 +30,34 @@ class MenuWidgetState extends State<MenuWidget> {
   TextEditingController controller = TextEditingController();
 
   @override Widget build(BuildContext context) {
-    var eldestCat = categories;
-    categories = <String, List<model.View>>{};
-    if (widget.views != null) {
-      for (var view in widget.views!.where( (e) => 
-        !(!e.name.toLowerCase().contains(controller.text.toLowerCase()) || (FavoriteConstants.isFavorite && !e.isFavorize)))) {
-        var cat = view.category == "" ? "general" : view.category;
-        if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
-        if (eldestCat.containsKey(cat)) {
-          try { 
-            view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).newIds.where(
-                                (element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
-          } catch(e) { /* */ }     
-        }
-        categories[cat]!.add(view);
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
       }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    var eldestCat = categories;
+    List<model.View> views = [];
+    for (var view in widget.views!) {
+      var label = await getOnFlow(view.label ?? view.name);
+      if (!((!label.toLowerCase().contains(MenuConstants.value?.toLowerCase() ?? "")) 
+      || (MenuConstants.isFavorite && !view.isFavorize))) {
+        views.add(view);
+      }
+    }
+    categories = <String, List<model.View>>{};
+    for (var view in views) {
+      var cat = view.category == "" ? "general" : view.category;
+      if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
+      if (eldestCat.containsKey(cat)) {
+        try { 
+          view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).newIds.where(
+                              (element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
+        } catch(e) { /* */ }     
+      }
+      categories[cat]!.add(view);
     }
     List<Widget> comps = [];
     for (var cat in categories.keys) {
@@ -81,9 +95,10 @@ class MenuWidgetState extends State<MenuWidget> {
         ])
       ));
     }
+    comps.add(SizedBox(height: 10,));
     firstAPI = false;
     noReload = false;
-    var height = noMenu ? MediaQuery.of(context).size.height - 81 : MediaQuery.of(context).size.height - 172;
+    var height = noMenu ? MediaQuery.of(context).size.height - 81 : MediaQuery.of(context).size.height - 162;
     return Column( children : [ 
       MenuHeaderWidget(controller: controller), 
       SizedBox( height: height > 0 ? height : 0,

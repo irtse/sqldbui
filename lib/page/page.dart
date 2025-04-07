@@ -14,6 +14,7 @@ import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
+import 'package:sqldbui2/page/translate.dart';
 
 bool noMenu = false;
 final _authProvider = AuthService();          
@@ -32,7 +33,7 @@ class PageWidgetState extends State<PageWidget> {
   @override Widget build(BuildContext context) {
     noMenu = MediaQuery.of(context).size.width - menuSize < 600;
     menuSize = isMenu && !noMenu ? (250 <= MediaQuery.of(context).size.width ? (
-                menuSize == 0 ? 250 : (menuSize <= (MediaQuery.of(context).size.width / 2) ? menuSize : (MediaQuery.of(context).size.width / 2))) : MediaQuery.of(context).size.width) : 0;
+              menuSize == 0 ? 250 : (menuSize <= (MediaQuery.of(context).size.width / 2) ? menuSize : (MediaQuery.of(context).size.width / 2))) : MediaQuery.of(context).size.width) : 0;
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
@@ -41,9 +42,9 @@ class PageWidgetState extends State<PageWidget> {
         elevation: 3,
         leading: noMenu ? Builder(
           builder: (context) {
-            return IconButton(
+            return Tooltip( message: TranslateConstants.menu.toLowerCase(), child: IconButton(
               icon: const Icon(Icons.menu, color: Colors.white,),
-              onPressed: () { Scaffold.of(context).openDrawer(); });
+              onPressed: () { Scaffold.of(context).openDrawer(); }));
           },
         ) : null,
         automaticallyImplyLeading: false,
@@ -73,17 +74,19 @@ class PageWidgetState extends State<PageWidget> {
         toolbarHeight: 40,
         actions: <Widget>[
           Stack( children: [
-             IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
+            Tooltip(
+             message: TranslateConstants.notifications.toLowerCase(),
+             child: IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
              onPressed: () { 
               if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
-             }),
+             })),
              NotificationWidget(key: appBarKey),
           ],),
-          DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: "tutorial", left: 12.5),
+          DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: TranslateConstants.tutorial.toLowerCase(), left: 12.5),
           DialogButtonWidget( left: 12.5, right: 50,
             icon: Icons.logout_outlined,
             widget: ConfirmBoxWidget(purpose: "disconnect your account", validate: () { _authProvider.logOut(context); }), 
-            tooltip: "logout"),
+            tooltip: TranslateConstants.logout),
         ],
       ),
       body: Stack( 

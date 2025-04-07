@@ -19,6 +19,7 @@ import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 bool isFilter() {
   return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
@@ -60,6 +61,14 @@ class DatagridWidgetState extends State<DatagridWidget> {
   List<DropdownMenuItem<String>> dpItems = <DropdownMenuItem<String>>[];
 
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
     var schemeItems = <DropdownMenuItem<String>>[];
     List<GridColumnWidget> columns = <GridColumnWidget>[];
@@ -81,13 +90,16 @@ class DatagridWidgetState extends State<DatagridWidget> {
         if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
         datas.add(Value(values: item.values, isLink: item.linkPath != "", readOnly: currentView!.readOnly || item.readonly)); 
       }
-      filterTempOrderView[viewID] = [];
+      if (!filterTempOrderView.containsKey(viewID)) {
+        filterTempOrderView[viewID] = [];
+      }
+      
       var order = realOrder();
       for (var fieldName in order) {
-        columns = getColumn(columns, schemeItems, schema, fieldName, datas, order);
+        columns = await getColumn(columns, schemeItems, schema, fieldName, datas, order);
       }
-      if (editMode[viewID] == "math") {
-        columns = getColumn(columns, schemeItems, schema, null, datas, order);
+      if (editMode[viewID] == TranslateConstants.math.toLowerCase()) {
+        columns = await getColumn(columns, schemeItems, schema, null, datas, order);
       }
     }
     if ( globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
@@ -148,9 +160,9 @@ class DatagridWidgetState extends State<DatagridWidget> {
                 child: Column( 
                   children : [  !(isEditMode[viewID] ?? false) ? (filterRowsWidget.isEmpty ? 
                 Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)) : ( 
-                  editMode[viewID] != "math" || functionMathRowsWidget.isEmpty ? Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
+                  editMode[viewID] != TranslateConstants.math.toLowerCase() || functionMathRowsWidget.isEmpty ? Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
                 ),  
-              ...(show && !(isEditMode[viewID] ?? false) ? filterRowsWidget : (editMode[viewID] == "math" ? functionMathRowsWidget : [])) ] 
+              ...(show && !(isEditMode[viewID] ?? false) ? filterRowsWidget : (editMode[viewID] == TranslateConstants.math.toLowerCase() ? functionMathRowsWidget : [])) ] 
             ))) 
         ])
       ),
@@ -203,10 +215,10 @@ class DatagridWidgetState extends State<DatagridWidget> {
       if (isEditMode[viewID] ?? false) {
         buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid));
       } else {
-        buttons.addAll([
-          Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
+        if (widget.view?.actions.contains("delete") ?? false) {
+          buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
           child: Tooltip( 
-            message: "delete ${currentView!.isList ? "selected " : ""}rows",
+            message: (currentView!.isList ? TranslateConstants.rowsListDelete : TranslateConstants.rowsDelete).toLowerCase(),
             child: InkWell( 
               onTap: () { 
                 if (selectedGrid.isEmpty) { return; }
@@ -218,9 +230,11 @@ class DatagridWidgetState extends State<DatagridWidget> {
                 APIService().delete("${APIConstants.genericEndpost}$schemaID?rows=${ids.join(",")}", context);
               }, 
               child: Icon(Icons.delete, color: Theme.of(context).highlightColor, size: 20)
-          ))),
+          ))));
+        }
+        buttons.addAll([
           PopupButtonWidget(
-            tooltip: "export ${currentView!.isList ? "selected " : ""}rows",
+            tooltip: (currentView!.isList ? TranslateConstants.rowsListExport : TranslateConstants.rowsExport).toLowerCase(),
             icon: Icons.file_download,
             widget: MappingPopUpWidget(isExport: true, format: "csv")
           )
@@ -230,7 +244,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
       buttons.add(
         PopupButtonWidget(
-          tooltip: "upload datas file",
+          tooltip: TranslateConstants.rowsImport,
           icon: Icons.upload,
           widget: MappingPopUpWidget(isExport: true, format: "csv")
         )
@@ -242,42 +256,44 @@ class DatagridWidgetState extends State<DatagridWidget> {
   List<dynamic> realOrder() {
     if (widget.view == null) { return []; }
     var schema = widget.view!.schema;
-    bool isMath = isEditMode[viewID] == true && editMode[viewID] == "math";
-    var order = filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math" 
+    bool isMath = isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase();
+    var order = filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase() 
                 ? filterTempOrderView[viewID]! : (filterOrderView[viewID] != null ? filterOrderView[viewID]! : widget.view!.order);
-    return ["id", ...order].where( (f) {
-      String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]!.type);
+    return ["id", ...order.where( (e) => e != "id")].where( (f) {
+      String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
       return f == "id" || (active && f != "description"  && !type.contains("many") && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
     }).toList();
   }
 
-  List<GridColumnWidget> getColumn(List<GridColumnWidget> columns, List<DropdownMenuItem<String>> schemeItems, 
-    Map<String, model.SchemaField> schema, String? fieldName, List<Value> datas, List<dynamic> order) {
+  Future<List<GridColumnWidget>> getColumn(List<GridColumnWidget> columns, List<DropdownMenuItem<String>> schemeItems, 
+    Map<String, model.SchemaField> schema, String? fieldName, List<Value> datas, List<dynamic> order) async {
     bool isEdit = isEditMode[viewID] ?? false;
     bool isNotValidCol = fieldName == null && fieldName == "id";
     String? lab = (schema[fieldName]?.label ?? "") != "" ? schema[fieldName]!.label : fieldName;
     String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]!.type);
-    String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? "total")).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
+    String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase())).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     if (!isNotValidCol && !filterTempOrderView[viewID]!.contains(fieldName) && !type.contains("many")) { 
       filterTempOrderView[viewID]!.add(fieldName); 
     }
-    schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(label, overflow: TextOverflow.ellipsis,)));
+    var realLabel = await getOnFlow(label);
+    schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
+      await getOnFlow(label), overflow: TextOverflow.ellipsis,)));
     columns.add( GridColumnWidget(
       context: context, 
       width: double.nan,
       items: schemeItems, 
       isEditMode: isEdit,
-      maxLength: order.length + (isEditMode[viewID] == true && editMode[viewID] == "math" ? 1 : 0),
+      maxLength: order.length + (isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase() ? 1 : 0),
       borderColor: Theme.of(context).splashColor, 
       allowSorting: !(datas.isEmpty && !isFilter()) && !isEdit,
-      columnName: fieldName ??  mathColName[viewID] ?? "total",
+      columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
       allowFiltering: !(datas.isEmpty && !isFilter()) && !isEdit, 
       type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
       url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
       contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-      label: label == "id" ? GridValueWidget(fontSize: 14, icon: Icons.tag) : GridValueWidget(fontSize: 14, value: label),
+      label: label == "id" ? GridValueWidget(fontSize: 14, icon: Icons.tag) : GridValueWidget(fontSize: 14, value: realLabel),
     ));
     return columns;
   }

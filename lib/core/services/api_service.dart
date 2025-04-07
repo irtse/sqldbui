@@ -215,8 +215,11 @@ class APIService {
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
         print(e); print(s);
-        developer.log('LOG ERR $e $s ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}', name: 'my.app.category');
-        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
+        if (e.toString().contains("connection error")) {
+          err = "server unreachable";
+        } else {
+          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
+        }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {

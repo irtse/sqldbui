@@ -12,6 +12,7 @@ import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class GridRowWidget extends StatefulWidget {
@@ -111,7 +112,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
         badges.add(Positioned(left: 10, top: 5, child: Container(
           decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
           child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-            child: Text("NEW", style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),)))));
+            child: Text(TranslateConstants.newT, 
+              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),)))));
       }
       var v = e.value;
       if (commands[viewID] != null) { 

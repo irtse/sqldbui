@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
@@ -9,6 +10,14 @@ class HomeViewWidget extends StatefulWidget{
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> comps = [];
     List<Widget> views = [];
     for (var cat in categories.keys) {
@@ -28,8 +37,10 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                 Padding(padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), child: ListTile(
                   title: Text( "${view.name[0].toUpperCase()}${view.name.substring(1).toLowerCase()}", overflow: TextOverflow.ellipsis,
                   style:  TextStyle( color: Theme.of(context).primaryColor, fontSize: 17), ),
-                  trailing: Text("go to view", style: const TextStyle(fontSize: 9, color: Colors.grey) ),
-                  subtitle: view.description == "" ? null : Text("${view.description[0].toUpperCase()}${view.description.substring(1).toLowerCase()}", 
+                  trailing: Text(TranslateConstants.goto.toLowerCase(), 
+                  style: const TextStyle(fontSize: 9, color: Colors.grey) ),
+                  subtitle: view.description == "" ? null 
+                    : Text(await getOnFlow("${view.description[0].toUpperCase()}${view.description.substring(1).toLowerCase()}"), 
                   style: const TextStyle( fontSize: 10), ),
                 )),
           ],)) )));
@@ -37,7 +48,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),
           Padding( padding: const EdgeInsets.only(right: 20),
-          child: Text("${cat[0].toUpperCase()}${cat.substring(1).toLowerCase()}",
+          child: Text(await getOnFlow("${cat[0].toUpperCase()}${cat.substring(1).toLowerCase()}"),
           style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
             Expanded( child: Divider(color: Theme.of(context).splashColor,))],),
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))
@@ -53,7 +64,8 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Flexible( child: Text("DASHBOARD", overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) )
+          Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
+            overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) )
         ])),
       Container(
             padding: const EdgeInsets.only(top: 30, right: 30, left: 30),

@@ -12,6 +12,7 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 List<String> errors = <String>[];
 @lazySingleton
@@ -106,7 +107,8 @@ class ActionService {
           if (form.view!.isEmpty) { isNew = value.data![0].items[0].values["id"]; }
           if (form.view!.id == mainForm.currentState!.widget.view!.id) {
             showAlertBanner(context, () {}, 
-              InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (method == "put" ? "save" : method)} datas suceed :)"), // <-- Put any widget here you want!
+              InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (
+                method == "put" ? TranslateConstants.filterSave.toUpperCase() : await getOnFlow(method))} datas suceed :)"), // <-- Put any widget here you want!
                                    alertBannerLocation:  AlertBannerLocation.bottom,);
           }
           // ignore: invalid_return_type_for_catch_error

@@ -9,6 +9,7 @@ import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/bottom_column.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 String? isNew;
 bool wait = false;
@@ -154,7 +155,8 @@ class GridWidgetState extends State<GridWidget> {
                         decoration: BoxDecoration( color: Theme.of(context).splashColor), 
                         width: maxWidth + 81.5,
                         child: Center(
-                          child: Text("EMPTY DATA", style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
+                          child: Text(TranslateConstants.emptyData, 
+                            style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
                         )
                       ) : Column(children: [...rows, const SizedBox(height: 10, child: null)])
                     )

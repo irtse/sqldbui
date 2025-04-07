@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class PopupButtonWidget extends StatefulWidget {
+  double? width; 
+  Color? color;
   String tooltip;
   IconData icon;
   Widget widget;
@@ -12,6 +14,8 @@ class PopupButtonWidget extends StatefulWidget {
     required this.tooltip,
     required this.icon,
     required this.widget,
+    this.color,
+    this.width
   });
   @override
   PopupButtonWidgetState createState() => PopupButtonWidgetState();
@@ -21,8 +25,8 @@ class PopupButtonWidgetState extends State<PopupButtonWidget> {
 
   @override Widget build(BuildContext context) {
     return PopupMenuButton(
-      constraints: BoxConstraints.tightFor( width: MediaQuery.of(context).size.width / 1.1),
-      color: Theme.of(context).secondaryHeaderColor, 
+      constraints: BoxConstraints.tightFor( width: widget.width ?? MediaQuery.of(context).size.width / 1.1),
+      color: widget.color ?? Theme.of(context).secondaryHeaderColor, 
       padding: const EdgeInsets.all(0),
       tooltip: widget.tooltip,
       icon: Icon(widget.icon, 

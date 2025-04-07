@@ -11,6 +11,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/form/convertors/text.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 
 // ignore: must_be_immutable
@@ -30,6 +31,14 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
   String directory = "/";
   bool isWeb = false;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     var mapped = <String, dynamic>{};
           List<String> order = <String>[];
           for (var fieldName in currentView!.schema.keys) { 
@@ -139,12 +148,12 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               child: Icon(widget.isExport ? Icons.download : Icons.upload, 
                 color: Theme.of(context).splashColor, 
                 size: 30,)),
-            Text("${widget.isExport ? "Export" : "Import" } ${currentView!.schemaName.replaceAll("db", "").replaceAll("_", " ")} datas with custom mapping",
+            Text((await getOnFlow("${widget.isExport ? "Export" : "Import" } data with custom mapping")).toLowerCase(),
               style: TextStyle(color: Theme.of(context).highlightColor, 
               fontSize: 20, 
               fontWeight: FontWeight.bold)),
             Padding( padding: const EdgeInsets.only(left: 20, top: 5), 
-            child: Text( widget.isExport && !isWeb ? "${"saved to folder"} : $directory" : "${"allowed format"} : ${widget.importFormat.join(",")}",
+            child: Text( widget.isExport && !isWeb ? "${TranslateConstants.savedFolder.toLowerCase()} : $directory" : "${TranslateConstants.allowedFormat.toLowerCase()} : ${widget.importFormat.join(",")}",
               style: TextStyle(color: Theme.of(context).splashColor, fontSize: 12))), 
             widget.isExport && !isWeb ? Padding( padding: const EdgeInsets.only(left: 5, top: 5), 
             child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20,), 
@@ -160,7 +169,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
         Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : isLoading ? [] : <Widget>[
               Padding( padding: const EdgeInsets.only(bottom: 10), 
               child: TextButton(style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
-                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text('Cancel', style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
+                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), 
+                child: Text(TranslateConstants.filterCancel.toUpperCase(), 
+                  style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
               Padding( padding: const EdgeInsets.only(right: 20, bottom: 10), 
               child: TextButton( style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge, backgroundColor: Theme.of(context).primaryColor),
                 child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text(widget.isExport ? "Export" : "Import", style: TextStyle(color: Theme.of(context).highlightColor))), 

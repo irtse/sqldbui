@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class WorkflowBarWidget extends StatefulWidget{
   final model.Workflow workflow;
@@ -28,7 +29,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
         active: active));
     }
     for (var i = 0; i < widget.workflow.steps.length; i++) {
-      items.add(StepWidget( content: Text("step ${ i + 1 }", style: const TextStyle(color: Colors.white)),
+      items.add(StepWidget( content: Text("${TranslateConstants.step.toLowerCase()} ${ i + 1 }", style: const TextStyle(color: Colors.white)),
         width: itemWidth, gotBefore: true, 
         steps: widget.workflow.steps.containsKey("${ i + 1 }") ? widget.workflow.steps["${ i + 1 }"] : null,
         beforeDoing: widget.workflow.position != "" && pos > ( i - 1 ),
@@ -50,7 +51,8 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
       active: widget.workflow.isClose && !widget.workflow.isDismiss));
     } else {
       items.add(SizedBox( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        child: Center(child: Text("no workflow related !", style: const TextStyle(color: Colors.white)),)));
+        child: Center(child: Text(TranslateConstants.noWorkflow, 
+          style: const TextStyle(color: Colors.white)),)));
     }
     return Container(  margin: const EdgeInsets.only(top: 25), width: max,
       height: 40, color: widget.workflow.steps.isEmpty ? Theme.of(context).splashColor : Colors.white,
@@ -92,7 +94,21 @@ class StepWidget extends StatefulWidget{
   @override StepWidgetState createState() => StepWidgetState();
 }
 class StepWidgetState extends State<StepWidget> {
+
+  Future<Widget> getState(model.Step step, double maxLength, List<Widget> additionnal) async {
+     return SizedBox( width: maxLength * 100,
+      child: Row( children : [ Padding(padding: const EdgeInsets.only(left: 20), child:  Icon(step.optionnal ? Icons.link_off : Icons.link,)), 
+        Padding(padding: const EdgeInsets.only(left: 10), child: Text(await getOnFlow(step.name))), ... additionnal]),);
+  }
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> icons = [];
     if (widget.steps != null && widget.steps!.isNotEmpty) {
       double maxLength = 0;
@@ -102,6 +118,7 @@ class StepWidgetState extends State<StepWidget> {
       icons.add(Positioned(
         left: widget.width - 50,
         child: PopupMenuButton(
+              tooltip: TranslateConstants.showMenu.toLowerCase(),
               constraints: BoxConstraints(maxWidth: maxLength * 15,),
               color: Colors.white,
               icon: const Icon(Icons.menu, color: Colors.white, size: 20,),
@@ -119,11 +136,13 @@ class StepWidgetState extends State<StepWidget> {
                     additionnal.add(const Padding(padding: EdgeInsets.only(left: 20), child: Icon(Icons.refresh)));
                   }
                   rows.add(PopupMenuItem(enabled: false, 
-                  child: StatefulBuilder( builder: (BuildContext context, StateSetter setState) {
-                    return SizedBox(
-                    width: maxLength * 100,
-                    child: Row( children : [ Padding(padding: const EdgeInsets.only(left: 20), child:  Icon(step.optionnal ? Icons.link_off : Icons.link,)), 
-                      Padding(padding: const EdgeInsets.only(left: 10), child: Text(step.name)), ... additionnal]),); })));
+                  child: StatefulBuilder( builder: (BuildContext context, StateSetter s) {
+                    return FutureBuilder<Widget>(future: getState(step, maxLength, additionnal), builder: (s, b) {
+                      if (b.data != null) {
+                        return b.data!;
+                      }
+                      return Container();
+                    }); })));
                 }
                 return rows; 
             })));

@@ -46,7 +46,7 @@ class ButtonWidgetState extends State<ButtonWidget> {
               })),
             onPressed: ActionService.pressed(this, false, currentView!.schemaName,  currentView!.actionPath, 
                   <String>["id"], currentView!.schema, widget.method, context), 
-            child: Text(widget.text, style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
+            child: Text(widget.text.toUpperCase(), style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
     );
   }
 }

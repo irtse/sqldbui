@@ -8,7 +8,9 @@ import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/page/translate.dart';
 
+bool translation = true;
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
   final model.View? view;
@@ -33,20 +35,25 @@ class ActionBarState extends State<ActionBarWidget> {
       icon: Icon( icon, color: isTransluscent ? Theme.of(context).splashColor : Theme.of(context).highlightColor, size: size ), 
       onPressed: () {  onPressed(); });
   }
-
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b, a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async{
       List<Widget> actions = <Widget>[];
       if (viewID != null) {
-        actions.add( getIconOffset("refresh page", Icons.refresh, null, () {
-          globalOffset = 0;
-          globalMenuKey.currentState?.refresh(true);
-          globalMainViewKey.currentState?.refreshUrl(currentView?.linkPath != "" ? currentView?.linkPath
-            : currentView?.actionPath.replaceAll("rows=all", "rows=${subViewID ?? viewID}"), subViewID, true);
+        actions.add( getIconOffset(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON.toLowerCase(), 
+        !translation ? Icons.translate : Icons.g_translate, null, () {
+          translation = !translation;
+          globalMainViewKey.currentState?.setState(() { });
         }, false));
       }
       if (widget.gridKey != null) {
-        actions.add(
-          getIconOffset("reset ui change", Icons.auto_fix_off, 20, () {
+        actions.add( getIconOffset(TranslateConstants.resetUI.toLowerCase(), Icons.auto_fix_off, 20, () {
             globalOffset = 0;
             globalMainViewKey.currentState?.setState(() {rects.remove(viewID); });
           }, false)
@@ -54,6 +61,7 @@ class ActionBarState extends State<ActionBarWidget> {
       }
       if (currentView != null && (MediaQuery.of(context).size.width - menuSize) > 650) {
         for (var short in currentView!.shortcuts.keys) {
+          var t = await getOnFlow(short);
           actions.add(
             Padding( 
               padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5), 
@@ -65,7 +73,7 @@ class ActionBarState extends State<ActionBarWidget> {
                   })
                 ), 
                 onPressed: () { AppRouter.navigateTo(currentView!.shortcuts[short]); }, 
-                child: Text(short, overflow: TextOverflow.ellipsis, style: const TextStyle( color: Colors.white, fontSize: 12 ))
+                child: Text(t.toLowerCase(), overflow: TextOverflow.ellipsis, style: const TextStyle( color: Colors.white, fontSize: 12 ))
               )
             )
           );
@@ -73,7 +81,10 @@ class ActionBarState extends State<ActionBarWidget> {
       }
       var row = <Widget>[];
       row.addAll([
-        getDescription(widget.view == null ? (globalLoading ? "LOADING" : "HOME") : excludeDB(widget.view!.name),
+        getDescription(
+          (widget.view == null ? (
+            globalLoading ? TranslateConstants.loading : TranslateConstants.home) 
+          : await getOnFlow(excludeDB(widget.view!.name))).toLowerCase(),  
           null, Theme.of(context).highlightColor),
         Padding(
           padding: const EdgeInsets.only(left: 10), 
@@ -83,7 +94,11 @@ class ActionBarState extends State<ActionBarWidget> {
             size: widget.view == null || !widget.view!.isList ? 20 : 25, 
           )
         ),
-        getDescription(widget.view == null ? "" : "   ${widget.view!.max} items founded", 11, Theme.of(context).splashColor),
+        Padding(
+          padding: const EdgeInsets.only(left: 10), 
+          child:getDescription(widget.view == null || !widget.view!.isList ? "" : "${widget.view!.max} ${TranslateConstants.found.toLowerCase()}", 
+            11, Theme.of(context).splashColor),
+        )
       ]);
       String path = "";
       if (viewID != null) { path += "$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
@@ -94,7 +109,7 @@ class ActionBarState extends State<ActionBarWidget> {
       List<Widget> rows = [];
       if (MediaQuery.of(context).size.width > 700) {
         rows = [ 
-          Flexible(flex: 1, child: Row( children: row,)),
+          Flexible(child: Row( children: row,)),
           Flexible( 
             flex: 1, 
             child: Row( 
@@ -114,13 +129,13 @@ class ActionBarState extends State<ActionBarWidget> {
                           fillColor: Theme.of(context).secondaryHeaderColor,
                           iconColor: Theme.of(context).highlightColor,
                           prefixIcon: const Icon(Icons.account_tree),      
-                          hintText: 'actual url...',
+                          hintText: TranslateConstants.url.toLowerCase(),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), borderSide: BorderSide(color: Theme.of(context).primaryColor))
                         )
                       )
                     ),
                   ),
-                  getIconOffset("go to data(s)", Icons.send, 20, () { AppRouter.navigateTo(controller.text); }, true),
+                  getIconOffset(TranslateConstants.goto.toLowerCase(), Icons.send, 20, () { AppRouter.navigateTo(controller.text); }, true),
               ]
             )
           ),

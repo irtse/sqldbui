@@ -9,6 +9,7 @@ import 'package:sqldbui2/core/services/router.dart';
 import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -18,6 +19,7 @@ final ThemeData myTheme = ThemeData(
 );
 
 void main() async { 
+  await SetUpTranslate();
   runApp(const MyApp()); 
 }
 final _appRouter = AppRouter();   
@@ -27,6 +29,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    TranslateConstants.lang = String.fromEnvironment("LANG", defaultValue: "fr");
     return MaterialApp.router(
       theme: myTheme,
       routerConfig: GoRouter(routes: _appRouter.routes),

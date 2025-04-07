@@ -4,6 +4,7 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class OneToManyWidget extends StatefulWidget {
@@ -28,6 +29,14 @@ class OneToManyWidget extends StatefulWidget {
 }
 class OneToManyState extends State<OneToManyWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     var schema =  widget.component.widget.view!.schema;
     var scheme = schema[widget.name];
     if (scheme == null) { return Container(); }
@@ -36,53 +45,28 @@ class OneToManyState extends State<OneToManyWidget> {
       return FutureBuilder<APIResponse<model.View>>(
         future: APIService().get(widget.value, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
-          List<Widget> items = <Widget>[];
-          if (snap.data != null) {
-            for (var data in snap.data!.data!) {
-              widget.readOnly = widget.readOnly || !data.actions.contains("put");
-              widget.canPost = data.actions.contains("post");
-              for (var item in data.items) {
-                var isDeleted = false;
-                var w = widget.component.widget.oneToManiesFormDelete;
-                for (var deleted in w) {
-                  if ("${deleted.view!.id}" == "${item.values["id"]}") { isDeleted = true; break; }
-                }
-                if (isDeleted) { continue; }
-                item.readonly = widget.readOnly;
-                var view = model.View(id: int.parse(item.values["id"]), name: data.name, readOnly: widget.readOnly,
-                                  workflow: data.workflow,
-                                  actions: data.actions, actionPath: data.actionPath, schemaName: data.schemaName,
-                                  schema: data.schema, order: data.order, isEmpty: false, items: <model.Item>[item]);
-                var dataForm = widget.flashed.containsKey(int.parse(item.values["id"])) ? widget.flashed[int.parse(item.values["id"])]! 
-                : DataFormWidget(view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
-                widget.flashed[dataForm.view!.id] = dataForm;
-                if (!widget.readOnly && data.actions.contains("delete")) {
-                  var w = Stack(children: [dataForm,
-                            Positioned(top: 10,  right: 100, 
-                            child: IconButton(onPressed: () {
-                              showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete occurency", validate: () {
-                                widget.component.widget.detectChange = true;
-                                setState(() {
-                                  var w = widget.component.widget.oneToManiesFormDelete;
-                                  w.add(dataForm);
-                                });
-                              })); }, icon: const Icon(Icons.delete, color: Colors.grey,)))],);
-                  items.add(w);
-                } else {  items.add(dataForm); }
-                var e = widget.component.widget.existingOneToManiesForm;
-                e.add(dataForm);
-              }
-            }
-          }
-          return Column(children: [Row(children: controlButtons(widget.readOnly, widget.canPost, scheme),)]..addAll(items)..addAll(filtered),);
+          return SubOneToManyWidget(schemaName: widget.schemaName, 
+          name: widget.name, 
+          datas: snap.data?.data, 
+          readOnly: widget.readOnly, 
+          value: widget.value, 
+          label: widget.label, 
+          require: widget.require, 
+          type: widget.type, 
+          url: widget.url, 
+          state: this,
+          scheme: scheme,
+          filtered: filtered.toList(),
+          component: widget.component);
       });
     }
-    return Column(children: [Row(children: controlButtons(widget.readOnly, widget.canPost, scheme),)]..addAll(filtered),);
+    return Column(children: [Row(children: await controlButtons(widget.readOnly, widget.canPost, scheme),)]..addAll(filtered),);
   }
 
-  List<Widget> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) {
-    List<Widget> rows = [Padding( padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
-                                  child: Text("${"related"} ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")),]; 
+  Future<List<Widget>> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) async {
+    List<Widget> rows = [Padding( 
+      padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
+      child: Text((await getOnFlow("${"related"} ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')} ${widget.require ? '*' : ''}:")).toLowerCase()))]; 
     if (!readOnly && (canPost || widget.component.widget.view != null) || widget.component.widget.view!.isEmpty) {
         var filtered = widget.component.widget.oneToManiesForm.where((element) => element.view!.name.contains(widget.label));
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
@@ -119,3 +103,84 @@ class OneToManyState extends State<OneToManyWidget> {
   }
 }
 // TODO FILTER
+// ignore: must_be_immutable
+class SubOneToManyWidget extends StatefulWidget {
+  final model.SchemaField scheme;
+  final List<DataFormWidget> filtered;
+  final String schemaName;
+  final dynamic name;
+  bool readOnly;
+  bool canPost = false;
+  final bool require;
+  dynamic value;
+  final String? url;
+  final String type;
+  final String label;
+  List<model.View>? datas;
+  var isFilled = true;
+  OneToManyState state;
+  var flashed = <int, DataFormWidget>{};
+  final FormWidgetState component;
+  SubOneToManyWidget ({ super.key, required this.state,
+  required this.schemaName, required this.name, required this.datas, required this.filtered,
+                      required this.readOnly, required this.value, required this.label,
+                      required this.require, required this.type, required this.url, 
+                      required this.component, required this.scheme});
+  @override
+  // ignore: library_private_types_in_public_api
+  SubOneToManyState createState() => SubOneToManyState();
+}
+class SubOneToManyState extends State<SubOneToManyWidget> {
+  @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    List<Widget> items = <Widget>[];
+          if (widget.datas != null) {
+            for (var data in widget.datas!) {
+              widget.readOnly = widget.readOnly || !data.actions.contains("put");
+              widget.canPost = data.actions.contains("post");
+              for (var item in data.items) {
+                var isDeleted = false;
+                var w = widget.component.widget.oneToManiesFormDelete;
+                for (var deleted in w) {
+                  if ("${deleted.view!.id}" == "${item.values["id"]}") { isDeleted = true; break; }
+                }
+                if (isDeleted) { continue; }
+                item.readonly = widget.readOnly;
+                var view = model.View(id: int.parse(item.values["id"]), name: data.name, readOnly: widget.readOnly,
+                                  workflow: data.workflow,
+                                  actions: data.actions, actionPath: data.actionPath, schemaName: data.schemaName,
+                                  schema: data.schema, order: data.order, isEmpty: false, items: <model.Item>[item]);
+                var dataForm = widget.flashed.containsKey(int.parse(item.values["id"])) ? widget.flashed[int.parse(item.values["id"])]! 
+                : DataFormWidget(view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
+                widget.flashed[dataForm.view!.id] = dataForm;
+                if (!widget.readOnly && data.actions.contains("delete")) {
+                  var w = Stack(children: [dataForm,
+                            Positioned(top: 10,  right: 100, 
+                            child: IconButton(onPressed: () {
+                              showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete occurency", validate: () {
+                                widget.component.widget.detectChange = true;
+                                setState(() {
+                                  var w = widget.component.widget.oneToManiesFormDelete;
+                                  w.add(dataForm);
+                                });
+                              })); }, icon: const Icon(Icons.delete, color: Colors.grey,)))],);
+                  items.add(w);
+                } else {  items.add(dataForm); }
+                var e = widget.component.widget.existingOneToManiesForm;
+                e.add(dataForm);
+              }
+            }
+          }
+          return Column(children: [Row(children: 
+            await widget.state.controlButtons(widget.readOnly, widget.canPost, widget.scheme),)
+          ]..addAll(items)..addAll(widget.filtered),);
+  }
+
+}

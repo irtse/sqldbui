@@ -1,5 +1,6 @@
 
 // ignore: must_be_immutable
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
@@ -9,6 +10,7 @@ import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class GridCell {
   double height = 100; 
@@ -63,6 +65,14 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
 }
 class GridCellWidgetState extends State<GridCellWidget> {
   @override Widget build(BuildContext context) { 
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     if (cacheChanges["${widget.cellID}:${widget.cell.columnName}"] != null) { 
       widget.cell.value = cacheChanges["${widget.cellID}:${widget.cell.columnName}"]; 
     }
@@ -72,7 +82,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
                 && !widget.cell.readOnly && !widget.readOnly;
     String url = currentView!.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]!.actionPath == "" ? 
       "" : "${currentView!.schema[widget.cell.columnName]!.actionPath}&shallow=enable";
-    return edit ? Convertor.filterFieldByType(
+    return Column( mainAxisAlignment: MainAxisAlignment.center, children: [edit ? await Convertor.filterFieldByType(
       context, widget, widget.cell.type, "", this, false, true, url, "${widget.cellID}:${widget.cell.columnName}") : 
       ListTile( 
         mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
@@ -89,12 +99,12 @@ class GridCellWidgetState extends State<GridCellWidget> {
           AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
-        child: Center(child: Text(widget.value, 
+        child: Center(child: Text( translation ? await getOnFlow(widget.value) : widget.value, 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
             color: Theme.of(context).primaryColorLight)
           )
-        )));
+        )))]);
   }
 }

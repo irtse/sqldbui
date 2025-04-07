@@ -1,12 +1,13 @@
 
 // ignore: must_be_immutable
-import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/page/translate.dart';
 
-class FavoriteConstants {
+class MenuConstants {
   static bool isFavorite = false;
+  static String? value;
 }
 
 // ignore: must_be_immutable
@@ -20,8 +21,8 @@ class MenuHeaderWidget extends StatefulWidget {
   @override MenuHeaderWidgetState createState() => MenuHeaderWidgetState();
 }
 class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
-  Widget getSlotMenu(int max, int index, IconData icon, bool Function() condition, void Function() change) {
-    return InkWell( 
+  Widget getSlotMenu(int max, int index, IconData icon, String tooltip, bool Function() condition, void Function() change) {
+    return Tooltip( message: tooltip, child: InkWell( 
       onTap: () { globalMenuKey.currentState?.setState(() { change(); });}, 
       child: Container(
         decoration: BoxDecoration(
@@ -31,7 +32,7 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
             right: index > 0 ? BorderSide(color: Colors.black, width: 0.4) : BorderSide.none)),
       alignment: Alignment.center, height: 40, width: (noMenu ? 300 : menuSize) > 0 ? (noMenu ? 300 : menuSize) / max : 0, 
       child: Icon(icon, color: Theme.of(context).highlightColor))
-    );
+    ));
   }
 
   @override Widget build(BuildContext context) {
@@ -49,7 +50,10 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
               cursorHeight: 15,
               controller: widget.controller,
               style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
-              onChanged: (value) => viewID == null ? homeKey.currentState?.setState(() {}) : setState(() { }),
+              onChanged: (value) {
+                MenuConstants.value = value;
+                globalMenuKey.currentState?.setState(() { });
+              },
               decoration: InputDecoration(
                 filled: true,
                 labelStyle: TextStyle(color: Theme.of(context).highlightColor),
@@ -58,14 +62,14 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
                 fillColor: Theme.of(context).primaryColorLight,
                 iconColor: Theme.of(context).highlightColor,
                 prefixIcon: Icon(Icons.filter_alt, size: 20, color: Theme.of(context).splashColor,),
-                hintText: 'filter menu...',
+                hintText: TranslateConstants.filterMenu.toLowerCase(),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
                                            borderSide: BorderSide(color: Theme.of(context).primaryColor)) )
         ),
       ))), 
       Row(children: [
-        getSlotMenu(2, 0, Icons.all_inbox, () => FavoriteConstants.isFavorite, () { FavoriteConstants.isFavorite = false; }),
-        getSlotMenu(2, 1, Icons.favorite_border, () => !FavoriteConstants.isFavorite, () { FavoriteConstants.isFavorite = true; }),
+        getSlotMenu(2, 0, Icons.all_inbox, TranslateConstants.all.toLowerCase(), () => MenuConstants.isFavorite, () { MenuConstants.isFavorite = false; }),
+        getSlotMenu(2, 1, Icons.favorite_border, TranslateConstants.favorites.toLowerCase(), () => !MenuConstants.isFavorite, () { MenuConstants.isFavorite = true; }),
       ])
     ]);
   }

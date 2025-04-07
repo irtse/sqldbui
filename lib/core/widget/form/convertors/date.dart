@@ -2,6 +2,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class DateWidget extends StatefulWidget {
@@ -23,6 +24,14 @@ class DateWidget extends StatefulWidget {
 }
 class _DateState extends State<DateWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
       DateTime? dateValue;
       if (widget.form[widget.name] != null) { 
         widget.value = widget.form[widget.name]; 
@@ -48,8 +57,8 @@ class _DateState extends State<DateWidget> {
             hintStyle: const TextStyle(fontSize: 12, ),
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: "enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase()}",
-            labelText: "${widget.label.toLowerCase()}${widget.require ? '*' : ''}",
+            hintText: (await getOnFlow("enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase()}")).toLowerCase(),
+            labelText: (await getOnFlow("${widget.label.toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(
               context: context,
