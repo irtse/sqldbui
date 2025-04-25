@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
 
 abstract class SerializerDeserializer<T> {
   T deserialize(Map<String, dynamic> json);

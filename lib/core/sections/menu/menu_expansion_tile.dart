@@ -27,15 +27,6 @@ class MenuExpansionTileWidget extends StatefulWidget {
 }
 class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
-    var category = await getOnFlow(widget.category);
     return ExpansionTile(
       shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
       initiallyExpanded: widget.isExpanded,
@@ -48,8 +39,14 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
         Flexible( 
           child: Padding( 
             padding: EdgeInsets.only(right: "${widget.count}".isNotEmpty ? (("${widget.count}".length + 1) * 7) : 0), 
-            child: Text(category.toUpperCase(), overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11))
+            child: FutureBuilder(future: getOnFlow(widget.category), builder: (a,s) {
+                if (s.data != null) {
+                  return Text(s.data!.toUpperCase(), overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11));
+                }
+                return Text(widget.category.toUpperCase(), overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 11));
+            })
           )
         ) 
       ]), 

@@ -99,14 +99,6 @@ class GridColumnWidget extends StatefulWidget {
 class GridColumnWidgetState extends State<GridColumnWidget> {
   double height = 100; bool orderASC = true; bool delayed = false;
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     var width = widget.getWidth(false);
     List<Widget> buttons = [];
     if (widget.allowSorting) { 
@@ -161,8 +153,15 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         t.addAll(["min", "max"]);
         if (!isDate) { t.addAll(["sum", "avg"]); }
       }
-      for (var func in t) { dpItems.add(DropdownMenuItem<String>(value: func, 
-        child: Text(await getOnFlow(func), style: const TextStyle(color: Colors.white))));  }
+      for (var func in t) { 
+        dpItems.add(DropdownMenuItem<String>(value: func, 
+            child: FutureBuilder<String>( future: getOnFlow(func), builder: (a,s) {
+              if (s.data != null) {
+                return Text(s.data!.toLowerCase(), style: const TextStyle(color: Colors.white));
+              }
+              return Text(func.toLowerCase(), style: const TextStyle(color: Colors.white));
+        })));
+      }
     }
     return Column( mainAxisSize: MainAxisSize.min, children: [ 
       Container( 

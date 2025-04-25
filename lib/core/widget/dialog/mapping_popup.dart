@@ -89,10 +89,13 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               readOnly: false, 
               value: null, 
               label: "filename", 
-            require: true, type: "varchar", component: null, isDark: true,)),
+              translatable: false,
+              require: true, type: "varchar", 
+              component: null, isDark: true)),
             DropDownWidget(
               form : cache, 
               schemaName: "", 
+              schema: <String,model.SchemaField>{},
               name: "format", 
               readOnly: false, 
               value: widget.format, 
@@ -100,9 +103,13 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               require: true, 
               type: "enum__csv_json", 
               component: null, 
+              mainUrl: null,
               url: null, 
               isDark: true, 
-              path: "")
+              path: "", 
+              translatable: false,
+              autofill: null,
+              empty: currentView?.isEmpty ?? false)
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Divider(color: Theme.of(context).splashColor,))]);
       } else {
@@ -131,9 +138,13 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
       }
       var schema = widget.forcedSchema ?? currentView!.schema;
       for (var scheme in schema.keys) {
-        var f = TextWidget(form : newCacheEntry, schemaName: currentView!.schemaName, name: scheme, 
-          readOnly: false, value: scheme, label: "${schema[scheme]!.label} as label", 
-          require: false, type: "varchar", component: null, isDark: true,);
+        var f = TextWidget(form : newCacheEntry, 
+          schemaName: currentView!.schemaName, name: scheme, 
+          readOnly: false, value: scheme, 
+          label: "${schema[scheme]!.label} as label", 
+          translatable: false,
+          require: false, type: "varchar", 
+          component: null, isDark: true);
         mapping.add(Padding(padding: const EdgeInsets.only(bottom: 10), 
                     child: Container( width: 300,
                     decoration: BoxDecoration( borderRadius: BorderRadius.circular(10),
@@ -163,7 +174,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               })) : Container(),
           ])),
         SizedBox( child: Wrap(alignment: WrapAlignment.center, children : [...items, Container( 
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 3), 
+          constraints: BoxConstraints(maxHeight: currentHeigth / 3), 
           child: SingleChildScrollView(scrollDirection: Axis.vertical,
           child: Wrap(alignment: WrapAlignment.center, children: mapping)))])),
         Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : isLoading ? [] : <Widget>[

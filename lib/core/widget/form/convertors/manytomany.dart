@@ -14,13 +14,14 @@ class ManyToManyWidget extends StatefulWidget {
   final bool readOnly;
   final bool require;
   dynamic value;
-  final FormWidgetState component;
+  final FormWidgetState? component;
   final String? url;
   final String type;
   final String label;
+  final bool translatable;
   var isFilled = true;
   ManyToManyWidget ({ super.key, required this.form, required this.schemaName, required this.name,
-                      required this.readOnly, required this.value, required this.label,
+                      required this.readOnly, required this.value, required this.label, required this.translatable,
                       required this.require, required this.type, required this.url, required this.component});
   @override
   // ignore: library_private_types_in_public_api
@@ -37,30 +38,38 @@ class _ManyToManyState extends State<ManyToManyWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-  var view = widget.component.widget.view!;
-  var schema =  widget.component.widget.view!.schema;
-  var scheme = schema[widget.name];
+  var actions = widget.component?.widget.view?.actions ?? [] as List<String>;
+  var schema =  widget.component?.widget.view!.schema;
+  var scheme = schema?[widget.name];
   if (scheme == null) { return Container(); }
-  var readOnly = widget.readOnly || (!view.actions.contains("post") && !view.actions.contains("put")) || mainForm.currentState!.widget.view!.readOnly;
+  var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || mainForm.currentState!.widget.view!.readOnly;
   if (readOnly) {
       List<Container> tags = <Container>[];
       if (widget.value != null && widget.value is List) {
         for (var val in widget.value) {
-        val = val as model.Shallowed;
-        tags.add(Container( margin: const EdgeInsets.only(top:5, left: 10, right: 10), 
-          child: TextButton(onPressed: (){}, 
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor),
-              mouseCursor: WidgetStateProperty.all(MouseCursor.uncontrolled),
-            ),
-            child: Text((await getOnFlow(val.label ?? val.name ?? "${val.id}")).toLowerCase(), 
-              style: const TextStyle(color: Colors.white))
+          val = val as model.Shallowed;
+          String str = (val.label ?? val.name ?? "${val.id}").replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
+          if (widget.translatable) {
+            str = await getOnFlow(str);
+          }
+          tags.add(Container( margin: const EdgeInsets.only(top:5, left: 10, right: 10), 
+            child: TextButton(onPressed: (){}, 
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor),
+                  mouseCursor: WidgetStateProperty.all(MouseCursor.uncontrolled),
+                ),
+                child: Text(str.toLowerCase(), style: const TextStyle(color: Colors.white))
+              )
             )
-          ));
+          );
         }
       }
+      String str =widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
+      if (widget.translatable) {
+        str = await getOnFlow(str);
+      }
       return Padding(padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),child: Column(children: [
-        Row(children: [Text((await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}:")).toLowerCase(), 
+        Row(children: [Text("$str${widget.require ? '*' : ''}:", 
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags)]) ]),);
     } else {
@@ -79,28 +88,31 @@ class _ManyToManyState extends State<ManyToManyWidget> {
               require: widget.require,
               label: widget.label,
               type: widget.type,
-              url: widget.url
+              url: widget.url,
+              translatable: widget.translatable,
             );
         });
       }
     }
 }
 
+// ignore: must_be_immutable
 class SubManyToManyWidget extends StatefulWidget {
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
   final bool readOnly;
   final bool require;
+  final bool translatable;
   dynamic value;
-  final FormWidgetState component;
+  final FormWidgetState? component;
   final String? url;
   final String type;
   final String label;
   var isFilled = true;
   List<model.Shallowed>? datas;
   SubManyToManyWidget ({ super.key, required this.datas, required this.form, required this.schemaName, required this.name,
-                      required this.readOnly, required this.value, required this.label,
+                      required this.readOnly, required this.value, required this.label, required this.translatable,
                       required this.require, required this.type, required this.url, required this.component});
   @override
   // ignore: library_private_types_in_public_api
@@ -129,18 +141,22 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               }
             }
           }
+          String str =widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
+          if (widget.translatable) {
+            str = await getOnFlow(str);
+          }
           return Padding( padding: const EdgeInsets.only(left: 25, right: 25, bottom: 15), child: MultiSelectDialogField(
             initialValue: widget.form[widget.name],
             validator: (value) => (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'do not leave empty' : null,
             title: Padding(padding: const EdgeInsets.only(left: 30), child: Text( "${widget.label.toUpperCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}", style: TextStyle( color: Theme.of(context).primaryColor ), )),
-            buttonText: Text((await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(), 
+            buttonText: Text("$str${widget.require ? '*' : ''}", 
               style: TextStyle( color: Colors.black, fontSize: 14, ), ),
             items: items,
             listType: MultiSelectListType.CHIP,
             onConfirm: (values) { widget.form[widget.name]=values; },
             onSaved: (values) { widget.form[widget.name]=values; },
             onSelectionChanged: (values) { 
-              widget.component.widget.detectChange = true;
+              widget.component?.widget.detectChange = true;
               widget.form[widget.name]=values; 
             },
           ));

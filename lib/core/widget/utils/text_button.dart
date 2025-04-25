@@ -18,6 +18,12 @@ class ButtonWidgetState extends State<TextButtonWidget> {
     return Padding(
       padding: const EdgeInsets.only(left: 5, right: 5), 
       child: TextButton(
+        style: TextButton.styleFrom(
+            backgroundColor: Theme.of(context).splashColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5), // Change this value
+            ),
+        ),
         onPressed: widget.onPressed,
         child: Row(children: widget.rows),  
       )

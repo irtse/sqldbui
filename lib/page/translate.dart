@@ -2,8 +2,11 @@ import 'package:translator/translator.dart';
 
 class TranslateConstants {
   static String lang = "fr";
-
+  static String synthesis = "tasks synthesis";
+  
+  static String empty = "not specified";
   static String all = "all";
+  static String update = "update";
   static String favorites = "favorites";
   static String dashboard = "dashboard";
   static String back = "backspace";
@@ -20,11 +23,14 @@ class TranslateConstants {
   static String filterPlaceholder = "select a filter...";
   static String filterLabel = "filters";
 
+  static String sendMail = "send back mails";
   static String filterTitle = "LIST COLUMNS";
   static String filterApply = "APPLY";
   static String filterCancel = "CANCEL";
   static String filterSave = "SAVE";
   static String submit = "SUBMIT";
+  static String draft = "DRAFT";
+  static String publish = "PUBLISH";
   static String delete = "DELETE";
   static String filterViewPlaceholder = "filter view columns";
 
@@ -73,7 +79,8 @@ class TranslateConstants {
   static String notLike = "not similar to";
 
   static String share = "share data";
-  static String pathToCopy = "copyable path in browser :";
+  static String pathToCopy = "navigation path for the browser :";
+  static String shareToUser = "share to a user :";
   static String successCopy = "successfully copied to clipboard";
 
   static String and = "and";
@@ -89,6 +96,8 @@ class TranslateConstants {
   static String validate = "validate";
   static String refused = "refused";
 
+    static String send = "send";
+
   static String yes = "yes";
   static String no = "no";
   static String colDirFilter = "select a direction to filter...";
@@ -97,11 +106,12 @@ class TranslateConstants {
   static String colCompFilter = "please select a comparator to filter...";
   static String emptyData = "EMPTY DATA";
   static String newT = "NEW";
+  static String draftT = "DRAFT";
   static String lost = "Seems pretty lost... go on another page please :)";
   static String sure = "Do we confirm?";
   static String undoAction = "You will not able to undo this action.";
   static String noWorkflow = "no workflow related !";
-  static String nextOpt = "next optionnal steps:";
+  static String nextOpt = "optional next steps:";
 
   static String howToCreate = "How to create a data ?";
   static String howToAssign = "How to access my assigned activities ?";
@@ -117,14 +127,26 @@ class TranslateConstants {
   static String needRule6 = "-> requests concerns all your request or your hierarchical subordinate. you can monitor where your requests are stated. notification will warn you on closure";
   static String needRule7 = "-> an request can be stated as <pending,progressing,dismiss,completed>. completion will close it as successful. dismiss will close it as rejected. when closed an activity can't be reopenned without superadmin action.";
   static String needRule8 = "-> filter showed column by tapping on the <gear> icon to open a popup panel to choose columns. filter can be saved. [ALPHA] only register state on session.";
-  
+  static String needRule9 = "-> filter on column by hovering column label and tapping <filter> icon to open a popup panel to filter by value column. filter multiple columns is allowed as 'and' connector. [ALPHA] only register state on session && does not adapt by column types only text considers.";
+  static String needRule10 = "-> filter on full table by using top bar <filter> icon. [ALPHA] actually not working, only visually sets up.";
+  static String needRule11 = "-> tap on a line of a list to acces its formulary. a form gives you state allowed depending your rights and actions available such as <save, delete>.";
+  static String needRule12 = "-> [ACCESS] enter in top search bar in the middle of the screen, app path to the form. (can also be use to access a list view)";
+  static String needRule13 = "-> only request, task shows workflow completion, on top of their forms. it consists of a simple bar declining steps with a list of parrallel subtask depending on step.";
+  static String needRule14 = "-> grey color define not reached step, vivid color step is done or currently doing, icons in subtask will give you its current state (done or doing). task can show you a optionnal hub under main workflow, by this you can choose wich are the next step to launch.";
+
   static String showMenu = "show menu";
   static String showFilter = "show filter";
 
   static String savedFolder = "saved to folder";
   static String allowedFormat = "allowed format";
-
+  static String howToAccess = "How to access a datas ?";
   static String howToTutorial = "TUTORIAL - HOW TO START";
+  static String howToOrder = "datas are ordered in thematized views accessible in the side menu. menu give access to datas list views.";
+  static String howToWorkflow = "workflows are attached to a request. some request does not have a workflow to integrate data.";
+  static String select = "select : ";
+  static String enter = "enter : ";
+  static String enterProper = "enter a proper value.";
+  static String dataFormulary = "fill data formulary";
   static Map<String, String> onFlowTrad = {};
 }
 
@@ -139,6 +161,23 @@ Future<String> getOnFlow(String value) async {
 
 Future<void> SetUpTranslate() async {
   var translator = GoogleTranslator();
+  await translator.translate(TranslateConstants.sendMail, to: TranslateConstants.lang).then( (e) => TranslateConstants.sendMail = e.text.toLowerCase());
+
+  await translator.translate(TranslateConstants.update, to: TranslateConstants.lang).then( (e) => TranslateConstants.update = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.send, to: TranslateConstants.lang).then( (e) => TranslateConstants.send = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.draftT, to: TranslateConstants.lang).then( (e) => TranslateConstants.draftT = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.dataFormulary, to: TranslateConstants.lang).then( (e) => TranslateConstants.dataFormulary = e.text.toLowerCase());
+
+  await translator.translate(TranslateConstants.enterProper, to: TranslateConstants.lang).then( (e) => TranslateConstants.enterProper = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.enter, to: TranslateConstants.lang).then( (e) => TranslateConstants.enter = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.select, to: TranslateConstants.lang).then( (e) => TranslateConstants.select = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.synthesis, to: TranslateConstants.lang).then( (e) => TranslateConstants.synthesis = e.text.toLowerCase());
+
+  await translator.translate(TranslateConstants.draft, to: TranslateConstants.lang).then( (e) => TranslateConstants.draft = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.publish, to: TranslateConstants.lang).then( (e) => TranslateConstants.publish = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.empty, to: TranslateConstants.lang).then( (e) => TranslateConstants.empty = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.shareToUser, to: TranslateConstants.lang).then( (e) => TranslateConstants.shareToUser = e.text.toLowerCase());
+
   await translator.translate(TranslateConstants.savedFolder, to: TranslateConstants.lang).then( (e) => TranslateConstants.savedFolder = e.text.toLowerCase());
   await translator.translate(TranslateConstants.allowedFormat, to: TranslateConstants.lang).then( (e) => TranslateConstants.allowedFormat = e.text.toLowerCase());
 
@@ -156,6 +195,13 @@ Future<void> SetUpTranslate() async {
   await translator.translate(TranslateConstants.needRule6, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule6 = e.text.toLowerCase());
   await translator.translate(TranslateConstants.needRule7, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule7 = e.text.toLowerCase());
   await translator.translate(TranslateConstants.needRule8, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule8 = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.needRule9, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule9 = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.needRule10, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule10 = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.needRule11, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule11 = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.needRule12, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule12 = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.needRule13, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule13 = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.needRule14, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule14 = e.text.toLowerCase());
+
 
   await translator.translate(TranslateConstants.refused, to: TranslateConstants.lang).then( (e) => TranslateConstants.refused = e.text.toLowerCase());
   await translator.translate(TranslateConstants.dismiss, to: TranslateConstants.lang).then( (e) => TranslateConstants.dismiss = e.text.toLowerCase());
@@ -262,5 +308,8 @@ Future<void> SetUpTranslate() async {
   await translator.translate(TranslateConstants.howToTutorial, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToTutorial = e.text.toLowerCase());
   await translator.translate(TranslateConstants.howToFilter, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToFilter = e.text.toLowerCase());
   await translator.translate(TranslateConstants.howToProgress, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToProgress = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.howToAccess, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToAccess = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.howToOrder, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToOrder = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.howToWorkflow, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToWorkflow = e.text.toLowerCase());
 
 }

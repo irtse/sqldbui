@@ -1,8 +1,10 @@
+import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
+import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -45,7 +47,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@"));
     if (isList || reForge) {
-        var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${viewID!.substring(1)}?rows=${subViewID != null ? "$subViewID" : "all"}" : "";
+        var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
         return FutureBuilder<APIResponse<model.View>>(
           future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), firstAPI, context) : 
           APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
@@ -98,6 +100,8 @@ class MainViewWidgetState extends State<MainViewWidget> {
     });
   }
 }
+
+bool isTriggerOpen = false;
 // ignore: must_be_immutable
 class ViewWidget extends StatefulWidget{
   List<model.View>? views;
@@ -110,6 +114,18 @@ class ViewWidgetState extends State<ViewWidget> {
   Widget _build(BuildContext context) {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
       return HomeViewWidget();
+    }
+    if (TriggerCacheService.getTriggers().isNotEmpty && !isTriggerOpen) {
+      isTriggerOpen = true;
+      Future.delayed(const Duration(milliseconds: 100), () {
+        var triggers = TriggerCacheService.getTriggers();
+        var trigger = triggers.first;
+        showDialog(context: context, barrierDismissible: false,
+        builder: (builder) => TriggerBoxWidget(
+          triggers: triggers, isCached: true,
+          title: trigger.name ?? "", actionPath: trigger.actionPath,
+          body: trigger.body, schema: trigger.schema,));
+      });
     }
     List<Widget> comps = <Widget>[];
     Future.delayed(const Duration(seconds: 2), () => globalLoading = false);
@@ -144,8 +160,8 @@ class ViewWidgetState extends State<ViewWidget> {
     }
     return Stack( children: [ 
       Container(margin: const EdgeInsets.only(top: 40),
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-        height: MediaQuery.of(context).size.height - 65 > 0 ? MediaQuery.of(context).size.height - 65 : 0, 
+        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
+        height: currentHeigth - 65 > 0 ? currentHeigth - 65 : 0, 
         decoration: BoxDecoration(color: Theme.of(context).primaryColor),
         child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : childs))),
       ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]); 
@@ -158,8 +174,8 @@ class LoaderMainViewWidget extends StatefulWidget{
 }
 class LoaderViewWidgetState extends State<LoaderMainViewWidget> {
   @override Widget build(BuildContext context) {
-    return globalLoading ? Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-                   height: MediaQuery.of(context).size.height > 0 ? MediaQuery.of(context).size.height - 40 : 0,
+    return globalLoading ? Container( width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
+                   height: currentHeigth > 0 ? currentHeigth - 40 : 0,
                    color: Theme.of(context).secondaryHeaderColor.withOpacity(0.5),
                    child: const SpinKitCircle(color: Colors.white, size: 100.0,)) : Container();
   }

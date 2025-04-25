@@ -2,6 +2,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -174,7 +175,7 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      if ((!force || noReload) && cache.containsKey(url) && cache[url] != null ) { 
+      if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
         return cache[url]! as APIResponse<T>;
       }
       try {
@@ -189,6 +190,7 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
+
         print("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode != null && response.statusCode! < 400) {
@@ -224,8 +226,9 @@ class APIService {
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
-      showAlertBanner( context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
-                       alertBannerLocation:  AlertBannerLocation.bottom,);
+      Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
+                       alertBannerLocation:  AlertBannerLocation.bottom,))
+      ;
     } 
     throw Exception(err);
   }
@@ -253,6 +256,15 @@ class APIService {
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     throw Exception(err);
+  }
+
+   Future<APIResponse<T>> sendPlatformFile<T extends SerializerDeserializer>(String url, PlatformFile file, BuildContext context) async {
+    FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(file.path!, filename:file.name),
+    });
+    // ignore: use_build_context_synchronously
+    return main("$url/import", formData, "post", "send succeed", true, context, null, null, false, 
+            null, Options(contentType: 'multipart/form-data'));
   }
 
   Future<APIResponse<T>> sendFile<T extends SerializerDeserializer>(String url, File file, BuildContext context) async {

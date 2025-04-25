@@ -22,7 +22,7 @@ class SaveDatagridButtonWidgetState extends State<SaveDatagridButtonWidget> {
   bool change = false;
   @override Widget build(BuildContext context) {
     return change ? const Padding( padding: EdgeInsets.symmetric(horizontal: 10), 
-      child: SpinKitCircle(color: Colors.white, size: 20.0,)) : IconButton(onPressed: () async {
+      child: SpinKitCircle(color: Colors.white, size: 30.0,)) : IconButton(onPressed: () async {
         setState(() { change = true; });
         for (var i in widget.selectedGrid) {
           if (i.cells.isNotEmpty) {

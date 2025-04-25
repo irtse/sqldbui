@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/main.dart';
 
 class InfoAlertBannerChild extends StatelessWidget {
   final String text;
@@ -9,7 +10,7 @@ class InfoAlertBannerChild extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+      constraints: BoxConstraints(maxWidth: currentWidth * 0.8),
       decoration: const BoxDecoration(
         color: Colors.greenAccent,
         borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -38,7 +39,7 @@ class AlertAlertBannerChild extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+      constraints: BoxConstraints(maxWidth: currentWidth * 0.8),
       decoration: const BoxDecoration(
         color: Colors.redAccent,
         borderRadius: BorderRadius.all(

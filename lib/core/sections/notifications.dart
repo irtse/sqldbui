@@ -20,11 +20,11 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    var len = MediaQuery.of(context).size.width > 430 ? 40 : ((MediaQuery.of(context).size.width ~/ 11));
+    var len = currentWidth > 430 ? 40 : ((currentWidth ~/ 11));
     List<Widget> notifs = [
       Container( 
         padding: const EdgeInsets.only(top: 10, bottom: 10), 
-        width: 430 < MediaQuery.of(context).size.width ? 430 : MediaQuery.of(context).size.width,
+        width: 430 < currentWidth ? 430 : currentWidth,
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Theme.of(context).splashColor ))
         ),
@@ -47,7 +47,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
           Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisSize: MainAxisSize.min, children: [ Container(
           padding: const EdgeInsets.only(bottom: 20, top: 15),
-          width: 430 < MediaQuery.of(context).size.width ? 430 : MediaQuery.of(context).size.width,
+          width: 430 < currentWidth ? 430 : currentWidth,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).splashColor, ))),
           child: Column(children: [
           Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: TextButton( onPressed: () { 
@@ -88,7 +88,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     }
     return Container(
         constraints: const BoxConstraints(minWidth: 200),
-        height: MediaQuery.of(context).size.height,
+        height: currentHeigth,
         color: Theme.of(context).secondaryHeaderColor,
         child: SingleChildScrollView( child: Column(children: notifs) ));
   }

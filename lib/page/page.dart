@@ -31,9 +31,9 @@ class PageWidgetState extends State<PageWidget> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override Widget build(BuildContext context) {
-    noMenu = MediaQuery.of(context).size.width - menuSize < 600;
-    menuSize = isMenu && !noMenu ? (250 <= MediaQuery.of(context).size.width ? (
-              menuSize == 0 ? 250 : (menuSize <= (MediaQuery.of(context).size.width / 2) ? menuSize : (MediaQuery.of(context).size.width / 2))) : MediaQuery.of(context).size.width) : 0;
+    noMenu = currentWidth - menuSize < 600;
+    menuSize = isMenu && !noMenu ? (250 <= currentWidth ? (
+              menuSize == 0 ? 250 : (menuSize <= (currentWidth / 2) ? menuSize : (currentWidth / 2))) : currentWidth) : 0;
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
@@ -54,20 +54,20 @@ class PageWidgetState extends State<PageWidget> {
         // the App.build method, and use it to set our appbar title.
         title: Padding(padding: EdgeInsets.only(left: noMenu ? 0 : 50, right: 50), 
           child: SizedBox(child: Row(children: [
-            MediaQuery.of(context).size.width > 400 ? RouterWidget(key: routerKey) : Container(),
+            currentWidth > 400 ? RouterWidget(key: routerKey) : Container(),
             InkWell( onTap: () { clear(); },  
-              child: Image(image: const AssetImage('assets/images/logo.png'), width: MediaQuery.of(context).size.width > 600 ? 60 : 0,)),
+              child: Image(image: const AssetImage('assets/images/logo.png'), width: currentWidth > 600 ? 60 : 0,)),
             InkWell( onTap: () { clear(); }, 
               child:Container(
-                padding: EdgeInsets.only(left: MediaQuery.of(context).size.width > 600 ? 30 : 0), 
-                child: MediaQuery.of(context).size.width > 1000 ? Text("SOFTWARE NAME", overflow: TextOverflow.ellipsis,
+                padding: EdgeInsets.only(left: currentWidth > 600 ? 30 : 0), 
+                child: currentWidth > 1000 ? Text("OPPS", overflow: TextOverflow.ellipsis,
                  style: TextStyle( color: Theme.of(context).highlightColor)) : null)),
             Padding(
-              padding: EdgeInsets.only(left: MediaQuery.of(context).size.width > 600 ?  50 : 0, 
-                right: MediaQuery.of(context).size.width > 600 ?  10 : 0), 
-              child: MediaQuery.of(context).size.width > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
+              padding: EdgeInsets.only(left: currentWidth > 600 ?  50 : 0, 
+                right: currentWidth > 600 ?  10 : 0), 
+              child: currentWidth > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
             Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
-                  child: MediaQuery.of(context).size.width > 600 ? Text("${AuthService.user != null ? "${AuthService.user!.name} - " : "unknown" }${AuthService.user != null ? AuthService.user!.email : ""}",
+                  child: currentWidth > 600 ? Text("${AuthService.user != null ? "${AuthService.user!.name} - " : "unknown" }${AuthService.user != null ? AuthService.user!.email : ""}",
                   overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)) : null)),
           ],)
         )),         
@@ -99,7 +99,7 @@ class PageWidgetState extends State<PageWidget> {
   void clear() {
     setState(() {
       currentView = null;
-      viewID = null;
+      viewID = TranslateConstants.dashboard.toLowerCase();
       subViewID = null;
     });
   }
@@ -153,14 +153,14 @@ class PageWidgetState extends State<PageWidget> {
     Rect rect = Rect.fromCenter( 
       center: MediaQuery.of(context).size.center(Offset.zero),
       width: menuSize, 
-      height: MediaQuery.of(context).size.height - 40 > 0 ? MediaQuery.of(context).size.height - 40 : 0
+      height: currentHeigth - 40 > 0 ? currentHeigth - 40 : 0
     );
     List<Widget> c = !isMenu || noMenu ? [] : <Widget>[
       fork.TransformableBox(
         rect: rect, constraints: BoxConstraints(
-          maxWidth: 250 <= (MediaQuery.of(context).size.width / 2) ? (MediaQuery.of(context).size.width / 2) 
-            : MediaQuery.of(context).size.width,
-          minWidth: 250 <= MediaQuery.of(context).size.width ? 250 : MediaQuery.of(context).size.width),
+          maxWidth: 250 <= (currentWidth / 2) ? (currentWidth / 2) 
+            : currentWidth,
+          minWidth: 250 <= currentWidth ? 250 : currentWidth),
         flip: null,
         draggable: false,
         handleTapSize: 1, 

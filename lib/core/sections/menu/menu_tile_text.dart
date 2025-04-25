@@ -32,7 +32,7 @@ class MenuTileTextWidgetState extends State<MenuTileTextWidget> {
     var label = await getOnFlow(widget.view);
     return Material(
       type: MaterialType.transparency,
-      child: ListTile(
+      child: Tooltip( message: label.toLowerCase(), child: ListTile(
         selected: widget.view == viewID?.substring(1),
         onTap: () async { setState(() { 
           widget.refreshView("#${widget.view}", widget.category, true, false, false);  
@@ -46,6 +46,6 @@ class MenuTileTextWidgetState extends State<MenuTileTextWidget> {
         visualDensity: const VisualDensity(vertical: -4), // to compact
         textColor: Colors.white, selectedColor: Colors.white, hoverColor: Theme.of(context).primaryColorLight,
         leading: Icon( Icons.dashboard ),
-      ));
+      )));
   }
 }

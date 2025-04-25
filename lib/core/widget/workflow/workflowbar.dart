@@ -1,17 +1,17 @@
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class WorkflowBarWidget extends StatefulWidget{
   final model.Workflow workflow;
-  const WorkflowBarWidget ({ Key? key, required this.workflow, }): super(key: key);
+  const WorkflowBarWidget ({ super.key, required this.workflow, });
   @override WorkflowBarWidgetState createState() => WorkflowBarWidgetState();
 }
 class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
   @override Widget build(BuildContext context) {
-    double max = MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0;
+    double max = currentWidth - menuSize > 0 ? currentWidth - menuSize : 0;
     var itemWidth = (max - 200) / widget.workflow.steps.length;
     List<Widget> items = [];
     var curr = 0;
@@ -19,13 +19,13 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
     var pos = 0;
     try { pos = int.parse(widget.workflow.position);  } catch(e) { /* */ }
     if (widget.workflow.steps.isNotEmpty) {
-      var active = false;
-      try { active = widget.workflow.position != "" && int.parse(widget.workflow.position) >= 0;  } catch(e) { /* */ }
+      var active = true;
       items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), 
         width: 100, gotBefore: false,
         current: widget.workflow.current != "" && curr == 0,
         doing: widget.workflow.position != "" && pos == 0,
-        isDismissible: widget.workflow.isDismiss, beforeDismissible: widget.workflow.isDismiss, 
+        isDismissible: widget.workflow.isDismiss, 
+        beforeDismissible: widget.workflow.isDismiss, 
         active: active));
     }
     for (var i = 0; i < widget.workflow.steps.length; i++) {
@@ -50,7 +50,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
       beforeActive: widget.workflow.isClose && !widget.workflow.isDismiss, 
       active: widget.workflow.isClose && !widget.workflow.isDismiss));
     } else {
-      items.add(SizedBox( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+      items.add(SizedBox( width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
         child: Center(child: Text(TranslateConstants.noWorkflow, 
           style: const TextStyle(color: Colors.white)),)));
     }

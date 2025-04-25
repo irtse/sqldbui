@@ -23,10 +23,17 @@ class GridCell {
   Color borderColor; 
   double fontSize; 
   String type; 
+  bool isDraft= false;
   bool readOnly = false;
   bool isLink = false;
-
+  String cellID;
+  bool translatable = true;
+  model.SchemaField? schemaField;
   GridCell({ 
+    required this.schemaField,
+    required this.translatable,
+    required this.isDraft,
+    required this.cellID,
     required this.columnName, 
     required this.wasValue,
     required this.value, 
@@ -44,9 +51,11 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   bool readOnly; bool isLink = true;
   String cellID; String schemaID;
   double maxheight;
+  bool translatable = true;
 
   GridCell cell;
   model.Shallowed? shal;
+  model.SchemaField? schemaField;
   @override dynamic value;
 
   GridCellWidget ({ 
@@ -59,6 +68,8 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
     required this.readOnly, 
     required this.schemaID, 
     required this.maxheight, 
+    required this.schemaField,
+    required this.translatable,
   });
 
   @override GridCellWidgetState createState() => GridCellWidgetState();
@@ -82,8 +93,18 @@ class GridCellWidgetState extends State<GridCellWidget> {
                 && !widget.cell.readOnly && !widget.readOnly;
     String url = currentView!.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]!.actionPath == "" ? 
       "" : "${currentView!.schema[widget.cell.columnName]!.actionPath}&shallow=enable";
-    return Column( mainAxisAlignment: MainAxisAlignment.center, children: [edit ? await Convertor.filterFieldByType(
-      context, widget, widget.cell.type, "", this, false, true, url, "${widget.cellID}:${widget.cell.columnName}") : 
+    var v = widget.value;
+    if (widget.shal?.name != null) {
+      widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
+    }
+    if (widget.translatable) {
+      v = await getOnFlow(widget.value);
+    }
+    return Column( mainAxisAlignment: MainAxisAlignment.center, children: [
+      edit ? await Convertor.filterFieldByType(
+        context, widget, widget.cell.type, "", 
+        this, false, true, url, 
+        "${widget.cellID}:${widget.cell.columnName}") : 
       ListTile( 
         mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum"), onTap: () {
@@ -99,7 +120,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
           AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
-        child: Center(child: Text( translation ? await getOnFlow(widget.value) : widget.value, 
+        child: Center(child: Text( translation ? v : widget.value, 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 

@@ -2,9 +2,8 @@ import 'dart:async';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/save_button.dart';
-import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
-import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -21,15 +20,28 @@ import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+Map<String, List<DropdownMenuItem<String>>> schemeItems = {};
+Map<String, Map<String,String>> fastTranslation = {};
+
 bool isFilter() {
   return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
   && (globalOrder[viewID]!.isNotEmpty || (globalFilter[viewID] != null && globalFilter[viewID]!.size() > 0));
 }
 class Value {
+  Map<String, model.SchemaField> schema = {};
+  String cellID;
+  bool isDraft = false;
   bool isLink = false;
   bool readOnly = false;
+  model.Sharing? sharing;
+  
   Map<String, dynamic> values = {};
-  Value({ this.values = const {}, this.isLink = true, this.readOnly = false });
+  Value({ 
+    required this.cellID, required this.isDraft,
+    this.values = const {}, this.isLink = true, 
+    this.readOnly = false, this.sharing, 
+    required this.schema,
+  });
 }
 bool tempRemoval = false;
 bool noFilterRetrieval = false;
@@ -69,37 +81,15 @@ class DatagridWidgetState extends State<DatagridWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
-    var schemeItems = <DropdownMenuItem<String>>[];
-    List<GridColumnWidget> columns = <GridColumnWidget>[];
     List<Value> datas = <Value>[];
     Map<String, String> links = <String, String>{};
-    Map<String, model.Shallowed> contentShallowed = <String, model.Shallowed>{};
     dpItems = [];
     if (widget.view != null) {
       schema = widget.view!.schema;
-      for (var item in widget.view?.items ?? []) {
-        if (!widget.cache.containsKey(widget.view!.schemaName)) { widget.cache[widget.view!.schemaName]=<String,dynamic>{}; } 
-        if (!widget.cache.containsKey("id")) { 
-          widget.cache[widget.view!.schemaName]!["id"]=item.values["id"];
-          if (item.linkPath != "") {  links[item.values['id']] = item.linkPath; }
-          for (var key in item.valuesShallow.keys) { 
-            contentShallowed['$key:${item.values["id"]}'] = item.valuesShallow[key]!; 
-          }
-        } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
-        if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
-        datas.add(Value(values: item.values, isLink: item.linkPath != "", readOnly: currentView!.readOnly || item.readonly)); 
-      }
       if (!filterTempOrderView.containsKey(viewID)) {
         filterTempOrderView[viewID] = [];
-      }
-      
-      var order = realOrder();
-      for (var fieldName in order) {
-        columns = await getColumn(columns, schemeItems, schema, fieldName, datas, order);
-      }
-      if (editMode[viewID] == TranslateConstants.math.toLowerCase()) {
-        columns = await getColumn(columns, schemeItems, schema, null, datas, order);
       }
     }
     if ( globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
@@ -108,16 +98,15 @@ class DatagridWidgetState extends State<DatagridWidget> {
     
     var index = 0;
     Filters? filterMain = globalFilter[viewID];
-    var t = 0;
+    
     if (!(isEditMode[viewID] ?? false)) {
       if (filterRestr[viewID] != null && !tempRemoval) {
-        filterRowsWidget = filterMain?.toRow(schemeItems, schema) ?? [];
+        filterRowsWidget = filterMain?.toRow(schema) ?? [];
       } else if (tempRemoval) { tempRemoval = false; }
       for (var i in filterRowsWidget) { 
         if (filterRowsWidget.length - 1 > index && i.connector == "") { 
           filterRowsWidget[index] = FilterRowWidget(
             schema: schema, 
-            items: schemeItems, 
             index: i.index, 
             connector: "and", 
             label: i.label, 
@@ -130,19 +119,19 @@ class DatagridWidgetState extends State<DatagridWidget> {
         index++;
       }
     }
-    t = show ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(isEditMode[viewID] ?? false) ? 0 : 138);
-    if (MediaQuery.of(context).size.width <= 1000) { t = 0; }
+    var subSize = show ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(isEditMode[viewID] ?? false) ? 0 : 138);
+    if (currentWidth <= 1000) { subSize = 0; }
     return Column( children: [ 
       Container( 
         color: Theme.of(context).primaryColorLight, 
         constraints: const BoxConstraints(minHeight: 40), 
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
         child: Column( children: [
           Stack( children: [ 
-            MediaQuery.of(context).size.width > 1000 ? 
+            currentWidth > 1000 ? 
             Positioned( top: 3.5, left: 32, child: (isEditMode[viewID] ?? false) ? 
-                FunctionsSelectorWidget(mathAllowed: realOrder().length > 2, items: schemeItems)
-              : FilterSelectorWidget(dpItems: dpItems, schemeItems: schemeItems, schema: schema, filterMain: filterMain)) 
+                FunctionsSelectorWidget(mathAllowed: realOrder(widget.view, false).length > 2)
+              : FilterSelectorWidget(dpItems: dpItems, schema: schema, filterMain: filterMain)) 
             : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
@@ -152,10 +141,10 @@ class DatagridWidgetState extends State<DatagridWidget> {
                 ])) 
             ]) 
           ]), 
-          MediaQuery.of(context).size.width <= 1000 ? 
-              Container() 
+          currentWidth <= 1000 ? Container() 
             : Container( 
-              constraints: BoxConstraints( maxHeight:  (MediaQuery.of(context).size.height > (120 + t) ? t : MediaQuery.of(context).size.height - 120).toDouble()), 
+              constraints: BoxConstraints( maxHeight:  (currentHeigth > (120 + subSize) ? subSize 
+                : currentHeigth - 120).toDouble()), 
               child: SingleChildScrollView( 
                 child: Column( 
                   children : [  !(isEditMode[viewID] ?? false) ? (filterRowsWidget.isEmpty ? 
@@ -163,34 +152,32 @@ class DatagridWidgetState extends State<DatagridWidget> {
                   editMode[viewID] != TranslateConstants.math.toLowerCase() || functionMathRowsWidget.isEmpty ? Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
                 ),  
               ...(show && !(isEditMode[viewID] ?? false) ? filterRowsWidget : (editMode[viewID] == TranslateConstants.math.toLowerCase() ? functionMathRowsWidget : [])) ] 
-            ))) 
+            ))),
+          MainGridWidget(links: links, view: widget.view, viewKey: widget.viewKey, 
+            subSize: subSize,
+            subWidthSize: menuSize,
+            isSelected: widget.isSelected) 
         ])
       ),
-      Container( 
-        height: MediaQuery.of(context).size.height - (120 + t) > 0 ? MediaQuery.of(context).size.height - (120 + t) : 0,
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        decoration: BoxDecoration( 
-          color:  Theme.of(context).highlightColor
-        ), 
-        child : GridWidget( 
-          source: datas, 
-          columns: columns,
-          key: globalGridKey, 
-          viewKey: widget.viewKey, 
-          showCheckboxColumn: true, 
-          isSelected: widget.isSelected,
-          showColumnHeaderIconOnHover: true,
-          contentShallowed: contentShallowed,  
-          schemaID: "${currentView?.schemaID}", 
-          borderColor: Theme.of(context).splashColor,
-          isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
-          maxLength: realOrder().length, 
-          contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        ) 
-      )
     ]);
   }
-
+  Future<void> fillSchemeItem() async {
+    var order = realOrder(widget.view, false);
+    if (!schemeItems.containsKey(viewID)) {
+      schemeItems[viewID ?? ""] = [];
+      fastTranslation[viewID ?? ""] = {};
+      for (var o in ["id", ...order]) {
+        var scheme = widget.view?.schema[o];
+    
+        var t = scheme?.label ?? o;
+        if (scheme?.translatable ?? false) {
+          t = (await getOnFlow(t)).toLowerCase();
+        }
+        fastTranslation[viewID ?? ""]?[scheme?.label ?? o] = t;
+        schemeItems[viewID ?? ""]?.add(DropdownMenuItem<String>(value: o, child: Text(t, overflow: TextOverflow.ellipsis)));
+      }
+    }
+  }
   List<Widget> getButtons() {
     var buttons = <Widget>[
       Padding( 
@@ -253,48 +240,4 @@ class DatagridWidgetState extends State<DatagridWidget> {
     return buttons;
   }
 
-  List<dynamic> realOrder() {
-    if (widget.view == null) { return []; }
-    var schema = widget.view!.schema;
-    bool isMath = isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase();
-    var order = filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase() 
-                ? filterTempOrderView[viewID]! : (filterOrderView[viewID] != null ? filterOrderView[viewID]! : widget.view!.order);
-    return ["id", ...order.where( (e) => e != "id")].where( (f) {
-      String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
-      bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
-      return f == "id" || (active && f != "description"  && !type.contains("many") && schema[f] != null
-          && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
-    }).toList();
-  }
-
-  Future<List<GridColumnWidget>> getColumn(List<GridColumnWidget> columns, List<DropdownMenuItem<String>> schemeItems, 
-    Map<String, model.SchemaField> schema, String? fieldName, List<Value> datas, List<dynamic> order) async {
-    bool isEdit = isEditMode[viewID] ?? false;
-    bool isNotValidCol = fieldName == null && fieldName == "id";
-    String? lab = (schema[fieldName]?.label ?? "") != "" ? schema[fieldName]!.label : fieldName;
-    String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]!.type);
-    String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase())).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-    if (!isNotValidCol && !filterTempOrderView[viewID]!.contains(fieldName) && !type.contains("many")) { 
-      filterTempOrderView[viewID]!.add(fieldName); 
-    }
-    var realLabel = await getOnFlow(label);
-    schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
-      await getOnFlow(label), overflow: TextOverflow.ellipsis,)));
-    columns.add( GridColumnWidget(
-      context: context, 
-      width: double.nan,
-      items: schemeItems, 
-      isEditMode: isEdit,
-      maxLength: order.length + (isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase() ? 1 : 0),
-      borderColor: Theme.of(context).splashColor, 
-      allowSorting: !(datas.isEmpty && !isFilter()) && !isEdit,
-      columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
-      allowFiltering: !(datas.isEmpty && !isFilter()) && !isEdit, 
-      type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
-      url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
-      contextWidth: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-      label: label == "id" ? GridValueWidget(fontSize: 14, icon: Icons.tag) : GridValueWidget(fontSize: 14, value: realLabel),
-    ));
-    return columns;
-  }
 }

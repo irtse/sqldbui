@@ -1,5 +1,6 @@
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
+import 'package:sqldbui2/core/widget/form/convertors/html.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
@@ -8,6 +9,7 @@ import 'package:sqldbui2/core/widget/form/convertors/text.dart';
 import 'package:sqldbui2/core/widget/form/convertors/date.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/form/convertors/upload.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -136,17 +138,18 @@ class Convertor {
           });
         },
       );
-    } else if (type.contains("enum") ) {
+    } else if (type.contains("enum") ) { // TODO THERE
       var items = <DropdownMenuItem<String>>[];
       for (var item in type.replaceAll("enum__", "").split("_")) { 
         if (items.where((element) => element.value == item).isEmpty) {
           items.add(DropdownMenuItem<String>(value: item, alignment: isGrid ? Alignment.center : Alignment.centerLeft, 
-            child: Text(await getOnFlow(item), overflow: TextOverflow.ellipsis)));
+            child: Text((await getOnFlow(item)).toLowerCase(), overflow: TextOverflow.ellipsis)));
         }
       }
-      w = DropdownButtonFormField<String>( key: formKey, items: items, isExpanded: true,
+      try {
+        w = DropdownButtonFormField<String>( key: formKey, items: items, isExpanded: true,
         alignment: isGrid ? Alignment.center : Alignment.centerLeft,
-        value: (cacheChanges[id]?.toString() ?? widget.value?.toString() ?? ""), elevation: 1,
+        value: (cacheChanges[id]?.toString() ?? widget.value?.toString()), elevation: 1,
         validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder; } return null; },
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300,
          color: isDark ? Colors.white : Colors.black, overflow: TextOverflow.ellipsis),
@@ -176,6 +179,10 @@ class Convertor {
           border: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0) ),
         ),
       );
+      } catch (e) {
+        print(e);
+      }
+      
     } else if (type.contains("link") && url != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(url, true, null), 
@@ -217,7 +224,7 @@ class Convertor {
               value = item.id.toString();
             }
             items.add(DropdownMenuItem<String>(value: item.id.toString(),  alignment: isGrid ? Alignment.center : Alignment.centerLeft,
-              child: Text(await getOnFlow(v.toString()), overflow: TextOverflow.ellipsis,),));
+              child: Text((await getOnFlow(v.toString())).toLowerCase(), overflow: TextOverflow.ellipsis,),));
           }
         }
       }
@@ -289,10 +296,14 @@ class Convertor {
   }
 
   static Future<Widget?> formFieldByType(
-    Map<String, dynamic> form, BuildContext context, String schemaName, 
+    Map<String, dynamic> form, BuildContext context, 
+    String schemaName, Map<String, dynamic> schema,
     String type, String name, String label, 
     String description, bool require, bool readOnly, 
-    dynamic value, String? url, String path, double maxWidth, FormWidgetState comp) async {
+    dynamic value, String? mainUrl, String? url, String path, 
+    FormWidgetState? comp, bool isEmpty, 
+    dynamic autofill, bool translatable
+  ) async {
     type = type.toLowerCase();
     bool isLink = false;
     try { isLink = (int.tryParse(value ?? "") != null ? false : true) || url != null; } catch(e) { /* */ }
@@ -306,7 +317,9 @@ class Convertor {
         label: label, 
         require: require, 
         type: type, 
-        component: comp
+        component: comp,
+        autofill: autofill,
+        translatable: translatable,
       );
     } else if (["int", "double", "float", "money", "decimal"].contains(type)) { 
       return NumberWidget(
@@ -321,11 +334,12 @@ class Convertor {
         require: 
         require, 
         type: type, 
-        component: comp
+        component: comp,
+        autofill: autofill,
       );
     } else if (type.contains("bool")) {
       if (form[name] != null) { value = form[name]; }
-        ValueNotifier<bool> ctrl = ValueNotifier(value ?? false);
+        ValueNotifier<bool> ctrl = ValueNotifier(value ?? autofill ?? false);
         return AdvancedSwitch( width : 200,
           initialValue: value ?? false,
           enabled: !readOnly,
@@ -336,7 +350,7 @@ class Convertor {
           borderRadius:  const BorderRadius.all(Radius.circular(15)),
           height: 30.0, disabledOpacity: 0.5,
           onChanged: (value) {
-            comp.widget.detectChange = true;
+            comp?.widget.detectChange = true;
             form[name]=value;
             ctrl.value = value;
           }
@@ -351,10 +365,14 @@ class Convertor {
           readOnly: readOnly, 
           value: value, 
           label: label, 
-          component: comp,);
+          component: comp,
+          autofill: autofill,
+        );
     } else if ((isLink && (type.contains("int")) || type == "link") || type.contains("enum") ) {
         return DropDownWidget(
+          mainUrl: mainUrl,
           form: form, 
+          schema: schema,
           schemaName: schemaName, 
           name: name, 
           readOnly: readOnly, 
@@ -364,7 +382,11 @@ class Convertor {
           type: type, 
           url: url, 
           path: path, 
-          component: comp);
+          component: comp,
+          empty: isEmpty,
+          autofill: autofill,
+          translatable: translatable,
+        );
     } else if (type == "link") {
       return TextWidget(
         form : form, 
@@ -375,7 +397,37 @@ class Convertor {
         label: label, 
         require: require, 
         type: type, 
-        component: comp
+        component: comp,
+        autofill: autofill,
+        translatable: translatable,
+      );
+    } else if (type == "html") {
+      return HTMLWidget(
+        form : form, 
+        translatable: false,
+        schemaName: schemaName, 
+        name: name,
+        readOnly: readOnly, 
+        value: value, 
+        label: label, 
+        require: require, 
+        type: type, 
+        component: comp,
+        autofill: autofill,
+      );
+    } else if (type == "upload") {
+      return UploadWidget(
+        form : form, 
+        url: mainUrl,
+        schemaName: schemaName, 
+        name: name,
+        readOnly: readOnly, 
+        value: value, 
+        label: label, 
+        require: require, 
+        type: type, 
+        component: comp,
+        autofill: autofill,
       );
     } else if (type.contains("onetomany")) {
         return OneToManyWidget(
@@ -387,12 +439,14 @@ class Convertor {
           require: require, 
           type: type, 
           url: url, 
+          translatable: translatable,
           component: comp);
     } else if (type.contains("manytomany")) {
       return ManyToManyWidget(
         form: form, 
         schemaName: schemaName, 
         name: name, 
+        translatable: translatable,
         readOnly: readOnly, 
         value: value, 
         label: label, 

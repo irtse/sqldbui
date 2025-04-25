@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/main.dart';
 
 // ignore: must_be_immutable
 class PopupButtonWidget extends StatefulWidget {
@@ -25,7 +26,7 @@ class PopupButtonWidgetState extends State<PopupButtonWidget> {
 
   @override Widget build(BuildContext context) {
     return PopupMenuButton(
-      constraints: BoxConstraints.tightFor( width: widget.width ?? MediaQuery.of(context).size.width / 1.1),
+      constraints: BoxConstraints.tightFor( width: widget.width ?? currentWidth / 1.1),
       color: widget.color ?? Theme.of(context).secondaryHeaderColor, 
       padding: const EdgeInsets.all(0),
       tooltip: widget.tooltip,

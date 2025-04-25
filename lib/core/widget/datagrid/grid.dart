@@ -101,7 +101,7 @@ class GridWidgetState extends State<GridWidget> {
       col.prefetch();  
       count++; 
     }
-    if ((maxWidth < MediaQuery.of(context).size.width - 350)) { 
+    if ((maxWidth < currentWidth - 350)) { 
       rects.remove(viewID); 
       for (var col in widget.columns) { col.prefetch(); }
     }
@@ -145,13 +145,13 @@ class GridWidgetState extends State<GridWidget> {
                     return true;
                   },
                   child: SizedBox( 
-                    height: MediaQuery.of(context).size.height - (180 + t) > 0 ? MediaQuery.of(context).size.height - (180 + t) : 0, 
+                    height: currentHeigth - (178 + t) > 0 ? currentHeigth - (178 + t) : 0, 
                     child: SingleChildScrollView(
                       controller: _vertical,
                       scrollDirection: Axis.vertical,
                       child: rows.isEmpty ? 
                       Container(
-                        height: MediaQuery.of(context).size.height - (180 + t) > 0 ? MediaQuery.of(context).size.height - (180 + t) : 0,
+                        height: currentHeigth - (178 + t) > 0 ? currentHeigth - (178 + t) : 0,
                         decoration: BoxDecoration( color: Theme.of(context).splashColor), 
                         width: maxWidth + 81.5,
                         child: Center(
@@ -186,14 +186,21 @@ class GridWidgetState extends State<GridWidget> {
         selectedGrid.firstWhere((element) => element.cells.first.value == mapped.values["id"]);
         found = true;
       } catch (e) { found = false; }
-      return GridRowWidget( borderWidth: widget.borderWidth, 
+      return GridRowWidget( 
+        sharing: mapped.sharing,
+        borderWidth: widget.borderWidth, 
         borderColor: widget.borderColor, 
         isSelected: found, 
         maxLength: widget.maxLength, 
         contextWidth: widget.contextWidth, 
         isEnum : widget.isEnum, 
         cells: columns.map<GridCell>((column) {
-        return GridCell( width: column.width, 
+        return GridCell( 
+          schemaField: mapped.schema[column.columnName],
+          translatable: mapped.schema[column.columnName]?.translatable ?? true,
+          isDraft: mapped.isDraft,
+          cellID: mapped.cellID,
+          width: column.width, 
           readOnly: mapped.readOnly,
           borderWidth: widget.borderWidth, 
           borderColor: widget.borderColor,
@@ -202,7 +209,8 @@ class GridWidgetState extends State<GridWidget> {
           isLink: mapped.isLink,
           columnName: column.columnName, 
           wasValue: Map.from(mapped.values)[column.columnName],
-          value: mapped.values[column.columnName], );
+          value: mapped.values[column.columnName], 
+        );
       }, ).toList(), 
       showCheckboxColumn: widget.showCheckboxColumn, 
       contentShallowed: widget.contentShallowed, 

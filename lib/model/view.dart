@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/filter.dart';
 
@@ -19,8 +21,11 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     this.actionPath = "",
     this.actions = emptyStr,
     this.schema = emptySchema,
+    this.autoFill,
+    this.translatable = false,
   });
-
+  bool translatable;
+  dynamic autoFill;
   String label;
   String type;
   bool active;
@@ -37,9 +42,12 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
 
   @override Map<String, dynamic> serialize() => { };
 
-  @override SchemaField deserialize(Map<String, dynamic> json) => SchemaField(
+  @override SchemaField deserialize(Map<String, dynamic> json) {
+    return SchemaField(
+    translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : true,
+    autoFill: json.containsKey("autofill") && json["autofill"] != null ? json["autofill"] : null,
     active: json.containsKey("active") && json["active"] != null ? json["active"] : true,
-    actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : <String>[], 
+    actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
     actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
     schema: json.containsKey("data_schema") && json["data_schema"] != null ?  fromMapJson(json["data_schema"], SchemaField()) : emptySchema, 
     label : json.containsKey("label") && json["label"] != null ? json["label"] : "Unknown label",
@@ -52,7 +60,58 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     defaultValue : json.containsKey("default_value") && json["default_value"] != null ? json["default_value"] : null,
     valuesPath : json.containsKey("values_path") && json["values_path"] != null ? json["values_path"] : "",
   );
+  }
 }
+
+class Consent extends SerializerDeserializer<Consent> {
+  Consent({
+    this.name = "",
+    this.actionPath,
+    this.optionnal=false,
+    this.body,
+    this.consent = false,
+    this.key,
+  });
+  bool consent;
+  String name;
+  String? actionPath;
+  bool optionnal;
+  Map<String, dynamic>? body;
+  GlobalKey<ConsentState>? key;
+
+  @override Map<String, dynamic> serialize() => { };
+
+  @override Consent deserialize(Map<String, dynamic> json) => Consent(
+    actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : <String>[], 
+    name : json.containsKey("name") && json["name"] != null ? json["name"] : "Unknown name",
+    optionnal : json.containsKey("optionnal") && json["optionnal"] != null ? json["optionnal"] : false,
+    body : json.containsKey("body") && json["body"] != null ? json["body"] : <String, dynamic>{},
+  );
+}
+class Sharing extends SerializerDeserializer<Sharing> {
+  Sharing({
+    this.shallowPath = const {},
+    this.body = const {},
+    this.sharePath,
+    this.sharedWithPath,
+  });
+  Map<String, dynamic> shallowPath;
+  Map<String, dynamic> body;
+  String? sharedWithPath;
+  String? sharePath;
+
+  @override Map<String, dynamic> serialize() => {};
+
+  @override deserialize(Map<String, dynamic> json) {
+    return  Sharing(
+      sharedWithPath: json.containsKey("shared_with_path") && json["shared_with_path"] != null ? json["shared_with_path"] : null, 
+      shallowPath: json.containsKey("shallow_path") && json["shallow_path"] != null ? json["shallow_path"] : <String,dynamic>{}, 
+      body: json.containsKey("body") && json["body"] != null ? json["body"] : <String,dynamic>{}, 
+      sharePath: json.containsKey("share_path") && json["share_path"] != null ? json["share_path"] : null, 
+    );
+}
+}
+
 const emptyValues = <String, Shallowed>{};
 const emptyDyn = <String, dynamic>{};
 const emptyManyValues = <String, List<Shallowed>>{};
@@ -66,13 +125,19 @@ class Item extends SerializerDeserializer<Item> {
     this.valuesMany = emptyManyValues,
     this.workflow,
     this.readonly = false,
+    this.sharing,
+    this.isDraft = false,
+    this.synthesisPath,
   });
+  bool isDraft;
+  Sharing? sharing;
   Map<String,dynamic> valuesManyPath;
   Map<String,dynamic> values;
   String linkPath = "";
   String dataPath = "";
   Workflow? workflow;
   bool readonly;
+  String? synthesisPath;
   Map<String,Shallowed> valuesShallow;
   Map<String,List<Shallowed>>valuesMany;
 
@@ -80,6 +145,9 @@ class Item extends SerializerDeserializer<Item> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      synthesisPath: json.containsKey("synthesis_path") && json["synthesis_path"] != null ? json["synthesis_path"] : null,
+      isDraft: json.containsKey("is_draft") && json["is_draft"] != null ? bool.parse("${json["is_draft"]}") : false,
+      sharing: json.containsKey("sharing") && json["sharing"] != null ? Sharing().deserialize(json["sharing"]) : null, 
       readonly: json.containsKey("readonly") && json["readonly"] != null ? bool.parse("${json["readonly"]}") : false,
       valuesShallow: json.containsKey("values_shallow") && json["values_shallow"] != null ? fromMapJson<Shallowed>(json["values_shallow"], Shallowed()) : <String, Shallowed>{}, 
       dataPath: json.containsKey("data_path") && json["data_path"] != null ? json["data_path"] : "", 
@@ -194,8 +262,11 @@ class View extends SerializerDeserializer<View> {
     this.filterPath = "",
     this.isWrapper = false,
     this.shortcuts = emptyDyn,
+    this.consents = const [],
+    this.triggers = const [],
   });
-
+  List<Trigger> triggers;
+  List<Consent> consents;
   String actionPath;
   List<dynamic> actions;
   List<Item> items;
@@ -227,6 +298,8 @@ class View extends SerializerDeserializer<View> {
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
+    consents: json.containsKey("consents") && json["consents"] != null ? fromListJson(json["consents"], Consent()) : <Consent>[], 
     workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
     id: json.containsKey("id") && json["id"] != null ? int.parse("${json["id"]}") : -1, 
     shortcuts: json.containsKey("shortcuts") && json["shortcuts"] != null ? json["shortcuts"] : <String, dynamic>{},
@@ -272,7 +345,8 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.workflow,
     this.selected = false,
     this.fields = emptyFilter,
-    this.elder = "all"
+    this.elder = "all",
+    this.triggers = const []
   });
   String? label;
   String? name;
@@ -288,9 +362,11 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   Workflow? workflow;
   List<Filter> fields;
   bool selected;
+  List<Trigger> triggers;
 
   @override deserialize(Map<String, dynamic> json) {
     return Shallowed(
+    triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
     id: json.containsKey("id") ? int.parse("${json["id"]}") : null, 
     ref: json.containsKey("data_ref") ? json["data_ref"] : "",
     selected: json.containsKey("is_selected") ? json["is_selected"] : false,
@@ -315,5 +391,30 @@ class RawData extends SerializerDeserializer<RawData> {
   RawData({ this.values = emptyDyn});
   Map<String, dynamic> values;
   @override deserialize(Map<String, dynamic> json) { return RawData(values: json); }
+  @override Map<String, dynamic> serialize() => { };
+}
+
+class Trigger extends SerializerDeserializer<Trigger> {
+  Trigger({
+    this.name,
+    this.mode,
+    this.actionPath = "",
+    this.schema = emptySchema,
+    this.body = const {},
+  });
+  String? name;
+  String? mode;
+  String actionPath;
+  Map<String, SchemaField> schema;
+  Map<String, dynamic> body;
+
+  @override deserialize(Map<String, dynamic> json) {
+    return Trigger(
+    name: json.containsKey("name") ?  json["name"] : null,
+    mode: json.containsKey("type") ?  json["type"] : null,
+    actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
+    body: json.containsKey("body") && json["body"] != null ? json["body"] : {}, 
+    schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{});
+  }
   @override Map<String, dynamic> serialize() => { };
 }

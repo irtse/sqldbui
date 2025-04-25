@@ -41,9 +41,13 @@ class MenuWidgetState extends State<MenuWidget> {
     var eldestCat = categories;
     List<model.View> views = [];
     for (var view in widget.views!) {
-      var label = await getOnFlow(view.label ?? view.name);
-      if (!((!label.toLowerCase().contains(MenuConstants.value?.toLowerCase() ?? "")) 
-      || (MenuConstants.isFavorite && !view.isFavorize))) {
+      if ((MenuConstants.value ?? "") != "") {
+        var label = await getOnFlow(view.label ?? view.name);
+        if (label.toLowerCase().contains(MenuConstants.value?.toLowerCase() ?? "")
+        && ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite)) {
+          views.add(view);
+        }
+      } else if ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite) {
         views.add(view);
       }
     }
@@ -98,7 +102,7 @@ class MenuWidgetState extends State<MenuWidget> {
     comps.add(SizedBox(height: 10,));
     firstAPI = false;
     noReload = false;
-    var height = noMenu ? MediaQuery.of(context).size.height - 81 : MediaQuery.of(context).size.height - 162;
+    var height = noMenu ? currentHeigth - 81 : currentHeigth - 162;
     return Column( children : [ 
       MenuHeaderWidget(controller: controller), 
       SizedBox( height: height > 0 ? height : 0,

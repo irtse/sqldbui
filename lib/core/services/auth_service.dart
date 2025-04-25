@@ -6,14 +6,14 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-var timeBomb = 10;
+var timeBomb = 60;
 @lazySingleton
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   final service = APIService();
   factory AuthService() { return _instance; }
   AuthService._internal() { 
-    if (timeBomb == 10) {
+    if (timeBomb == 60) {
       refresh(true).then((value) {
         if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, null, false); }
       }); 
@@ -92,7 +92,7 @@ class AuthService extends ChangeNotifier {
     if (timeBomb > 0) {
       timeBomb--;  Future.delayed(const Duration(seconds: 1), () => timer());
     } else { 
-      timeBomb = 10; 
+      timeBomb = 60; 
       refresh(false);
     }
   }

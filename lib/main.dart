@@ -10,6 +10,8 @@ import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_linux_webview/flutter_linux_webview.dart';
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -19,17 +21,53 @@ final ThemeData myTheme = ThemeData(
 );
 
 void main() async { 
+    // ensureInitialized() is required if the plugin is initialized before runApp()
+  WidgetsFlutterBinding.ensureInitialized();
+  // Run `LinuxWebViewPlugin.initialize()` first before creating a WebView.
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.linux) {
+    LinuxWebViewPlugin.initialize(options: <String, String?>{
+      'user-agent': 'UA String',
+      'remote-debugging-port': '8888',
+      'autoplay-policy': 'no-user-gesture-required',
+    });
+
+    // Configure [WebView] to use the [LinuxWebView].
+    WebView.platform = LinuxWebView();
+  }
+  
   await SetUpTranslate();
   runApp(const MyApp()); 
 }
 final _appRouter = AppRouter();   
+
+double currentWidth = -1;
+double currentHeigth = -1;
+
+bool resize = false;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    TranslateConstants.lang = String.fromEnvironment("LANG", defaultValue: "fr");
+    if (currentWidth < 0) {
+      currentWidth = MediaQuery.of(context).size.width;
+    }
+    if (currentHeigth < 0) {
+      currentHeigth = MediaQuery.of(context).size.height;
+    }
+    if (MediaQuery.of(context).size.width != currentWidth) {
+      resize = true;
+      currentWidth = MediaQuery.of(context).size.width;
+    }
+    if (MediaQuery.of(context).size.height != currentHeigth) {
+        resize = true;
+        currentHeigth = MediaQuery.of(context).size.height;
+    }
+    if (resize) {
+      Future.delayed(Duration(seconds: 2), () => resize == false );
+    }
+    TranslateConstants.lang = const String.fromEnvironment("LANG", defaultValue: "fr");
     return MaterialApp.router(
       theme: myTheme,
       routerConfig: GoRouter(routes: _appRouter.routes),
@@ -79,6 +117,7 @@ class HomeScreenState extends State<HomeScreen> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     AuthService();
+    isTriggerOpen = false;
     if (homeWidth == 0) { homeWidth = MediaQuery.of(context).size.width; 
     } else if (homeWidth != MediaQuery.of(context).size.width) { 
       homeWidth = MediaQuery.of(context).size.width; 

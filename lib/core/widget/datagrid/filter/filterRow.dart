@@ -21,13 +21,11 @@ class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
   int index; int? ref;
   bool isNull = false;
   Map<String, SchemaField> schema;
-  List<DropdownMenuItem<String>> items;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   FilterRowWidget ({ 
     super.key, 
     required this.schema, 
-    required this.items,
     this.label, 
     this.type = "text", 
     this.ref, 
@@ -64,17 +62,12 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     var indications = widget.type.contains("enum") || widget.type == "link" ? ["=", "!="] : ["like", "not like", "=", "!="];
     for (var indication in ( isText ? indications : [...indications, "<", ">", "<=", ">="])) {
       conn.add( DropdownMenuItem<String>(
-        value: indication, child: Text(indication, overflow: TextOverflow.ellipsis)));
+        value: indication, 
+        child: Text(indication, overflow: TextOverflow.ellipsis)
+      ));
     }
     if (!["=", "!="].contains(widget.comparator)) {
       widget.comparator = widget.type.contains("enum") || widget.type == "link"  ? "=" : widget.comparator;
-    }
-    if (widget.items.where((element) => element.value == widget.columnName).isEmpty) {
-      String text = (widget.schema[widget.columnName]?.label ?? widget.columnName ?? "");
-      if (text != "") {
-        var t = await getOnFlow(text);
-        widget.items.add(DropdownMenuItem<String>(value: widget.columnName, child: Text(await getOnFlow(t), overflow: TextOverflow.ellipsis)));
-      }
     }
     return Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, 
       child: SizedBox(height: 45, child: Row(children: [
@@ -83,7 +76,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
               Padding( padding: const EdgeInsets.only(left: 0, right: 20, top: 0), child: Icon(Icons.circle, color: Theme.of(context).splashColor, size: 15)),
               SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 6, 
                 child: DropdownButtonFormField<String>( 
-                  items: widget.items, 
+                  items: schemeItems[viewID], 
                     value: widget.columnName, 
                     hint: Text(TranslateConstants.colFilter.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
@@ -157,10 +150,10 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                   widget.connector = widget.connector == "and" ? "" : "and"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
-                  globalGridWidgetKey.currentState?.setState(() { 
+                  globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
                     } else if (filterRowsWidget.length - 1 == widget.index) {
-                       filterRowsWidget.add(FilterRowWidget(schema: widget.schema, items: widget.items, index: filterRowsWidget.length));  }
+                       filterRowsWidget.add(FilterRowWidget(schema: widget.schema,  index: filterRowsWidget.length));  }
                   });
                 }); },
                 style: ButtonStyle( backgroundColor: WidgetStateProperty.all(widget.connector == "and" ? Theme.of(context).primaryColor : Colors.transparent)), child: Padding( padding: const EdgeInsets.all(10), 
@@ -169,11 +162,11 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                   widget.connector = widget.connector == "or" ? "" : "or"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
-                  globalGridWidgetKey.currentState?.setState(() { 
+                  globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {
                       filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
                     } else if (filterRowsWidget.length - 1 == widget.index) {
-                        filterRowsWidget.add(FilterRowWidget(schema: widget.schema, items: widget.items,  index: filterRowsWidget.length));
+                        filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length));
                     }
                   });
                 }); },

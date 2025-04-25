@@ -15,9 +15,10 @@ class DateWidget extends StatefulWidget {
   dynamic value;
   final String label;
   final String type;
+  final dynamic autofill;
   DateWidget ({ super.key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.type, required this.value, required this.label,
-                      required this.component, this.require = false});
+                      required this.component, this.require = false, required this.autofill});
   @override
   // ignore: library_private_types_in_public_api
   _DateState createState() => _DateState();
@@ -35,7 +36,33 @@ class _DateState extends State<DateWidget> {
       DateTime? dateValue;
       if (widget.form[widget.name] != null) { 
         widget.value = widget.form[widget.name]; 
+      }
+      if (widget.value != null) {
         dateValue = DateTime.parse(widget.value);
+      } else if (widget.autofill != null) {
+        dateValue = DateTime.parse("${widget.autofill}");
+      }
+      if (widget.readOnly) {
+        return SizedBox(width: 400, height: 30, child: TextFormField(
+          readOnly: true,
+          initialValue: widget.value != null ? "${widget.value}" 
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null)),
+          style: TextStyle(fontSize: 14, color: Colors.black),
+         decoration: InputDecoration(
+            filled: true,
+            suffixIcon:  widget.type.contains("enum") ? Icon(Icons.format_list_numbered, color: Theme.of(context).secondaryHeaderColor) 
+                        : Icon(Icons.calendar_month, color: Theme.of(context).primaryColor,),
+            errorStyle: const TextStyle(height: -2),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
+            hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+            border: const OutlineInputBorder(),
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+            contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
+            hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+            labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
+          ) ));
       }
       return DateTimeField(
         validator: (DateTime? value) {
@@ -57,7 +84,7 @@ class _DateState extends State<DateWidget> {
             hintStyle: const TextStyle(fontSize: 12, ),
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: (await getOnFlow("enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase()}")).toLowerCase(),
+            hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
             labelText: (await getOnFlow("${widget.label.toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(

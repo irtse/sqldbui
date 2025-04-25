@@ -10,19 +10,26 @@ import 'package:sqldbui2/page/translate.dart';
 class DropDownWidget extends StatefulWidget {
   final FormWidgetState? component;
   final Map<String, dynamic> form;
+  final Map<String, dynamic> schema;
   final String schemaName;
   final dynamic name;
   final bool readOnly;
   final bool require;
   dynamic value;
   final String path;
+  final String? mainUrl;
   final String? url;
   final String type;
   final String label;
+  final bool translatable;
   bool isDark = false;
-  DropDownWidget ({ super.key, required this.form, required this.schemaName, required this.name, required this.path,
-                      required this.readOnly, required this.value, required this.label, this.isDark = false,
-                      required this.require, required this.type, required this.url, required this.component});
+  bool empty = false;
+  final dynamic autofill;
+  DropDownWidget ({ super.key, required this.form, required this.schemaName, required this.name, 
+                    required this.path, required this.translatable, required this.schema,
+                    required this.mainUrl, required this.readOnly, required this.value, 
+                    required this.label, this.isDark = false, required this.empty, required this.autofill,
+                    required this.require, required this.type, required this.url, required this.component});
   @override
   DropDownState createState() => DropDownState();
 }
@@ -36,83 +43,93 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    if (widget.type.contains("enum") || widget.url == null) {
+    if (widget.type.contains("enum") || widget.mainUrl == null) {
       if (widget.readOnly) {
-        return SizedBox(width: 400, height: 30, child: TextFormField(
-                      readOnly: true,
-                      initialValue: widget.value != null ? await getOnFlow(widget.value) : null,
-                      style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
-                      decoration: InputDecoration(
-                        filled: true,
-                        suffixIcon: InkWell( mouseCursor: widget.path != "" ? null : MouseCursor.defer,
-                          onTap: () { if (widget.path != "") { AppRouter.navigateTo(widget.path); } }, child: 
-                          widget.type.contains("enum") ? Icon(Icons.format_list_numbered, color: Theme.of(context).secondaryHeaderColor) 
-                          : Icon(Icons.link, color: widget.path == "" ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,)),
-                        errorStyle: const TextStyle(height: -2),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
-                        fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
-                        hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-                        border: const OutlineInputBorder(),
-                        labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-                        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-                        contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                        hintText: (await getOnFlow("enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}")).toLowerCase(),
-                        labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
-                      ) ));
+        var val = widget.value  ?? widget.autofill;
+        if (val == null) {
+          val = widget.readOnly ? TranslateConstants.empty : null;
+        } else if (widget.translatable) {
+          val = await getOnFlow(val);
+        }
+        return SizedBox(width: 400, height: 30, 
+          child: TextFormField(
+            readOnly: true,
+            initialValue: val,
+            style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
+            decoration: InputDecoration(
+              filled: true,
+              suffixIcon: InkWell( mouseCursor: widget.path != "" ? null : MouseCursor.defer,
+                onTap: () { if (widget.path != "") { AppRouter.navigateTo(widget.path); } }, 
+                child: widget.type.contains("enum") ? Icon(Icons.format_list_numbered, color: Theme.of(context).secondaryHeaderColor) 
+                  : Icon(Icons.link, color: widget.path == "" ? Theme.of(context).secondaryHeaderColor : Theme.of(context).primaryColor,)),
+                errorStyle: const TextStyle(height: -2),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
+                hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+                border: const OutlineInputBorder(),
+                labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+                enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+                contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
+                hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+                labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
+              )
+            )
+          );
       }
       var items = <DropdownMenuItem<String>>[];
       var values = widget.type.replaceAll("enum__", "").split("_");
       for (var item in values) { 
         if (items.where((element) => element.value == item).isEmpty) {
-          items.add(DropdownMenuItem<String>(value: item, child:  Text(await getOnFlow(item), overflow: TextOverflow.ellipsis,),));
+          var v = item;
+          if (widget.translatable) {
+            v = await getOnFlow(item);
+          }
+          items.add(DropdownMenuItem<String>(value: item, child:  Text(v.toLowerCase(), overflow: TextOverflow.ellipsis)));
         }
       }
-      var found = items.where((element) => element.value == widget.value);
-      if (found.isEmpty && widget.value != null) {
-        items.add(DropdownMenuItem<String>(value: widget.value, child: Text(await getOnFlow(widget.value), overflow: TextOverflow.ellipsis,),));
-      }
-      return DropdownButtonFormField<String>( items: items, 
-        isExpanded: true,
-        hint: Text(await getOnFlow("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}..."), 
-          overflow: TextOverflow.ellipsis, softWrap: true),
-        value: await getOnFlow(widget.value),
-        style: TextStyle(fontSize: 14, 
-          color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, 
-          overflow: TextOverflow.ellipsis),
-        onChanged: (value) {
-          widget.component?.widget.detectChange = true;
-          if (value == null) { widget.form[widget.name]=null;
-          } else { widget.form[widget.name]=value; }
-        },
-        onSaved: (value) {
-          if (value == null) { widget.form[widget.name]=null;
-          } else { widget.form[widget.name]=value; }
-        },
-        dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
-        decoration: InputDecoration( isDense: true,
-          suffixIconColor: Theme.of(context).primaryColor,
-          errorStyle: const TextStyle(height: -2),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          filled: true,
-          constraints: const BoxConstraints(minWidth: 0),
-          labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-          fillColor: widget.readOnly ? Theme.of(context).splashColor : (
-            widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
-          hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-          border: const OutlineInputBorder(),
-          contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-          labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
-        ),
-        validator: (String? value) {
-          return (value == null || value.isEmpty) && widget.require ? 'enter a proper value.' : null;
-        },
-      );
+      return DropdownButtonFormField<String>( 
+          items: items, 
+          isExpanded: true,
+          hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...", 
+            overflow: TextOverflow.ellipsis, softWrap: true),
+          value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
+          style: TextStyle(fontSize: 14, 
+            color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, 
+            overflow: TextOverflow.ellipsis),
+          onChanged: (value) {
+            widget.component?.widget.detectChange = true;
+            if (value == null) { widget.form[widget.name]=null;
+            } else { widget.form[widget.name]=value; }
+          },
+          onSaved: (value) {
+            if (value == null) { widget.form[widget.name]=null;
+            } else { widget.form[widget.name]=value; }
+          },
+          dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
+          decoration: InputDecoration( isDense: true,
+            suffixIconColor: Theme.of(context).primaryColor,
+            errorStyle: const TextStyle(height: -2),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            filled: true,
+            constraints: const BoxConstraints(minWidth: 0),
+            labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+            fillColor: widget.readOnly ? Theme.of(context).splashColor : (
+              widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
+            hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+            border: const OutlineInputBorder(),
+            contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
+            labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
+          ),
+          validator: (String? value) {
+            return (value == null || value.isEmpty) && widget.require ? "" : null;
+          },
+      ); 
     }
-    if (widget.readOnly) {
+    if (widget.readOnly && !widget.empty) {
       return SizedBox(width: 400, height: 30, child: TextFormField(
                       readOnly: true,
-                      initialValue: widget.value,
+                      initialValue: widget.value ?? widget.autofill,
                       style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
                       decoration: InputDecoration(
                         filled: true,
@@ -127,8 +144,23 @@ class DropDownState extends State<DropDownWidget> {
                         labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
                       ) ));
     }
+    if (widget.empty && widget.value != null) {
+      widget.component?.widget.detectChange = true;
+      widget.form[widget.name]=widget.value;
+      if (widget.url != null) {
+        if (widget.component?.widget.wrappersURL[widget.name] == null) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+              widget.component?.setState( () {
+                widget.component?.widget.hideField.add(widget.name);
+                widget.component?.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${widget.value}");
+              });
+            });
+          }  
+        }
+        return Container();
+      }
     return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.url!, firstAPI, null), 
+        future: APIService().get(widget.mainUrl!, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           return SubDropDownWidget(
             label: widget.label,
@@ -143,6 +175,9 @@ class DropDownState extends State<DropDownWidget> {
             url: widget.url,
             type: widget.type,
             data: snap.data?.data,
+            autofill: widget.autofill,
+            schema: widget.schema,
+            translatable: widget.translatable,
           );
         });
   }
@@ -153,6 +188,7 @@ class SubDropDownWidget extends StatefulWidget {
   final List<model.Shallowed>? data;
   final FormWidgetState? component;
   final Map<String, dynamic> form;
+  final Map<String, dynamic> schema;
   final String schemaName;
   final dynamic name;
   final bool readOnly;
@@ -162,9 +198,12 @@ class SubDropDownWidget extends StatefulWidget {
   final String? url;
   final String type;
   final String label;
+  final bool translatable;
   bool isDark = false;
+  final dynamic autofill;
   SubDropDownWidget ({ super.key, required this.form, required this.data,
-    required this.schemaName, required this.name, required this.path,
+    required this.schemaName, required this.name, required this.path, 
+    required this.autofill, required this.translatable, required this.schema,
     required this.readOnly, required this.value, required this.label, this.isDark = false,
     required this.require, required this.type, required this.url, required this.component});
   @override
@@ -181,61 +220,67 @@ class SubDropDownState extends State<SubDropDownWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
-          Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
-          if (widget.data != null) {
-              if (widget.component != null) {
-              for (var item in widget.data!) {
-                var v = item.name ?? "${item.id}";
-                v = v.replaceAll("db", "").replaceAll("_", " ");
-                var t = items.where((element) => element.value == v);
-                if (!mapped.containsKey(v) && t.isEmpty){
-                  mapped[v]=item;
-                  if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
-                  && items.where((element) => element.value == v,).isEmpty) {
-                    items.add(DropdownMenuItem<String>(value: v, child: Text(await getOnFlow(v), overflow: TextOverflow.ellipsis,),));
-                  }
-                }
-              }
+    Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
+    if (widget.data != null && widget.component != null) {
+      for (var item in widget.data!) {
+        var field = widget.schema[widget.name] as model.SchemaField?;
+        bool f = field?.schema["name"]?.translatable ?? true;
+        var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+        var t = items.where((element) => element.value == v);
+        if (!mapped.containsKey(v) && t.isEmpty){
+          mapped[v]=item;
+          if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
+            && items.where((element) => element.value == v).isEmpty) {
+            var vv = v;
+            if (widget.translatable && f) {
+              vv = await getOnFlow(vv);
             }
+            items.add(DropdownMenuItem<String>(value: "${item.id}", child: Text(vv.toLowerCase(), overflow: TextOverflow.ellipsis)));
           }
-          return DropdownButtonFormField<String>(
-              isExpanded: true,
-              hint: Text(await getOnFlow("${"select a "}${widget.label.replaceAll("db", "").replaceAll("_", " ")}..."), 
-                overflow: TextOverflow.ellipsis, softWrap: true,),
-              value: widget.value,
-              items: items, 
-              dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
-              style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, overflow: TextOverflow.ellipsis),
-              onChanged: (value) {
-                widget.component?.widget.detectChange = true;
-                if (value == null) { widget.form[widget.name]=null;
-                } else { widget.form[widget.name]=mapped[value]!.id; }
-                var item = mapped[value];
-                if (widget.url != null && item != null) {
-                  widget.component?.setState( () { 
-                    widget.component?.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
-                  }); 
-                }
-              },
-              onSaved: (value) {
-                if (value == null) { widget.form[widget.name]=null;
-                } else if (mapped[value] != null) { widget.form[widget.name]=mapped[value]!.id; }
-              },
-              decoration: InputDecoration(
-                filled: true, isDense: true,
-                enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-                border: const OutlineInputBorder(),
-                errorStyle: const TextStyle(height: -2, fontSize: 0),
-                hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-                labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
-                fillColor: widget.readOnly ? Theme.of(context).splashColor : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
-                labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
-              ),
-              validator: (String? value) {
-                return (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'enter a proper value.' : null;
-              },
-            ); 
+        }
+      }
+    }
+   
+    return DropdownButtonFormField<String>(
+      isExpanded: true,
+      hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...", 
+        overflow: TextOverflow.ellipsis, softWrap: true),
+      value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
+      items: items, 
+      dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
+      style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor 
+                                                          : Colors.black, overflow: TextOverflow.ellipsis),
+      onChanged: (value) {
+        widget.component?.widget.detectChange = true;
+        if (value == null) { widget.form[widget.name]=null;
+        } else { widget.form[widget.name]=mapped[value]!.id; }
+        var item = mapped[value];
+        if (widget.url != null && item != null) {
+          widget.component?.setState( () { 
+            widget.component?.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+          }); 
+        }
+      },
+      onSaved: (value) {
+        if (value == null) { widget.form[widget.name]=null;
+        } else if (mapped[value] != null) { widget.form[widget.name]=mapped[value]!.id; }
+      },
+      decoration: InputDecoration(
+        filled: true, isDense: true,
+        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+        border: const OutlineInputBorder(),
+        errorStyle: const TextStyle(height: -2, fontSize: 0),
+        hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+        labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
+        fillColor: widget.readOnly ? Theme.of(context).splashColor 
+                                     : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
+        labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
+      ),
+      validator: (String? value) {
+        return (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
+      },
+    ); 
   }
 }

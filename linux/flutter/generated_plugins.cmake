@@ -4,7 +4,11 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_window
+  file_selector_linux
+  flutter_linux_webview
+  irondash_engine_context
   open_file_linux
+  super_native_extensions
   url_launcher_linux
 )
 

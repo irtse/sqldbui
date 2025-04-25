@@ -5,7 +5,7 @@ import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class NumberWidget extends StatefulWidget {
-  final FormWidgetState component;
+  final FormWidgetState? component;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
@@ -14,9 +14,10 @@ class NumberWidget extends StatefulWidget {
   dynamic value;
   final String type;
   final String label;
+  final dynamic autofill;
   NumberWidget ({ super.key, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
-                      required this.require, required this.type, required this.component});
+                      required this.require, required this.type, required this.component, this.autofill});
   @override
   // ignore: library_private_types_in_public_api
   _NumberState createState() => _NumberState();
@@ -44,7 +45,8 @@ class _NumberState extends State<NumberWidget> {
     }
     return SizedBox(width: 300, height: 30, child: TextFormField(
           readOnly: widget.readOnly,
-          initialValue: await getOnFlow(widget.value != null ? "${widget.value}" : ""), 
+          initialValue: widget.value != null ? "${widget.value}"
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null)), 
           style:  const TextStyle(fontSize: 14),
           decoration: InputDecoration(
             enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
@@ -56,13 +58,13 @@ class _NumberState extends State<NumberWidget> {
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro, color: Colors.black) : Icon(Icons.onetwothree, color: Theme.of(context).secondaryHeaderColor),
-            hintText: (await getOnFlow("enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}...")).toLowerCase(),
+            hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
             labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
           ),
           onSaved: func,
           onChanged: (String? value) {
-            widget.component.widget.detectChange = true;
+            widget.component?.widget.detectChange = true;
             try {
               if (value == null) { widget.form[widget.name]=null;
               } else if (widget.type.contains("int")) { 

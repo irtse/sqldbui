@@ -1,7 +1,6 @@
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'package:sqldbui2/model/view.dart';
-import 'dart:developer' as developer;
 
 Map<Type, SerializerDeserializer> refs = <Type, SerializerDeserializer> {
   User : User(),

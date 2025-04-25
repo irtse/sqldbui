@@ -1,13 +1,13 @@
-import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
   final bool readOnly;
-  const WorkflowPanelWidget ({ Key? key, required this.workflow, this.readOnly = false }): super(key: key);
+  const WorkflowPanelWidget ({ super.key, required this.workflow, this.readOnly = false });
   @override WorkflowPanelWidgetState createState() => WorkflowPanelWidgetState();
 }
 GlobalKey<WorkflowPanelWidgetState> globalWorkflowPanelWidgetKey = GlobalKey<WorkflowPanelWidgetState>();
@@ -37,7 +37,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
               onChanged: (value) => change = true,
             )));
       }
-      return Container( width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, decoration: BoxDecoration(color: Theme.of(context).splashColor,
+      return Container( width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, decoration: BoxDecoration(color: Theme.of(context).splashColor,
           border: const Border(top: BorderSide(color: Colors.white, width: 1))),
         padding: const EdgeInsets.all(10), child: 
             Wrap(alignment: WrapAlignment.center, 

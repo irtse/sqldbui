@@ -15,9 +15,11 @@ class TextWidget extends StatefulWidget {
   final dynamic name;
   final bool readOnly;
   final bool require;
+  final bool translatable;
   dynamic value;
   final String type;
   final String label;
+  final dynamic autofill;
   bool isDark = false;
   TextWidget ({ 
     super.key, 
@@ -29,7 +31,9 @@ class TextWidget extends StatefulWidget {
     required this.type, 
     required this.component,
     required this.label,
+    required this.translatable,
     this.value,
+    this.autofill,
     this.isDark = false});
   @override
   // ignore: library_private_types_in_public_api
@@ -49,10 +53,16 @@ class _TextState extends State<TextWidget> {
     if ((widget.type.contains("time") || widget.type.contains("date")) && widget.value != null) {
       widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
     }
+    var val = widget.value  ?? widget.autofill;
+    if (val == null || val == "") {
+      val = widget.readOnly ? TranslateConstants.empty : null;
+    } else if (widget.translatable) {
+      val = await getOnFlow(val);
+    }
     return TextFormField(
       obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
       readOnly: widget.readOnly,
-      initialValue: widget.value ?? "",
+      initialValue: val,
       maxLines:  (widget.type.contains("text") && !widget.label.contains("password") ? 100 : 1),
       style: TextStyle( fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Theme.of(context).secondaryHeaderColor),
       enabled: true,
@@ -80,7 +90,7 @@ class _TextState extends State<TextWidget> {
             }
           })),
         child: Icon(Icons.link, size: 20)) : Icon(Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
-        hintText: (await getOnFlow("enter ${widget.schemaName.replaceAll("_", " ").replaceAll("db", "")} ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}...")).toLowerCase(),
+        hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
         labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
         labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
         errorStyle: const TextStyle(fontSize: 0,),
@@ -91,7 +101,7 @@ class _TextState extends State<TextWidget> {
       },
       onSaved: (String? value) => widget.form[widget.name]=value,
         validator: (String? value) {
-          var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? 'enter a proper value.' : null;
+          var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
           return t;
         },
       );

@@ -56,9 +56,8 @@ void evalCmd(String command, List<GridCell> cells) {
 // ignore: must_be_immutable
 class FunctionMathRowWidget extends StatefulWidget implements ConvertorWidget {
   String? addColumnName;
-  List<DropdownMenuItem<String>> items = [];
   @override dynamic value = "";
-  FunctionMathRowWidget ({ super.key, required this.items });
+  FunctionMathRowWidget ({ super.key});
   @override FunctionMathRowWidgetState createState() => FunctionMathRowWidgetState();
 }
 class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
@@ -74,13 +73,13 @@ class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
     if (commands[viewID] != null && widget.value == "") { widget.value = commands[viewID]; }
     return Container( 
       height: 45,
-      width: MediaQuery.of(context).size.width - menuSize,
+      width: currentWidth - menuSize,
       padding: const EdgeInsets.only(left: 48), child: Row(children: [
         Icon(Icons.functions, size: 20, color: Theme.of(context).splashColor),
         Container( 
           height: 25,
           margin: const EdgeInsets.only(left: 10, right: 10), 
-          width: (MediaQuery.of(context).size.width - menuSize) / 2, 
+          width: (currentWidth - menuSize) / 2, 
           child: await Convertor.filterFieldByType(context, widget, "varchar", "enter math operation", this, true, false, "", "")
         ),
         InkWell(onTap: () {
@@ -93,9 +92,9 @@ class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
         Container( 
           height: 25, 
           margin: const EdgeInsets.only(left: 10, right: 10),
-          width: (MediaQuery.of(context).size.width - menuSize) / 6, 
+          width: (currentWidth - menuSize) / 6, 
           child: DropdownButtonFormField<String>( 
-              items: widget.items.where((element) => element.value != "id").toList(), 
+              items: schemeItems[viewID]?.where((element) => element.value != "id").toList(), 
               value: widget.addColumnName, 
               hint: Text(TranslateConstants.colFilter.toLowerCase(), 
                 overflow: TextOverflow.ellipsis, 

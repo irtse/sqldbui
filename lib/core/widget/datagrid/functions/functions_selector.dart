@@ -24,8 +24,7 @@ class FunctionsSelectorWidget extends StatefulWidget {
   String mode = TranslateConstants.edit.toLowerCase(); 
   var mathAllowed = true;
   String value = TranslateConstants.total.toLowerCase();
-  List<DropdownMenuItem<String>> items = [];
-  FunctionsSelectorWidget ({ super.key, required this.mathAllowed, required this.items });
+  FunctionsSelectorWidget ({ super.key, required this.mathAllowed });
   @override FunctionsSelectorWidgetState createState() => FunctionsSelectorWidgetState();
 }
 class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
@@ -36,13 +35,13 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     } else { widget.value = mathColName[viewID] ?? TranslateConstants.total.toLowerCase(); }
     if (editMode[viewID] == null) { editMode[viewID] = TranslateConstants.edit.toLowerCase(); }
     if (editMode[viewID] == TranslateConstants.math.toLowerCase()) {
-      for (var item in widget.items) {
+      for (var item in (schemeItems[viewID] ?? [])) {
         if (currentView!.schema[item.value] != null) { fields[item.value!] = currentView!.schema[item.value]!; 
         } else if (item.value != null) { fields[item.value!] = model.SchemaField(label: item.value!); }
       }
       fields[mathColName[viewID] ?? TranslateConstants.total.toLowerCase()] = model.SchemaField(label: mathColName[viewID] ?? TranslateConstants.total.toLowerCase());
       if (functionMathRowsWidget.isEmpty) {
-        functionMathRowsWidget.add(FunctionMathRowWidget(items: widget.items));
+        functionMathRowsWidget.add(FunctionMathRowWidget());
         Future.delayed(const Duration(milliseconds: 100), () { globalGridWidgetKey.currentState?.setState(() { }); });
       } 
     } 
@@ -75,7 +74,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
             }),
       )),
       editMode[viewID] == TranslateConstants.math.toLowerCase() ? Container( margin: const EdgeInsets.only(left: 20, right: 10, top: 2), height: 25,  
-        width: (MediaQuery.of(context).size.width - menuSize) / 4, 
+        width: (currentWidth - menuSize) / 4, 
           child: TextFormField( key: formKey,
           textAlign: TextAlign.start,
           initialValue: mathColName[viewID]?.toString() ?? widget.value,

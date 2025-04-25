@@ -22,6 +22,7 @@ class GridRowWidget extends StatefulWidget {
   bool isSelected; 
   int maxLength; 
   double contextWidth;
+  model.Sharing? sharing;
   GlobalKey<ViewWidgetState>? viewKey; 
   double borderWidth; 
   String schemaID; 
@@ -37,6 +38,7 @@ class GridRowWidget extends StatefulWidget {
     required this.contentShallowed,
     required this.maxLength, 
     required this.contextWidth, 
+    required this.sharing,
     this.isEnum = false, 
     this.showCheckboxColumn = false, 
     this.viewKey, 
@@ -54,14 +56,17 @@ class GridRowWidgetState extends State<GridRowWidget> {
       onExit: (b) { setState(() { widget.isHovered = false; }); },
       child: Stack( alignment: Alignment.center, children: [ 
         Row(children: getCellsContent(context)),
-        Positioned( left : 57.5, child: LinkBoxWidget(path: "@${widget.schemaID}:${widget.cells.first.value}" )),
+        widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
+          path: "@${widget.schemaID}:${widget.cells.first.value}",
+          sharing: widget.sharing,
+        )) : Container(),
       ])
     );
   }
 
   List<Widget> getCellsContent(BuildContext context) {
     if (widget.cells.isEmpty) { return []; }
-    String cellID = '${widget.cells[0].value}';
+    String cellID = '${widget.cells[0].columnName != "id" ? widget.cells[0].cellID : widget.cells[0].value}';
     List<Widget> widgets = [];
     double maxheight = 48;
     for (var e in widget.cells) {
@@ -105,16 +110,34 @@ class GridRowWidgetState extends State<GridRowWidget> {
           ids=v.newIds.where((element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
         }
       }
-      List<Widget> badges = [];
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
+      List<Widget> bs = [];
       if (ids.contains(cellID) && first || isNew == cellID && first) {
-        first = false;
-        badges.add(Positioned(left: 10, top: 5, child: Container(
+        bs.add(Container(
           decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
           child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-            child: Text(TranslateConstants.newT, 
-              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor ),)))));
+            child: Text(TranslateConstants.newT.toLowerCase(), 
+              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+            )
+          )
+        ));
       }
+      if (e.isDraft && first) {
+        bs.add(Container(
+          margin: EdgeInsets.only(left: 10),
+          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
+          child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
+            child: Text(TranslateConstants.draftT.toLowerCase(), 
+              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+            )
+          )
+        ));
+      }
+      if (first) {
+        first = false;
+      }
+      List<Widget> badges = [Positioned(left: 10, top: 5, child: Row( children: bs ))];
+
       var v = e.value;
       if (commands[viewID] != null) { 
         evalCmd(commands[viewID]!, widget.cells);
@@ -131,6 +154,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
           readOnly: readOnly, 
           maxheight: maxheight,
           schemaID: widget.schemaID, 
+          schemaField: e.schemaField,
+          translatable: e.translatable,
           shal: widget.contentShallowed["${e.columnName}:$cellID"], 
         )
       );

@@ -8,7 +8,11 @@ class ButtonWidget extends StatefulWidget {
   Color color;
   String text;
   String method;
-  ButtonWidget ({ super.key, required this.text, required this.method, required this.color});
+  bool isDraft;
+  void Function()? overrideFunc;
+  IconData? icon;
+  ButtonWidget ({ super.key, required this.text, this.icon, this.overrideFunc,
+    required this.method, required this.color, this.isDraft = false});
   @override ButtonWidgetState createState() => ButtonWidgetState();
 }
 class ButtonWidgetState extends State<ButtonWidget> {
@@ -38,15 +42,20 @@ class ButtonWidgetState extends State<ButtonWidget> {
       Padding( padding: const EdgeInsets.only(left: 5, right: 5), 
         child: TextButton(
           style: ButtonStyle(  
-            padding: WidgetStateProperty.resolveWith((states) => const EdgeInsets.symmetric(horizontal: 30, vertical: 15)),
+            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5), // Change this value
+            )),
+            padding: WidgetStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: 30, vertical: widget.icon != null ? 10 : 15)),
             backgroundColor: WidgetStateProperty.resolveWith((states) => widget.color) ,
             overlayColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.pressed)) { return Colors.green; }
                 return Theme.of(context).primaryColor;
               })),
-            onPressed: ActionService.pressed(this, false, currentView!.schemaName,  currentView!.actionPath, 
-                  <String>["id"], currentView!.schema, widget.method, context), 
-            child: Text(widget.text.toUpperCase(), style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
+            onPressed: widget.overrideFunc ?? ActionService.pressed(this, false, currentView!.schemaName,  currentView!.actionPath, 
+                  <String>["id"], currentView!.schema, widget.method, widget.isDraft, context), 
+            child: widget.icon != null ? Tooltip( message: widget.text.toLowerCase(),
+              child: Icon( widget.icon, color: Colors.white)) : Text(widget.text.toUpperCase(), 
+              style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
     );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:http/http.dart';
 import 'package:sqldbui2/core/widget/utils/text_button.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -126,14 +125,14 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                         if (search.globalKey.currentState!.validate() && search.value != null && search.value != "") {
                           if (filterRowsWidget.length > 1 && filterRowsWidget.last.connector == "") { filterRowsWidget.last.connector = "and"; }
                           if (founded.isEmpty) { 
-                            filterRowsWidget.add(FilterRowWidget(schema: currentView!.schema, items: widget.items, columnName: search.columnName, type: search.type,
+                            filterRowsWidget.add(FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: filterRowsWidget.length));
                             globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = globalFilter[viewID]!.size();
                           } else {
-                            filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, items: widget.items, columnName: search.columnName, type: search.type,
+                            filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);
                             globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 
@@ -264,7 +263,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                   DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,)) 
                 ], isExpanded: true,
-                hint: Text( (await getOnFlow("${"select a"} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...")).toLowerCase(), 
+                hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...".toLowerCase(), 
                   overflow: TextOverflow.ellipsis, softWrap: true ),
                 value: widget.value == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder.toLowerCase(); } return null; },

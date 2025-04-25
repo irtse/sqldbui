@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/utils.dart';
@@ -45,7 +46,7 @@ class ActionBarState extends State<ActionBarWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async{
       List<Widget> actions = <Widget>[];
-      if (viewID != null) {
+      if (viewID != null && currentView!.isList) {
         actions.add( getIconOffset(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON.toLowerCase(), 
         !translation ? Icons.translate : Icons.g_translate, null, () {
           translation = !translation;
@@ -59,22 +60,63 @@ class ActionBarState extends State<ActionBarWidget> {
           }, false)
         );
       }
-      if (currentView != null && (MediaQuery.of(context).size.width - menuSize) > 650) {
-        for (var short in currentView!.shortcuts.keys) {
-          var t = await getOnFlow(short);
+      if (currentView != null && (currentWidth - menuSize) > 650) {
+        if (currentView!.shortcuts.keys.length == 1) {
+          var t = await getOnFlow(currentView!.shortcuts.keys.first);
           actions.add(
-            Padding( 
-              padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5), 
-              child: OutlinedButton( 
-                style: ButtonStyle( 
-                  overlayColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.pressed)) { return Colors.green; }
-                    return Theme.of(context).primaryColor;
-                  })
-                ), 
-                onPressed: () { AppRouter.navigateTo(currentView!.shortcuts[short]); }, 
-                child: Text(t.toLowerCase(), overflow: TextOverflow.ellipsis, style: const TextStyle( color: Colors.white, fontSize: 12 ))
+            InkWell( 
+                onTap: () { AppRouter.navigateTo(currentView!.shortcuts[currentView!.shortcuts.keys.first]); }, 
+                child: Container(
+                  margin:  const EdgeInsets.only(top: 5, bottom: 5, left: 5),
+                  padding: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 20), 
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white),
+                    borderRadius: const BorderRadius.all(Radius.circular(30))),
+                  width: (currentWidth / 8) > 200 ? 200 : currentWidth / 8,
+                  child: Center( 
+                    child: Text(t.toLowerCase(), overflow: TextOverflow.ellipsis, 
+                      style: const TextStyle( color: Colors.white, fontSize: 12 )))
               )
+            )
+          );
+        } else if (currentView!.shortcuts.isNotEmpty) {
+          List<Widget> items = [];
+          double maxWidth = 0;
+          for (var short in currentView!.shortcuts.keys) {
+            var t = (await getOnFlow(short)).toLowerCase();
+            if ((t.length * 12) > maxWidth) {
+              maxWidth = t.length * 12;
+            }
+            items.add(
+              InkWell( 
+                onTap: () { 
+                  AppRouter.navigateTo(currentView!.shortcuts[currentView!.shortcuts.keys.first]); 
+                  Navigator.pop(context);
+                },
+                child: 
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(
+                        color: currentView!.shortcuts.keys.last == short ? Colors.transparent : Colors.grey.shade200
+                      ))
+                    ),
+                    padding: EdgeInsets.all(10),
+                    width: maxWidth,
+                    child: Center( child: Row( children: [ 
+                      Padding(padding: EdgeInsets.only(right: 5), child: Icon(Icons.arrow_right, color: Colors.grey)),
+                      Text(t) 
+                    ]))
+                )
+              )
+            );
+          }
+          actions.add(
+            PopupButtonWidget(
+              tooltip: 'shortcuts',
+              width: maxWidth,
+              icon: Icons.menu,
+              color: Colors.white,
+              widget: Column(children: items),
             )
           );
         }
@@ -107,7 +149,7 @@ class ActionBarState extends State<ActionBarWidget> {
         Future.delayed(const Duration(seconds: 1), () { globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); }); 
       }
       List<Widget> rows = [];
-      if (MediaQuery.of(context).size.width > 700) {
+      if (currentWidth > 700) {
         rows = [ 
           Flexible(child: Row( children: row,)),
           Flexible( 
@@ -145,7 +187,7 @@ class ActionBarState extends State<ActionBarWidget> {
       return Container( 
         height: 40, 
         padding: const EdgeInsets.symmetric(horizontal: 30),
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
+        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
         decoration: BoxDecoration(
           color: Theme.of(context).secondaryHeaderColor,
           boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],

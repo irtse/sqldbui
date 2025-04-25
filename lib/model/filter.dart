@@ -59,10 +59,10 @@ class Filters {
     return orderedFilters;
   }
 
-  List<FilterRowWidget> toRow(List<DropdownMenuItem<String>> columns, Map<String, SchemaField> schema) {
+  List<FilterRowWidget> toRow(Map<String, SchemaField> schema) {
     List<FilterRowWidget> rows = [];
     for (var filter in sort()) {
-      rows.add(FilterRowWidget(schema: schema, items: columns, columnName: filter.column, label: filter.label ?? filter.column, index: filter.index, 
+      rows.add(FilterRowWidget(schema: schema, columnName: filter.column, label: filter.label ?? filter.column, index: filter.index, 
         type: filter.type, comparator: filter.comparator, connector: filter.connector, dir: filter.dir, value: filter.value));
     }
     return rows;

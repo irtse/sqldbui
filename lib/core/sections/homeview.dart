@@ -1,7 +1,16 @@
+import 'dart:async';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/model/view.dart';
 import 'package:sqldbui2/page/translate.dart';
-
+import 'package:webview_flutter/webview_flutter.dart';
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
 class HomeViewWidget extends StatefulWidget{
@@ -9,6 +18,7 @@ class HomeViewWidget extends StatefulWidget{
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
+  final Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -19,31 +29,31 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> comps = [];
-    List<Widget> views = [];
+    List<RedirectButtonWidget> views = [];
+    Widget? web;
+    if (kIsWeb) {
+      web= html.HtmlWidget(
+            '''
+              <iframe title="YouTube video player" src="https://flutter.dev"</iframe>
+            ''',
+          );
+    } else {
+      web = WebView(
+            initialUrl: 'https://flutter.dev',
+            initialCookies: const [
+              WebViewCookie(name: 'mycookie', value: 'foo', domain: 'flutter.dev')
+            ],
+            onWebViewCreated: (WebViewController webViewController) {
+              _controller.complete(webViewController);
+            },
+            javascriptMode: JavascriptMode.unrestricted,
+          );
+    }
     for (var cat in categories.keys) {
       for (var view in categories[cat]!.where( (e) => e.isFavorize)) {
         views.add(
-          InkWell( onTap: () { globalMenuKey.currentState?.refreshView("#${view.id}", cat, false, false, false); },
-              child: Container(
-            margin: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.white,
-              boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ],
-              borderRadius: const BorderRadius.all(Radius.circular(7))),
-            child: SizedBox( width: 300, child: Column(children: [
-                Container(margin: const EdgeInsets.only(top: 10), child: const ClipRRect(
-                  borderRadius:  BorderRadius.only(topLeft: Radius.circular(7), topRight: Radius.circular(7)),
-                  child: Image( image: AssetImage('assets/images/default.png'), height: 150, width: 280, fit: BoxFit.cover, ),
-                )),
-                Padding(padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), child: ListTile(
-                  title: Text( "${view.name[0].toUpperCase()}${view.name.substring(1).toLowerCase()}", overflow: TextOverflow.ellipsis,
-                  style:  TextStyle( color: Theme.of(context).primaryColor, fontSize: 17), ),
-                  trailing: Text(TranslateConstants.goto.toLowerCase(), 
-                  style: const TextStyle(fontSize: 9, color: Colors.grey) ),
-                  subtitle: view.description == "" ? null 
-                    : Text(await getOnFlow("${view.description[0].toUpperCase()}${view.description.substring(1).toLowerCase()}"), 
-                  style: const TextStyle( fontSize: 10), ),
-                )),
-          ],)) )));
+          RedirectButtonWidget(id: "${view.id}", name: view.label ?? view.name, category: cat)
+        );
       }
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),
@@ -54,25 +64,50 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))
       ],)));
     }
-    return Column( children: [
-      Container( 
-        height: 40, 
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0,
-        decoration: BoxDecoration(
-          color: Theme.of(context).secondaryHeaderColor,
-          boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
-        ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
-            overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) )
-        ])),
-      Container(
-            padding: const EdgeInsets.only(top: 30, right: 30, left: 30),
-            width: MediaQuery.of(context).size.width - menuSize > 0 ? MediaQuery.of(context).size.width - menuSize : 0, 
-            height: MediaQuery.of(context).size.height - 80 > 0 ? MediaQuery.of(context).size.height - 80 : 0, 
-                decoration: BoxDecoration( color: Colors.grey[200]),
-                child: SingleChildScrollView(child: Wrap(alignment: WrapAlignment.center, children:views)))
-    ]);
-  }
+    return FutureBuilder<APIResponse<Shallowed>>(future:APIService().get<Shallowed>(
+      "${APIConstants.genericEndpost}/dbview?rows=all&shallow=enable&shortcut_on_main=true", false, context), 
+    builder: (a,s) {
+      if (s.data?.data != null) {
+        for (var d in s.data!.data!) {
+          var l =  d.label ?? d.name ?? "";
+          if (views.where( (e) => e.name == l).isEmpty) {
+            views.add(RedirectButtonWidget(id: "${d.id}", name: l, category: ""));
+          } 
+        } 
+      }
+      return Column( children: [
+        Container( 
+          height: 40, 
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+          decoration: BoxDecoration(
+            color: Theme.of(context).secondaryHeaderColor,
+            boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
+              overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) ),
+              Padding(padding: EdgeInsets.only(left: 10),
+                child: Icon(Icons.dashboard, color: Colors.grey, size: 18)
+            ),
+          ])),
+        Column( children: [
+          Container(
+              width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
+              decoration: BoxDecoration( 
+                boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+                color: Theme.of(context).primaryColor),
+              child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: views))
+          ),
+          SizedBox(
+            width: currentWidth - menuSize,
+            height: currentHeigth - 80 - (views.isEmpty ? 0 : 40),
+            child: web
+          ),
+        ])
+      
+      ]);
+    }); 
+  }  
 }

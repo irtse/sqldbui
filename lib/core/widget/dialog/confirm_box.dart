@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sqldbui2/core/widget/utils/alert.dart';
 import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
@@ -19,8 +20,8 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    return AlertDialog(
-        content: Padding(padding: EdgeInsets.all(20), child: Column(mainAxisSize: MainAxisSize.min, children: [
+    return AlertWidget(
+        widget: Column(mainAxisSize: MainAxisSize.min, children: [
       Center(child: Padding( padding: EdgeInsets.only(bottom: 10), 
         child: Icon(Icons.help_outline_outlined, size: 80, color: Colors.grey,))),
       Center(child: Text(TranslateConstants.sure.toUpperCase(), 
@@ -40,6 +41,6 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(
           TranslateConstants.no.toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15),)))]))
-    ],)));
+    ],));
   }
 }
