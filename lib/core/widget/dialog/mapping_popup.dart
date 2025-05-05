@@ -107,6 +107,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               url: null, 
               isDark: true, 
               path: "", 
+              wrappers: null,
               translatable: false,
               autofill: null,
               empty: currentView?.isEmpty ?? false)

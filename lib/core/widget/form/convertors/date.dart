@@ -58,9 +58,9 @@ class _DateState extends State<DateWidget> {
             hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
             border: const OutlineInputBorder(),
             labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-            hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+            hintText: TranslateConstants.selectDate.toLowerCase(),
             labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
           ) ));
       }
@@ -75,7 +75,7 @@ class _DateState extends State<DateWidget> {
         decoration: InputDecoration(
             suffixIcon: const Icon(Icons.calendar_month, size: 20,),
             suffixIconColor: widget.readOnly ? Colors.black : Theme.of(context).primaryColor,
-            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             helperStyle: const TextStyle(height: -2),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,
@@ -84,7 +84,7 @@ class _DateState extends State<DateWidget> {
             hintStyle: const TextStyle(fontSize: 12, ),
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+            hintText: TranslateConstants.selectDate.toLowerCase(),
             labelText: (await getOnFlow("${widget.label.toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(

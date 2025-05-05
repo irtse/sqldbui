@@ -55,9 +55,9 @@ class _UploadState extends State<UploadWidget> {
           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
           border: const OutlineInputBorder(),
           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-          hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+          hintText: TranslateConstants.writePath.toLowerCase(),
           labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
         )
       ));
@@ -81,7 +81,7 @@ class _UploadState extends State<UploadWidget> {
         autocorrect: true,
         keyboardType: TextInputType.multiline,
         decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           border: const OutlineInputBorder(),
           isDense: true,
           suffixIconColor: Theme.of(context).primaryColor,
@@ -95,8 +95,7 @@ class _UploadState extends State<UploadWidget> {
           suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
             : ( widget.type.contains("link") ? InkWell( 
           child: Icon(Icons.attach_file, size: 20)) : Icon(Icons.attach_file, color: Theme.of(context).secondaryHeaderColor)),
-          hintText: (
-            "${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+          hintText: TranslateConstants.writePath.toLowerCase(),
           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
           labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
           errorStyle: const TextStyle(fontSize: 0,),

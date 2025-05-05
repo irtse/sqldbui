@@ -45,7 +45,7 @@ class Value {
 }
 bool tempRemoval = false;
 bool noFilterRetrieval = false;
-int globalLimit = 20;
+int globalLimit = 10;
 int globalOffset = 0;
 List<GridRowWidget> unselectedGrid = [];
 List<GridRowWidget> selectedGrid = []; 
@@ -131,7 +131,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
             currentWidth > 1000 ? 
             Positioned( top: 3.5, left: 32, child: (isEditMode[viewID] ?? false) ? 
                 FunctionsSelectorWidget(mathAllowed: realOrder(widget.view, false).length > 2)
-              : FilterSelectorWidget(dpItems: dpItems, schema: schema, filterMain: filterMain)) 
+              : FilterSelectorWidget(schema: schema, filterMain: filterMain, schemaName: widget.view?.schemaName ?? "")) 
             : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
@@ -174,7 +174,9 @@ class DatagridWidgetState extends State<DatagridWidget> {
           t = (await getOnFlow(t)).toLowerCase();
         }
         fastTranslation[viewID ?? ""]?[scheme?.label ?? o] = t;
-        schemeItems[viewID ?? ""]?.add(DropdownMenuItem<String>(value: o, child: Text(t, overflow: TextOverflow.ellipsis)));
+        if (schemeItems[viewID ?? ""]!.where( (e) => e.value == o ).isEmpty) {
+          schemeItems[viewID ?? ""]?.add(DropdownMenuItem<String>(value: o, child: Text(t, overflow: TextOverflow.ellipsis)));
+        }
       }
     }
   }

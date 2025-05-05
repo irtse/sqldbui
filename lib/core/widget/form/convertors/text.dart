@@ -69,7 +69,7 @@ class _TextState extends State<TextWidget> {
       autocorrect: true,
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
-        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: widget.isDark ? Theme.of(context).splashColor : Colors.grey, width: 1.0)),
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).splashColor, width: 1.0)),
         border: const OutlineInputBorder(),
         isDense: true,
         suffixIconColor: Theme.of(context).primaryColor,
@@ -90,7 +90,7 @@ class _TextState extends State<TextWidget> {
             }
           })),
         child: Icon(Icons.link, size: 20)) : Icon(Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
-        hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+        hintText: TranslateConstants.writeValue.toLowerCase(),
         labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
         labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
         errorStyle: const TextStyle(fontSize: 0,),

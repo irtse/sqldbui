@@ -27,14 +27,13 @@ class FilterColsPopUpWidget extends StatefulWidget{
   @override
   FilterColsPopUpState createState() => FilterColsPopUpState();
 }
-
+bool forceViewFilter = false;
 class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
-  bool force = false;
   @override Widget build(BuildContext context) {
     if (viewID == null) { return Container(); }
-    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", false, null), 
+    return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", forceViewFilter, null), 
     builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
-      force = false;
+      forceViewFilter = false;
       if (snapshot.hasData && snapshot.data!.data != null && snapshot.data!.data!.isNotEmpty) {
         return FutureMenuColsPopUpWidget(comp: this, datas: snapshot.data!.data!, schema: widget.schema);
       }
@@ -145,7 +144,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
                       globalOffset = 0; 
                       rects.remove(viewID);
-                      widget.comp.force = true;
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                     child: Padding( padding: EdgeInsets.all(10), 
@@ -173,6 +171,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     filterOrderView[viewID] = filterTempOrderView[viewID]!;
                     var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
                     APIService().post<model.Shallowed>(currentView!.filterPath, body, null).then((v) async { 
+                        forceViewFilter = true;
                         globalOffset = 0; 
                         rects.remove(viewID);
                         widget.comp.setState((){  });
@@ -185,7 +184,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                             (await getOnFlow(filterLabel)).toLowerCase(), overflow: TextOverflow.ellipsis,),));
                         }
                         setState((){});
-                        widget.comp.force = true;
                         Future.delayed( const Duration(seconds: 1), () {
                           globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                         });

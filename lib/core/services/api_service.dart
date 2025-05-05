@@ -20,6 +20,7 @@ import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/services/html.dart' if (kIsWeb) 'dart:html' as http;
 import 'package:sqldbui2/model/view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 var firstAPI = false;
 var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
@@ -190,10 +191,14 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-
-        print("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
-        if (response.statusCode != null && response.statusCode! < 400) {
+        if (response.statusCode == 302) {
+          final locationHeader = response.headers.value('location');
+          if (locationHeader != null) {
+            launchUrl(Uri.parse(locationHeader), webOnlyWindowName: '_blank');
+          }
+        }
+        if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
           if (method == "delete") { cache.remove(url); return APIResponse<T>(); }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { 
@@ -243,7 +248,13 @@ class APIService {
         var command = "";
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
         var response = await request("$url$command&rawview=enable", method, body, null);
-        if (response.statusCode != null && response.statusCode! < 400) {
+        if (response.statusCode == 302) {
+          final locationHeader = response.headers.value('location');
+          if (locationHeader != null) {
+            launchUrl(Uri.parse(locationHeader), webOnlyWindowName: '_blank');
+          }
+        }
+        if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
           if (method == "delete") { cache.remove(url); return APIResponse<RawData>(); }
           APIResponse<RawData> resp = APIResponse<RawData>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") { return resp; }

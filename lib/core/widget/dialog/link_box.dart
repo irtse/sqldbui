@@ -12,18 +12,19 @@ class LinkBoxWidget extends StatefulWidget {
   String path;
   bool success = false;
   Map<String,String> values = {};
-  bool isOpen = false;
   LinkBoxWidget ({ super.key, required this.path, required this.sharing });
   @override LinkBoxWidgetState createState() => LinkBoxWidgetState();
 }
+bool forceUser = false;
 class LinkBoxWidgetState extends State<LinkBoxWidget> {
   @override Widget build(BuildContext context) {
     List<Widget> drops = [];
-    if (widget.sharing != null && widget.isOpen ) {
+    if (widget.sharing != null) {
       var len = 0;
       for (var m in widget.sharing!.shallowPath.entries) {
         len++;
-        drops.add(FutureBuilder(future: APIService().get<model.Shallowed>(m.value, false, context), builder: (a,s) {
+        drops.add(FutureBuilder(future: APIService().get<model.Shallowed>(m.value, forceUser, context), builder: (a,s) {
+          forceUser = false;
           List<DropdownMenuItem<String>> dpItems = [];
           if (s.data?.data != null) {
             for (var data in s.data!.data!) {
@@ -69,7 +70,10 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                         APIService().post<model.Shallowed>(
                           widget.sharing!.sharePath!, 
                           widget.sharing!.body, null
-                        ).then( (value) { setState(() { Navigator.pop(context); }); });
+                        ).then( (value) { 
+                          forceUser = true;
+                          setState(() { Navigator.pop(context); }); 
+                        });
                     }, icon: Icon(Icons.share, size: 20, color: widget.values[m.key] != null ? Colors.grey.shade200 :Colors.grey))
                   ) : Container(), 
                 ]);
@@ -81,14 +85,6 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
       color: Colors.white,
       tooltip: TranslateConstants.share.toLowerCase(),
       icon: Icon(size: 18, Icons.share, color: Theme.of(context).primaryColor),
-      onOpened: () {
-        setState(() {
-          widget.isOpen = true;
-        });
-      },
-      onCanceled: () {
-        widget.isOpen = false;
-      },
       itemBuilder: (BuildContext bc) { 
         return [ 
           PopupMenuItem(enabled: false, 

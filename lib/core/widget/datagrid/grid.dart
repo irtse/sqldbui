@@ -1,15 +1,17 @@
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/bottom_column.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/page/translate.dart';
 
 String? isNew;
 bool wait = false;
@@ -134,17 +136,7 @@ class GridWidgetState extends State<GridWidget> {
                 thumbVisibility: true,
                 interactive: !globalLoading,
                 notificationPredicate: (notif) => notif.depth > -1,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (scrollNotification) {
-                    if (scrollNotification is ScrollEndNotification) {
-                      if (currentView != null && currentView!.items.length < currentView!.max) {
-                        if (currentView?.items.length == globalOffset + globalLimit) { globalOffset += globalLimit; }
-                        globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
-                      } 
-                    }
-                    return true;
-                  },
-                  child: SizedBox( 
+                child:  SizedBox( 
                     height: currentHeigth - (178 + t) > 0 ? currentHeigth - (178 + t) : 0, 
                     child: SingleChildScrollView(
                       controller: _vertical,
@@ -158,10 +150,29 @@ class GridWidgetState extends State<GridWidget> {
                           child: Text(TranslateConstants.emptyData, 
                             style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
                         )
-                      ) : Column(children: [...rows, const SizedBox(height: 10, child: null)])
+                      ) : Column(children: [
+                        ...rows, 
+                        currentView != null && currentView!.items.length < currentView!.max 
+                        ? Center(child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 10), 
+                          child: VisibilityDetector(
+                            key: Key('my-widget-key'),
+                            onVisibilityChanged: (VisibilityInfo info) {
+                              if (info.visibleFraction > 0) {
+                                if (currentView != null && currentView!.items.length < currentView!.max) {
+                                  if ((currentView?.items.length ?? 0) >= globalOffset) { 
+                                    globalOffset = (currentView?.items.length ?? 0); 
+                                  }
+                                  globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
+                                }
+                              }
+                            },
+                            child: SpinKitCircle(color: Theme.of(context).primaryColor))))
+                        : const SizedBox(height: 10, child: null)
+                      ])
                     )
                   )
-            ))),
+            )),
       Container(  
         decoration: BoxDecoration(
           color: Theme.of(context).highlightColor,

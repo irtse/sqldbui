@@ -1,6 +1,7 @@
 import 'package:translator/translator.dart';
 
 class TranslateConstants {
+  static String global = "menu of the data";
   static String lang = "fr";
   static String synthesis = "tasks synthesis";
   
@@ -144,9 +145,18 @@ class TranslateConstants {
   static String howToOrder = "datas are ordered in thematized views accessible in the side menu. menu give access to datas list views.";
   static String howToWorkflow = "workflows are attached to a request. some request does not have a workflow to integrate data.";
   static String select = "select : ";
-  static String enter = "enter : ";
+  static String selectDate = "select a date";
+  static String selectValue = "select a value";
+  static String writeValue = "write a value";
+  static String writeNumber = "write a number";
+  static String writePath = "write a path";
+
+  static String commentary = "write your commentary";
   static String enterProper = "enter a proper value.";
   static String dataFormulary = "fill data formulary";
+
+  static String data = "the data";
+  static String comments = "comments";
   static Map<String, String> onFlowTrad = {};
 }
 
@@ -161,15 +171,25 @@ Future<String> getOnFlow(String value) async {
 
 Future<void> SetUpTranslate() async {
   var translator = GoogleTranslator();
-  await translator.translate(TranslateConstants.sendMail, to: TranslateConstants.lang).then( (e) => TranslateConstants.sendMail = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.commentary, to: TranslateConstants.lang).then( (e) => TranslateConstants.commentary = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.global, to: TranslateConstants.lang).then( (e) => TranslateConstants.global = e.text.toLowerCase());
 
+  await translator.translate(TranslateConstants.selectDate, to: TranslateConstants.lang).then( (e) => TranslateConstants.selectDate = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.writeValue, to: TranslateConstants.lang).then( (e) => TranslateConstants.writeValue = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.writeNumber, to: TranslateConstants.lang).then( (e) => TranslateConstants.writeNumber = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.writePath, to: TranslateConstants.lang).then( (e) => TranslateConstants.writePath = e.text.toLowerCase());
+
+  await translator.translate(TranslateConstants.sendMail, to: TranslateConstants.lang).then( (e) => TranslateConstants.sendMail = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.data, to: TranslateConstants.lang).then( (e) => TranslateConstants.data = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.comments, to: TranslateConstants.lang).then( (e) => TranslateConstants.comments = e.text.toLowerCase());
+ 
   await translator.translate(TranslateConstants.update, to: TranslateConstants.lang).then( (e) => TranslateConstants.update = e.text.toLowerCase());
   await translator.translate(TranslateConstants.send, to: TranslateConstants.lang).then( (e) => TranslateConstants.send = e.text.toLowerCase());
   await translator.translate(TranslateConstants.draftT, to: TranslateConstants.lang).then( (e) => TranslateConstants.draftT = e.text.toLowerCase());
   await translator.translate(TranslateConstants.dataFormulary, to: TranslateConstants.lang).then( (e) => TranslateConstants.dataFormulary = e.text.toLowerCase());
 
   await translator.translate(TranslateConstants.enterProper, to: TranslateConstants.lang).then( (e) => TranslateConstants.enterProper = e.text.toLowerCase());
-  await translator.translate(TranslateConstants.enter, to: TranslateConstants.lang).then( (e) => TranslateConstants.enter = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.selectValue, to: TranslateConstants.lang).then( (e) => TranslateConstants.selectValue = e.text.toLowerCase());
   await translator.translate(TranslateConstants.select, to: TranslateConstants.lang).then( (e) => TranslateConstants.select = e.text.toLowerCase());
   await translator.translate(TranslateConstants.synthesis, to: TranslateConstants.lang).then( (e) => TranslateConstants.synthesis = e.text.toLowerCase());
 

@@ -107,8 +107,9 @@ class GridCellWidgetState extends State<GridCellWidget> {
         "${widget.cellID}:${widget.cell.columnName}") : 
       ListTile( 
         mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
-        enabled: !widget.cell.type.contains("enum"), onTap: () {
-          if (widget.cell.type.contains("enum") || (isEditMode[viewID] ?? false) || !widget.isLink) { return; }
+        enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 
+        onTap: () {
+          if (widget.cell.type.contains("enum") || (isEditMode[viewID] ?? false) || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
           try {
             List<model.View> v = [];
             for (var cat in categories.values) { v = cat.where( (v) => "${v.id}" == viewID?.substring(1)).toList(); }
@@ -120,7 +121,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
           AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
-        child: Center(child: Text( translation ? v : widget.value, 
+        child: Center(child: Text( "$v".toLowerCase(), 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 

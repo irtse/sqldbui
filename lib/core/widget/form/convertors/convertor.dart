@@ -10,6 +10,7 @@ import 'package:sqldbui2/core/widget/form/convertors/date.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/upload.dart';
+import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -302,7 +303,8 @@ class Convertor {
     String description, bool require, bool readOnly, 
     dynamic value, String? mainUrl, String? url, String path, 
     FormWidgetState? comp, bool isEmpty, 
-    dynamic autofill, bool translatable
+    dynamic autofill, bool translatable,
+    GlobalKey<SubFormularyWidgetState>? wrappers,
   ) async {
     type = type.toLowerCase();
     bool isLink = false;
@@ -339,9 +341,10 @@ class Convertor {
       );
     } else if (type.contains("bool")) {
       if (form[name] != null) { value = form[name]; }
-        ValueNotifier<bool> ctrl = ValueNotifier(value ?? autofill ?? false);
+      try {
+        print("$value $autofill");
+        ValueNotifier<bool> ctrl = ValueNotifier(value ?? ("$autofill" == "true"));
         return AdvancedSwitch( width : 200,
-          initialValue: value ?? false,
           enabled: !readOnly,
           controller: ctrl,
           activeColor: Colors.green, inactiveColor: Colors.grey,
@@ -355,6 +358,10 @@ class Convertor {
             ctrl.value = value;
           }
         );
+      } catch(e,s) {
+        print(e);
+        print(s);
+      }
     } else if (type.contains("time") || type.contains("date")) { 
         return DateWidget(
           form: form, 
@@ -386,6 +393,7 @@ class Convertor {
           empty: isEmpty,
           autofill: autofill,
           translatable: translatable,
+          wrappers: wrappers,
         );
     } else if (type == "link") {
       return TextWidget(

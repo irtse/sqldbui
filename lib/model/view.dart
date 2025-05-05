@@ -44,7 +44,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
 
   @override SchemaField deserialize(Map<String, dynamic> json) {
     return SchemaField(
-    translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : true,
+    translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : false,
     autoFill: json.containsKey("autofill") && json["autofill"] != null ? json["autofill"] : null,
     active: json.containsKey("active") && json["active"] != null ? json["active"] : true,
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
@@ -128,6 +128,7 @@ class Item extends SerializerDeserializer<Item> {
     this.sharing,
     this.isDraft = false,
     this.synthesisPath,
+    this.commentsPath,
   });
   bool isDraft;
   Sharing? sharing;
@@ -140,11 +141,13 @@ class Item extends SerializerDeserializer<Item> {
   String? synthesisPath;
   Map<String,Shallowed> valuesShallow;
   Map<String,List<Shallowed>>valuesMany;
+  String? commentsPath;
 
   @override Map<String, dynamic> serialize() => {};
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      commentsPath: json.containsKey("comments_path") ? json["comments_path"] : "",
       synthesisPath: json.containsKey("synthesis_path") && json["synthesis_path"] != null ? json["synthesis_path"] : null,
       isDraft: json.containsKey("is_draft") && json["is_draft"] != null ? bool.parse("${json["is_draft"]}") : false,
       sharing: json.containsKey("sharing") && json["sharing"] != null ? Sharing().deserialize(json["sharing"]) : null, 
@@ -259,13 +262,18 @@ class View extends SerializerDeserializer<View> {
     this.workflow,
     this.isFavorize = false,
     this.favorizeBody = emptyDyn,
+    this.commentsPath = "",
     this.filterPath = "",
     this.isWrapper = false,
+    this.isEnum = false,
     this.shortcuts = emptyDyn,
     this.consents = const [],
     this.triggers = const [],
+    this.commentBody = const {}
   });
+  Map<String, dynamic> commentBody;
   List<Trigger> triggers;
+  bool isEnum;
   List<Consent> consents;
   String actionPath;
   List<dynamic> actions;
@@ -294,10 +302,13 @@ class View extends SerializerDeserializer<View> {
   int max;
   bool isWrapper = false;
   Workflow? workflow;
+  String commentsPath = "";
   Map<String, dynamic> shortcuts= <String, dynamic>{};
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    isEnum:  json.containsKey("is_enum") && json["is_enum"] != null ? bool.parse("${json["is_enum"]}") : false,
+    commentBody: json.containsKey("comment_body") && json["comment_body"] != null ? json["comment_body"] : {},
     triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
     consents: json.containsKey("consents") && json["consents"] != null ? fromListJson(json["consents"], Consent()) : <Consent>[], 
     workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
@@ -366,21 +377,21 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
 
   @override deserialize(Map<String, dynamic> json) {
     return Shallowed(
-    triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
-    id: json.containsKey("id") ? int.parse("${json["id"]}") : null, 
-    ref: json.containsKey("data_ref") ? json["data_ref"] : "",
-    selected: json.containsKey("is_selected") ? json["is_selected"] : false,
-    fields: json.containsKey("filter_fields") ? fromListJson(json["filter_fields"], Filter()) : <Filter>[],
-    elder: json.containsKey("elder") ? json["elder"] : "all",
-    name: json.containsKey("name") ?  json["name"] : null,
-    label: json.containsKey("label") ? json["label"] : null,
-    workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
-    readOnly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,  
-    actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
-    actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
-    schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
-    linkPath: json.containsKey("link_path") && json["link_path"] != null ? json["link_path"] : "",
-    schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{});
+      triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
+      id: json.containsKey("id") ? int.parse("${json["id"]}") : null, 
+      ref: json.containsKey("data_ref") ? json["data_ref"] : "",
+      selected: json.containsKey("is_selected") ? json["is_selected"] : false,
+      fields: json.containsKey("filter_fields") ? fromListJson(json["filter_fields"], Filter()) : <Filter>[],
+      elder: json.containsKey("elder") ? json["elder"] : "all",
+      name: json.containsKey("name") ?  json["name"] : null,
+      label: json.containsKey("label") ? json["label"] : null,
+      workflow: json.containsKey("workflow") && json["workflow"] != null ? Workflow().deserialize(json["workflow"]) : null, 
+      readOnly: json.containsKey("readonly") && json["readonly"] != null ? json["readonly"] : false,  
+      actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
+      actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
+      schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
+      linkPath: json.containsKey("link_path") && json["link_path"] != null ? json["link_path"] : "",
+      schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{}); 
   }
   @override Map<String, dynamic> serialize() => {
     "id" : id,

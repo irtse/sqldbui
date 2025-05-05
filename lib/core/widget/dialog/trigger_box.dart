@@ -46,7 +46,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             var w = await Convertor.formFieldByType(
               widget.body, context, "", widget.schema, scheme.type, k, scheme.label, 
               scheme.description, scheme.require, scheme.readonly, widget.body[k], "", "", 
-              "", null, currentView?.isEmpty ?? false, scheme.autoFill, scheme.translatable);
+              "", null, currentView?.isEmpty ?? false, scheme.autoFill, scheme.translatable, null);
             widgets.add(
               Container( 
                 width: currentWidth / 1.5,

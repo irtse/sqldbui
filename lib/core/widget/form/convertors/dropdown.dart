@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
+import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -25,9 +26,10 @@ class DropDownWidget extends StatefulWidget {
   bool isDark = false;
   bool empty = false;
   final dynamic autofill;
+  GlobalKey<SubFormularyWidgetState>? wrappers;
   DropDownWidget ({ super.key, required this.form, required this.schemaName, required this.name, 
                     required this.path, required this.translatable, required this.schema,
-                    required this.mainUrl, required this.readOnly, required this.value, 
+                    required this.mainUrl, required this.readOnly, required this.value, required this.wrappers,
                     required this.label, this.isDark = false, required this.empty, required this.autofill,
                     required this.require, required this.type, required this.url, required this.component});
   @override
@@ -68,9 +70,9 @@ class DropDownState extends State<DropDownWidget> {
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                 border: const OutlineInputBorder(),
                 labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-                enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+                hintText: TranslateConstants.selectValue.toLowerCase(),
                 labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
               )
             )
@@ -113,7 +115,7 @@ class DropDownState extends State<DropDownWidget> {
             filled: true,
             constraints: const BoxConstraints(minWidth: 0),
             labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             fillColor: widget.readOnly ? Theme.of(context).splashColor : (
               widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
             hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
@@ -133,14 +135,14 @@ class DropDownState extends State<DropDownWidget> {
                       style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
                       decoration: InputDecoration(
                         filled: true,
-                        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                         errorStyle: const TextStyle(height: -2),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
                         hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                         border: const OutlineInputBorder(),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
-                        hintText: (await getOnFlow("enter your ${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}")).toLowerCase(),
+                        hintText: TranslateConstants.selectValue.toLowerCase(),
                         labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
                       ) ));
     }
@@ -148,17 +150,17 @@ class DropDownState extends State<DropDownWidget> {
       widget.component?.widget.detectChange = true;
       widget.form[widget.name]=widget.value;
       if (widget.url != null) {
-        if (widget.component?.widget.wrappersURL[widget.name] == null) {
+        if (widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
           Future.delayed(const Duration(milliseconds: 100), () {
-              widget.component?.setState( () {
-                widget.component?.widget.hideField.add(widget.name);
-                widget.component?.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${widget.value}");
-              });
+            widget.component?.setState( () {
+              widget.component?.widget.hideField.add(widget.name);
+              widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${widget.value}");
             });
-          }  
-        }
-        return Container();
+          });
+        }  
       }
+      return Container();
+    }
     return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.mainUrl!, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
@@ -178,6 +180,7 @@ class DropDownState extends State<DropDownWidget> {
             autofill: widget.autofill,
             schema: widget.schema,
             translatable: widget.translatable,
+            wrappers: widget.wrappers,
           );
         });
   }
@@ -201,8 +204,10 @@ class SubDropDownWidget extends StatefulWidget {
   final bool translatable;
   bool isDark = false;
   final dynamic autofill;
+  GlobalKey<SubFormularyWidgetState>? wrappers;
+
   SubDropDownWidget ({ super.key, required this.form, required this.data,
-    required this.schemaName, required this.name, required this.path, 
+    required this.schemaName, required this.name, required this.path, required this.wrappers,
     required this.autofill, required this.translatable, required this.schema,
     required this.readOnly, required this.value, required this.label, this.isDark = false,
     required this.require, required this.type, required this.url, required this.component});
@@ -223,12 +228,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
     Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
     if (widget.data != null && widget.component != null) {
       for (var item in widget.data!) {
-        var field = widget.schema[widget.name] as model.SchemaField?;
-        bool f = field?.schema["name"]?.translatable ?? true;
+        bool f = item.schema["name"]?.translatable ?? false;
         var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-        var t = items.where((element) => element.value == v);
+        var t = items.where((element) => element.value == v);        
         if (!mapped.containsKey(v) && t.isEmpty){
-          mapped[v]=item;
+          mapped["${item.id}"]=item;
           if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
             && items.where((element) => element.value == v).isEmpty) {
             var vv = v;
@@ -240,7 +244,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
         }
       }
     }
-   
     return DropdownButtonFormField<String>(
       isExpanded: true,
       hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...", 
@@ -253,11 +256,12 @@ class SubDropDownState extends State<SubDropDownWidget> {
       onChanged: (value) {
         widget.component?.widget.detectChange = true;
         if (value == null) { widget.form[widget.name]=null;
-        } else { widget.form[widget.name]=mapped[value]!.id; }
+        } else { widget.form[widget.name]=mapped[value]?.id; }
         var item = mapped[value];
         if (widget.url != null && item != null) {
-          widget.component?.setState( () { 
-            widget.component?.widget.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+          print("URELE ${widget.wrappers?.currentState} ${widget.name} ${widget.url}");
+          widget.wrappers?.currentState?.setState( () { 
+            widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
           }); 
         }
       },
@@ -267,7 +271,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
       },
       decoration: InputDecoration(
         filled: true, isDense: true,
-        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
         border: const OutlineInputBorder(),
         errorStyle: const TextStyle(height: -2, fontSize: 0),
         hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),

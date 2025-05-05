@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
+import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -77,6 +77,7 @@ class Filters {
 }
 
   void removeFilter() {
+    forceFilter = true;
     filterRowsWidget = [];
     globalOffset = 0;
     noFilterRetrieval = true;
@@ -103,6 +104,7 @@ class Filters {
   }
 
   void refreshFilter(List<Filter> fields) {
+    forceFilter = true;
     globalFilter[viewID] = Filters(); 
     globalOrder[viewID] = {};
     for (var field in fields) {

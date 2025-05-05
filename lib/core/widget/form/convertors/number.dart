@@ -49,7 +49,7 @@ class _NumberState extends State<NumberWidget> {
             : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null)), 
           style:  const TextStyle(fontSize: 14),
           decoration: InputDecoration(
-            enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,
             suffixIconColor: Theme.of(context).primaryColor,
@@ -58,7 +58,7 @@ class _NumberState extends State<NumberWidget> {
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro, color: Colors.black) : Icon(Icons.onetwothree, color: Theme.of(context).secondaryHeaderColor),
-            hintText: ("${TranslateConstants.enter} ${await getOnFlow(widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase())}").toLowerCase(),
+            hintText: TranslateConstants.writeNumber.toLowerCase(),
             labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
           ),
