@@ -45,6 +45,8 @@ class ActionService {
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, bool isDraft) async {  
+    print("THERE");
+
     if (consentCache[viewID] != null) {
       for (var consent in consentCache[viewID]!.values) {
         if (!consent.consent && !consent.optionnal) {
@@ -79,6 +81,7 @@ class ActionService {
         }
       return views;
     }
+
     if (form.oneToManiesForm.where((element) => element.detectChange).isNotEmpty) { form.detectChange = true; }
     if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
         form.detectChange = true;
@@ -87,6 +90,7 @@ class ActionService {
     }
     if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
     && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) { return views; }
+    
     var path = url;
      if (form.cacheForm["id"] != null) { 
       body["id"]=int.parse(form.cacheForm["id"]); 
@@ -132,6 +136,7 @@ class ActionService {
         }
         consentCache.remove(viewID);
         // ignore: use_build_context_synchronously
+        print("THERE $path $body");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {            
             views.add(value.data![0]); 

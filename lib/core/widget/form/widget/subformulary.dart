@@ -11,10 +11,12 @@ import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class SubFormularyWidget extends StatefulWidget {  
   bool isEmpty = false;
+  model.Item item;
   String relatedDatas;
   DataFormWidget component;
   SubFormularyWidget ({ 
     super.key, 
+    required this.item,
     required this.isEmpty,
     required this.component,
     required this.relatedDatas,

@@ -16,6 +16,7 @@ import 'package:sqldbui2/page/translate.dart';
 bool isMenu = true;
 double menuSize = 250;
 Map<String, List<model.View>> categories = <String, List<model.View>>{};
+List<GlobalKey<MenuExpansionTileWidgetState>> globalExpandedKey = [];
 GlobalKey<MenuWidgetState> globalMenuKey = GlobalKey<MenuWidgetState>();
 // ignore: must_be_immutable
 class MenuWidget extends StatefulWidget{
@@ -39,30 +40,34 @@ class MenuWidgetState extends State<MenuWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     var eldestCat = categories;
-    List<model.View> views = [];
-    for (var view in widget.views!) {
-      if ((MenuConstants.value ?? "") != "") {
-        var label = await getOnFlow(view.label ?? view.name);
-        if (label.toLowerCase().contains(MenuConstants.value?.toLowerCase() ?? "")
-        && ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite)) {
+    
+    if (filterMenuMain || categories.isEmpty) {
+      List<model.View> views = [];
+      for (var view in widget.views!) {
+        if ((MenuConstants.value ?? "") != "") {
+          var label = await getOnFlow(view.label ?? view.name);
+          if (label.toLowerCase().contains(MenuConstants.value?.toLowerCase() ?? "")
+          && ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite)) {
+            views.add(view);
+          }
+        } else if ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite) {
           views.add(view);
         }
-      } else if ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite) {
-        views.add(view);
+      }
+      categories = <String, List<model.View>>{};
+      for (var view in views) {
+        var cat = view.category == "" ? "general" : view.category;
+        if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
+        if (eldestCat.containsKey(cat)) {
+          try { 
+            view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).newIds.where(
+                                (element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
+          } catch(e) { /* */ }     
+        }
+        categories[cat]!.add(view);
       }
     }
-    categories = <String, List<model.View>>{};
-    for (var view in views) {
-      var cat = view.category == "" ? "general" : view.category;
-      if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
-      if (eldestCat.containsKey(cat)) {
-        try { 
-          view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).newIds.where(
-                              (element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
-        } catch(e) { /* */ }     
-      }
-      categories[cat]!.add(view);
-    }
+    print("THERE");
     List<Widget> comps = [];
     for (var cat in categories.keys) {
       var count = 0;
@@ -82,6 +87,8 @@ class MenuWidgetState extends State<MenuWidget> {
             )
           )
         )] : [];
+      GlobalKey<MenuExpansionTileWidgetState> key = GlobalKey<MenuExpansionTileWidgetState>();
+      globalExpandedKey.add(key);
       comps.add(Container(
         width: noMenu ? 300 : menuSize,
         decoration: BoxDecoration(
@@ -91,6 +98,7 @@ class MenuWidgetState extends State<MenuWidget> {
         margin: const EdgeInsets.only(bottom: 0.3),
         child: Stack( children: [
           MenuExpansionTileWidget(
+            key: key,
             count: count,
             category: cat, 
             isExpanded: initiallyExpanded[cat]!, 
@@ -99,7 +107,7 @@ class MenuWidgetState extends State<MenuWidget> {
         ])
       ));
     }
-    comps.add(SizedBox(height: 10,));
+    comps.add(SizedBox(height: 10));
     firstAPI = false;
     noReload = false;
     var height = noMenu ? currentHeigth - 81 : currentHeigth - 162;

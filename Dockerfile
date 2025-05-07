@@ -6,10 +6,12 @@ COPY . .
 
 RUN flutter pub get
  
-RUN flutter build web --dart-define=HOST=${HOST:-http://locahost:8080} --release --build-number ${CI_JOB_ID:-1}
+RUN flutter build web --dart-define=HOST=${HOST:-http://capitalisation.irt-aese.local/sqldb} --release --build-number ${CI_JOB_ID:-1}
 
 FROM scratch
  
 WORKDIR /app
 
 COPY --from=builder /app/build/web /app/web
+
+EXPOSE 8080

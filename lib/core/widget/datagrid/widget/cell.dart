@@ -101,10 +101,11 @@ class GridCellWidgetState extends State<GridCellWidget> {
       v = await getOnFlow(widget.value);
     }
     return Column( mainAxisAlignment: MainAxisAlignment.center, children: [
-      edit ? await Convertor.filterFieldByType(
+      edit ? SizedBox(height: widget.maxheight - 20, 
+        child: await Convertor.filterFieldByType(
         context, widget, widget.cell.type, "", 
         this, false, true, url, 
-        "${widget.cellID}:${widget.cell.columnName}") : 
+        "${widget.cellID}:${widget.cell.columnName}")) : 
       ListTile( 
         mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 

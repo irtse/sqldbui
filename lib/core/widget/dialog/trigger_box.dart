@@ -66,9 +66,10 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
       widget: Column(
         mainAxisSize: MainAxisSize.min, 
       children: [
-        Text("${await getOnFlow(widget.title.toUpperCase())} ${widget.index}/${widget.triggers.length}", 
-          style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor)),
-      Container( height: MediaQuery.of(context).size.height / 1.5,
+      Padding(padding: EdgeInsets.all(20), 
+        child :  Text("${await getOnFlow(widget.title.toUpperCase())} ${widget.index}/${widget.triggers.length}", overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor))),
+      Container( height: MediaQuery.of(context).size.height / 1.7,
         child: SingleChildScrollView( child: Column(
         children: widgets,
       ))),

@@ -8,14 +8,14 @@ import 'package:sqldbui2/page/translate.dart';
 class MenuConstants {
   static bool isFavorite = false;
   static String? value;
+  
 }
-
 // ignore: must_be_immutable
 class MenuHeaderWidget extends StatefulWidget {
   TextEditingController controller = TextEditingController();
 
-  MenuHeaderWidget ({ 
-    super.key, 
+  MenuHeaderWidget ({
+    super.key,  
     required this.controller,
   });
   @override MenuHeaderWidgetState createState() => MenuHeaderWidgetState();
@@ -23,7 +23,13 @@ class MenuHeaderWidget extends StatefulWidget {
 class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
   Widget getSlotMenu(int max, int index, IconData icon, String tooltip, bool Function() condition, void Function() change) {
     return Tooltip( message: tooltip, child: InkWell( 
-      onTap: () { globalMenuKey.currentState?.setState(() { change(); });}, 
+      onTap: () { 
+        change();
+        setState(() {});
+        for (var s in globalExpandedKey) {
+           s.currentState?.setState(() {  });
+        }
+      }, 
       child: Container(
         decoration: BoxDecoration(
           color: !condition() ? Theme.of(context).primaryColor : Theme.of(context).secondaryHeaderColor,
@@ -69,7 +75,9 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
       ))), 
       Row(children: [
         getSlotMenu(2, 0, Icons.all_inbox, TranslateConstants.all.toLowerCase(), () => MenuConstants.isFavorite, () { MenuConstants.isFavorite = false; }),
-        getSlotMenu(2, 1, Icons.favorite_border, TranslateConstants.favorites.toLowerCase(), () => !MenuConstants.isFavorite, () { MenuConstants.isFavorite = true; }),
+        getSlotMenu(2, 1, Icons.favorite_border, TranslateConstants.favorites.toLowerCase(), () => !MenuConstants.isFavorite, () { 
+            MenuConstants.isFavorite = true; 
+        }),
       ])
     ]);
   }

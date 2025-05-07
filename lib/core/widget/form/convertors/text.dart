@@ -81,7 +81,7 @@ class _TextState extends State<TextWidget> {
           top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
           bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
         suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
-          : ( widget.type.contains("link") ? InkWell( 
+          : ( widget.type.contains("url") ? InkWell( 
           onTap: () async => showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "navigate to ${widget.value}", validate: () {
             if ("${widget.value}".substring(0,7) == "http://") {
               launchUrl(widget.value, webOnlyWindowName:'_blank');

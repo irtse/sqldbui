@@ -12,6 +12,8 @@ import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
 
+
+Map<Key, bool> formularyRef = {};
 // ignore: must_be_immutable
 class FormularyWidget extends StatefulWidget {
   bool show;
@@ -25,23 +27,26 @@ class FormularyWidget extends StatefulWidget {
   List<String> hideField = [];
   Map<String,dynamic> newCacheEntry;
   Map<String, dynamic> cacheForm = {};
+  bool formIsEmpty = false;
   Map<String, model.SchemaField> schema;
   List<Widget> additionnalWidgets;
   GlobalKey<SubFormularyWidgetState>? wrappers;
   
-  final formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> formKey;
   FormularyWidget ({ 
     super.key, 
     required this.show,
     required this.view, 
     required this.width,
     required this.schema,
+    required this.formKey,
     required this.refItem,
     required this.subForm,
     required this.wrappers, 
     required this.component,
     required this.hideField,
     required this.isSplitted,
+    required this.formIsEmpty,
     required this.newCacheEntry,
     required this.additionnalWidgets,
     required this.superFormSchemaName    
@@ -67,22 +72,22 @@ class FormularyWidgetState extends State<FormularyWidget> {
 
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
-
+          var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
+          readOnly = readOnly || !((widget.view.actions.contains("post") && widget.view.isEmpty) || widget.view.actions.contains("put")); // to remove if change its mind
           String path = "";
           if (widget.refItem.valuesShallow.containsKey(fieldName)) { 
             var v = widget.refItem.valuesShallow[fieldName]!;
-            value = "${v.id}";
+            value = readOnly ? v.label ?? v.name : "${v.id}";
             path = v.ref ?? "";
           }
           if (widget.refItem.valuesMany.containsKey(fieldName)) { value = widget.refItem.valuesMany[fieldName]!; }
           if (widget.refItem.valuesManyPath.containsKey(fieldName)) { value = widget.refItem.valuesManyPath[fieldName]!; }
 
-          var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
-          readOnly = readOnly || !((widget.view.actions.contains("post") && widget.view.isEmpty) || widget.view.actions.contains("put")); // to remove if change its mind
-          
           widget.newCacheEntry[fieldName] = widget.newCacheEntry[fieldName] ?? value;
           
-          if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { continue; }
+          if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { 
+            continue; 
+          }
           
           String? mainUrl, url;
 
@@ -138,13 +143,19 @@ class FormularyWidgetState extends State<FormularyWidget> {
           widget.additionnalWidgets.add(ConsentWidget(consent: consent, value: false));
         }
       }
-      widget.additionnalWidgets.add(getSynthesis(widget.refItem.synthesisPath ?? ""));
+      // widget.additionnalWidgets.add(getSynthesis(widget.refItem.synthesisPath ?? ""));
+      if (widget.key != null) {
+        formularyRef[widget.key!] = fields.length == widget.hideField.length;
+      }
+      if (fields.length == widget.hideField.length) {
+        return Container();
+      }
       return Form( key: widget.formKey, 
         autovalidateMode: AutovalidateMode.always, 
         child: Wrap( 
           alignment: WrapAlignment.center,
           children: [ 
-            fields.isNotEmpty ? Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 30), 
+            fields.isNotEmpty ? Padding( padding: const EdgeInsets.only(left: 30, right: 30, bottom: 10), 
               child: Container( 
                 padding: EdgeInsets.only(top: widget.subForm || (!widget.subForm && widget.isSplitted) ? 0 : 30), 
                 child: Wrap( alignment: WrapAlignment.center, children : fields))
@@ -154,38 +165,5 @@ class FormularyWidgetState extends State<FormularyWidget> {
           ]
         )
       );
-    }
-
-    Widget getSynthesis(String synthesisPath) {
-      if (synthesisPath == "") {
-        return Container();
-      }
-      return FutureBuilder(
-        future: APIService().get<model.View>(synthesisPath, true, context), 
-        builder: (a,s) {
-          if (s.data?.data != null && s.data!.data!.isNotEmpty) {
-            return Column( children: [
-              Container(
-                height: 40,
-                color: Theme.of(context).primaryColor,
-                width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
-                child: Center( child: Text( TranslateConstants.synthesis.toLowerCase(), 
-                  style: TextStyle( color: Colors.white, fontSize: 18 ) ) )
-              ),
-              Container( 
-                margin: EdgeInsets.only(bottom: 20),
-                height: 200,
-                decoration: BoxDecoration( 
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7), bottomRight: Radius.circular(7)),
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade300, width: 2.0),
-                    left: BorderSide(color: Colors.grey.shade300, width: 2.0),
-                    right: BorderSide(color: Colors.grey.shade300, width: 2.0),
-                ) ),
-                child: MainGridWidget(view: s.data!.data![0], viewKey: null, subTable: true, links: {}, subSize: 0, subWidthSize: 0)
-            )]);
-          }
-          return Container();
-        });
     }
 }

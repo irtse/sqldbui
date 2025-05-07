@@ -1,14 +1,11 @@
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
-import 'package:path/path.dart' as path;
-import 'dart:io' as io show Directory, File;
+import 'package:flutter_quill_delta_from_html/flutter_quill_delta_from_html.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
-import 'package:flutter_quill/flutter_quill.dart';// ignore: must_be_immutable
+import 'package:delta_to_html/delta_to_html.dart';import 'package:flutter_quill/flutter_quill.dart';// ignore: must_be_immutable
 class HTMLWidget extends StatefulWidget {
   final FormWidgetState? component;
   final Map<String, dynamic> form;
@@ -53,10 +50,12 @@ class HTMLState extends State<HTMLWidget> {
   void initState() {
     super.initState();
     if (widget.value != null) {
-      _controller.document.insert(0, "${widget.value}");
+      final delta = HtmlToDelta().convert("${widget.value}");
+      _controller.document = Document.fromDelta(delta);
     }
   }
   @override Widget build(BuildContext context) {
+    _controller.addListener(_onEditorChanged);
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -132,5 +131,11 @@ class HTMLState extends State<HTMLWidget> {
             ),
           ],
     ));
+  }
+  _onEditorChanged() {
+    List deltaJson = _controller.document.toDelta().toJson();
+    var html = DeltaToHTML.encodeJson(deltaJson);
+    widget.component?.widget.detectChange = true;
+    widget.form[widget.name] = html;
   }
 }

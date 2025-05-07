@@ -307,9 +307,7 @@ class Convertor {
     GlobalKey<SubFormularyWidgetState>? wrappers,
   ) async {
     type = type.toLowerCase();
-    bool isLink = false;
-    try { isLink = (int.tryParse(value ?? "") != null ? false : true) || url != null; } catch(e) { /* */ }
-    if (type.contains("text") || type.contains("varchar") || ((type.contains("time") || type.contains("date")) && readOnly)) { 
+    if (type.contains("text") || type.contains("url") || type.contains("varchar") || ((type.contains("time") || type.contains("date")) && readOnly)) { 
       return TextWidget(
         form : form, 
         schemaName: schemaName, 
@@ -323,7 +321,7 @@ class Convertor {
         autofill: autofill,
         translatable: translatable,
       );
-    } else if (["int", "double", "float", "money", "decimal"].contains(type)) { 
+    } else if (type.contains("int") || type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal")) { 
       return NumberWidget(
         form: form, 
         schemaName: 
@@ -342,7 +340,6 @@ class Convertor {
     } else if (type.contains("bool")) {
       if (form[name] != null) { value = form[name]; }
       try {
-        print("$value $autofill");
         ValueNotifier<bool> ctrl = ValueNotifier(value ?? ("$autofill" == "true"));
         return AdvancedSwitch( width : 200,
           enabled: !readOnly,
@@ -375,7 +372,7 @@ class Convertor {
           component: comp,
           autofill: autofill,
         );
-    } else if ((isLink && (type.contains("int")) || type == "link") || type.contains("enum") ) {
+    } else if ( type.contains("link") || type.contains("enum") ) {
         return DropDownWidget(
           mainUrl: mainUrl,
           form: form, 
@@ -395,20 +392,6 @@ class Convertor {
           translatable: translatable,
           wrappers: wrappers,
         );
-    } else if (type == "link") {
-      return TextWidget(
-        form : form, 
-        schemaName: schemaName, 
-        name: name,
-        readOnly: readOnly, 
-        value: value, 
-        label: label, 
-        require: require, 
-        type: type, 
-        component: comp,
-        autofill: autofill,
-        translatable: translatable,
-      );
     } else if (type == "html") {
       return HTMLWidget(
         form : form, 

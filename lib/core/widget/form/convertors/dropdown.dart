@@ -151,7 +151,7 @@ class DropDownState extends State<DropDownWidget> {
       widget.form[widget.name]=widget.value;
       if (widget.url != null) {
         if (widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
-          Future.delayed(const Duration(milliseconds: 100), () {
+          Future.delayed(const Duration(seconds: 1), () {
             widget.component?.setState( () {
               widget.component?.widget.hideField.add(widget.name);
               widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${widget.value}");
@@ -258,8 +258,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
         if (value == null) { widget.form[widget.name]=null;
         } else { widget.form[widget.name]=mapped[value]?.id; }
         var item = mapped[value];
-        if (widget.url != null && item != null) {
-          print("URELE ${widget.wrappers?.currentState} ${widget.name} ${widget.url}");
+        if (widget.url != null && item != null && widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
           widget.wrappers?.currentState?.setState( () { 
             widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
           }); 

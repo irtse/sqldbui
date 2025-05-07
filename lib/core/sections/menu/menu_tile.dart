@@ -1,6 +1,8 @@
 
 // ignore: must_be_immutable
+import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -25,7 +27,8 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: getOnFlow(widget.view.label ?? widget.view.name), builder: (a,s) {
         if (s.data != null) {
-          return Material(
+          try {
+            return Material(
               type: MaterialType.transparency,
               child: Tooltip( message: s.data!.toLowerCase(), child: ListTile(
                 selected: "${widget.view.id}" == viewID?.substring(1),
@@ -51,16 +54,20 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                       var urlPath = widget.view.favorizePath;
                       for (var k in widget.view.favorizeBody.keys.where((element) => !widget.view.isFavorize)) { 
                         urlPath += "&$k=${widget.view.favorizeBody[k]}"; 
-
                       }
                       setState(() {});
-                      APIService().call<model.View>(urlPath, widget.view.isFavorize ? "post" : "delete", widget.view.favorizeBody, true, null);
+                     globalHomeViewKey.currentState?.setState(() {});
+                      APIService().call<model.View>(urlPath, widget.view.isFavorize ? "post" : "delete", widget.view.favorizeBody, true, null).then((value) => (e) {
+                      },);
                     }, 
                     child: Icon( widget.view.isFavorize ? Icons.favorite : Icons.favorite_border, size: 14)
                   )
                 ),
                 leading: Icon( widget.view.isList ?Icons.list : Icons.edit_document ),
               )));
+          } catch(e) {
+            return Container();
+          }
       } else {
         return Container();
       }

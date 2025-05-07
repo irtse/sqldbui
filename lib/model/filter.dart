@@ -104,7 +104,6 @@ class Filters {
   }
 
   void refreshFilter(List<Filter> fields) {
-    forceFilter = true;
     globalFilter[viewID] = Filters(); 
     globalOrder[viewID] = {};
     for (var field in fields) {

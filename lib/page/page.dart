@@ -26,7 +26,7 @@ class PageWidget extends StatefulWidget {
   @override
   State<PageWidget> createState() => PageWidgetState();
 }
-
+bool filterMenuMain = true;
 class PageWidgetState extends State<PageWidget> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -108,8 +108,9 @@ class PageWidgetState extends State<PageWidget> {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(0), bottomRight: Radius.circular(0))),
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         child: FutureBuilder<APIResponse<model.View>>(
-          future: APIService().get<model.View>(APIConstants.mainEndpost, false, null), // a previously-obtained Future<String> or null
+          future: APIService().get<model.View>(APIConstants.mainEndpost, filterMenuMain, null), // a previously-obtained Future<String> or null
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
+          filterMenuMain = false;
           if (snapshot.hasData && snapshot.data!.data != null) { 
             widget.views = snapshot.data!.data!;
           }
@@ -138,7 +139,7 @@ class PageWidgetState extends State<PageWidget> {
   Widget buildView() {
     return widget.views.isNotEmpty ? buildPage(widget.views) :
       FutureBuilder<APIResponse<model.View>>(
-        future: APIService().get<model.View>(APIConstants.mainEndpost, false, null), // a previously-obtained Future<String> or null
+        future: APIService().get<model.View>(APIConstants.mainEndpost, filterMenuMain, null), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
           var c = <Widget>[];
           if (snapshot.hasData && snapshot.data!.data != null) { 

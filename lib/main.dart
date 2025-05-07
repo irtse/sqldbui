@@ -146,6 +146,7 @@ class HomeScreenState extends State<HomeScreen> {
       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
     });
     if (!kIsWeb) { DesktopWindow.setMinWindowSize(const Size(800, 600)); }
+    print(currentWidth);
     return PageWidget();
   }
 }

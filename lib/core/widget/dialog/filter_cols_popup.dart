@@ -15,6 +15,7 @@ import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 bool setLatest = false;
 Map<String?, List<dynamic>> filterOrderView = <String?, List<dynamic>>{};
+Map<String?, bool> filterTempID = <String?, bool>{};
 Map<String?, List<dynamic>> filterTempOrderView = <String?, List<dynamic>>{};
 Map<String?, String?> filterView = <String?, String?>{};
 Map<String?, int> filterViewIDName = <String, int>{};
@@ -228,6 +229,23 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
     List<Widget> items = [];
     if (filterTempOrderView[viewID] == null) { filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; }
     var list = currentView!.order.where( (fieldName) => !(widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")));
+    items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), child:  Row( children : [ 
+          Container( width: 44),
+          Padding( padding: const EdgeInsets.only(right: 10), 
+          child: Tooltip( message: "id", child: AdvancedSwitch(
+            initialValue: filterTempOrderView[viewID]!.contains("id"),
+            activeColor: Colors.green, inactiveColor: Colors.grey,
+            activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text("id", overflow: TextOverflow.ellipsis)), 
+            inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text("id", overflow: TextOverflow.ellipsis)), 
+            borderRadius:  const BorderRadius.all(Radius.circular(15)),
+            width: 165, height: 30.0, disabledOpacity: 0.5,
+            onChanged: (value) { 
+              filterTempID[viewID] = value; 
+            }
+          ))),
+          Container()
+        ]))));
+    
     for (var (index,fieldName) in list.where( (el) => widget.schema[el] != null).indexed) {
         if (widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")) { continue; }
         var scheme =  widget.schema[fieldName]!; 
@@ -243,10 +261,11 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
               setState(() { filterTempOrderView[viewID] = b; }); 
             }, child: const Icon(Icons.arrow_upward))),
           Padding( padding: const EdgeInsets.only(right: 10), 
-          child: AdvancedSwitch(
-            initialValue: filterView[viewID] == null || filterView[viewID] == "" || filterTempOrderView[viewID]!.contains(fieldName),
+          child: Tooltip( message: label.toLowerCase(), child: AdvancedSwitch(
+            initialValue: filterTempOrderView[viewID]!.contains(fieldName),
             activeColor: Colors.green, inactiveColor: Colors.grey,
-            activeChild: Text(label.toLowerCase()), inactiveChild: Text(label.toLowerCase()), 
+            activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text(label.toLowerCase(), overflow: TextOverflow.ellipsis)), 
+            inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text(label.toLowerCase(), overflow: TextOverflow.ellipsis)), 
             borderRadius:  const BorderRadius.all(Radius.circular(15)),
             width: 165, height: 30.0, disabledOpacity: 0.5,
             onChanged: (value) { 
@@ -258,7 +277,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                 filterTempOrderView[viewID] = b; 
               } else { filterTempOrderView[viewID]?.remove(fieldName); }
             }
-          )),
+          ))),
           index == list.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child:  InkWell(onTap: () {
               var tmp = filterTempOrderView[viewID]!;
               var i = tmp.removeAt(index);

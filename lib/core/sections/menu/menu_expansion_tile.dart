@@ -1,14 +1,12 @@
-
 // ignore: must_be_immutable
-import 'package:sqldbui2/core/sections/menu/menu_header.dart';
-import 'package:sqldbui2/core/sections/menu/menu_tile_text.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/page.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/menu/menu_tile.dart';
-import 'package:sqldbui2/page/translate.dart';
-
+import 'package:sqldbui2/core/sections/menu/menu_header.dart';
+import 'package:sqldbui2/core/sections/menu/menu_tile_text.dart';
 // ignore: must_be_immutable
 class MenuExpansionTileWidget extends StatefulWidget {
   String category;
@@ -27,6 +25,12 @@ class MenuExpansionTileWidget extends StatefulWidget {
 }
 class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
   @override Widget build(BuildContext context) {
+    var datas = categories[widget.category]!.where( (v) {
+      return !MenuConstants.isFavorite || ( MenuConstants.isFavorite && v.isFavorize);
+    } );
+    if (datas.isEmpty && widget.category != "general") {
+      return Container();
+    }
     return ExpansionTile(
       shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
       initiallyExpanded: widget.isExpanded,
@@ -68,7 +72,7 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
         ) : Container(),
         Container(
           width: noMenu ? 300 : menuSize, 
-          height: (categories[widget.category]!.length * 41) + 10, 
+          height: (datas.length * 41) + 10, 
           color: Theme.of(context).secondaryHeaderColor,
           child: ListView.builder(itemBuilder: (builder, index) {
             if (categories[widget.category] == null || categories[widget.category]!.length <= index) { 

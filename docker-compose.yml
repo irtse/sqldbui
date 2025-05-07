@@ -1,0 +1,32 @@
+version: '3.4'
+
+traefik:
+    image: traefik:v2.10.4
+    container_name: traefik
+    restart: unless-stopped
+    networks:
+      - oc
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:800800"  # Expose Traefik on port 8000    
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+services:
+  oc-front:
+    image: oc-front
+    container_name: oc-front
+    ports: 
+      - 8080:8080
+    networks:
+      - oc
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.front.entrypoints=web"
+        - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+        - "traefik.http.services.front.loadbalancer.server.port=8080"
+networks:
+  oc:
+    external: true

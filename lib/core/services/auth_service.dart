@@ -5,6 +5,7 @@ import 'package:sqldbui2/model/user.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 var timeBomb = 60;
 @lazySingleton
@@ -51,7 +52,7 @@ class AuthService extends ChangeNotifier {
 
   void authenticate(User logUser) {
     authenticateShallow(logUser);
-    homeKey.currentState!.refresh(null, null, false);
+    homeKey.currentState!.refresh(TranslateConstants.dashboard.toLowerCase(), null, false);
   }
   void authenticateShallow(User logUser) {
     _isAuthenticated = true; 

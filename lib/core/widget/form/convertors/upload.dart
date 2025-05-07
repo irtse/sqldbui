@@ -114,9 +114,11 @@ class _UploadState extends State<UploadWidget> {
       setState(() {
         _selectedFile = result.files.first;
         widget.value = _selectedFile?.name;
-        text.value = TextEditingValue(text: widget.value);
-        widget.form[widget.name]=<String,PlatformFile>{};
-        widget.form[widget.name][widget.url]=_selectedFile;
+        if (widget.url != null) {
+          text.value = TextEditingValue(text: widget.value);
+          widget.form[widget.name]=<String,PlatformFile>{};
+          widget.form[widget.name][widget.url]=_selectedFile;
+        }
         widget.component?.widget.detectChange = true;
       });
     }

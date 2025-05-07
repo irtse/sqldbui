@@ -10,6 +10,7 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+// ignore: must_be_immutable
 class MainGridWidget extends StatefulWidget {
   var schemeItems = <DropdownMenuItem<String>>[];
   final model.View? view; 
@@ -113,7 +114,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
         type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
         url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
         contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
-        label: label == "id" ? GridValueWidget(fontSize: 14, icon: Icons.tag) : GridValueWidget(fontSize: 14, value: realLabel),
+        label: label == "id" ? GridValueWidget(fontSize: 13, icon: Icons.tag) : GridValueWidget(fontSize: 13, value: realLabel),
       ));
     return columns;
   }
@@ -124,9 +125,12 @@ List<dynamic> realOrder(model.View? view, bool subtable) {
     var schema = view.schema;
     bool isMath = isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase();
     List<String> seen = [];
-    var order = filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase() 
-                ? filterTempOrderView[viewID]! : (filterOrderView[viewID] != null ? filterOrderView[viewID]! : view.order);
-    return ["id", ...order.where( (e) => e != "id")].where( (f) {
+    if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
+    && filterOrderView[viewID] == null) {
+      filterTempOrderView[viewID] = view.order.sublist(0, view.order.length < 5 ? view.order.length : 5);
+    }
+    var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
+    var o = [  ...order.where( (e) => e != "id")].where( (f) {
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description"  && !type.contains("many") && schema[f] != null
@@ -134,4 +138,8 @@ List<dynamic> realOrder(model.View? view, bool subtable) {
       seen.add(f);
       return ok;
     }).toList();
+    if (filterTempID[viewID] ?? false) {
+      o = ["id", ...o];
+    }
+    return o;
   }

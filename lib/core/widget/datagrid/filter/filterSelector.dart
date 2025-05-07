@@ -61,7 +61,10 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             (viewID != null && filterRestr[viewID] != null && filterRestr[viewID] != "" ? 
             APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), body, context) :
             APIService().post<model.Shallowed>(currentView!.filterPath, body, context)).then((value) {
-              setState(() { refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); }); 
+              setState(() { 
+                forceFilter = true;
+                refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); 
+              }); 
             });
           })) : Container(),
         filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(right: 5), 
@@ -79,13 +82,13 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 }); });
               }));
             })) : Container() ,
-        currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", forceFilter, null), 
+        currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", 
+        forceFilter, null), 
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
           forceFilter = false;
           if (snapshot.data?.data != null) {
             return SubFilterSelectorWidget( filterMain: widget.filterMain, schema: widget.schema, datas: snapshot.data?.data);
           }
-          Future.delayed(Duration(milliseconds: 100), () => setState(() { forceFilter = true; }));
           return SubFilterSelectorWidget( filterMain: widget.filterMain, schema: widget.schema, datas: []);
         }) : Container(), 
         filterRowsWidget.isEmpty ? Padding(padding: const EdgeInsets.only(left: 5), 
@@ -130,6 +133,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             filterRestr[viewID] = ""; 
             APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), <String, dynamic> { "is_selected" : false }, null).then((value) {
               Future.delayed(const Duration(seconds: 1), () => setState(() {
+                forceFilter = true;
                 refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []);
               })); 
             }); })) : Container(),
@@ -203,7 +207,10 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
                       filterRestr[viewID] = value; 
                       APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[value]}"), 
                         <String, dynamic> { "is_selected" : true }, null).then( 
-                          (value) => setState(() { refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); }));
+                          (value) => setState(() { 
+                            forceFilter = true;
+                            refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); 
+                          }));
                     }, dropdownColor: Theme.of(context).secondaryHeaderColor,
                     decoration: InputDecoration(
                       suffixIconColor: Theme.of(context).primaryColor,  errorStyle: const TextStyle(height: -2),

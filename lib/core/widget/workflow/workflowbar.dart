@@ -55,7 +55,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
           style: const TextStyle(color: Colors.white)),)));
     }
     return Container(  margin: const EdgeInsets.only(top: 25), width: max,
-      height: 40, color: widget.workflow.steps.isEmpty ? Theme.of(context).splashColor : Colors.white,
+      height: 40, color: widget.workflow.steps.isEmpty ? Colors.grey : Colors.white,
       child: Row(children: items,),);
   }
 }

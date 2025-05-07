@@ -25,8 +25,11 @@ class ButtonWidgetState extends State<ButtonWidget> {
       return Column(children: [
         Padding( padding: const EdgeInsets.only(left: 5, right: 5), 
           child: TextButton(
-            style: ButtonStyle(  
-              padding: WidgetStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: widget.text.length * 10, vertical: 15)),
+            style: ButtonStyle( 
+              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5), // Change this value
+              )), 
+              padding: WidgetStateProperty.resolveWith((states) => EdgeInsets.symmetric(horizontal: 30, vertical: widget.icon != null ? 10 : 15)),
               backgroundColor: WidgetStateProperty.resolveWith((states) => Colors.green) ,
               overlayColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.pressed)) { return Colors.green; }
@@ -34,7 +37,7 @@ class ButtonWidgetState extends State<ButtonWidget> {
               })
             ), 
             onPressed: (){}, 
-            child: const SpinKitCircle(color: Colors.white, size: 15.0)))
+            child: const SpinKitCircle(color: Colors.white, size: 20.0)))
         ],
       );
     }
@@ -51,8 +54,9 @@ class ButtonWidgetState extends State<ButtonWidget> {
               if (states.contains(WidgetState.pressed)) { return Colors.green; }
                 return Theme.of(context).primaryColor;
               })),
-            onPressed: widget.overrideFunc ?? ActionService.pressed(this, false, currentView!.schemaName,  currentView!.actionPath, 
-                  <String>["id"], currentView!.schema, widget.method, widget.isDraft, context), 
+            onPressed: widget.overrideFunc ?? ActionService.pressed(
+              this, false, currentView!.schemaName,  currentView!.actionPath, 
+              <String>["id"], currentView!.schema, widget.method, widget.isDraft, context), 
             child: widget.icon != null ? Tooltip( message: widget.text.toLowerCase(),
               child: Icon( widget.icon, color: Colors.white)) : Text(widget.text.toUpperCase(), 
               style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],

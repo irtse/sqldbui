@@ -30,6 +30,7 @@ class MainViewWidget extends StatefulWidget{
 }
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
+    
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
       return ViewWidget(view: currentView, views: widget.views);
     }
@@ -148,7 +149,7 @@ class ViewWidgetState extends State<ViewWidget> {
     List<Widget> childs = [];
     if (viewID == null) {
       return Stack(children: [ 
-        HomeViewWidget(key: globalHomeViewKey), 
+        HomeViewWidget(), 
         ActionBarWidget(key: globalActionBar, view: widget.view ) 
       ]);
     }

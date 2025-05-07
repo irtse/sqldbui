@@ -1,6 +1,7 @@
 import 'package:translator/translator.dart';
 
 class TranslateConstants {
+  static String noDashboard = "no dashboard found";
   static String global = "menu of the data";
   static String lang = "fr";
   static String synthesis = "tasks synthesis";
@@ -154,9 +155,11 @@ class TranslateConstants {
   static String commentary = "write your commentary";
   static String enterProper = "enter a proper value.";
   static String dataFormulary = "fill data formulary";
+  static String formulary = "form";
 
   static String data = "the data";
   static String comments = "comments";
+  static String formularyMenu = "submenu";
   static Map<String, String> onFlowTrad = {};
 }
 
@@ -171,6 +174,9 @@ Future<String> getOnFlow(String value) async {
 
 Future<void> SetUpTranslate() async {
   var translator = GoogleTranslator();
+  await translator.translate(TranslateConstants.noDashboard, to: TranslateConstants.lang).then( (e) => TranslateConstants.noDashboard = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.formulary, to: TranslateConstants.lang).then( (e) => TranslateConstants.formulary = e.text.toLowerCase());
+  await translator.translate(TranslateConstants.formularyMenu, to: TranslateConstants.lang).then( (e) => TranslateConstants.formularyMenu = e.text.toLowerCase());
   await translator.translate(TranslateConstants.commentary, to: TranslateConstants.lang).then( (e) => TranslateConstants.commentary = e.text.toLowerCase());
   await translator.translate(TranslateConstants.global, to: TranslateConstants.lang).then( (e) => TranslateConstants.global = e.text.toLowerCase());
 

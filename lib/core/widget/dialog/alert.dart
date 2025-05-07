@@ -1,13 +1,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 class InfoAlertBannerChild extends StatelessWidget {
   final String text;
   const InfoAlertBannerChild({super.key, required this.text});
 
   @override
-  Widget build(BuildContext context) {
+  @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(maxWidth: currentWidth * 0.8),
@@ -19,9 +28,8 @@ class InfoAlertBannerChild extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Material(
           color: Colors.transparent,
-          child: Text(text,
+          child: Text((await getOnFlow(text)).toLowerCase(),
             style: const TextStyle(color: Colors.white, fontSize: 18),
-            maxLines: 3,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),
@@ -37,6 +45,14 @@ class AlertAlertBannerChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(maxWidth: currentWidth * 0.8),
@@ -50,9 +66,8 @@ class AlertAlertBannerChild extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Material(
           color: Colors.transparent,
-          child: Text( text,
+          child: Text( (await getOnFlow(text)).toLowerCase(),
             style: const TextStyle(color: Colors.white, fontSize: 18),
-            maxLines: 3,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),

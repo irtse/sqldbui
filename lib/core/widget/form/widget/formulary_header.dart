@@ -50,7 +50,6 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     List<Widget> widgets = [];
     List<Widget> states = [];
     List<Widget> title = [];    
-    int len = (currentWidth - menuSize) ~/ 20;
     name = widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
     description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
     if (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null) { 
@@ -87,8 +86,8 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     title.add(Padding( padding: const EdgeInsets.only(left: 53), 
       child: Row( 
         children: [ Flexible( 
-          child: Text( (await getOnFlow(name + (len > name.length ? "" : "...").toLowerCase())),
-          style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))), 
+          child: Text( (await getOnFlow(name)).toLowerCase(), overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))), 
           widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),
             child: InkWell( onTap: () => setState(() {

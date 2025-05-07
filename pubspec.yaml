@@ -77,6 +77,9 @@ dependencies:
     sdk: flutter
   flutter_quill_extensions: ^10.8.5
   visibility_detector: ^0.4.0+2
+  flutter_quill_delta_from_html: ^1.5.0
+  vsc_quill_delta_to_html: ^1.0.5
+  delta_to_html: ^0.2.2
 
 dev_dependencies:
   flutter_test:
