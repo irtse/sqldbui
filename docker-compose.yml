@@ -11,7 +11,7 @@ traefik:
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
     ports:
-      - "80:800800"  # Expose Traefik on port 8000    
+      - "80:80"  # Expose Traefik on port 8000    
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 services:
