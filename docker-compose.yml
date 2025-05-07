@@ -15,9 +15,9 @@ traefik:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 services:
-  oc-front:
-    image: oc-front
-    container_name: oc-front
+  sqldbui:
+    image: irtse/sqldbui
+    container_name: sqldbui
     ports: 
       - 8080:8080
     networks:
