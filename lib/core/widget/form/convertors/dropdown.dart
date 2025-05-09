@@ -249,14 +249,12 @@ class SubDropDownState extends State<SubDropDownWidget> {
   @override Widget build(BuildContext context) {
     return MultiDropdown<String>(
         addFunction: (String value) {
-          setState(() {
             for (var e in ctrls.items) {
               e.selected = false;
             }
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
             newDropDownValue[widget.url ?? ""] = value;
             searchCtrl.text = "";
-          });
         },
                         controller: ctrls,
                         singleSelect: true,
