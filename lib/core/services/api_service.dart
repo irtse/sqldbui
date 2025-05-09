@@ -35,6 +35,9 @@ class APIService {
   static String auth = "";
   static final dio = Dio(
     BaseOptions(
+      connectTimeout: Duration.zero, // No timeout on connection
+      receiveTimeout: Duration.zero, // No timeout on receiving response
+      sendTimeout: Duration.zero, 
       baseUrl: baseURL, // you can keep this blank
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
     ),
@@ -191,7 +194,6 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-        print(url);
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');

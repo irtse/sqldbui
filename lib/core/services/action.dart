@@ -45,7 +45,6 @@ class ActionService {
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, bool isDraft) async {  
-    print("THERE");
 
     if (consentCache[viewID] != null) {
       for (var consent in consentCache[viewID]!.values) {
@@ -136,7 +135,6 @@ class ActionService {
         }
         consentCache.remove(viewID);
         // ignore: use_build_context_synchronously
-        print("THERE $path $body");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if (value.data != null && value.data!.isNotEmpty) {            
             views.add(value.data![0]); 

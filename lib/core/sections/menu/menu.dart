@@ -67,7 +67,6 @@ class MenuWidgetState extends State<MenuWidget> {
         categories[cat]!.add(view);
       }
     }
-    print("THERE");
     List<Widget> comps = [];
     for (var cat in categories.keys) {
       var count = 0;

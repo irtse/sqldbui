@@ -42,7 +42,6 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
         var scheme = widget.schema[k];
         if (!scheme!.readonly) {
           try {
-            print("$k ${widget.schema[k]} ${widget.schema[k]?.readonly} ${widget.schema[k]?.type}");
             var w = await Convertor.formFieldByType(
               widget.body, context, "", widget.schema, scheme.type, k, scheme.label, 
               scheme.description, scheme.require, scheme.readonly, widget.body[k], "", "", 
@@ -57,8 +56,6 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             print(e);
             print(s);
           }
-          
-          
         }
       }
     }

@@ -9,8 +9,8 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
+import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 
 
 Map<Key, bool> formularyRef = {};

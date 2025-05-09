@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
@@ -92,7 +93,7 @@ class DropDownState extends State<DropDownWidget> {
       return DropdownButtonFormField<String>( 
           items: items, 
           isExpanded: true,
-          hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...", 
+          hint: Text(TranslateConstants.select.toLowerCase(), 
             overflow: TextOverflow.ellipsis, softWrap: true),
           value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
           style: TextStyle(fontSize: 14, 
@@ -161,34 +162,62 @@ class DropDownState extends State<DropDownWidget> {
       }
       return Container();
     }
+    var lab = await getOnFlow(widget.label);
     return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.mainUrl!, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-          return SubDropDownWidget(
-            label: widget.label,
-            component: widget.component,
-            form: widget.form,
-            schemaName: widget.schemaName,
-            name: widget.name,
-            readOnly: widget.readOnly,
-            require: widget.require,
-            value: widget.value,
-            path: widget.path,
-            url: widget.url,
-            type: widget.type,
-            data: snap.data?.data,
-            autofill: widget.autofill,
-            schema: widget.schema,
-            translatable: widget.translatable,
-            wrappers: widget.wrappers,
-          );
-        });
+          if (snap.data?.data != null) {
+            List<DropdownItem<String>> items = [];
+            Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
+            for (var item in snap.data!.data!) {
+                var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+                var t = items.where((element) => element.value == v);        
+                if (!mapped.containsKey(v) && t.isEmpty){
+                  mapped["${item.id}"]=item;
+                  if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
+                    && items.where((element) => element.value == v).isEmpty) {
+                    var vv = v;
+                    bool select = false;
+                    for (var val in widget.value ?? []) {
+                        if ("$val" == "${item.id}") {
+                          select = true;
+                          break;
+                        }
+                    }
+                    items.add(DropdownItem<String>(value: "${item.id}", label: vv.toLowerCase(), selected: select));
+                  }
+              }
+            }
+            return SubDropDownWidget(
+              label: lab,
+              mapped: mapped,
+              component: widget.component,
+              form: widget.form,
+              schemaName: widget.schemaName,
+              name: widget.name,
+              readOnly: widget.readOnly,
+              require: widget.require,
+              value: widget.value,
+              path: widget.path,
+              url: widget.url,
+              type: widget.type,
+              items: items,
+              autofill: widget.autofill,
+              schema: widget.schema,
+              translatable: widget.translatable,
+              wrappers: widget.wrappers,
+            );
+          } else {
+            return Container();
+          }
+        });   
   }
 }
 
 // ignore: must_be_immutable
 class SubDropDownWidget extends StatefulWidget {
-  final List<model.Shallowed>? data;
+  Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
+  final List<DropdownItem<String>> items;
   final FormWidgetState? component;
   final Map<String, dynamic> form;
   final Map<String, dynamic> schema;
@@ -206,7 +235,7 @@ class SubDropDownWidget extends StatefulWidget {
   final dynamic autofill;
   GlobalKey<SubFormularyWidgetState>? wrappers;
 
-  SubDropDownWidget ({ super.key, required this.form, required this.data,
+  SubDropDownWidget ({ super.key, required this.form, required this.items, required this.mapped,
     required this.schemaName, required this.name, required this.path, required this.wrappers,
     required this.autofill, required this.translatable, required this.schema,
     required this.readOnly, required this.value, required this.label, this.isDark = false,
@@ -216,74 +245,92 @@ class SubDropDownWidget extends StatefulWidget {
 }
 class SubDropDownState extends State<SubDropDownWidget> {
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
-    List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
-    Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
-    if (widget.data != null && widget.component != null) {
-      for (var item in widget.data!) {
-        bool f = item.schema["name"]?.translatable ?? false;
-        var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-        var t = items.where((element) => element.value == v);        
-        if (!mapped.containsKey(v) && t.isEmpty){
-          mapped["${item.id}"]=item;
-          if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
-            && items.where((element) => element.value == v).isEmpty) {
-            var vv = v;
-            if (widget.translatable && f) {
-              vv = await getOnFlow(vv);
-            }
-            items.add(DropdownMenuItem<String>(value: "${item.id}", child: Text(vv.toLowerCase(), overflow: TextOverflow.ellipsis)));
-          }
-        }
-      }
-    }
-    return DropdownButtonFormField<String>(
-      isExpanded: true,
-      hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...", 
-        overflow: TextOverflow.ellipsis, softWrap: true),
-      value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
-      items: items, 
-      dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
-      style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor 
-                                                          : Colors.black, overflow: TextOverflow.ellipsis),
-      onChanged: (value) {
-        widget.component?.widget.detectChange = true;
-        if (value == null) { widget.form[widget.name]=null;
-        } else { widget.form[widget.name]=mapped[value]?.id; }
-        var item = mapped[value];
-        if (widget.url != null && item != null && widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
-          widget.wrappers?.currentState?.setState( () { 
-            widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
-          }); 
-        }
-      },
-      onSaved: (value) {
-        if (value == null) { widget.form[widget.name]=null;
-        } else if (mapped[value] != null) { widget.form[widget.name]=mapped[value]!.id; }
-      },
-      decoration: InputDecoration(
-        filled: true, isDense: true,
-        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-        border: const OutlineInputBorder(),
-        errorStyle: const TextStyle(height: -2, fontSize: 0),
-        hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-        labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-        floatingLabelBehavior: FloatingLabelBehavior.always,
-        contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
-        fillColor: widget.readOnly ? Theme.of(context).splashColor 
+    final controller = MultiSelectController<String>();
+    return MultiDropdown<String>(
+        addFunction:() => setState(() {
+      
+        }),
+                        singleSelect: true,
+                        items: widget.items,
+                        controller: controller,
+                        enabled: true,
+                        searchEnabled: true,
+                        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
+                        ),
+                        fieldDecoration: FieldDecoration(
+                          labelText: widget.label,
+                          backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
-        labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
-      ),
-      validator: (String? value) {
-        return (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
-      },
-    ); 
+                          labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+                          hintText: TranslateConstants.selectValue.toLowerCase(),
+                          hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+                          prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
+                          showClearIcon: false,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            borderSide: BorderSide(color: Theme.of(context).splashColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        ),
+                        searchDecoration: SearchFieldDecoration(
+                          border : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                            borderRadius: BorderRadius.all(Radius.circular(5)))
+                        ),
+                        dropdownDecoration: DropdownDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          marginTop: 2,
+                          maxHeight: 400,
+                          header: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                              "       ${TranslateConstants.selectValue.toLowerCase()}",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        dropdownItemDecoration: DropdownItemDecoration(
+                          backgroundColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
+                          selectedIcon:
+                              const Icon(Icons.check_box, color: Colors.green),
+                          disabledIcon:
+                              Icon(Icons.lock, color: Colors.grey.shade300),
+                        ),
+                        validator: (value) {
+                          if ((value == null || value.isEmpty) && widget.require) {
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSelectionChange: (values) {
+                          widget.component?.widget.detectChange = true;
+                          if (values.isEmpty) { widget.form[widget.name]=null;
+                          } else { widget.form[widget.name]=widget.mapped[values[0]]?.id; }
+                          var item = widget.mapped[values[0]];
+                          if (widget.url != null && item != null && widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
+                            widget.wrappers?.currentState?.setState( () { 
+                              widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+                            }); 
+                          }
+                        },
+                      );
   }
 }
