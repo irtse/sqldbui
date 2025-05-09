@@ -283,6 +283,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           ),
                         ),
                         searchDecoration: SearchFieldDecoration(
+                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),

@@ -177,6 +177,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           ),
                         ),
                         dropdownDecoration: DropdownDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
                           marginTop: 2,
                           maxHeight: 400,
                           header: Padding(
@@ -192,6 +193,13 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           ),
                         ),
                         searchDecoration: SearchFieldDecoration(
+                          border : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                            borderRadius: BorderRadius.all(Radius.circular(5))),
                           hintText: "       ${TranslateConstants.search.toLowerCase()}",
                         ),
                         dropdownItemDecoration: DropdownItemDecoration(
