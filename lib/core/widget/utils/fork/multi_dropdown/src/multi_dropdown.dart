@@ -4,6 +4,7 @@ import 'dart:io' if (dart.library.io) 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/main.dart';
@@ -163,7 +164,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   })  : items = const [],
         super(key: key);
 
-  final void Function()? addFunction;
+  final void Function(String)? addFunction;
   /// The list of dropdown items.
   final List<DropdownItem<T>> items;
 

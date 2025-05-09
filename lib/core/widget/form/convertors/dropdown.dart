@@ -8,6 +8,7 @@ import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+Map<String,String> newDropDownValue = {};
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
   final FormWidgetState? component;
@@ -244,15 +245,22 @@ class SubDropDownWidget extends StatefulWidget {
   SubDropDownState createState() => SubDropDownState();
 }
 class SubDropDownState extends State<SubDropDownWidget> {
+  MultiSelectController<String> ctrls = MultiSelectController<String>();
   @override Widget build(BuildContext context) {
-    final controller = MultiSelectController<String>();
     return MultiDropdown<String>(
-        addFunction:() => setState(() {
-      
-        }),
+        addFunction: (String value) {
+          setState(() {
+            for (var e in ctrls.items) {
+              e.selected = false;
+            }
+            ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+            newDropDownValue[widget.url ?? ""] = value;
+            searchCtrl.text = "";
+          });
+        },
+                        controller: ctrls,
                         singleSelect: true,
                         items: widget.items,
-                        controller: controller,
                         enabled: true,
                         searchEnabled: true,
                         chipDecoration: ChipDecoration(

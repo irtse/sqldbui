@@ -5,6 +5,8 @@ import 'package:sqldbui2/core/widget/datagrid/buttons/save_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
+import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -81,6 +83,9 @@ class DatagridWidgetState extends State<DatagridWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    newDropDownValue = {};
+    searchCtrl.text = "";
+
     await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
     List<Value> datas = <Value>[];

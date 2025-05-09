@@ -20,7 +20,7 @@ class _Dropdown<T> extends StatelessWidget {
     this.itemSeparator,
     this.singleSelect = false,
   }) : super(key: key);
-  final void Function()? addFunction;
+  final void Function(String)? addFunction;
   /// The decoration of the dropdown.
   final DropdownDecoration decoration;
 
@@ -194,24 +194,25 @@ class _Dropdown<T> extends StatelessWidget {
         _selectedCount >= maxSelections;
   }
 }
+TextEditingController searchCtrl = TextEditingController();
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({
+   _SearchField({
     required this.decoration,
     required this.onChanged,
     this.function,
   });
 
   final SearchFieldDecoration decoration;
-
   final ValueChanged<String> onChanged;
-  final void Function()? function;
+  final void Function(String)? function;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Wrap( alignment: WrapAlignment.center, children: [ TextField(
+        controller: searchCtrl,
         decoration: InputDecoration(
           isDense: true,
           hintText: decoration.hintText,
@@ -219,10 +220,17 @@ class _SearchField extends StatelessWidget {
           focusedBorder: decoration.focusedBorder,
           suffixIcon: decoration.searchIcon,
         ),
-        onChanged: onChanged,
-      ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 5), 
+        onChanged: (String v) {
+          searchCtrl.text = v;
+          onChanged(v);
+        },
+      ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
       child: InkWell( 
-        onTap: function,
+        onTap: () {
+          if (searchCtrl.text != "") {
+            function!(searchCtrl.text);
+          }
+        },
         child: Container(
           alignment: Alignment.center,
           decoration: BoxDecoration( 

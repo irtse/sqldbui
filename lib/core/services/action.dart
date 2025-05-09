@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
+import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
@@ -71,6 +72,17 @@ class ActionService {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
       body["dbschema_id"]=resp.first.schemaID;
     }
+    if (newDropDownValue.isEmpty) {
+      if (method == "post" || method == "put") {
+        for(var name in newDropDownValue.keys) {
+          await APIService().post(newDropDownValue[name] ?? "", {
+            "name" : name,
+          // ignore: invalid_return_type_for_catch_error
+          }, context).catchError( (e) => errors.add(e.toString()));
+        }
+      }
+      newDropDownValue = {};
+    }
     if (errors.isNotEmpty) {
       var errorStr = "";
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
@@ -89,6 +101,7 @@ class ActionService {
     }
     if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
     && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) { return views; }
+    
     
     var path = url;
      if (form.cacheForm["id"] != null) { 

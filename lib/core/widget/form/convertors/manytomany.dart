@@ -125,7 +125,6 @@ class SubManyToManyWidget extends StatefulWidget {
 class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
-          final controller = MultiSelectController<Map<String, dynamic>>();
           List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
           widget.form[widget.name] = <dynamic>[];
           if (widget.datas != null) {
@@ -148,7 +147,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
           }
           return MultiDropdown<Map<String, dynamic>>(
                         items: items,
-                        controller: controller,
                         enabled: true,
                         searchEnabled: true,
                         chipDecoration: ChipDecoration(
