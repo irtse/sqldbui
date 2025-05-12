@@ -174,7 +174,7 @@ Future<String> getOnFlow(String value) async {
   return TranslateConstants.onFlowTrad[value]!;
 }
 
-Future<void> SetUpTranslate() async {
+void setUpTranslate() {
   var translator = GoogleTranslator();
   translator.translate(TranslateConstants.addNewEntry, to: TranslateConstants.lang).then( (e) => TranslateConstants.addNewEntry = e.text.toLowerCase());
   translator.translate(TranslateConstants.search, to: TranslateConstants.lang).then( (e) => TranslateConstants.search = e.text.toLowerCase());
