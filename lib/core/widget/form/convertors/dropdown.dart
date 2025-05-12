@@ -264,14 +264,14 @@ class SubDropDownState extends State<SubDropDownWidget> {
     }
     }
     return MultiDropdown<String>(
-        addFunction: (String value) {
+        addFunction: widget.type == "link_add" ? (String value) {
             for (var e in ctrls.items) {
               e.selected = false;
             }
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
             newDropDownValue[widget.url ?? ""] = value;
             searchCtrl.text = "";
-        },
+        } : null,
                         controller: ctrls,
                         singleSelect: true,
                         items: items,
