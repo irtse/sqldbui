@@ -35,7 +35,7 @@ void main() async {
     WebView.platform = LinuxWebView();
   }
   
-  SetUpTranslate();
+  await SetUpTranslate();
   runApp(const MyApp()); 
 }
 final _appRouter = AppRouter();   

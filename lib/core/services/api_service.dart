@@ -39,7 +39,7 @@ class APIService {
       connectTimeout: Duration.zero, // No timeout on connection
       receiveTimeout: Duration.zero, // No timeout on receiving response
       sendTimeout: Duration.zero, 
-      baseUrl: baseURL, // you can keep this blank
+      baseUrl: baseURL.contains("localhost") ? baseURL : baseURL.replaceAll("/v1", "/sqldb"), // you can keep this blank
       headers: { 'Content-Type': 'application/json; charset=UTF-8' },
     ),
   )..interceptors.add(LogInterceptor( requestHeader: true, ),);
