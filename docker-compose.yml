@@ -5,7 +5,7 @@ services:
     container_name: traefik
     restart: unless-stopped
     networks:
-      - oc
+      - sqldb
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
@@ -20,12 +20,12 @@ services:
     ports: 
       - 8080:8080
     networks:
-      - oc
+      - sqldb
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.front.entrypoints=web"
         - "traefik.http.routers.front.rule=PathPrefix(`/`)"
         - "traefik.http.services.front.loadbalancer.server.port=8080"
 networks:
-  oc:
+  sqldb:
     external: true
