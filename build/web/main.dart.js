@@ -187535,7 +187535,7 @@ return A.o(A.Ad(p,q.b,q.c,q.d,q.e,q.f,A.m(t.N,t.z),q.r),$async$$0)
 case 4:case 3:if(!n)o.brp(0)
 if(n){o=$.ft().gH()
 n=$.eQ
-o.aCq("http://localhost:8000/v1/generic/"+q.b+"?rows="+A.e(n),n,!0)}return A.t(null,r)}})
+o.aCq("http://capitalisation.irt-aese.local/v1/generic/"+q.b+"?rows="+A.e(n),n,!0)}return A.t(null,r)}})
 return A.u($async$$0,r)},
 $S:10}
 A.aRM.prototype={
@@ -187896,7 +187896,7 @@ d=A.bb(a7)
 A.j_(e)
 A.j_(d)
 if(J.ew(J.bI(e),"connection error")){a6.a="server unreachable"
-c="server unreachable"}else{a4=A.e(J.bI(e))+" http://localhost:8000"
+c="server unreachable"}else{a4=A.e(J.bI(e))+" http://capitalisation.irt-aese.local"
 a6.a=a4
 c=a4}s=9
 break
@@ -187952,7 +187952,7 @@ i=A.ax(b)
 h=A.bb(b)
 A.j_(i)
 A.j_(h)
-c=A.e(J.bI(i))+" http://localhost:8000"
+c=A.e(J.bI(i))+" http://capitalisation.irt-aese.local"
 s=9
 break
 case 6:s=2
@@ -214564,7 +214564,7 @@ r($,"ddx","c3u",()=>A.qF(null,A.aq("Y2")))
 r($,"ddA","DX",()=>A.qF(null,A.aq("Nk")))
 r($,"ddz","ft",()=>A.qF(null,A.aq("Zq")))
 r($,"ddy","cce",()=>A.qF(null,A.aq("Zd")))
-s($,"d47","DV",()=>{var q=A.cCr("http://localhost:8000/v1",B.H,A.i(["Content-Type","application/json; charset=UTF-8"],t.N,t.z),B.H,B.H),p=A.cor(),o=new A.anh(A.a([B.avX],A.aq("A<nl?>")))
+s($,"d47","DV",()=>{var q=A.cCr("http://capitalisation.irt-aese.local/v1",B.H,A.i(["Content-Type","application/json; charset=UTF-8"],t.N,t.z),B.H,B.H),p=A.cor(),o=new A.anh(A.a([B.avX],A.aq("A<nl?>")))
 p=new A.b_G(p,o,A.cor(),new A.aUd(A.cTX()),!1)
 p.LA$=q
 p.aap$=new A.aUI(A.aW(A.aq("xN")))
