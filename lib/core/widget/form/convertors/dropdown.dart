@@ -53,8 +53,10 @@ class DropDownState extends State<DropDownWidget> {
         if (val == null) {
           val = widget.readOnly ? TranslateConstants.empty : null;
         } else if (widget.translatable) {
-          val = await getOnFlow(val);
-        }
+          try {
+            val = await getOnFlow(val);
+          } catch(e) {}
+        } 
         return SizedBox(width: 400, height: 30, 
           child: TextFormField(
             readOnly: true,
@@ -86,7 +88,9 @@ class DropDownState extends State<DropDownWidget> {
         if (items.where((element) => element.value == item).isEmpty) {
           var v = item;
           if (widget.translatable) {
-            v = await getOnFlow(item);
+            try {
+              v = await getOnFlow(item);
+            } catch(e) {}
           }
           items.add(DropdownMenuItem<String>(value: item, child:  Text(v.toLowerCase(), overflow: TextOverflow.ellipsis)));
         }
@@ -168,30 +172,8 @@ class DropDownState extends State<DropDownWidget> {
         future: APIService().get(widget.mainUrl!, firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           if (snap.data?.data != null) {
-            List<DropdownItem<String>> items = [];
-            Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
-            for (var item in snap.data!.data!) {
-                var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-                var t = items.where((element) => element.value == v);        
-                if (!mapped.containsKey(v) && t.isEmpty){
-                  mapped["${item.id}"]=item;
-                  if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
-                    && items.where((element) => element.value == v).isEmpty) {
-                    var vv = v;
-                    bool select = false;
-                    for (var val in widget.value ?? []) {
-                        if ("$val" == "${item.id}") {
-                          select = true;
-                          break;
-                        }
-                    }
-                    items.add(DropdownItem<String>(value: "${item.id}", label: vv.toLowerCase(), selected: select));
-                  }
-              }
-            }
             return SubDropDownWidget(
               label: lab,
-              mapped: mapped,
               component: widget.component,
               form: widget.form,
               schemaName: widget.schemaName,
@@ -202,7 +184,7 @@ class DropDownState extends State<DropDownWidget> {
               path: widget.path,
               url: widget.url,
               type: widget.type,
-              items: items,
+              datas: snap.data!.data!,
               autofill: widget.autofill,
               schema: widget.schema,
               translatable: widget.translatable,
@@ -217,11 +199,10 @@ class DropDownState extends State<DropDownWidget> {
 
 // ignore: must_be_immutable
 class SubDropDownWidget extends StatefulWidget {
-  Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
-  final List<DropdownItem<String>> items;
+  final List<model.Shallowed> datas;
+  final Map<String, dynamic> schema;
   final FormWidgetState? component;
   final Map<String, dynamic> form;
-  final Map<String, dynamic> schema;
   final String schemaName;
   final dynamic name;
   final bool readOnly;
@@ -236,7 +217,7 @@ class SubDropDownWidget extends StatefulWidget {
   final dynamic autofill;
   GlobalKey<SubFormularyWidgetState>? wrappers;
 
-  SubDropDownWidget ({ super.key, required this.form, required this.items, required this.mapped,
+  SubDropDownWidget ({ super.key, required this.form, required this.datas,
     required this.schemaName, required this.name, required this.path, required this.wrappers,
     required this.autofill, required this.translatable, required this.schema,
     required this.readOnly, required this.value, required this.label, this.isDark = false,
@@ -247,6 +228,41 @@ class SubDropDownWidget extends StatefulWidget {
 class SubDropDownState extends State<SubDropDownWidget> {
   MultiSelectController<String> ctrls = MultiSelectController<String>();
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    List<DropdownItem<String>> items = [];
+    Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
+    for (var item in widget.datas) {
+      var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+      var t = items.where((element) => element.value == v);        
+      if (!mapped.containsKey(v) && t.isEmpty){
+        mapped["${item.id}"]=item;
+      if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
+      && items.where((element) => element.value == v).isEmpty) {
+        var vv = v;
+        bool select = false;
+        for (var val in widget.value ?? []) {
+          if ("$val" == "${item.id}") {
+            select = true;
+            break;
+          }
+        }
+        try {
+          if (widget.translatable || item.translatable) {
+            vv = await getOnFlow(vv);
+          }
+        } catch(e) {}
+        
+        items.add(DropdownItem<String>(value: "${item.id}", label: vv.toLowerCase(), selected: select));
+      }
+    }
+    }
     return MultiDropdown<String>(
         addFunction: (String value) {
             for (var e in ctrls.items) {
@@ -258,7 +274,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
         },
                         controller: ctrls,
                         singleSelect: true,
-                        items: widget.items,
+                        items: items,
                         enabled: true,
                         searchEnabled: true,
                         chipDecoration: ChipDecoration(
@@ -330,8 +346,8 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         onSelectionChange: (values) {
                           widget.component?.widget.detectChange = true;
                           if (values.isEmpty) { widget.form[widget.name]=null;
-                          } else { widget.form[widget.name]=widget.mapped[values[0]]?.id; }
-                          var item = widget.mapped[values[0]];
+                          } else { widget.form[widget.name]=mapped[values[0]]?.id; }
+                          var item = mapped[values[0]];
                           if (widget.url != null && item != null && widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
                             widget.wrappers?.currentState?.setState( () { 
                               widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");

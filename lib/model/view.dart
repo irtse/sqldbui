@@ -354,6 +354,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.linkPath = "",
     this.schemaName = "",
     this.workflow,
+    this.translatable = false,
     this.selected = false,
     this.fields = emptyFilter,
     this.elder = "all",
@@ -362,6 +363,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   String? label;
   String? name;
   int? id;
+  bool translatable;
   String? ref;
   String elder;
   bool readOnly;
@@ -377,6 +379,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
 
   @override deserialize(Map<String, dynamic> json) {
     return Shallowed(
+      translatable: json.containsKey("translatable") ? json["translatable"] : false,
       triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
       id: json.containsKey("id") ? int.parse("${json["id"]}") : null, 
       ref: json.containsKey("data_ref") ? json["data_ref"] : "",

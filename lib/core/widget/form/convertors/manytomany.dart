@@ -125,6 +125,14 @@ class SubManyToManyWidget extends StatefulWidget {
 class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
           List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
           widget.form[widget.name] = <dynamic>[];
           if (widget.datas != null) {
@@ -139,6 +147,11 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                   break;
                 }
               }
+              try {
+                if (widget.translatable || item.translatable) {
+                  v = await getOnFlow(v);
+                }
+              } catch(e) {}
               items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v.toLowerCase(), selected: select));
               for (var val in (widget.value ?? []) as List<dynamic>) {
                 if (val.id == item.id) { widget.form[widget.name].add(ser); }

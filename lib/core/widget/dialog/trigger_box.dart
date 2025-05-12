@@ -97,7 +97,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           style: TextStyle(color: Colors.white, fontSize: 15))))),
         TextButton(
           style: TextButton.styleFrom(
-            backgroundColor: Theme.of(context).splashColor,
+            backgroundColor: Colors.grey,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5), // Change this value
             ),

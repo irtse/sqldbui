@@ -1,12 +1,7 @@
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
