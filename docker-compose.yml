@@ -1,6 +1,6 @@
 version: '3.4'
-
-traefik:
+services:
+  traefik:
     image: traefik:v2.10.4
     container_name: traefik
     restart: unless-stopped
@@ -14,7 +14,6 @@ traefik:
       - "80:80"  # Expose Traefik on port 8000    
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-services:
   sqldbui:
     image: irtse/sqldbui
     container_name: sqldbui
