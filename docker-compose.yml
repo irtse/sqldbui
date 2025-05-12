@@ -18,7 +18,7 @@ services:
     image: irtse/sqldbui
     container_name: sqldbui
     ports: 
-      - 8081:8080
+      - 8081:80
     networks:
       - sqldb
     environment:
@@ -27,7 +27,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.front.entrypoints=web"
         - "traefik.http.routers.front.rule=PathPrefix(`/`)"
-        - "traefik.http.services.front.loadbalancer.server.port=8080"
+        - "traefik.http.services.front.loadbalancer.server.port=80"
 networks:
   sqldb:
     external: true

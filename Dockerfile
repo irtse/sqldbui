@@ -4,5 +4,5 @@ FROM nginx:1.25.2-alpine
 COPY ./build/web /usr/share/nginx/html
 
 # Expose and run nginx
-EXPOSE 8080
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
