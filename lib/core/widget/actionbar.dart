@@ -46,26 +46,26 @@ class ActionBarState extends State<ActionBarWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async{
       List<Widget> actions = <Widget>[];
-      if (viewID != null && currentView!.isList) {
-        actions.add( getIconOffset(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON.toLowerCase(), 
+      if (viewID != null && widget.view!.isList) {
+        actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
         !translation ? Icons.translate : Icons.g_translate, null, () {
           translation = !translation;
           globalMainViewKey.currentState?.setState(() { });
         }, false));
       }
       if (widget.gridKey != null) {
-        actions.add( getIconOffset(TranslateConstants.resetUI.toLowerCase(), Icons.auto_fix_off, 20, () {
+        actions.add( getIconOffset( (await getOnFlow(TranslateConstants.resetUI)).toLowerCase(), Icons.auto_fix_off, 20, () {
             globalOffset = 0;
             globalMainViewKey.currentState?.setState(() {rects.remove(viewID); });
           }, false)
         );
       }
-      if (currentView != null && (currentWidth - menuSize) > 650) {
-        if (currentView!.shortcuts.keys.length == 1) {
-          var t = await getOnFlow(currentView!.shortcuts.keys.first);
+      if (widget.view != null && (currentWidth - menuSize) > 650) {
+        if (widget.view!.shortcuts.keys.length == 1) {
+          var t = await getOnFlow(widget.view!.shortcuts.keys.first);
           actions.add(
             InkWell( 
-                onTap: () { AppRouter.navigateTo(currentView!.shortcuts[currentView!.shortcuts.keys.first]); }, 
+                onTap: () { AppRouter.navigateTo(widget.view!.shortcuts[widget.view!.shortcuts.keys.first]); }, 
                 child: Container(
                   margin:  const EdgeInsets.only(top: 5, bottom: 5, left: 5),
                   padding: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 20), 
@@ -79,10 +79,10 @@ class ActionBarState extends State<ActionBarWidget> {
               )
             )
           );
-        } else if (currentView!.shortcuts.isNotEmpty) {
+        } else if (widget.view!.shortcuts.isNotEmpty) {
           List<Widget> items = [];
           double maxWidth = 0;
-          for (var short in currentView!.shortcuts.keys) {
+          for (var short in widget.view!.shortcuts.keys) {
             var t = (await getOnFlow(short)).toLowerCase();
             if ((t.length * 12) > maxWidth) {
               maxWidth = t.length * 12;
@@ -90,14 +90,14 @@ class ActionBarState extends State<ActionBarWidget> {
             items.add(
               InkWell( 
                 onTap: () { 
-                  AppRouter.navigateTo(currentView!.shortcuts[currentView!.shortcuts.keys.first]); 
+                  AppRouter.navigateTo(widget.view!.shortcuts[widget.view!.shortcuts.keys.first]); 
                   Navigator.pop(context);
                 },
                 child: 
                   Container(
                     decoration: BoxDecoration(
                       border: Border(bottom: BorderSide(
-                        color: currentView!.shortcuts.keys.last == short ? Colors.transparent : Colors.grey.shade200
+                        color: widget.view!.shortcuts.keys.last == short ? Colors.transparent : Colors.grey.shade200
                       ))
                     ),
                     padding: EdgeInsets.all(10),
@@ -122,26 +122,35 @@ class ActionBarState extends State<ActionBarWidget> {
         }
       }
       var row = <Widget>[];
-      row.addAll([
-        getDescription(
-          (widget.view == null ? (
-            globalLoading ? TranslateConstants.loading : TranslateConstants.home) 
-          : await getOnFlow(excludeDB(widget.view!.name))).toLowerCase(),  
-          null, Theme.of(context).highlightColor),
-        Padding(
+      try {
+        row.add(getDescription(
+          ( await getOnFlow( widget.view == null ? (globalLoading ? TranslateConstants.loading : TranslateConstants.home)
+          : (widget.view!.name != "" ?  widget.view!.name : ""))).toLowerCase(),  
+          // ignore: use_build_context_synchronously
+          null, Theme.of(context).highlightColor));
+      } catch(e) {
+        row.add(getDescription(
+          (widget.view == null ? (  globalLoading ? TranslateConstants.loading : TranslateConstants.home) 
+          : (widget.view!.name != "" ? excludeDB(widget.view!.name)  : "")).toLowerCase(),  
+          // ignore: use_build_context_synchronously
+          null, Theme.of(context).highlightColor));
+      }
+      row.add(Padding(
           padding: const EdgeInsets.only(left: 10), 
           child: Icon(
-            widget.view == null || !widget.view!.isList ? Icons.edit_document : Icons.list, 
+            widget.view == null || !(widget.view?.isList ?? false)  ? Icons.edit_document : Icons.list, 
+            // ignore: use_build_context_synchronously
             color: Theme.of(context).splashColor, 
-            size: widget.view == null || !widget.view!.isList ? 20 : 25, 
+            size: widget.view == null || !(widget.view?.isList ?? false) ? 20 : 25, 
           )
-        ),
+        ));
+      row.add(
         Padding(
           padding: const EdgeInsets.only(left: 10), 
-          child:getDescription(widget.view == null || !widget.view!.isList ? "" : "${widget.view!.max} ${TranslateConstants.found.toLowerCase()}", 
-            11, Theme.of(context).splashColor),
+          child: Text("${widget.view == null ? "0" : widget.view?.max} ${await getOnFlow(TranslateConstants.found.toLowerCase())}", 
+          overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
         )
-      ]);
+      );
       String path = "";
       if (viewID != null) { path += "$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
       var controller = TextEditingController(text: path);
@@ -161,23 +170,31 @@ class ActionBarState extends State<ActionBarWidget> {
                       padding: const EdgeInsets.only(right: 10.0, top: 5, bottom: 5),
                       child: TextFormField(
                         cursorHeight: 15,
+                        // ignore: use_build_context_synchronously
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
                         controller: controller,
                         decoration: InputDecoration( 
                           filled: true,
+                          // ignore: use_build_context_synchronously
                           labelStyle: TextStyle(color: Theme.of(context).splashColor),
+                          // ignore: use_build_context_synchronously
                           hintStyle: TextStyle(color: Theme.of(context).splashColor),
                           contentPadding: const EdgeInsets.all(1),
+                          // ignore: use_build_context_synchronously
                           fillColor: Theme.of(context).secondaryHeaderColor,
+                          // ignore: use_build_context_synchronously
                           iconColor: Theme.of(context).highlightColor,
                           prefixIcon: const Icon(Icons.account_tree),      
-                          hintText: TranslateConstants.url.toLowerCase(),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), borderSide: BorderSide(color: Theme.of(context).primaryColor))
+                          hintText:  await getOnFlow(TranslateConstants.url.toLowerCase()),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                            // ignore: use_build_context_synchronously
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor))
                         )
                       )
                     ),
                   ),
-                  getIconOffset(TranslateConstants.goto.toLowerCase(), Icons.send, 20, () { AppRouter.navigateTo(controller.text); }, true),
+                  getIconOffset( await getOnFlow(TranslateConstants.goto.toLowerCase()), 
+                  Icons.send, 20, () { AppRouter.navigateTo(controller.text); }, true),
               ]
             )
           ),
@@ -189,9 +206,10 @@ class ActionBarState extends State<ActionBarWidget> {
         padding: const EdgeInsets.symmetric(horizontal: 30),
         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
         decoration: BoxDecoration(
+          // ignore: use_build_context_synchronously
           color: Theme.of(context).secondaryHeaderColor,
           boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: rows));
+        child: Row(mainAxisSize: MainAxisSize.min, children: rows));      
   }
 }

@@ -66,7 +66,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             borderRadius: BorderRadius.circular(30), 
             color: Colors.grey
           ),
-          child: Text(TranslateConstants.draftT.toLowerCase(), 
+          child: Text((await getOnFlow(TranslateConstants.draftT)).toLowerCase(), 
             style: const TextStyle(color: Colors.white, fontSize: 10)))
         )
       );
@@ -127,13 +127,13 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                     title: trigger.name ?? "", actionPath: trigger.actionPath,
                     body: trigger.body, schema: trigger.schema)
             );
-          }, text: TranslateConstants.sendMail.toUpperCase(), color: Colors.grey, isDraft: true));
+          }, text: (await getOnFlow(TranslateConstants.sendMail)).toUpperCase(), color: Colors.grey, isDraft: true));
         }
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
         || widget.view.actions.contains("put")) {
           if (widget.view.actions.contains("post") && widget.view.isEmpty ) {
             actions.add(ButtonWidget( method: "post", 
-                  text: TranslateConstants.draft.toUpperCase(), color: Colors.grey, isDraft: true));
+                  text: (await getOnFlow(TranslateConstants.draft)).toUpperCase(), color: Colors.grey, isDraft: true));
           }
           if (widget.view.items.isNotEmpty && widget.view.items[0].isDraft) {
             actions.add(ButtonWidget(method: "put",
@@ -141,13 +141,13 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
           }
           actions.add(ButtonWidget(
             method: !widget.view.actions.contains("put") || widget.view.isEmpty ? "post" : "put", 
-            text: !widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish.toUpperCase()
-                : TranslateConstants.update.toUpperCase(), 
+            text: (await getOnFlow(!widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish
+                : TranslateConstants.update)).toUpperCase(), 
                 // ignore: use_build_context_synchronously
             color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft));
         }
         if (widget.view.actions.contains("delete") && !widget.view.isEmpty) {
-          actions.add(ButtonWidget(method: "delete", text: TranslateConstants.delete.toUpperCase(), color: Colors.red));
+          actions.add(ButtonWidget(method: "delete", text: (await getOnFlow(TranslateConstants.delete)).toUpperCase(), color: Colors.red));
         }
       }   
       widgets.add( 

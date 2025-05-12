@@ -180,6 +180,7 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
+      print("${cache[url]} ${url}");
       if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
         return cache[url]! as APIResponse<T>;
       }
@@ -203,9 +204,12 @@ class APIService {
           }
         }
         if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
-          if (method == "delete") { cache.remove(url); return APIResponse<T>(); }
+          if (method == "delete") { 
+            cache.remove(url); 
+            return APIResponse<T>(); 
+          }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
-          if (resp.error == "") { 
+          if (resp.error == "") {    
             if (method == "get") { 
               if (limit != null && cache.containsKey(url) && offset != null && offset > 0) { 
                   cache[url]!.data!.addAll(resp.data!);

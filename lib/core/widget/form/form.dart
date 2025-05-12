@@ -138,7 +138,7 @@ class FormWidgetState extends State<DataFormWidget> {
                   : BorderRadius.all(Radius.circular(5))
               ),
               height: 40, width: subMenu.length == widget.subMenuIndex ? 190 : 180,  
-              child: Center( child: Text(menu.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle( 
+              child: Center( child: Text((await getOnFlow(menu)).toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle( 
                 // ignore: use_build_context_synchronously
                 color: subMenu.length == widget.subMenuIndex ? Theme.of(context).primaryColor : Colors.grey)) )),
             )
@@ -194,7 +194,7 @@ class FormWidgetState extends State<DataFormWidget> {
                   crossAxisAlignment: CrossAxisAlignment.end, children: [
                     Row(children:[Container( margin: EdgeInsets.only(top: 20, left: 30, bottom: 5), 
                     child: Text(
-                      TranslateConstants.formularyMenu.toUpperCase()))]),
+                      (await getOnFlow(TranslateConstants.formularyMenu)).toUpperCase()))]),
                     ...( widget.view!.isEmpty ? [] : subMenu)
                   ])
               ),

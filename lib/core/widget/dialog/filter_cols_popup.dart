@@ -31,6 +31,7 @@ class FilterColsPopUpWidget extends StatefulWidget{
 bool forceViewFilter = false;
 class FilterColsPopUpState extends State<FilterColsPopUpWidget> {
   @override Widget build(BuildContext context) {
+    print(forceViewFilter);
     if (viewID == null) { return Container(); }
     return FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=true", forceViewFilter, null), 
     builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {

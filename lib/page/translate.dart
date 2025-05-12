@@ -174,8 +174,23 @@ Future<String> getOnFlow(String value) async {
   return TranslateConstants.onFlowTrad[value]!;
 }
 
-void setUpTranslate() {
+Future<void> setUpTranslate() async {
   var translator = GoogleTranslator();
+  translator.translate(TranslateConstants.filterTitle, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterTitle = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterApply, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterApply = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterCancel, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterCancel = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterSave, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterSave = e.text.toLowerCase());
+
+  translator.translate(TranslateConstants.filterViewPlaceholder, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterViewPlaceholder = e.text.toLowerCase());
+
+  translator.translate(TranslateConstants.filterNew, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterNew = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterApplyT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterApplyT = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterResetT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterResetT = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterSaveT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterSaveT = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterDeleteT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterDeleteT = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterHide, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterHide = e.text.toLowerCase());
+  translator.translate(TranslateConstants.filterShow, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterShow = e.text.toLowerCase());
+
   translator.translate(TranslateConstants.addNewEntry, to: TranslateConstants.lang).then( (e) => TranslateConstants.addNewEntry = e.text.toLowerCase());
   translator.translate(TranslateConstants.search, to: TranslateConstants.lang).then( (e) => TranslateConstants.search = e.text.toLowerCase());
 
@@ -217,22 +232,6 @@ void setUpTranslate() {
   translator.translate(TranslateConstants.showMenu, to: TranslateConstants.lang).then( (e) => TranslateConstants.showMenu = e.text.toLowerCase());
   translator.translate(TranslateConstants.showFilter, to: TranslateConstants.lang).then( (e) => TranslateConstants.showFilter = e.text.toLowerCase());
 
-  translator.translate(TranslateConstants.needAccess, to: TranslateConstants.lang).then( (e) => TranslateConstants.needAccess = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule1, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule1 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule2, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule2 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule3, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule3 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule4, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule4 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule5, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule5 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule6, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule6 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule7, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule7 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule8, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule8 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule9, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule9 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule10, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule10 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule11, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule11 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule12, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule12 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule13, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule13 = e.text.toLowerCase());
-  translator.translate(TranslateConstants.needRule14, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule14 = e.text.toLowerCase());
-
 
   translator.translate(TranslateConstants.refused, to: TranslateConstants.lang).then( (e) => TranslateConstants.refused = e.text.toLowerCase());
   translator.translate(TranslateConstants.dismiss, to: TranslateConstants.lang).then( (e) => TranslateConstants.dismiss = e.text.toLowerCase());
@@ -257,21 +256,7 @@ void setUpTranslate() {
   translator.translate(TranslateConstants.filterPlaceholder, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterPlaceholder = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterLabel, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterLabel = e.text.toLowerCase());
 
-  translator.translate(TranslateConstants.filterTitle, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterTitle = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterApply, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterApply = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterCancel, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterCancel = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterSave, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterSave = e.text.toLowerCase());
-
-  translator.translate(TranslateConstants.filterViewPlaceholder, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterViewPlaceholder = e.text.toLowerCase());
-
-  translator.translate(TranslateConstants.filterNew, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterNew = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterApplyT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterApplyT = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterResetT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterResetT = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterSaveT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterSaveT = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterDeleteT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterDeleteT = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterHide, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterHide = e.text.toLowerCase());
-  translator.translate(TranslateConstants.filterShow, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterShow = e.text.toLowerCase());
-
+  
   translator.translate(TranslateConstants.home, to: TranslateConstants.lang).then( (e) => TranslateConstants.home = e.text.toLowerCase());
   translator.translate(TranslateConstants.loading, to: TranslateConstants.lang).then( (e) => TranslateConstants.loading = e.text.toLowerCase());
   translator.translate(TranslateConstants.found, to: TranslateConstants.lang).then( (e) => TranslateConstants.found = e.text.toLowerCase());
@@ -342,5 +327,21 @@ void setUpTranslate() {
   translator.translate(TranslateConstants.howToAccess, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToAccess = e.text.toLowerCase());
   translator.translate(TranslateConstants.howToOrder, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToOrder = e.text.toLowerCase());
   translator.translate(TranslateConstants.howToWorkflow, to: TranslateConstants.lang).then( (e) => TranslateConstants.howToWorkflow = e.text.toLowerCase());
-
+  
+  
+  translator.translate(TranslateConstants.needAccess, to: TranslateConstants.lang).then( (e) => TranslateConstants.needAccess = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule1, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule1 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule2, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule2 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule3, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule3 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule4, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule4 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule5, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule5 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule6, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule6 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule7, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule7 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule8, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule8 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule9, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule9 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule10, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule10 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule11, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule11 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule12, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule12 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule13, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule13 = e.text.toLowerCase());
+  translator.translate(TranslateConstants.needRule14, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule14 = e.text.toLowerCase());
 }

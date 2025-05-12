@@ -83,7 +83,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               }));
             })) : Container() ,
         currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", 
-        forceFilter, null), 
+        firstAPI && forceFilter, null), 
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
           forceFilter = false;
           if (snapshot.data?.data != null) {
