@@ -21,6 +21,8 @@ services:
       - 8081:8080
     networks:
       - sqldb
+    environment:
+      HOST: ${HOST:-http://capitalisation.irt-aese.local/sqldb}
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.front.entrypoints=web"
