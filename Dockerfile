@@ -1,17 +1,8 @@
-FROM instrumentisto/flutter:3.19.6-androidsdk34-r0 as builder
+FROM nginx:1.25.2-alpine
 
-WORKDIR /app
- 
-COPY . .
+# copy the info of the builded web app to nginx
+COPY ./build/web /usr/share/nginx/html
 
-RUN flutter pub get
- 
-RUN flutter build web --dart-define=HOST=${HOST:-http://capitalisation.irt-aese.local/sqldb} --release --build-number ${CI_JOB_ID:-1}
-
-FROM scratch
- 
-WORKDIR /app
-
-COPY --from=builder /app/build/web /app/web
-
+# Expose and run nginx
 EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]
