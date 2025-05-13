@@ -1,6 +1,8 @@
 import 'package:translator/translator.dart';
 
 class TranslateConstants {
+  static String searchInfoMake = "make a search to find others.";
+  static String searchInfo = "items were found, only the first ones were displayed.";
   static String addNewEntry = "add new entry";
   static String search = "search";
   static String noDashboard = "no dashboard found";
@@ -176,6 +178,9 @@ Future<String> getOnFlow(String value) async {
 
 Future<void> setUpTranslate() async {
   var translator = GoogleTranslator();
+  translator.translate(TranslateConstants.searchInfoMake, to: TranslateConstants.lang).then( (e) => TranslateConstants.searchInfoMake = e.text.toLowerCase());
+  translator.translate(TranslateConstants.searchInfo, to: TranslateConstants.lang).then( (e) => TranslateConstants.searchInfo = e.text.toLowerCase());
+
   translator.translate(TranslateConstants.filterTitle, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterTitle = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterApply, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterApply = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterCancel, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterCancel = e.text.toLowerCase());

@@ -110,6 +110,8 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.focusNode,
     this.onSelectionChange,
     this.onSearchChange,
+    this.changeFunction,
+    this.max = 0,
     this.closeOnBackButton = false,
     Key? key,
   })  : future = null,
@@ -158,12 +160,15 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.focusNode,
     this.onSelectionChange,
     this.onSearchChange,
+    this.changeFunction,
     this.closeOnBackButton = false,
     this.addFunction,
+    this.max = 0,
     Key? key,
   })  : items = const [],
         super(key: key);
-
+  final int max;
+  final Future<void> Function(dynamic)? changeFunction;
   final void Function(String)? addFunction;
   /// The list of dropdown items.
   final List<DropdownItem<T>> items;
@@ -434,6 +439,8 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
                       : Offset(0, widget.dropdownDecoration.marginTop),
                   child: RepaintBoundary(
                     child: _Dropdown<T>(
+                      max: widget.max,
+                      changeFunction: widget.changeFunction,
                       addFunction: widget.addFunction,
                       decoration: widget.dropdownDecoration,
                       onItemTap: _handleDropdownItemTap,

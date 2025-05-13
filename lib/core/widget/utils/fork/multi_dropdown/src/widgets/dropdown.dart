@@ -13,17 +13,20 @@ class _Dropdown<T> extends StatelessWidget {
     required this.maxSelections,
     required this.items,
     required this.onItemTap,
+    this.changeFunction,
     this.addFunction,
     Key? key,
+    this.max = 0,
     this.onSearchChange,
     this.itemBuilder,
     this.itemSeparator,
     this.singleSelect = false,
   }) : super(key: key);
+  final void Function(dynamic)? changeFunction;
   final void Function(String)? addFunction;
   /// The decoration of the dropdown.
   final DropdownDecoration decoration;
-
+  final int max;
   /// Whether the search field is enabled.
   final bool searchEnabled;
 
@@ -95,9 +98,19 @@ class _Dropdown<T> extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (searchEnabled)
+                if (max > 20) 
+                  Column(children: [
+                    Center(child: Padding(padding: EdgeInsets.only(bottom: 5, top: 15),
+                      child: Text("$max ${TranslateConstants.searchInfo}", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                    )),
+                    Center(child: Padding(padding: EdgeInsets.only(bottom: 5),
+                      child: Text(TranslateConstants.searchInfoMake, style: TextStyle(color: Colors.grey)),
+                    )),
+                  ]),
                 _SearchField(
                   function: addFunction,
                   decoration: searchDecoration,
+                  changeFunction: changeFunction,
                   onChanged: _onSearchChange,
                 ),
               if (decoration.header != null)
@@ -197,15 +210,17 @@ class _Dropdown<T> extends StatelessWidget {
 TextEditingController searchCtrl = TextEditingController();
 
 class _SearchField extends StatelessWidget {
-   _SearchField({
+   const _SearchField({
     required this.decoration,
     required this.onChanged,
+    required this.changeFunction,
     this.function,
   });
 
   final SearchFieldDecoration decoration;
   final ValueChanged<String> onChanged;
   final void Function(String)? function;
+  final void Function(dynamic)? changeFunction;
 
   @override
   Widget build(BuildContext context) {
@@ -222,6 +237,13 @@ class _SearchField extends StatelessWidget {
         ),
         onChanged: (String v) {
           searchCtrl.text = v;
+          if (changeFunction != null) {
+            Future.delayed(Duration(seconds: 1), () {
+              if (searchCtrl.text == v) {
+                changeFunction!(v);
+              }
+            });
+          }
           onChanged(v);
         },
       ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 

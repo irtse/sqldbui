@@ -110,14 +110,14 @@ class FormularyWidgetState extends State<FormularyWidget> {
               field.translatable,
               widget.wrappers,
             );
-            if (![OneToManyWidget, ManyToManyWidget].contains(f.runtimeType) && widget.show) {
+            if (![OneToManyWidget].contains(f.runtimeType) && widget.show) {
               var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
                   width: field.type.contains("bool") ? 210 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : 40, child: f));
               fields.add(w);
             }
-            if (([OneToManyWidget, ManyToManyWidget].contains(f.runtimeType) && widget.show) 
+            if (([OneToManyWidget].contains(f.runtimeType) && widget.show) 
             && !(widget.view.isEmpty && !widget.view.actions.contains("post"))) { 
               bottomFields.add(
                 Padding(

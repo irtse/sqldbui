@@ -76,7 +76,7 @@ class APIService {
       var cmdCol = getCmdCol();
       var columns = getColumns(url, true);
       var orderBy = getOrderDir(url);
-      var filter = getFilter(url, isFilter);
+      var filter = getFilter(url, isFilter, globalFilter[viewID]);
       var command = "";
       if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
@@ -152,12 +152,12 @@ class APIService {
     return columns;
   }
 
-  String getFilter(String url, bool isFilter) {
+  String getFilter(String url, bool isFilter, Filters? filters) {
     var filter = "";
     if (url.contains("?") && isFilter) {
-      if (globalFilter.containsKey(viewID) && globalFilter[viewID]!.sort().isNotEmpty) {
+      if (filters != null && filters.sort().isNotEmpty) {
         filter = "&filter_line=";
-        for (var f in globalFilter[viewID]!.sort()) {  
+        for (var f in filters.sort()) {  
           if (f.column == "") { continue; } 
           if (f.comparator == "=") { filter += "${f.column}%3A${f.value}"; 
           } else if (f.comparator == "!=") { filter += "${f.column}%3C%3E${f.value}"; 
@@ -180,7 +180,6 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      print("${cache[url]} ${url}");
       if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
         return cache[url]! as APIResponse<T>;
       }
@@ -189,7 +188,7 @@ class APIService {
         dio.interceptors.clear(); 
         var cmdCol = getCmdCol();
         var orderBy = getOrderDir(url);
-        var filter = getFilter(url, isFilter);
+        var filter = getFilter(url, isFilter, globalFilter[viewID]);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var command = "";

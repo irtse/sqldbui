@@ -358,10 +358,12 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.selected = false,
     this.fields = emptyFilter,
     this.elder = "all",
-    this.triggers = const []
+    this.triggers = const [],
+    this.max = 0,
   });
   String? label;
   String? name;
+  int max;
   int? id;
   bool translatable;
   String? ref;
@@ -381,6 +383,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     return Shallowed(
       translatable: json.containsKey("translatable") ? json["translatable"] : false,
       triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
+      max: json.containsKey("max") ? int.parse("${json["max"]}") : 0, 
       id: json.containsKey("id") ? int.parse("${json["id"]}") : null, 
       ref: json.containsKey("data_ref") ? json["data_ref"] : "",
       selected: json.containsKey("is_selected") ? json["is_selected"] : false,
