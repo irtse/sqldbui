@@ -152,21 +152,6 @@ class DropDownState extends State<DropDownWidget> {
                         labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
                       ) ));
     }
-    if (widget.empty && widget.value != null) {
-      widget.component?.widget.detectChange = true;
-      widget.form[widget.name]=widget.value;
-      if (widget.url != null) {
-        if (widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
-          Future.delayed(const Duration(seconds: 1), () {
-            widget.component?.setState( () {
-              widget.component?.widget.hideField.add(widget.name);
-              widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${widget.value}");
-            });
-          });
-        }  
-      }
-      return Container();
-    }
     var lab = await getOnFlow(widget.label);
     return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.mainUrl!, firstAPI, null), 
@@ -243,27 +228,29 @@ class SubDropDownState extends State<SubDropDownWidget> {
       var t = items.where((element) => element.value == v);        
       if (!mapped.containsKey(v) && t.isEmpty){
         mapped["${item.id}"]=item;
-      if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
-      && items.where((element) => element.value == v).isEmpty) {
-        var vv = v;
-        bool select = false;
-        for (var val in widget.value ?? []) {
-          if ("$val" == "${item.id}") {
+        if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
+        && items.where((element) => element.value == v).isEmpty) {
+          var vv = v;
+          bool select = false;
+          if ("${widget.value}" == "${item.id}" || "${widget.autofill}" == "${item.id}") {
             select = true;
-            break;
+            if (widget.url != null) {
+               widget.wrappers?.currentState?.setState( () { 
+                widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+              }); 
+            }
           }
+          try {
+            if (widget.translatable || item.translatable) {
+              vv = await getOnFlow(vv);
+            }
+          } catch(e) {}
+          items.add(DropdownItem<String>(value: "${item.id}", label: vv.toLowerCase(), selected: select));
         }
-        try {
-          if (widget.translatable || item.translatable) {
-            vv = await getOnFlow(vv);
-          }
-        } catch(e) {}
-        
-        items.add(DropdownItem<String>(value: "${item.id}", label: vv.toLowerCase(), selected: select));
       }
     }
-    }
     return MultiDropdown<String>(
+        enabled:!widget.readOnly,
         addFunction: widget.type == "link_add" ? (String value) {
             for (var e in ctrls.items) {
               e.selected = false;
@@ -275,7 +262,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         controller: ctrls,
                         singleSelect: true,
                         items: items,
-                        enabled: true,
                         searchEnabled: true,
                         chipDecoration: ChipDecoration(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -348,7 +334,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           if (values.isEmpty) { widget.form[widget.name]=null;
                           } else { widget.form[widget.name]=mapped[values[0]]?.id; }
                           var item = mapped[values[0]];
-                          if (widget.url != null && item != null && widget.wrappers?.currentState?.wrappersURL[widget.name] == null) {
+                          if (widget.url != null && item != null) {
                             widget.wrappers?.currentState?.setState( () { 
                               widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                             }); 
