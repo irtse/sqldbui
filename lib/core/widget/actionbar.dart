@@ -144,13 +144,15 @@ class ActionBarState extends State<ActionBarWidget> {
             size: widget.view == null || !(widget.view?.isList ?? false) ? 20 : 25, 
           )
         ));
-      row.add(
-        Padding(
-          padding: const EdgeInsets.only(left: 10), 
-          child: Text("${widget.view == null ? "0" : widget.view?.max} ${await getOnFlow(TranslateConstants.found.toLowerCase())}", 
-          overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
-        )
-      );
+      if (widget.view != null && (widget.view?.isList ?? false)) {
+        row.add(
+          Padding(
+            padding: const EdgeInsets.only(left: 10), 
+            child: Text("${widget.view == null ? "0" : widget.view?.max} ${await getOnFlow(TranslateConstants.found.toLowerCase())}", 
+            overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
+          )
+        );
+      }
       String path = "";
       if (viewID != null) { path += "$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
       var controller = TextEditingController(text: path);
