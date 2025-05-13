@@ -54,6 +54,9 @@ class _TextState extends State<TextWidget> {
       widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
     }
     var val = widget.value  ?? widget.autofill;
+    if (val != null) {
+      widget.form[widget.name]=val;
+    }
     if (val == null || val == "") {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {

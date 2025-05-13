@@ -50,6 +50,9 @@ class DropDownState extends State<DropDownWidget> {
     if (widget.type.contains("enum") || widget.mainUrl == null) {
       if (widget.readOnly) {
         var val = widget.value  ?? widget.autofill;
+        if (val != null) {
+          widget.form[widget.name]=val;
+        }
         if (val == null) {
           val = widget.readOnly ? TranslateConstants.empty : null;
         } else if (widget.translatable) {
@@ -233,6 +236,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
           var vv = v;
           bool select = false;
           if ("${widget.value}" == "${item.id}" || "${widget.autofill}" == "${item.id}") {
+            widget.form[widget.name]=widget.value ?? widget.autofill;
             select = true;
             if (widget.url != null) {
                widget.wrappers?.currentState?.setState( () { 
@@ -271,7 +275,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           spacing: 10,
                         ),
                         fieldDecoration: FieldDecoration(
-                          labelText: widget.label,
+                          labelText: "${widget.label}${widget.require ? "*" : ""}",
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),

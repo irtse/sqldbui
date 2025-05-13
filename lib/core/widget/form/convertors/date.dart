@@ -39,8 +39,10 @@ class _DateState extends State<DateWidget> {
       }
       if (widget.value != null) {
         dateValue = DateTime.parse(widget.value);
+        widget.form[widget.name]=widget.value;
       } else if (widget.autofill != null) {
         dateValue = DateTime.parse("${widget.autofill}");
+        widget.form[widget.name]=widget.autofill;
       }
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, child: TextFormField(

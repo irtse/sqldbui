@@ -8,6 +8,7 @@ import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -81,6 +82,7 @@ class ActionService {
           }, context).catchError( (e) => errors.add(e.toString()));
         }
       }
+      searchCtrl.text = "";
       newDropDownValue = {};
     }
     if (errors.isNotEmpty) {

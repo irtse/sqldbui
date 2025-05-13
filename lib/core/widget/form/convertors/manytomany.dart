@@ -170,7 +170,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           spacing: 10,
                         ),
                         fieldDecoration: FieldDecoration(
-                          labelText: widget.label,
+                          labelText: "${widget.label}${widget.require ? "*" : ""}",
                           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
                           hintText: TranslateConstants.selectValue.toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
