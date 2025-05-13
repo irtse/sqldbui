@@ -175,7 +175,6 @@ class _Dropdown<T> extends StatelessWidget {
         title: Text(option.label),
         trailing: trailing,
         dense: true,
-        autofocus: true,
         enabled: !option.disabled,
         selected: option.selected,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -226,7 +225,10 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: Wrap( alignment: WrapAlignment.center, children: [ TextField(
+      child: Wrap( 
+      alignment: WrapAlignment.center, 
+      children: [ TextField(
+        autofocus: true,
         controller: searchCtrl,
         decoration: InputDecoration(
           isDense: true,

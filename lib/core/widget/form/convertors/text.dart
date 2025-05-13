@@ -60,7 +60,7 @@ class _TextState extends State<TextWidget> {
     if (val == null || val == "") {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {
-      val = await getOnFlow(val);
+      val = (await getOnFlow(val)).toLowerCase();
     }
     return TextFormField(
       obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,

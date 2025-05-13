@@ -58,7 +58,7 @@ class DropDownState extends State<DropDownWidget> {
           val = widget.readOnly ? TranslateConstants.empty : null;
         } else if (widget.translatable) {
           try {
-            val = await getOnFlow(val);
+            val = (await getOnFlow(val)).toLowerCase();
           } catch(e) {}
     }
     if (widget.type.contains("enum") || widget.mainUrl == null) {
@@ -294,11 +294,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
           }
           try {
             if (widget.translatable || item.translatable) {
-              vv = await getOnFlow(vv);
+              vv = (await getOnFlow(vv)).toLowerCase();
             }
           } catch(e) {}
           idSet.add("${item.id}");
-          items.add(DropdownItem<String>(value: "${item.id}", label: vv.toLowerCase(), selected: select));
+          items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
         }
       }
     }

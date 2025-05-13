@@ -32,6 +32,10 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
       return Container();
     }
     return ExpansionTile(
+      onExpansionChanged: (bool ok) {
+        widget.isExpanded = ok;
+        initiallyExpanded[widget.category] = ok;
+      },
       shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
       initiallyExpanded: widget.isExpanded,
       backgroundColor: Theme.of(context).secondaryHeaderColor,

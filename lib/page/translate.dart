@@ -2,7 +2,7 @@ import 'package:translator/translator.dart';
 
 class TranslateConstants {
   static String searchInfoMake = "make a search to find others.";
-  static String searchInfo = "items were found, only the first ones were displayed.";
+  static String searchInfo = "items were found, only the first 20 ones were displayed.";
   static String addNewEntry = "add new entry";
   static String search = "search";
   static String noDashboard = "no dashboard found";
@@ -40,7 +40,7 @@ class TranslateConstants {
   static String delete = "DELETE";
   static String filterViewPlaceholder = "filter view columns";
 
-  static String filterMenu = "filter the menu...";
+  static String filterMenu = "search in menu...";
 
   static String filterNew = "new filter";
   static String filterApplyT = "apply filter";
@@ -50,7 +50,7 @@ class TranslateConstants {
   static String filterHide = "hide filter panel";
   static String filterShow = "show filter panel";
 
-  static String home = "HOME";
+  static String home = "home page";
   static String loading = "LOADING";
   static String found = "items found";
   static String url = "actual url...";
@@ -178,6 +178,7 @@ Future<String> getOnFlow(String value) async {
 
 Future<void> setUpTranslate() async {
   var translator = GoogleTranslator();
+  translator.translate(TranslateConstants.home, to: TranslateConstants.lang).then( (e) => TranslateConstants.home = e.text.toLowerCase());
   translator.translate(TranslateConstants.searchInfoMake, to: TranslateConstants.lang).then( (e) => TranslateConstants.searchInfoMake = e.text.toLowerCase());
   translator.translate(TranslateConstants.searchInfo, to: TranslateConstants.lang).then( (e) => TranslateConstants.searchInfo = e.text.toLowerCase());
 
@@ -261,8 +262,6 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.filterPlaceholder, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterPlaceholder = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterLabel, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterLabel = e.text.toLowerCase());
 
-  
-  translator.translate(TranslateConstants.home, to: TranslateConstants.lang).then( (e) => TranslateConstants.home = e.text.toLowerCase());
   translator.translate(TranslateConstants.loading, to: TranslateConstants.lang).then( (e) => TranslateConstants.loading = e.text.toLowerCase());
   translator.translate(TranslateConstants.found, to: TranslateConstants.lang).then( (e) => TranslateConstants.found = e.text.toLowerCase());
   translator.translate(TranslateConstants.url, to: TranslateConstants.lang).then( (e) => TranslateConstants.url = e.text.toLowerCase());

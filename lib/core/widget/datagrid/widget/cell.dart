@@ -98,11 +98,12 @@ class GridCellWidgetState extends State<GridCellWidget> {
       widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
     }
     if (widget.translatable) {
-      v = await getOnFlow(widget.value);
+      v = (await getOnFlow(widget.value)).toLowerCase();
     }
     return Column( mainAxisAlignment: MainAxisAlignment.center, children: [
       edit ? SizedBox(height: widget.maxheight - 20, 
         child: await Convertor.filterFieldByType(
+        // ignore: use_build_context_synchronously
         context, widget, widget.cell.type, "", 
         this, false, true, url, 
         "${widget.cellID}:${widget.cell.columnName}")) : 
@@ -122,10 +123,11 @@ class GridCellWidgetState extends State<GridCellWidget> {
           AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
-        child: Center(child: Text( "$v".toLowerCase(), 
+        child: Center(child: Text( "$v", 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
+            // ignore: use_build_context_synchronously
             color: Theme.of(context).primaryColorLight)
           )
         )))]);

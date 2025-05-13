@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/sections/head_menu.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -52,25 +53,7 @@ class PageWidgetState extends State<PageWidget> {
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Padding(padding: EdgeInsets.only(left: noMenu ? 0 : 50, right: 50), 
-          child: SizedBox(child: Row(children: [
-            currentWidth > 400 ? RouterWidget(key: routerKey) : Container(),
-            InkWell( onTap: () { clear(); },  
-              child: Image(image: const AssetImage('assets/images/logo.png'), width: currentWidth > 600 ? 60 : 0,)),
-            InkWell( onTap: () { clear(); }, 
-              child:Container(
-                padding: EdgeInsets.only(left: currentWidth > 600 ? 30 : 0), 
-                child: currentWidth > 1000 ? Text("OPPS", overflow: TextOverflow.ellipsis,
-                 style: TextStyle( color: Theme.of(context).highlightColor)) : null)),
-            Padding(
-              padding: EdgeInsets.only(left: currentWidth > 600 ?  50 : 0, 
-                right: currentWidth > 600 ?  10 : 0), 
-              child: currentWidth > 600 ? Icon(Icons.verified_user, color: Theme.of(context).splashColor) : null),
-            Flexible(child: Container(padding: const EdgeInsets.only(left: 0, right: 0), 
-                  child: currentWidth > 600 ? Text("${AuthService.user != null ? "${AuthService.user!.name} - " : "unknown" }${AuthService.user != null ? AuthService.user!.email : ""}",
-                  overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Theme.of(context).splashColor)) : null)),
-          ],)
-        )),         
+        title: HeadMenuWidget(),         
         toolbarHeight: 40,
         actions: <Widget>[
           Stack( children: [

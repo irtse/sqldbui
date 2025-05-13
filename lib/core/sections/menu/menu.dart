@@ -26,8 +26,8 @@ class MenuWidget extends StatefulWidget{
   @override MenuWidgetState createState() => MenuWidgetState();
 }
 bool globalLoading = true;
+Map<String, bool> initiallyExpanded = {};
 class MenuWidgetState extends State<MenuWidget> {
-  Map<String, bool> initiallyExpanded = {};
   TextEditingController controller = TextEditingController();
 
   @override Widget build(BuildContext context) {
@@ -70,8 +70,9 @@ class MenuWidgetState extends State<MenuWidget> {
     List<Widget> comps = [];
     for (var cat in categories.keys) {
       var count = 0;
-      initiallyExpanded[cat] = widget.views != null ? widget.views!.where(
-        (element) => viewID != null && viewID!.isNotEmpty && "${element.id}" == viewID!.substring(1)).isNotEmpty : false;
+      if (initiallyExpanded[cat] == null) {
+        initiallyExpanded[cat] = cat.toLowerCase() == "general";
+      }
       if (!categories[cat]!.isNotEmpty) { continue; }
       for (var catIndex in categories[cat]!) { 
         count += catIndex.newIds.length; 
@@ -100,7 +101,7 @@ class MenuWidgetState extends State<MenuWidget> {
             key: key,
             count: count,
             category: cat, 
-            isExpanded: initiallyExpanded[cat]!, 
+            isExpanded: initiallyExpanded[cat] ?? false, 
             refreshView: refreshView), 
           ...badgeCat
         ])

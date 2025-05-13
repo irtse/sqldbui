@@ -73,14 +73,13 @@ class ManyToManyState extends State<ManyToManyWidget> {
         Row(children: [Text("$str${widget.require ? '*' : ''}:", 
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags)]) ]),);
-    } else {
-      String url = scheme.valuesPath;
+    } else if ((widget.url ?? "") != "") {
       if (widget.value != null) {
         return FutureBuilder<APIResponse<model.Shallowed>>(
-          future: APIService().get(url.replaceAll("rows=all", "rows=${widget.value.join(",")}"), true, null), 
+          future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${widget.value.join(",")}"), true, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get(url, true, null), 
+            future: APIService().get(widget.url!, true, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
                 if (snap.data?.data != null) {
                   return SubManyToManyWidget(
@@ -104,7 +103,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
         });
       }
       return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(url, true, null), 
+        future: APIService().get(widget.url ?? "", true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
             if (snap.data?.data != null) {
               return SubManyToManyWidget(
@@ -127,6 +126,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
             
         });
       }
+      return Container();
     }
 }
 
@@ -208,6 +208,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           var filters = Filters();
                           filters.add("name", Filter(value: value, column: "name"));
                           var e = await service.get<model.Shallowed>("${widget.url}${service.getFilter(widget.url ?? "", true, filters)}", true, context);
+
                           if (e.data != null) {
                               for (var item in e.data!) {
                                 if (!idSet.contains("${item.id}")) {

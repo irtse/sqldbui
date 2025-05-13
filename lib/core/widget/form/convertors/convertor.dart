@@ -443,7 +443,7 @@ class Convertor {
         label: label, 
         require: require, 
         type: type, 
-        url: url, 
+        url: mainUrl, 
         component: comp);
     }
     return null;

@@ -1,8 +1,6 @@
 
 // ignore: must_be_immutable
 import 'package:sqldbui2/core/sections/homeview.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -34,7 +32,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 selected: "${widget.view.id}" == viewID?.substring(1),
                 onTap: () async { setState(() { 
                   widget.refreshView("#${widget.view.id}", widget.category, true, false, false);  
-                  globalMenuKey.currentState?.setState(() {});
+                  // globalMenuKey.currentState?.setState(() {});
                 }); },
                 tileColor: Theme.of(context).secondaryHeaderColor,
                 iconColor: Theme.of(context).splashColor,
