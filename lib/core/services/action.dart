@@ -6,6 +6,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
+import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -58,8 +59,10 @@ class ActionService {
       } 
     }
     if (method != "delete" && errors.isEmpty) {
-      if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) {  
+      if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) { 
         if (form.formKey.currentState != null && form.subForm) {
+          mainForm.currentState?.widget.error = TranslateConstants.errorRequire;
+          mainForm.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }
         return []; 
@@ -73,16 +76,34 @@ class ActionService {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    if (newDropDownValue.isEmpty) {
-      if (method == "post" || method == "put") {
-        for(var name in newDropDownValue.keys) {
-          await APIService().post(newDropDownValue[name] ?? "", {
-            "name" : name,
-          // ignore: invalid_return_type_for_catch_error
-          }, context).catchError( (e) => errors.add(e.toString()));
-        }
+    if (newManyToManyValue.isNotEmpty && (method == "post" || method == "put")) {
+      for(var url in newManyToManyValue.keys) {
+          for (var name in newManyToManyValue[url]!.keys) {
+            var resp = await APIService().post<model.Shallowed>("$url&shallow=enable", {
+              "name" : newManyToManyValue[url]![name],
+            // ignore: invalid_return_type_for_catch_error
+            }, context).catchError( (e) => errors.add(e.toString()));
+            if ( resp.data?.isNotEmpty ?? false) {
+              body[name] = resp.data?.first.id;
+            }
+          }
       }
-      searchCtrl.text = "";
+      searchCtrl = {};
+      newDropDownValue = {};
+    }
+    if (newDropDownValue.isNotEmpty && (method == "post" || method == "put")) {
+      for(var url in newDropDownValue.keys) {
+          for (var name in newDropDownValue[url]!.keys) {
+            var resp = await APIService().post<model.Shallowed>("$url&shallow=enable", {
+              "name" : newDropDownValue[url]![name],
+            // ignore: invalid_return_type_for_catch_error
+            }, context).catchError( (e) => errors.add(e.toString()));
+            if ( resp.data?.isNotEmpty ?? false) {
+              body[name] = resp.data?.first.id;
+            }
+          }
+      }
+      searchCtrl = {};
       newDropDownValue = {};
     }
     if (errors.isNotEmpty) {
@@ -119,9 +140,16 @@ class ActionService {
           && !(["dbschema_id"].contains(fieldName) && form.cacheForm[fieldName] == null)
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
           && form.cacheForm[fieldName] is! List) { 
-            if (form.cacheForm[fieldName] is Map<String, PlatformFile>) {
-              for (var fileStr in (form.cacheForm[fieldName] as Map<String, PlatformFile>).keys) {
-                files[fileStr] = form.cacheForm[fieldName][fileStr];
+            if (form.cacheForm[fieldName] is Map<String, List<PlatformFile>>) {
+              for (var fileStr in (form.cacheForm[fieldName] as Map<String, List<PlatformFile>>).keys) {
+                for (var file in form.cacheForm[fieldName][fileStr] as List<PlatformFile>) {
+                  files[fileStr] = file;
+                  if ( body[fieldName] == null) {
+                     body[fieldName] = file.name;
+                  } else {
+                    body[fieldName] += ",${file.name}";
+                  }
+                }
               }
             } else {
               body[fieldName]=form.cacheForm[fieldName]; 

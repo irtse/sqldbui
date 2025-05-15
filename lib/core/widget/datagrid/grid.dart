@@ -48,7 +48,7 @@ class GridWidget extends StatefulWidget {
     this.viewKey,
     this.isSelected = true,
     this.isEnum = false,
-    this.showCheckboxColumn = false, 
+    this.showCheckboxColumn = true, 
     this.showColumnHeaderIconOnHover = false,
     this.borderWidth = 1, 
     this.borderColor = Colors.grey, 
@@ -192,12 +192,9 @@ class GridWidgetState extends State<GridWidget> {
 
   List<GridRowWidget> buildRows(List<GridColumnWidget> columns, List<Value> datas) {
     return datas.map<GridRowWidget>((mapped) {
-      bool found = true;
-      try {
-        selectedGrid.firstWhere((element) => element.cells.first.value == mapped.values["id"]);
-        found = true;
-      } catch (e) { found = false; }
+      bool found = selectedGrid.where((element) => element.cellID == mapped.values["id"]).isNotEmpty;
       return GridRowWidget( 
+        cellID: "${mapped.values["id"]}",
         sharing: mapped.sharing,
         borderWidth: widget.borderWidth, 
         borderColor: widget.borderColor, 

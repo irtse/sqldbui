@@ -1,8 +1,10 @@
 import 'package:translator/translator.dart';
 
 class TranslateConstants {
+  static String inserImage = "insert image from desktop";
+  static String errorRequire = "you must fill in the required fields *";
   static String searchInfoMake = "make a search to find others.";
-  static String searchInfo = "items were found, only the first 20 ones were displayed.";
+  static String searchInfo = "items were found, they may be partially displayed.";
   static String addNewEntry = "add new entry";
   static String search = "search";
   static String noDashboard = "no dashboard found";
@@ -178,6 +180,7 @@ Future<String> getOnFlow(String value) async {
 
 Future<void> setUpTranslate() async {
   var translator = GoogleTranslator();
+
   translator.translate(TranslateConstants.home, to: TranslateConstants.lang).then( (e) => TranslateConstants.home = e.text.toLowerCase());
   translator.translate(TranslateConstants.searchInfoMake, to: TranslateConstants.lang).then( (e) => TranslateConstants.searchInfoMake = e.text.toLowerCase());
   translator.translate(TranslateConstants.searchInfo, to: TranslateConstants.lang).then( (e) => TranslateConstants.searchInfo = e.text.toLowerCase());
@@ -210,6 +213,7 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.writeValue, to: TranslateConstants.lang).then( (e) => TranslateConstants.writeValue = e.text.toLowerCase());
   translator.translate(TranslateConstants.writeNumber, to: TranslateConstants.lang).then( (e) => TranslateConstants.writeNumber = e.text.toLowerCase());
   translator.translate(TranslateConstants.writePath, to: TranslateConstants.lang).then( (e) => TranslateConstants.writePath = e.text.toLowerCase());
+  translator.translate(TranslateConstants.errorRequire, to: TranslateConstants.lang).then( (e) => TranslateConstants.errorRequire = e.text.toLowerCase());
 
   translator.translate(TranslateConstants.sendMail, to: TranslateConstants.lang).then( (e) => TranslateConstants.sendMail = e.text.toLowerCase());
   translator.translate(TranslateConstants.data, to: TranslateConstants.lang).then( (e) => TranslateConstants.data = e.text.toLowerCase());
@@ -242,6 +246,7 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.refused, to: TranslateConstants.lang).then( (e) => TranslateConstants.refused = e.text.toLowerCase());
   translator.translate(TranslateConstants.dismiss, to: TranslateConstants.lang).then( (e) => TranslateConstants.dismiss = e.text.toLowerCase());
   translator.translate(TranslateConstants.validate, to: TranslateConstants.lang).then( (e) => TranslateConstants.validate = e.text.toLowerCase());
+  translator.translate(TranslateConstants.inserImage, to: TranslateConstants.lang).then( (e) => TranslateConstants.inserImage = e.text.toLowerCase());
 
   translator.translate(TranslateConstants.sure, to: TranslateConstants.lang).then( (e) => TranslateConstants.sure = e.text.toLowerCase());
 

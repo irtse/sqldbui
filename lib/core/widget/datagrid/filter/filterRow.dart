@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/core/sections/view.dart';
@@ -69,6 +70,17 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     if (!["=", "!="].contains(widget.comparator)) {
       widget.comparator = widget.type.contains("enum") || widget.type == "link"  ? "=" : widget.comparator;
     }
+    List<DropdownMenuItem<String>> items = [];
+    for (var o in realOrderMap(currentView, false).entries) {
+      items.add(DropdownMenuItem<String>(value: o.key, child: FutureBuilder(future: getOnFlow(o.value), builder: (a,s) {
+        if (s.data != null) {
+          return Text(s.data!.toLowerCase(), overflow: TextOverflow.ellipsis);
+        }
+        return Text(o.value.toLowerCase(), overflow: TextOverflow.ellipsis);
+      })
+      ));
+    }
+    
     return Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, 
       child: SizedBox(height: 45, child: Row(children: [
               Padding(  padding: const EdgeInsets.only(left: 37, right: 10, top: 0), 
@@ -76,7 +88,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
               Padding( padding: const EdgeInsets.only(left: 0, right: 20, top: 0), child: Icon(Icons.circle, color: Theme.of(context).splashColor, size: 15)),
               SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 6, 
                 child: DropdownButtonFormField<String>( 
-                  items: schemeItems[viewID], 
+                  items: items, 
                     value: widget.columnName, 
                     hint: Text(TranslateConstants.colFilter.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),

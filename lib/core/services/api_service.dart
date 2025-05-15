@@ -169,7 +169,7 @@ class APIService {
           filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "");
         }
       }
-      if (globalNew[viewID] != null && globalNew[viewID] != "all") { filter += "&filter_new=${globalNew[viewID]}"; }
+      if (globalNew[viewID] != null && globalNew[viewID] != "all") { filter += "&filter_status=${globalNew[viewID]}"; }
     }
     return filter;
   }
@@ -194,6 +194,9 @@ class APIService {
         var command = "";
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
+        }
+        if (url.contains("poster_authors")) {
+          print("POSTER $url $body");
         }
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode == 302) {

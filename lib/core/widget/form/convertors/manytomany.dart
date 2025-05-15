@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -10,20 +11,23 @@ import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.da
 // ignore: must_be_immutable
 class ManyToManyWidget extends StatefulWidget {
   final Map<String, dynamic> form;
+  final Map<String, dynamic> schema;
   final String schemaName;
   final dynamic name;
   final bool readOnly;
   final bool require;
   dynamic value;
   final FormWidgetState? component;
+  final String? mainURL;
   final String? url;
   final String type;
   final String label;
   final bool translatable;
   var isFilled = true;
-  ManyToManyWidget ({ super.key, required this.form, required this.schemaName, required this.name,
+  ManyToManyWidget ({ super.key, required this.form, required this.schemaName, required this.name, required this.schema,
                       required this.readOnly, required this.value, required this.label, required this.translatable,
-                      required this.require, required this.type, required this.url, required this.component});
+                      required this.require, required this.type, required this.url, required this.component,
+                      required this.mainURL});
   @override
   // ignore: library_private_types_in_public_api
   ManyToManyState createState() => ManyToManyState();
@@ -39,12 +43,12 @@ class ManyToManyState extends State<ManyToManyWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-  var actions = widget.component?.widget.view?.actions ?? [] as List<String>;
-  var schema =  widget.component?.widget.view!.schema;
-  var scheme = schema?[widget.name];
-  if (scheme == null) { return Container(); }
-  var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || mainForm.currentState!.widget.view!.readOnly;
-  if (readOnly) {
+    var actions = widget.component?.widget.view?.actions ?? currentView?.actions ?? [];
+    var scheme = widget.schema[widget.name];
+    if (scheme == null) { return Container(); }
+    var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || (mainForm.currentState?.widget.view?.readOnly ?? false);
+    print("$actions $scheme ${widget.name} ${widget.value } $readOnly");
+    if (readOnly) {
       List<Container> tags = <Container>[];
       if (widget.value != null && widget.value is List) {
         for (var val in widget.value) {
@@ -74,6 +78,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags)]) ]),);
     } else if ((widget.url ?? "") != "") {
+      print("$actions $scheme ${widget.name} ${widget.value }");
       if (widget.value != null) {
         return FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${widget.value.join(",")}"), true, null), 
@@ -83,6 +88,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
                 if (snap.data?.data != null) {
                   return SubManyToManyWidget(
+                    mainURL: widget.mainURL,
                     form: widget.form,
                     dp: this,
                     schemaName: widget.schemaName,
@@ -102,12 +108,15 @@ class ManyToManyState extends State<ManyToManyWidget> {
             });
         });
       }
+      print("$actions $scheme ${widget.name} ${widget.url}");
+
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.url ?? "", true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
             if (snap.data?.data != null) {
               return SubManyToManyWidget(
                 form: widget.form,
+                mainURL: widget.mainURL,
                 dp: this,
                 schemaName: widget.schemaName,
                 name: widget.name,
@@ -132,6 +141,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
 
 // ignore: must_be_immutable
 class SubManyToManyWidget extends StatefulWidget {
+  final String? mainURL;
   final Map<String, dynamic> form;
   final String schemaName;
   final dynamic name;
@@ -145,15 +155,17 @@ class SubManyToManyWidget extends StatefulWidget {
   final String type;
   final String label;
   var isFilled = true;
-  List<dynamic>? datas;
+  List<model.Shallowed>? datas;
   SubManyToManyWidget ({ super.key, required this.datas, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label, required this.translatable,
                       required this.require, required this.type, required this.url, required this.component,
-                      required this.dp});
+                      required this.dp, required this.mainURL});
   @override
   // ignore: library_private_types_in_public_api
   _SubManyToManyState createState() => _SubManyToManyState();
 }
+Map<String, Map<String,String>> newManyToManyValue = {};
+
 class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
@@ -164,14 +176,18 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
       return Container();
     });
   }
+
+  MultiSelectController<Map<String, dynamic>> ctrls = MultiSelectController<Map<String, dynamic>>();
   Future<Widget> futureBuild(BuildContext context) async {
-    MultiSelectController<String> ctrls = MultiSelectController<String>();
-    List<String> idSet = [];
-          List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
-          widget.form[widget.name] = <dynamic>[];
-          int max = 0;
-          if (widget.datas != null) {
+    List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
+    ctrls = MultiSelectController<Map<String, dynamic>>();
+    widget.form[widget.name] = <dynamic>[];
+    int max = 0;
+    if (widget.datas != null) {
             for (var item in widget.datas!) {
+              if (items.where( (e) => e.value["id"] != "${item.id}").isNotEmpty) {
+                continue;
+              }
               max = item.max;
               var v = item.label ?? item.name ?? "${item.id}";
               var ser = item.serialize();
@@ -188,45 +204,42 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                   v = await getOnFlow(v);
                 }
               } catch(e) {}
-              idSet.add("${item.id}");
               items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v.toLowerCase(), selected: select));
               for (var val in (widget.value ?? []) as List<dynamic>) {
                 if (val.id == item.id) { widget.form[widget.name].add(ser); }
               }
             }
-          }
-          return MultiDropdown<Map<String, dynamic>>(
+    }
+    return MultiDropdown<Map<String, dynamic>>(
+                        addFunction: widget.type == "manytomany_add" ? (String value) {
+                            ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
+                              "name": value,
+                            }, label: value, selected: true));
+                            widget.form[widget.name].add( {
+                              "name": value,
+                            });
+                            ctrls.closeDropdown();
+                            ctrls.openDropdown(null, widget.label);
+                            if (newManyToManyValue[widget.mainURL] == null) {
+                              newManyToManyValue[widget.mainURL ?? ""] = {};
+                            }
+                            newManyToManyValue[widget.mainURL ?? ""]?[widget.name] = value;
+                        } : null,
+                        controller: ctrls,
                         items: items,
                         enabled: true,
                         searchEnabled: true,
                         max: max,
-                        changeFunction: (dynamic value) async {
+                        changeFunction: (String value) async {
                           if (value == "") {
-                            widget.dp.setState(() {});
+                            return;
                           }
-                          var service = APIService();
                           var filters = Filters();
                           filters.add("name", Filter(value: value, column: "name"));
-                          var e = await service.get<model.Shallowed>("${widget.url}${service.getFilter(widget.url ?? "", true, filters)}", true, context);
-
-                          if (e.data != null) {
-                              for (var item in e.data!) {
-                                if (!idSet.contains("${item.id}")) {
-                                  var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-                                  try {
-                                    if (widget.translatable || item.translatable) {
-                                      v = await getOnFlow(v);
-                                    }
-                                  } catch(e) {}
-                                  idSet.add("${item.id}");
-                                  ctrls.addItem(DropdownItem<String>(value: "${item.id}", label: v.toLowerCase(), selected: false));
-                                  ctrls.closeDropdown();
-                                  ctrls.openDropdown();
-                                }
-                              }
-                          }
+                          load(0, 10, APIService().getFilter(widget.url ?? "", true, filters), value, items);
                         },
                         chipDecoration: ChipDecoration(
+                          deleteIcon: Icon(Icons.close, size: 15, color: Colors.white),
                           backgroundColor: Theme.of(context).primaryColor,
                           labelStyle: TextStyle(color: Colors.white),
                           wrap: true,
@@ -294,5 +307,31 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           widget.form[widget.name]=values;
                         },
                       );
+  }
+
+  Future<void> load(int start, int interval, String filter, String value, List<DropdownItem<Map<String, dynamic>>> items) async {
+    if (filter == "") { return; }
+    var found = false;
+      var e = await APIService().get<model.Shallowed>("${widget.url}$filter&offset=$start&limit=$interval", filter != "", null);
+        if (e.data != null) {
+          for (var item in e.data!) {
+            if (items.where( (e) => e.value["id"] == "${item.id}").isEmpty) {
+              found = true;
+              var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+              try {
+                if (widget.translatable || item.translatable) {
+                  v = await getOnFlow(v);
+                }
+              } catch(e) {}
+              items.add(DropdownItem<Map<String, dynamic>>(
+                value: item.serialize(), label: v.toLowerCase(), selected: false));
+              ctrls.addItem(items.last);
+            }
+          }
+    } 
+    if (ctrls.isOpen && found) {
+      ctrls.closeDropdown();
+      ctrls.openDropdown(value, widget.label);
+    }
   }
 }

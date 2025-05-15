@@ -5,6 +5,7 @@ part of '../multi_dropdown.dart';
 class _Dropdown<T> extends StatelessWidget {
   /// Creates a dropdown widget.
   const _Dropdown({
+    required this.label,
     required this.decoration,
     required this.width,
     required this.searchEnabled,
@@ -22,7 +23,7 @@ class _Dropdown<T> extends StatelessWidget {
     this.itemSeparator,
     this.singleSelect = false,
   }) : super(key: key);
-  final void Function(dynamic)? changeFunction;
+  final void Function(String)? changeFunction;
   final void Function(String)? addFunction;
   /// The decoration of the dropdown.
   final DropdownDecoration decoration;
@@ -32,6 +33,7 @@ class _Dropdown<T> extends StatelessWidget {
 
   /// The width of the dropdown.
   final double width;
+  final String label;
 
   /// The decoration of the dropdown items.
   final DropdownItemDecoration dropdownItemDecoration;
@@ -56,7 +58,6 @@ class _Dropdown<T> extends StatelessWidget {
 
   /// The callback when the search field value changes.
   final ValueChanged<String>? onSearchChange;
-
   /// Whether the selection is single.
   final bool singleSelect;
 
@@ -101,13 +102,15 @@ class _Dropdown<T> extends StatelessWidget {
                 if (max > 20) 
                   Column(children: [
                     Center(child: Padding(padding: EdgeInsets.only(bottom: 5, top: 15),
-                      child: Text("$max ${TranslateConstants.searchInfo}", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                      child: Text("$max ${TranslateConstants.searchInfo}", 
+                        style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
                     )),
                     Center(child: Padding(padding: EdgeInsets.only(bottom: 5),
                       child: Text(TranslateConstants.searchInfoMake, style: TextStyle(color: Colors.grey)),
                     )),
                   ]),
                 _SearchField(
+                  label: label,
                   function: addFunction,
                   decoration: searchDecoration,
                   changeFunction: changeFunction,
@@ -206,30 +209,42 @@ class _Dropdown<T> extends StatelessWidget {
         _selectedCount >= maxSelections;
   }
 }
-TextEditingController searchCtrl = TextEditingController();
-
+Map<String,TextEditingController> searchCtrl = {};
+Map<String, String> search = {};
+// ignore: must_be_immutable
 class _SearchField extends StatelessWidget {
-   const _SearchField({
+   _SearchField({
     required this.decoration,
     required this.onChanged,
     required this.changeFunction,
+    required this.label,
     this.function,
   });
 
+  final String label;
   final SearchFieldDecoration decoration;
   final ValueChanged<String> onChanged;
   final void Function(String)? function;
-  final void Function(dynamic)? changeFunction;
+  final void Function(String)? changeFunction;
 
   @override
   Widget build(BuildContext context) {
+    if (searchCtrl[label] == null) {
+      searchCtrl[label] =TextEditingController();
+    }
+    if ((searchCtrl[label]?.text ?? "") != "" && (search[label] ?? "") == "") {
+      Future.delayed(Duration(microseconds: 100), () {
+        search[label]=searchCtrl[label]!.text;
+        onChanged(search[label]!);
+      });
+    }
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Wrap( 
       alignment: WrapAlignment.center, 
       children: [ TextField(
         autofocus: true,
-        controller: searchCtrl,
+        controller: searchCtrl[label]!,
         decoration: InputDecoration(
           isDense: true,
           hintText: decoration.hintText,
@@ -238,11 +253,11 @@ class _SearchField extends StatelessWidget {
           suffixIcon: decoration.searchIcon,
         ),
         onChanged: (String v) {
-          searchCtrl.text = v;
+          search[label] = searchCtrl[label]!.text;
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
-              if (searchCtrl.text == v) {
-                changeFunction!(v);
+              if (searchCtrl[label]?.text == search[label]) {
+                changeFunction!(searchCtrl[label]!.text);
               }
             });
           }
@@ -251,8 +266,8 @@ class _SearchField extends StatelessWidget {
       ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
       child: InkWell( 
         onTap: () {
-          if (searchCtrl.text != "") {
-            function!(searchCtrl.text);
+          if (searchCtrl[label]!.text != "") {
+            function!(searchCtrl[label]!.text);
           }
         },
         child: Container(

@@ -20,6 +20,7 @@ GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
+  String error = "";
   GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   bool reloadWorkflow = true;
   List<String> hideField = [];
@@ -62,7 +63,7 @@ class FormWidgetState extends State<DataFormWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
       newDropDownValue = {};
-      searchCtrl.text = "";
+      searchCtrl = {};
 
       widget.detectChange = false;
       additionnal = [];
@@ -103,6 +104,7 @@ class FormWidgetState extends State<DataFormWidget> {
               width: mainWidth, 
               refItem: refItem, 
               view: widget.view!,
+              error: widget.error,
               formKey: widget.formKey,       
               isSplitted: isSplitted,
               subForm: widget.subForm,
@@ -174,7 +176,8 @@ class FormWidgetState extends State<DataFormWidget> {
                   workflow: workflow,
                   subForm: widget.subForm,
                   canUpdate: widget.view!.actions.contains("put") && widget.view!.actions.contains("delete"),
-                ),fields.isEmpty && content == null ? EmptyFormularyWidget() : content!
+                ),
+                fields.isEmpty && content == null ? EmptyFormularyWidget() : content!
             ]));
           } 
         }
@@ -203,7 +206,10 @@ class FormWidgetState extends State<DataFormWidget> {
                 width: widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40), 
                 height: mainHeight,
                 child: SingleChildScrollView(scrollDirection: Axis.vertical, 
-                  child: isSplitted  ? Wrap( alignment: WrapAlignment.center, children:[isLower ? content! : Container(), ...additionnal]) : content)
+                  child: Column( children: [ 
+                  isSplitted  ? Wrap( alignment: WrapAlignment.center, children:[
+                    isLower ? content! : Container(), ...additionnal
+                  ]) : content!, ]) )
               )
             ]) 
           )

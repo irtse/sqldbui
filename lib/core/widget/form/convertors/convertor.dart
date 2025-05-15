@@ -406,7 +406,7 @@ class Convertor {
         component: comp,
         autofill: autofill,
       );
-    } else if (type == "upload") {
+    } else if (type.contains("upload")) {
       return UploadWidget(
         form : form, 
         url: mainUrl,
@@ -434,7 +434,9 @@ class Convertor {
           component: comp);
     } else if (type.contains("manytomany")) {
       return ManyToManyWidget(
+        mainURL: mainUrl,
         form: form, 
+        schema: schema,
         schemaName: schemaName, 
         name: name, 
         translatable: translatable,
@@ -443,7 +445,7 @@ class Convertor {
         label: label, 
         require: require, 
         type: type, 
-        url: mainUrl, 
+        url: url, 
         component: comp);
     }
     return null;

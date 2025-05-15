@@ -1,7 +1,6 @@
 import 'package:sqldbui2/core/sections/head_menu.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
 import 'package:sqldbui2/core/widget/utils/dialog_button.dart';
@@ -79,13 +78,7 @@ class PageWidgetState extends State<PageWidget> {
       backgroundColor: Theme.of(context).secondaryHeaderColor);
   }
 
-  void clear() {
-    setState(() {
-      currentView = null;
-      viewID = TranslateConstants.dashboard.toLowerCase();
-      subViewID = null;
-    });
-  }
+  
   Widget? buildDrawer() {
     return noMenu ? Drawer(
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(0), bottomRight: Radius.circular(0))),

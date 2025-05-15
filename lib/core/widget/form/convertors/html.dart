@@ -1,4 +1,7 @@
 
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -85,21 +88,9 @@ class HTMLState extends State<HTMLWidget> {
             QuillSimpleToolbar(
               controller: _controller,
               configurations: QuillSimpleToolbarConfigurations(
-                embedButtons: FlutterQuillEmbeds.toolbarButtons(),
                 showClipboardPaste: true,
-                customButtons: [
-                  QuillToolbarCustomButtonOptions(
-                    icon: const Icon(Icons.add_alarm_rounded),
-                    onPressed: () {
-                      _controller.updateSelection(
-                        TextSelection.collapsed(
-                          offset: _controller.selection.extentOffset + 1,
-                        ),
-                        ChangeSource.local,
-                      );
-                    },
-                  ),
-                ],
+                embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+                customButtons: [ ],
                 buttonOptions: QuillSimpleToolbarButtonOptions(
                   base: QuillToolbarBaseButtonOptions(
                     afterButtonPressed: () {
@@ -125,7 +116,7 @@ class HTMLState extends State<HTMLWidget> {
                 configurations: QuillEditorConfigurations(
                   placeholder: 'Start writing your notes...',
                   padding: const EdgeInsets.all(16),
-                  embedBuilders: [],
+                  embedBuilders: kIsWeb ? FlutterQuillEmbeds.editorWebBuilders() : FlutterQuillEmbeds.editorBuilders(),
                 ),
               ),
             ),

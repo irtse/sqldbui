@@ -84,7 +84,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     newDropDownValue = {};
-    searchCtrl.text = "";
+    searchCtrl = {};
 
     await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
@@ -135,7 +135,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
           Stack( children: [ 
             currentWidth > 1000 ? 
             Positioned( top: 3.5, left: 32, child: (isEditMode[viewID] ?? false) ? 
-                FunctionsSelectorWidget(mathAllowed: realOrder(widget.view, false).length > 2)
+                FunctionsSelectorWidget(mathAllowed: realOrder(widget.view, false, false).length > 2)
               : FilterSelectorWidget(schema: schema, filterMain: filterMain, schemaName: widget.view?.schemaName ?? "")) 
             : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
@@ -167,7 +167,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     ]);
   }
   Future<void> fillSchemeItem() async {
-    var order = realOrder(widget.view, false);
+    var order = realOrder(widget.view, false, false);
     if (!schemeItems.containsKey(viewID)) {
       schemeItems[viewID ?? ""] = [];
       fastTranslation[viewID ?? ""] = {};

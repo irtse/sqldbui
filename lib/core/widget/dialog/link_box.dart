@@ -23,7 +23,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
       var len = 0;
       for (var m in widget.sharing!.shallowPath.entries) {
         len++;
-        drops.add(FutureBuilder(future: APIService().get<model.Shallowed>(m.value, forceUser, context), builder: (a,s) {
+        drops.add(FutureBuilder(future: APIService().get<model.Shallowed>("${m.value}&scope=enable", forceUser, context), builder: (a,s) {
           forceUser = false;
           List<DropdownMenuItem<String>> dpItems = [];
           if (s.data?.data != null) {
@@ -61,6 +61,9 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                     child: IconButton(
                       enableFeedback: widget.values[m.key] != null,
                       onPressed: () {
+                        if (widget.values[m.key] == null) {
+                          return;
+                        }
                         for (var k in widget.values.values) {
                           var last = k.split("~");
                           if (last.length == 2) {
@@ -121,22 +124,15 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                 Text(TranslateConstants.shareToUser.toLowerCase(), style: TextStyle(fontSize: 12.5, color: Colors.grey)),
                 ...(widget.sharing != null ? drops : []),
                 Column(children: [
-                currentView?.actions.contains("create") ?? false ? Padding( padding: EdgeInsets.only(top: 5), child: AdvancedSwitch(
-                  initialValue: widget.sharing?.body["create_access"],
-                  activeColor: Theme.of(context).primaryColor,  inactiveColor: Colors.grey,
-                  borderRadius:  const BorderRadius.all(Radius.circular(15)),
-                  activeChild: Text("create"), inactiveChild: Text("create"), 
-                  width: 130.0, height: 25.0, disabledOpacity: 0.5,
-                  onChanged: (value) =>  widget.sharing?.body["create_access"] = value)) : Container(),
-                currentView?.actions.contains("update") ?? false ?  Padding( padding: EdgeInsets.only(top: 10), child: AdvancedSwitch(
-                  initialValue: widget.sharing?.body["update_access"],
+                currentView?.actions.contains("put") ?? false ?  Padding( padding: EdgeInsets.only(top: 10), child: AdvancedSwitch(
+                  initialValue: widget.sharing?.body["update_access"] ?? false,
                   activeColor: Theme.of(context).primaryColor,  inactiveColor: Colors.grey,
                   borderRadius:  const BorderRadius.all(Radius.circular(15)),
                   activeChild: Text("update"), inactiveChild: Text("update"), 
                   width: 130.0, height: 25.0, disabledOpacity: 0.5,
                   onChanged: (value) =>  widget.sharing?.body["update_access"] = value)): Container(),
                 currentView?.actions.contains("delete") ?? false ? Padding( padding: EdgeInsets.only(top: 10), child: AdvancedSwitch(
-                  initialValue: widget.sharing?.body["delete_access"],
+                  initialValue: widget.sharing?.body["delete_access"] ?? false,
                   activeColor: Theme.of(context).primaryColor,  inactiveColor: Colors.grey,
                   borderRadius:  const BorderRadius.all(Radius.circular(15)),
                   activeChild: Text("delete"), inactiveChild: Text("delete"), 

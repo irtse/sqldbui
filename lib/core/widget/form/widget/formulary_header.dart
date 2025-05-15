@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/dialog/link_box.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -113,6 +115,13 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     }
     List<Widget> actions = [];
     if (!widget.subForm) {
+      if (!(currentView?.isEmpty ?? false)) {
+        actions.add(Padding( padding: EdgeInsets.only(right: 10),
+            child: LinkBoxWidget(
+              path: "@${currentView?.schemaID}:${currentView?.id}",
+              sharing: widget.refItem.sharing,
+            )));
+      }
       if (!widget.view.readOnly) {
         if (widget.view.actions.contains("put") && !widget.view.isEmpty 
         && (widget.view.triggers.where( (e) => e.mode == "mail") ).isNotEmpty) {

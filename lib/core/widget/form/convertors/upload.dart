@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
-
+import 'package:textfield_tags/textfield_tags.dart';
 // ignore: must_be_immutable
 class UploadWidget extends StatefulWidget {
   final FormWidgetState? component;
@@ -24,9 +24,8 @@ class UploadWidget extends StatefulWidget {
   _UploadState createState() => _UploadState();
 }
 class _UploadState extends State<UploadWidget> {
-  TextEditingController text = TextEditingController();
   PlatformFile? _selectedFile;
-
+  TextEditingController text = TextEditingController();
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -35,7 +34,7 @@ class _UploadState extends State<UploadWidget> {
       return Container();
     });
   }
-
+  var stringTagController = StringTagController();
   Future<Widget> futureBuild(BuildContext context) async {
     if ("${widget.value}" == "") {
       widget.value = null;
@@ -64,63 +63,131 @@ class _UploadState extends State<UploadWidget> {
     }
     String? iv = widget.value ?? (widget.autofill != null ? (await getOnFlow("${widget.autofill}")) 
                                                                : (widget.readOnly ? TranslateConstants.empty : null));
-    if (text.value.text != "") {
-      iv = null;
+    var label = (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase();
+    
+    if (iv != null && !widget.type.contains("multiple")) {
+      text = TextEditingController(text: iv);
     }
-    return InkWell( 
-      mouseCursor: SystemMouseCursors.click,
-      onTap: () => widget.readOnly ? null : _pickFile(),
-      child: TextFormField(
-        controller: text,
-        obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
-        readOnly: true,
-        initialValue: iv,
-        maxLines: (widget.type.contains("text") && !widget.label.contains("password") ? 100 : 1),
-        style: TextStyle( fontSize: 14, color: Theme.of(context).secondaryHeaderColor),
-        enabled: false,
-        autocorrect: true,
-        keyboardType: TextInputType.multiline,
-        decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-          border: const OutlineInputBorder(),
-          isDense: true,
-          suffixIconColor: Theme.of(context).primaryColor,
-          hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          filled: true,
-          fillColor: widget.readOnly ? Theme.of(context).splashColor :Colors.white,
-          contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
-            top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
-            bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
-          suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
-            : ( widget.type.contains("link") ? InkWell( 
-          child: Icon(Icons.attach_file, size: 20)) : Icon(Icons.attach_file, color: Theme.of(context).secondaryHeaderColor)),
-          hintText: TranslateConstants.writePath.toLowerCase(),
-          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-          labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
-          errorStyle: const TextStyle(fontSize: 0,),
-        ),
-        validator: (String? value) {
-          var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
-          return t;
-        },
-      )
-    );
+    Widget w = InkWell( 
+            mouseCursor: SystemMouseCursors.click,
+            onTap: () => widget.readOnly ? null : _pickFile(),
+            child: TextFormField(
+              obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
+              readOnly: true,
+              controller: text,
+              maxLines: (widget.type.contains("text") && !widget.label.contains("password") ? 100 : 1),
+              style: TextStyle( fontSize: 14, color: Theme.of(context).secondaryHeaderColor),
+              enabled: false,
+              autocorrect: true,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                isDense: true,
+                suffixIconColor: Theme.of(context).primaryColor,
+                hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                filled: true,
+                fillColor: widget.readOnly ? Theme.of(context).splashColor :Colors.white,
+                contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
+                  top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
+                  bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
+                suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
+                  : ( widget.type.contains("link") ? InkWell( 
+                child: Icon(Icons.attach_file, size: 20)) : Icon(Icons.attach_file, color: Theme.of(context).secondaryHeaderColor)),
+                hintText: TranslateConstants.writePath.toLowerCase(),
+                labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                labelText: label,
+                errorStyle: const TextStyle(fontSize: 0,),
+              ),
+              validator: (String? value) {
+                var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
+                return t;
+              },
+            )
+          );
+      if (widget.type.contains("multiple")) {
+        return Column(children: [
+          Wrap( children: widget.value == null ? [] : ("${widget.value}".split(",").map( 
+            (e) => Container(
+                margin: EdgeInsets.only(left: 5, right: 5, bottom: 10),
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.all(Radius.circular(7))
+                ),
+                child: Row( 
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center, 
+                  children: [
+                  Text(e, style: TextStyle( color: Colors.white), overflow: TextOverflow.ellipsis ), 
+                  InkWell( 
+                    onTap: () => setState(() { 
+                      if (widget.value == null) {
+                        return;
+                      }
+                      widget.value = "${widget.value}".replaceAll(e, "").replaceAll(",,", ","); 
+                      var m = widget.form[widget.name] as Map<String,List<PlatformFile>>;
+                      var newM = <String,List<PlatformFile>>{};
+                      for (var f in m.keys) {
+                        List<PlatformFile> files = [];
+                        for (var vv in m[f]!) {
+                          if (widget.value.contains(vv.name)) {
+                            files.add(vv);
+                          }
+                        }
+                        newM[f] = files;
+                      } 
+                      widget.form[widget.name] = newM;
+                    }),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 10), 
+                      child: Icon(Icons.close, size: 15, color: Colors.white)
+                    )
+                  )
+                ])
+            ))).toList()),
+          w,
+        ]);
+      }
+      return w;
   }
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.any);
+    List<String> extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf', 
+      'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'xls', 'xlsx', 'csv', 'ods'];
+    if (widget.type.contains("upload_str")) {
+      extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf'];
+    } else if (widget.type.contains("upload_img")) {
+      extension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic'];
+    } else if (widget.type.contains("upload_img")) {
+      extension = ['xls', 'xlsx', 'csv', 'ods'];
+    }
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: extension,
+    );
     if (result != null) {
-      setState(() {
-        _selectedFile = result.files.first;
+      _selectedFile = result.files.first;
+      widget.component?.widget.detectChange = true;
+      if ("${widget.value ?? ""}" == "" || !widget.type.contains("multiple")) {
         widget.value = _selectedFile?.name;
-        if (widget.url != null) {
-          text.value = TextEditingValue(text: widget.value);
-          widget.form[widget.name]=<String,PlatformFile>{};
-          widget.form[widget.name][widget.url]=_selectedFile;
+      } else {
+        widget.value += ",${_selectedFile?.name}";
+      }
+      
+      if (widget.url != null && _selectedFile != null) {
+        if (widget.form[widget.name] == null || widget.form[widget.name] is! Map) {
+          widget.form[widget.name]=<String,List<PlatformFile>>{};
         }
-        widget.component?.widget.detectChange = true;
-      });
+        var m = widget.form[widget.name] as Map<String,List<PlatformFile>>;
+        if (m[widget.url ?? ""] == null) {
+          m[widget.url ?? ""] = [];
+        }
+        m[widget.url ?? ""]?.add(_selectedFile!);
+        widget.form[widget.name] = m;
+      }
+      setState(() { });
     }
   }
 }

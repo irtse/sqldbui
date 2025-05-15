@@ -26,6 +26,7 @@ class GridRowWidget extends StatefulWidget {
   GlobalKey<ViewWidgetState>? viewKey; 
   double borderWidth; 
   String schemaID; 
+  String cellID;
   Map<String, model.Shallowed> contentShallowed;
   List<GridCell> cells;  
   List<GridCellWidget> widgetCells = [];  
@@ -33,6 +34,7 @@ class GridRowWidget extends StatefulWidget {
 
   GridRowWidget ({ 
     super.key, 
+    required this.cellID,
     required this.cells, 
     required this.schemaID, 
     required this.contentShallowed,
@@ -57,7 +59,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
       child: Stack( alignment: Alignment.center, children: [ 
         Row(children: getCellsContent(context)),
         widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
-          path: "@${widget.schemaID}:${widget.cells.first.value}",
+          path: "@${widget.schemaID}:${widget.cellID}",
           sharing: widget.sharing,
         )) : Container(),
       ])

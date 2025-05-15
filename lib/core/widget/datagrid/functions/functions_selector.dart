@@ -1,5 +1,6 @@
 
 
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -47,13 +48,14 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     } 
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     if (showFunctions[viewID] == null) { showFunctions[viewID] = false; }
+    var o = realOrder(currentView, false, true);
     return Row( children: [ 
-      Padding( padding: const EdgeInsets.only(top: 2), 
+      o.isNotEmpty && editMode[viewID] == "math" ? Padding( padding: const EdgeInsets.only(top: 2), 
         child: InkWell( mouseCursor: SystemMouseCursors.click,
           onTap: () { globalGridWidgetKey.currentState?.setState(() { showFunctions[viewID] = !showFunctions[viewID]!; },); },
           child: Icon( showFunctions[viewID]! ? Icons.calculate : Icons.calculate_outlined, size: 25, color: Theme.of(context).splashColor) ),
-      ),
-      Padding(
+      ) :  Container() ,
+      o.isEmpty ? Container() : Padding(
         padding: const EdgeInsets.only(left: 20, top: 2), 
         child: MouseRegion( 
           cursor: SystemMouseCursors.click,

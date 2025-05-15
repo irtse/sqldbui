@@ -56,7 +56,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
       }
           
 
-      var order = realOrder(widget.view, widget.subTable);
+      var order = realOrder(widget.view, widget.subTable, false);
       for (var fieldName in order) {
           columns = getColumn(columns, widget.schemeItems, schema, fieldName, datas, order);
       }
@@ -80,7 +80,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
           schemaID: "${currentView?.schemaID}", 
           borderColor: Theme.of(context).splashColor,
           isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
-          maxLength: realOrder(widget.view, widget.subTable).length, 
+          maxLength: realOrder(widget.view, widget.subTable, false).length, 
           contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
         ) 
       );
@@ -120,8 +120,8 @@ class MainGridWidgetState extends State<MainGridWidget> {
   }
 }
 
-List<dynamic> realOrder(model.View? view, bool subtable) {
-    if (view == null) { return []; }
+Map<String,String> realOrderMap(model.View? view, bool subtable) {
+    if (view == null) { return {}; }
     var schema = view.schema;
     bool isMath = isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase();
     List<String> seen = [];
@@ -130,7 +130,35 @@ List<dynamic> realOrder(model.View? view, bool subtable) {
       filterTempOrderView[viewID] = view.order.sublist(0, view.order.length < 5 ? view.order.length : 5);
     }
     var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
-    var o = [  ...order.where( (e) => e != "id")].where( (f) {
+    List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
+      String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
+      bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
+      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description"  && !type.contains("many") && schema[f] != null
+          && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
+      seen.add(f);
+      return ok;
+    }).toList();
+    if (filterTempID[viewID] ?? false) {
+      o = ["id", ...o];
+    }
+    Map<String,String> newOrder = {};
+    for (var oo in o) {
+      newOrder[oo] = view.schema[oo]?.label ?? oo;
+    }
+    return newOrder;
+  }
+
+List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath) {
+    if (view == null) { return []; }
+    var schema = view.schema;
+    bool isMath = forceMath || (isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase());
+    List<String> seen = [];
+    if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
+    && filterOrderView[viewID] == null) {
+      filterTempOrderView[viewID] = view.order.sublist(0, view.order.length < 5 ? view.order.length : 5);
+    }
+    var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
+    List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description"  && !type.contains("many") && schema[f] != null

@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 
 Map<String,String> currentDropdown = {};
-Map<String,String> newDropDownValue = {};
+Map<String, Map<String,String>> newDropDownValue = {};
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
   final FormWidgetState? component;
@@ -32,6 +32,7 @@ class DropDownWidget extends StatefulWidget {
   bool empty = false;
   final dynamic autofill;
   GlobalKey<SubFormularyWidgetState>? wrappers;
+
   DropDownWidget ({ super.key, required this.form, required this.schemaName, required this.name, 
                     required this.path, required this.translatable, required this.schema,
                     required this.mainUrl, required this.readOnly, required this.value, required this.wrappers,
@@ -51,15 +52,15 @@ class DropDownState extends State<DropDownWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     var val = widget.value  ?? widget.autofill ?? currentDropdown[viewID!];
-        if (val != null) {
-          widget.form[widget.name]=val;
-        }
-        if (val == null) {
-          val = widget.readOnly ? TranslateConstants.empty : null;
-        } else if (widget.translatable) {
-          try {
-            val = (await getOnFlow(val)).toLowerCase();
-          } catch(e) {}
+    if (val != null) {
+      widget.form[widget.name]=val;
+    }
+    if (val == null) {
+      val = widget.readOnly ? TranslateConstants.empty : null;
+    } else if (widget.translatable) {
+      try {
+        val = (await getOnFlow(val)).toLowerCase();
+      } catch(e) {}
     }
     if (widget.type.contains("enum") || widget.mainUrl == null) {
       if (widget.readOnly) {
@@ -163,12 +164,14 @@ class DropDownState extends State<DropDownWidget> {
                       ) ));
     }
     var lab = await getOnFlow(widget.label);
+    print("VAAAAl ${widget.value} ${widget.autofill}");
     if (val != null) {
+      print("VAAAAl");
       return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.mainUrl!.replaceAll("rows=all", "rows=$val"), firstAPI, null), 
+        future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
            return FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get(widget.mainUrl!, firstAPI, null), 
+            future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", firstAPI, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
               if (snap.data?.data != null) {
                 return SubDropDownWidget(
@@ -259,7 +262,7 @@ class SubDropDownWidget extends StatefulWidget {
   SubDropDownState createState() => SubDropDownState();
 }
 class SubDropDownState extends State<SubDropDownWidget> {
-  MultiSelectController<String> ctrls = MultiSelectController<String>();
+  Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -268,19 +271,19 @@ class SubDropDownState extends State<SubDropDownWidget> {
       return Container();
     });
   }
+  MultiSelectController<String> ctrls = MultiSelectController<String>();
+  
   Future<Widget> futureBuild(BuildContext context) async {
-    List<String> idSet = [];
     List<DropdownItem<String>> items = [];
-    Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
     int max = 0;
+    ctrls = MultiSelectController<String>();
     for (var item in widget.datas) {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-      var t = items.where((element) => element.value == v);        
+      var t = items.where((e) => e.value == "${item.id}"); 
       if (!mapped.containsKey(v) && t.isEmpty){
         mapped["${item.id}"]=item;
-        if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))
-        && items.where((element) => element.value == v).isEmpty) {
+        if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
           var vv = v;
           bool select = false;
           if ("${widget.value}" == "${item.id}" || "${widget.autofill}" == "${item.id}" || currentDropdown[viewID!] == "${item.id}") {
@@ -297,7 +300,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
               vv = (await getOnFlow(vv)).toLowerCase();
             }
           } catch(e) {}
-          idSet.add("${item.id}");
+          print(select);
           items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
         }
       }
@@ -306,29 +309,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
         max: max,
         changeFunction: (dynamic value) async {
           if (value == "") {
-            widget.dp.setState(() {});
+            return;
           }
-          var service = APIService();
           var filters = Filters();
           filters.add("name", Filter(value: value, column: "name"));
-          var e = await service.get<model.Shallowed>("${widget.mainUrl}${service.getFilter(widget.mainUrl, true, filters)}", true, context);
-          if (e.data != null) {
-              for (var item in e.data!) {
-                if (!idSet.contains("${item.id}")) {
-                   var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-                   try {
-                    if (widget.translatable || item.translatable) {
-                      v = await getOnFlow(v);
-                    }
-                  } catch(e) {}
-                  mapped["${item.id}"]=item;
-                  idSet.add("${item.id}");
-                  ctrls.addItem(DropdownItem<String>(value: "${item.id}", label: v.toLowerCase(), selected: false));
-                  ctrls.closeDropdown();
-                  ctrls.openDropdown();
-                }
-              }
-          }
+          load(0, 10, APIService().getFilter(widget.mainUrl, true, filters), value, items);
         },
         enabled:!widget.readOnly,
         addFunction: widget.type == "link_add" ? (String value) {
@@ -337,9 +322,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
             }
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
             ctrls.closeDropdown();
-            ctrls.openDropdown();
-            newDropDownValue[widget.url ?? ""] = value;
-            searchCtrl.text = "";
+            ctrls.openDropdown(null, widget.label);
+            if (newDropDownValue[widget.url] == null) {
+              newDropDownValue[widget.url ?? ""] = {};
+            }
+            newDropDownValue[widget.url ?? ""]?[widget.name] = value;
         } : null,
                         controller: ctrls,
                         singleSelect: true,
@@ -423,10 +410,34 @@ class SubDropDownState extends State<SubDropDownWidget> {
                                 widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                               }); 
                             }
-                          } catch(e) {
-
-                          } 
+                          } catch(e) {} 
                         },
                       );
+  }
+
+  Future<void> load(int start, int interval, String filter, String value, List<DropdownItem<String>> items) async {
+    if (filter == "") { return; }
+    var found = false;
+      var e = await APIService().get<model.Shallowed>("${widget.mainUrl}$filter&offset=$start&limit=$interval", filter != "", null);
+        if (e.data != null) {
+          for (var item in e.data!) {
+            if (items.where( (e) => e.value == "${item.id}").isEmpty) {
+              found = true;
+              var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+              try {
+                if (widget.translatable || item.translatable) {
+                  v = await getOnFlow(v);
+                }
+              } catch(e) {}
+              mapped["${item.id}"]=item;
+              items.add(DropdownItem<String>(value: "${item.id}", label: v.toLowerCase(), selected: false));
+              ctrls.addItem(items.last);
+            }
+          }
+    } 
+    if (ctrls.isOpen && found) {
+      ctrls.closeDropdown();
+      ctrls.openDropdown(value, widget.label);
+    }
   }
 }

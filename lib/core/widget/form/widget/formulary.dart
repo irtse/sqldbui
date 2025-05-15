@@ -11,6 +11,7 @@ import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 Map<Key, bool> formularyRef = {};
 // ignore: must_be_immutable
 class FormularyWidget extends StatefulWidget {
+  String error = "";
   bool show;
   double width;
   bool subForm;
@@ -30,6 +31,7 @@ class FormularyWidget extends StatefulWidget {
   GlobalKey<FormState> formKey;
   FormularyWidget ({ 
     super.key, 
+    this.error = "",
     required this.show,
     required this.view, 
     required this.width,
@@ -100,7 +102,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
               field.description, 
               field.require, 
               readOnly || (value != null && widget.view.isEmpty), 
-              value, 
+              value == "" ? null : value, 
               mainUrl,
               url, 
               path, 
@@ -144,6 +146,9 @@ class FormularyWidgetState extends State<FormularyWidget> {
       }
       if (fields.length == widget.hideField.length) {
         return Container();
+      }
+      if (widget.error != "") {
+        fields = [ Text(widget.error, style: TextStyle(color: Colors.red), overflow: TextOverflow.ellipsis), ...fields];
       }
       return Form( key: widget.formKey, 
         autovalidateMode: AutovalidateMode.always, 

@@ -11,6 +11,7 @@ import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class TriggerBoxWidget extends StatefulWidget {
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
   String title;
   int index = 1;
 
@@ -39,19 +40,20 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
     order.sort( (a, b) => (widget.schema[a]?.index ?? 0) - (widget.schema[b]?.index ?? 0) );
     for (var k in order) {
       if (widget.schema[k] != null) {
-        var scheme = widget.schema[k];
+        var scheme = widget.triggers.first.schema[k];
         if (!scheme!.readonly) {
           try {
+            print("${scheme.actionPath} ${scheme.valuesPath}");
             var w = await Convertor.formFieldByType(
               widget.body, context, "", widget.schema, scheme.type, k, scheme.label, 
-              scheme.description, scheme.require, scheme.readonly, widget.body[k], "", "", 
+              scheme.description, scheme.require, scheme.readonly, widget.body[k] == "" ? null : widget.body[k], scheme.actionPath, scheme.valuesPath, 
               "", null, currentView?.isEmpty ?? false, scheme.autoFill, scheme.translatable, null);
-            widgets.add(
-              Container( 
-                width: currentWidth / 1.5,
-                padding: EdgeInsets.all(10),
-                child: w)
-            );
+              widgets.add(
+                Container( 
+                  width: currentWidth / 1.5,
+                  padding: EdgeInsets.all(10),
+                  child: w)
+              );
           } catch(e,s) {
             print(e);
             print(s);
@@ -67,9 +69,11 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
         child :  Text("${await getOnFlow(widget.title.toUpperCase())} ${widget.index}/${widget.triggers.length}", overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor))),
       Container( height: MediaQuery.of(context).size.height / 1.7,
-        child: SingleChildScrollView( child: Column(
+        child: SingleChildScrollView( child: Form( key: widget.formKey, 
+        autovalidateMode: AutovalidateMode.always, 
+        child: Column(
         children: widgets,
-      ))),
+      )))),
       Padding( padding: EdgeInsets.only(top: 20), 
       child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
         Padding( padding: EdgeInsets.only(right: 10), 
@@ -81,16 +85,18 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             ),
           ),
           onPressed: () {
-            APIService().post(widget.actionPath, widget.body, context);
-            if (widget.isCached) {
-              TriggerCacheService.deleteTriggers(widget.index - 1);
-            }
-            if (widget.index + 1 < widget.triggers.length) {
-              widget.index++;
-            }
-            isTriggerOpen = false;
-            context.pop();
-            globalMainViewKey.currentState?.setState(() { });
+            if (widget.formKey.currentState?.validate() ?? false) {
+              APIService().post(widget.actionPath, widget.body, context);
+              if (widget.isCached) {
+                TriggerCacheService.deleteTriggers(widget.index - 1);
+              }
+              if (widget.index + 1 < widget.triggers.length) {
+                widget.index++;
+              }
+              isTriggerOpen = false;
+              context.pop();
+              globalMainViewKey.currentState?.setState(() { });
+            } 
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
           child: Text(TranslateConstants.send.toUpperCase(), 

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
 
@@ -168,7 +169,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   })  : items = const [],
         super(key: key);
   final int max;
-  final Future<void> Function(dynamic)? changeFunction;
+  final Future<void> Function(String)? changeFunction;
   final void Function(String)? addFunction;
   /// The list of dropdown items.
   final List<DropdownItem<T>> items;
@@ -440,6 +441,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
                   child: RepaintBoundary(
                     child: _Dropdown<T>(
                       max: widget.max,
+                      label: widget.fieldDecoration.labelText ?? "",
                       changeFunction: widget.changeFunction,
                       addFunction: widget.addFunction,
                       decoration: widget.dropdownDecoration,
@@ -686,7 +688,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
 
     if (_portalController.isShowing && _dropdownController.isOpen) return;
 
-    _dropdownController.openDropdown();
+    _dropdownController.openDropdown(null, widget.fieldDecoration.labelText ?? "");
   }
 
   void _handleOutsideTap() {

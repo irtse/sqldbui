@@ -81,6 +81,8 @@ dependencies:
   vsc_quill_delta_to_html: ^1.0.5
   delta_to_html: ^0.2.2
   multi_dropdown: ^3.0.1
+  textfield_tags: ^3.0.1
+  flutter_input_chips: ^1.1.0
 
 dev_dependencies:
   flutter_test:

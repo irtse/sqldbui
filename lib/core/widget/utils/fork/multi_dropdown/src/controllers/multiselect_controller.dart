@@ -193,15 +193,16 @@ class MultiSelectController<T> extends ChangeNotifier {
   }
 
   /// shows the dropdown, if it is not already open.
-  void openDropdown() {
+  void openDropdown(String? search, String label) {
     if (_open) return;
-
+    searchCtrl[label]?.text = search ?? "";
     _open = true;
     notifyListeners();
   }
 
   /// hides the dropdown, if it is not already closed.
   void closeDropdown() {
+    search={};
     if (!_open) return;
 
     _open = false;
