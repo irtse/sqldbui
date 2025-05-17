@@ -23,6 +23,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     this.schema = emptySchema,
     this.autoFill,
     this.translatable = false,
+    this.linkID,
   });
   bool translatable;
   dynamic autoFill;
@@ -38,12 +39,14 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
   String valuesPath;
   String actionPath;
   List<dynamic> actions;
+  String? linkID;
   Map<String, SchemaField> schema;
 
   @override Map<String, dynamic> serialize() => { };
 
   @override SchemaField deserialize(Map<String, dynamic> json) {
     return SchemaField(
+    linkID: json.containsKey("link_id") && json["link_id"] != null ? "${json["link_id"]}" : null,
     translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : false,
     autoFill: json.containsKey("autofill") && json["autofill"] != null ? json["autofill"] : null,
     active: json.containsKey("active") && json["active"] != null ? json["active"] : true,

@@ -10,9 +10,10 @@ import 'package:sqldbui2/model/view.dart' as model;
 class LinkBoxWidget extends StatefulWidget {
   model.Sharing? sharing;
   String path;
+  Color? color;
   bool success = false;
   Map<String,String> values = {};
-  LinkBoxWidget ({ super.key, required this.path, required this.sharing });
+  LinkBoxWidget ({ super.key, required this.path, required this.sharing, this.color, });
   @override LinkBoxWidgetState createState() => LinkBoxWidgetState();
 }
 bool forceUser = false;
@@ -87,7 +88,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
     return PopupMenuButton(
       color: Colors.white,
       tooltip: TranslateConstants.share.toLowerCase(),
-      icon: Icon(size: 18, Icons.share, color: Theme.of(context).primaryColor),
+      icon: Icon(size: 18, Icons.share, color: widget.color ?? Theme.of(context).primaryColor),
       itemBuilder: (BuildContext bc) { 
         return [ 
           PopupMenuItem(enabled: false, 

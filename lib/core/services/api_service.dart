@@ -195,9 +195,6 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-        if (url.contains("poster_authors")) {
-          print("POSTER $url $body");
-        }
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');

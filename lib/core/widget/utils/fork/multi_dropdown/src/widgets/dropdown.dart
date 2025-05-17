@@ -211,6 +211,8 @@ class _Dropdown<T> extends StatelessWidget {
 }
 Map<String,TextEditingController> searchCtrl = {};
 Map<String, String> search = {};
+Map<String, List<String>> alreadySearch = {};
+
 // ignore: must_be_immutable
 class _SearchField extends StatelessWidget {
    _SearchField({
@@ -233,7 +235,7 @@ class _SearchField extends StatelessWidget {
       searchCtrl[label] =TextEditingController();
     }
     if ((searchCtrl[label]?.text ?? "") != "" && (search[label] ?? "") == "") {
-      Future.delayed(Duration(microseconds: 100), () {
+      Future.delayed(Duration(seconds: 1), () {
         search[label]=searchCtrl[label]!.text;
         onChanged(search[label]!);
       });
@@ -256,7 +258,11 @@ class _SearchField extends StatelessWidget {
           search[label] = searchCtrl[label]!.text;
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
-              if (searchCtrl[label]?.text == search[label]) {
+              if (searchCtrl[label]?.text == search[label] && !(alreadySearch[label]?.contains(search[label]) ?? false)) {
+                if (alreadySearch[label] == null) {
+                  alreadySearch[label] = [];
+                }
+                alreadySearch[label]?.add(search[label]!);
                 changeFunction!(searchCtrl[label]!.text);
               }
             });

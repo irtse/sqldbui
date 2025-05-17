@@ -47,7 +47,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
     var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || (mainForm.currentState?.widget.view?.readOnly ?? false);
-    print("$actions $scheme ${widget.name} ${widget.value } $readOnly");
     if (readOnly) {
       List<Container> tags = <Container>[];
       if (widget.value != null && widget.value is List) {
@@ -78,7 +77,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags)]) ]),);
     } else if ((widget.url ?? "") != "") {
-      print("$actions $scheme ${widget.name} ${widget.value }");
       if (widget.value != null) {
         return FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${widget.value.join(",")}"), true, null), 
@@ -108,8 +106,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
             });
         });
       }
-      print("$actions $scheme ${widget.name} ${widget.url}");
-
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.url ?? "", true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
@@ -182,33 +178,47 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
     ctrls = MultiSelectController<Map<String, dynamic>>();
     widget.form[widget.name] = <dynamic>[];
+    var l = await getOnFlow(widget.label);
     int max = 0;
     if (widget.datas != null) {
-            for (var item in widget.datas!) {
-              if (items.where( (e) => e.value["id"] != "${item.id}").isNotEmpty) {
-                continue;
-              }
-              max = item.max;
-              var v = item.label ?? item.name ?? "${item.id}";
-              var ser = item.serialize();
-              bool select = false;
-              for (var val in widget.value ?? []) {
-                val = val as model.Shallowed;
-                if (val.id == item.id) {
-                  select = true;
-                  break;
-                }
-              }
-              try {
-                if (widget.translatable || item.translatable) {
-                  v = await getOnFlow(v);
-                }
-              } catch(e) {}
-              items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v.toLowerCase(), selected: select));
-              for (var val in (widget.value ?? []) as List<dynamic>) {
-                if (val.id == item.id) { widget.form[widget.name].add(ser); }
+      for (var item in widget.datas!) {
+        if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
+          continue;
+        }
+        max = item.max;
+        var v = item.label ?? item.name ?? "${item.id}";
+        var ser = item.serialize();
+        bool select = false;
+        try {
+          if (widget.value is String) {
+            for (var val in widget.value?.split(",") ?? []) {
+              val = val as model.Shallowed;
+              if (val.id == item.id) {
+                select = true;
+                break;
               }
             }
+          } else {
+            for (var val in widget.value ?? []) {
+              val = val as model.Shallowed;
+              if (val.id == item.id) {
+                select = true;
+                break;
+              }
+            }
+          }
+        } catch(e) {}
+        
+        try {
+          if (widget.translatable || item.translatable) {
+            v = await getOnFlow(v);
+          }
+        } catch(e) {}
+        items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v.toLowerCase(), selected: select));
+        for (var val in (widget.value ?? []) as List<dynamic>) {
+          if (val.id == item.id) { widget.form[widget.name].add(ser); }
+        }
+      }
     }
     return MultiDropdown<Map<String, dynamic>>(
                         addFunction: widget.type == "manytomany_add" ? (String value) {
@@ -247,7 +257,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           spacing: 10,
                         ),
                         fieldDecoration: FieldDecoration(
-                          labelText: "${widget.label}${widget.require ? "*" : ""}",
+                          labelText: "${l.toLowerCase()}${widget.require ? "*" : ""}",
                           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
                           hintText: TranslateConstants.selectValue.toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
@@ -312,22 +322,22 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
   Future<void> load(int start, int interval, String filter, String value, List<DropdownItem<Map<String, dynamic>>> items) async {
     if (filter == "") { return; }
     var found = false;
-      var e = await APIService().get<model.Shallowed>("${widget.url}$filter&offset=$start&limit=$interval", filter != "", null);
-        if (e.data != null) {
-          for (var item in e.data!) {
-            if (items.where( (e) => e.value["id"] == "${item.id}").isEmpty) {
-              found = true;
-              var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-              try {
-                if (widget.translatable || item.translatable) {
-                  v = await getOnFlow(v);
-                }
-              } catch(e) {}
-              items.add(DropdownItem<Map<String, dynamic>>(
-                value: item.serialize(), label: v.toLowerCase(), selected: false));
-              ctrls.addItem(items.last);
+    var e = await APIService().get<model.Shallowed>("${widget.url}$filter&offset=$start&limit=$interval", filter != "", null);
+    if (e.data != null) {
+      for (var item in e.data!) {
+        if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isEmpty) {
+          found = true;
+          var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+          try {
+            if (widget.translatable || item.translatable) {
+              v = await getOnFlow(v);
             }
-          }
+          } catch(e) {}
+          items.add(DropdownItem<Map<String, dynamic>>(
+            value: item.serialize(), label: v.toLowerCase(), selected: false));
+          ctrls.addItem(items.last);
+        }
+      }
     } 
     if (ctrls.isOpen && found) {
       ctrls.closeDropdown();

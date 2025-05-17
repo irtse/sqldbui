@@ -203,6 +203,7 @@ class MultiSelectController<T> extends ChangeNotifier {
   /// hides the dropdown, if it is not already closed.
   void closeDropdown() {
     search={};
+    alreadySearch={};
     if (!_open) return;
 
     _open = false;

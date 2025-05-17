@@ -115,29 +115,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     }
     List<Widget> actions = [];
     if (!widget.subForm) {
-      if (!(currentView?.isEmpty ?? false)) {
-        actions.add(Padding( padding: EdgeInsets.only(right: 10),
-            child: LinkBoxWidget(
-              path: "@${currentView?.schemaID}:${currentView?.id}",
-              sharing: widget.refItem.sharing,
-            )));
-      }
       if (!widget.view.readOnly) {
-        if (widget.view.actions.contains("put") && !widget.view.isEmpty 
-        && (widget.view.triggers.where( (e) => e.mode == "mail") ).isNotEmpty) {
-          var triggers = widget.view.triggers.where( (e) => e.mode == "mail").toList();
-          var trigger = triggers.first;
-          actions.add(ButtonWidget( method: "post", icon: Icons.mail, overrideFunc: () {
-            showDialog(
-              context: context, 
-              barrierDismissible: false,
-              builder: (builder) => TriggerBoxWidget(
-                    triggers: triggers, isCached: false,
-                    title: trigger.name ?? "", actionPath: trigger.actionPath,
-                    body: trigger.body, schema: trigger.schema)
-            );
-          }, text: (await getOnFlow(TranslateConstants.sendMail)).toUpperCase(), color: Colors.grey, isDraft: true));
-        }
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
         || widget.view.actions.contains("put")) {
           if (widget.view.actions.contains("post") && widget.view.isEmpty ) {

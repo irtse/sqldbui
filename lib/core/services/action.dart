@@ -6,7 +6,6 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
-import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -68,7 +67,6 @@ class ActionService {
         return []; 
       } else { form.formKey.currentState!.save(); }
     }  
-    var files = <String, PlatformFile>{};       
     var body = <String, dynamic>{};
     List<model.View> views = [];
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft);
@@ -76,36 +74,7 @@ class ActionService {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    if (newManyToManyValue.isNotEmpty && (method == "post" || method == "put")) {
-      for(var url in newManyToManyValue.keys) {
-          for (var name in newManyToManyValue[url]!.keys) {
-            var resp = await APIService().post<model.Shallowed>("$url&shallow=enable", {
-              "name" : newManyToManyValue[url]![name],
-            // ignore: invalid_return_type_for_catch_error
-            }, context).catchError( (e) => errors.add(e.toString()));
-            if ( resp.data?.isNotEmpty ?? false) {
-              body[name] = resp.data?.first.id;
-            }
-          }
-      }
-      searchCtrl = {};
-      newDropDownValue = {};
-    }
-    if (newDropDownValue.isNotEmpty && (method == "post" || method == "put")) {
-      for(var url in newDropDownValue.keys) {
-          for (var name in newDropDownValue[url]!.keys) {
-            var resp = await APIService().post<model.Shallowed>("$url&shallow=enable", {
-              "name" : newDropDownValue[url]![name],
-            // ignore: invalid_return_type_for_catch_error
-            }, context).catchError( (e) => errors.add(e.toString()));
-            if ( resp.data?.isNotEmpty ?? false) {
-              body[name] = resp.data?.first.id;
-            }
-          }
-      }
-      searchCtrl = {};
-      newDropDownValue = {};
-    }
+    
     if (errors.isNotEmpty) {
       var errorStr = "";
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
@@ -127,35 +96,13 @@ class ActionService {
     
     
     var path = url;
-     if (form.cacheForm["id"] != null) { 
+    if (form.cacheForm["id"] != null) { 
       body["id"]=int.parse(form.cacheForm["id"]); 
       if (method.toUpperCase() == "DELETE") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
+    body = await getBody(method, { ...form.cacheForm}, body, schema, context);
+    var files = await getFiles(method, { ...form.cacheForm}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
-        for (var fieldName in schema.keys) {
-          if (form.cacheForm[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
-          if (schema[fieldName] != null && schema[fieldName]!.type.toLowerCase().contains("many")) { continue; }
-          
-          if (!["dbdest_table_id"].contains(fieldName) 
-          && !(["dbschema_id"].contains(fieldName) && form.cacheForm[fieldName] == null)
-          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
-          && form.cacheForm[fieldName] is! List) { 
-            if (form.cacheForm[fieldName] is Map<String, List<PlatformFile>>) {
-              for (var fileStr in (form.cacheForm[fieldName] as Map<String, List<PlatformFile>>).keys) {
-                for (var file in form.cacheForm[fieldName][fileStr] as List<PlatformFile>) {
-                  files[fileStr] = file;
-                  if ( body[fieldName] == null) {
-                     body[fieldName] = file.name;
-                  } else {
-                    body[fieldName] += ",${file.name}";
-                  }
-                }
-              }
-            } else {
-              body[fieldName]=form.cacheForm[fieldName]; 
-            }
-          }
-        }
         for (var k in add.keys) { body[k] = add[k]; }
         if (globalWorkflowPanelWidgetKey.currentState != null && form.view!.id == mainForm.currentState!.widget.view!.id) {
             List<String> nexts = [];
@@ -179,28 +126,25 @@ class ActionService {
         consentCache.remove(viewID);
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
-          if (value.data != null && value.data!.isNotEmpty) {            
-            views.add(value.data![0]); 
-            form.cacheForm["id"]=value.data![0].items[0].values["id"];
-            listSubForms(schema, form.cacheForm, method, value.data![0].schemaName, context, false);
-          } 
-          if (form.view!.isEmpty) { isNew = value.data![0].items[0].values["id"]; }
-          if (form.view!.id == mainForm.currentState!.widget.view!.id) {
-            showAlertBanner(context, () {}, 
-              InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (
-                method == "put" ? TranslateConstants.filterSave.toUpperCase() : await getOnFlow(method))} datas suceed :)"), // <-- Put any widget here you want!
-                                   alertBannerLocation:  AlertBannerLocation.bottom,);
-          }
-          if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
-            TriggerCacheService.setTriggers(value.data![0].triggers);
-            for (var pathFile in files.keys) {
-              await submitFile(pathFile, files[pathFile]!, context);
+          if(value.data != null && value.data!.isNotEmpty) {
+            views.add(value.data!.first);
+            onSuccessMethod(method, views.last, { ...form.cacheForm}, views.last.schema, files, context);
+            if (views.last.items.isNotEmpty) {
+              if (form.view!.isEmpty) { 
+                isNew = value.data![0].items[0].values["id"]; 
+              }
+              if (form.view!.id == mainForm.currentState!.widget.view!.id) {
+                showAlertBanner(context, () {}, 
+                  InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (
+                    method == "put" ? TranslateConstants.filterSave.toUpperCase() : await getOnFlow(method))} datas suceed :)"), // <-- Put any widget here you want!
+                                      alertBannerLocation:  AlertBannerLocation.bottom,);
+              }
             }
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
           errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}");
-          listSubForms(schema, form.cacheForm, method, schemaName, context, true);
+          listSubForms(schema, form.cacheForm, method, schemaName, "", context, true);
           APIResponse<model.View>(data: null);
         });      
         formSubForms(form.oneToManiesForm, body, method, schemaName, context, false, false, isDraft); // ignore: use_build_context_synchronously
@@ -223,22 +167,117 @@ class ActionService {
     }
     return views;
   }
-  static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, BuildContext context, bool warn) async {
+  static onSuccessMethod(String method, model.View view, Map<String, dynamic> values, 
+    Map<String, model.SchemaField> schema, Map<String, PlatformFile> files, BuildContext context) {
+    if (view.items.isNotEmpty) {            
+      values["id"]=view.items.first.values["id"];
+      listSubForms(schema, values, method, view.schemaName, "${view.schemaID}", context, false);
+    } 
+    if ((method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") && (values["id"] ?? "") != "") {
+      TriggerCacheService.setTriggers(view.triggers);
+      for (var pathFile in files.keys) {
+        submitFile(pathFile.replaceAll("rows=all", "rows=${values["id"]}"), files[pathFile]!, context);
+      }
+    }
+  }
+
+  static Future<Map<String, PlatformFile>> getFiles(String method, Map<String, dynamic> values, 
+    Map<String, model.SchemaField> schema, BuildContext context) async {
+    var files = <String, PlatformFile>{};       
+    if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
+        for (var fieldName in schema.keys) {
+          if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
+          if (schema[fieldName] != null && schema[fieldName]!.type.toLowerCase().contains("many")) { continue; }
+          
+          if (!["dbdest_table_id"].contains(fieldName) 
+          && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
+          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
+          && values[fieldName] is! List) { 
+            if (values[fieldName] is Map<String, List<PlatformFile>>) {
+              for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
+                for (var file in values[fieldName][fileStr] as List<PlatformFile>) {
+                  files[fileStr] = file;
+                }
+              }
+            }
+          }
+      }
+    }
+    return files;
+  }
+  static Future<Map<String, dynamic>> getBody(String method, Map<String, dynamic> values, Map<String, dynamic> body, 
+    Map<String, model.SchemaField> schema, BuildContext context) async {
+    if (newDropDownValue.isNotEmpty && (method == "post" || method == "put")) {
+      for(var url in newDropDownValue.keys) {
+          for (var name in newDropDownValue[url]!.keys) {
+            if (values[name]?.contains(newDropDownValue[url]![name]) ?? true) {
+              continue;
+            }
+            var resp = await APIService().post<model.Shallowed>("$url&shallow=enable", {
+              "name" : newDropDownValue[url]![name],
+            // ignore: invalid_return_type_for_catch_error
+            }, context).catchError( (e) => errors.add(e.toString()));
+            if ( resp.data?.isNotEmpty ?? false) {
+              body[name] = resp.data?.first.id;
+            }
+          }
+      }
+      searchCtrl = {};
+      newDropDownValue = {};
+    }
+    if (values["id"] != null) { 
+      body["id"]=int.parse(values["id"]); 
+    }
+    if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
+        for (var fieldName in schema.keys) {
+          if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
+          if (schema[fieldName] != null && schema[fieldName]!.type.toLowerCase().contains("many")) { continue; }
+          
+          if (!["dbdest_table_id"].contains(fieldName) 
+          && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
+          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
+          && values[fieldName] is! List) { 
+            if (values[fieldName] is Map<String, List<PlatformFile>>){
+              for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
+                for (var file in values[fieldName][fileStr] as List<PlatformFile>) {
+                  if ( body[fieldName] == null) {
+                     body[fieldName] = file.name;
+                  } else {
+                    body[fieldName] += ",${file.name}";
+                  }
+                }
+              }
+            } else {
+              body[fieldName]=values[fieldName]; 
+            }
+          }
+        }
+    }
+    return body;
+  }
+
+  static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, String schemaID, BuildContext context, bool warn) async {
     for (var fieldName in schema.keys) {
       if (values[fieldName] is List) {
-        if(values["id"] != null) {
-          await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&${schemaName}_id=${values["id"]}", null
-            ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
-        }
         for (var item in values[fieldName] as List) {
           var newBody = <String, dynamic> {};
           for (var f in schema[fieldName]!.schema.keys) {
-            if (f.contains(schemaName) && values["id"] != null) { newBody[f]=values["id"]; 
-            } else if (f.contains("_id")) { newBody[f]=item["id"];  }
+            var ff = schema[fieldName]!.schema[f];
+            if ((ff?.linkID ?? "") == schemaID && values["id"] != null) { 
+              newBody[f]=values["id"];
+              await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&$f=${values["id"]}", null
+              ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); }); 
+            } else if ((ff?.linkID ?? "") != "" && (item["id"] ?? "" ) != "") { 
+              newBody[f]=item["id"];  
+            } else if(f == "name" && (item[f] ?? "" ) != "") {
+              newBody[f]=item[f];  
+            }
           } 
           // ignore: use_build_context_synchronously
           await APIService().post<model.View>(schema[fieldName]!.actionPath, newBody, null
-                                             ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); });
+                                             ).catchError( (e) { 
+                                              errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); 
+                                            });
         }
       }
     }

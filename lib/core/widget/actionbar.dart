@@ -1,4 +1,6 @@
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
+import 'package:sqldbui2/core/widget/dialog/link_box.dart';
+import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/utils.dart';
@@ -46,12 +48,42 @@ class ActionBarState extends State<ActionBarWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async{
       List<Widget> actions = <Widget>[];
-      if (viewID != null && widget.view!.isList) {
-        actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
-        !translation ? Icons.translate : Icons.g_translate, null, () {
-          translation = !translation;
-          globalMainViewKey.currentState?.setState(() { });
-        }, false));
+      if (viewID != null) {
+        if (widget.view!.isList) {
+          actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
+          !translation ? Icons.translate : Icons.g_translate, null, () {
+            translation = !translation;
+            globalMainViewKey.currentState?.setState(() { });
+          }, false));
+        } else if (currentView?.items.isNotEmpty ?? false) {
+          
+          if (currentView != null && !currentView!.readOnly) {
+            if (currentView!.actions.contains("put") && !currentView!.isEmpty 
+            && (currentView!.triggers.where( (e) => e.mode == "mail") ).isNotEmpty) {
+              var triggers = currentView!.triggers.where( (e) => e.mode == "mail").toList();
+              var trigger = triggers.first;
+              actions.add(getIconOffset((await getOnFlow(TranslateConstants.sendMail)).toLowerCase(), 
+              Icons.mail, 20, () {
+                showDialog(
+                  context: context, 
+                  barrierDismissible: false,
+                  builder: (builder) => TriggerBoxWidget(
+                        triggers: triggers, isCached: false,
+                        title: trigger.name ?? "", actionPath: trigger.actionPath,
+                        body: trigger.body, schema: trigger.schema)
+                );
+              }, false));
+            }
+          }
+        }
+        if (!(currentView?.isEmpty ?? false)) {
+          actions.add(Padding( padding: EdgeInsets.only(right: 10),
+                child: LinkBoxWidget(
+                  color: Colors.white,
+                  path: "@${currentView?.schemaID}:${currentView?.id}",
+                  sharing: currentView?.items.first.sharing,
+                )));
+        }
       }
       if (widget.gridKey != null) {
         actions.add( getIconOffset( (await getOnFlow(TranslateConstants.resetUI)).toLowerCase(), Icons.auto_fix_off, 20, () {

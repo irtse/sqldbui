@@ -164,9 +164,7 @@ class DropDownState extends State<DropDownWidget> {
                       ) ));
     }
     var lab = await getOnFlow(widget.label);
-    print("VAAAAl ${widget.value} ${widget.autofill}");
     if (val != null) {
-      print("VAAAAl");
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
@@ -300,7 +298,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
               vv = (await getOnFlow(vv)).toLowerCase();
             }
           } catch(e) {}
-          print(select);
           items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
         }
       }

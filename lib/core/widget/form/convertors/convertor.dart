@@ -407,9 +407,10 @@ class Convertor {
         autofill: autofill,
       );
     } else if (type.contains("upload")) {
+      print("pRRRRR $url");
       return UploadWidget(
         form : form, 
-        url: mainUrl,
+        url: url,
         schemaName: schemaName, 
         name: name,
         readOnly: readOnly, 
