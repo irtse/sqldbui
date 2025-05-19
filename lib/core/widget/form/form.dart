@@ -214,9 +214,6 @@ class FormWidgetState extends State<DataFormWidget> {
             ]) 
           )
         );
-        if (isLower) {
-
-        }
         return Stack( children: [ 
           Row(children: [
             widget.formIsEmpty ? Container() : formWrap,
@@ -269,12 +266,8 @@ class FormWidgetState extends State<DataFormWidget> {
    Widget? getSynthesis(String synthesisPath, double height) {
       if (synthesisPath == "") {
         return null;
-      }
-      return FutureBuilder(
-        future: APIService().get<model.View>(synthesisPath, true, context), 
-        builder: (a,s) {
-          if (s.data?.data != null && s.data!.data!.isNotEmpty) {
-            return Column( children: [
+      } 
+      return Column( children: [
               Container(
                 height: 40,
                 color: Theme.of(context).primaryColor,
@@ -283,16 +276,29 @@ class FormWidgetState extends State<DataFormWidget> {
                   style: TextStyle( color: Colors.white, fontSize: 18 ) ) )
               ),
               Container( 
-                height: height - 40,
+                height: height - 110,
                 decoration: BoxDecoration( 
                   borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7), bottomRight: Radius.circular(7)),
                   border: Border(
                     left: BorderSide(color: Colors.grey.shade300, width: 1.0),
                 ) ),
-                child: MainGridWidget(view: s.data!.data![0], viewKey: null, subTable: true, links: {}, subSize: 0, subWidthSize: 100)
-            )]);
-          }
-          return Container();
-        });
-    }
+                child: FutureBuilder(
+                  future: APIService().get<model.View>(synthesisPath, true, context), 
+                  builder: (a,s) {
+                    if (s.data?.data != null && s.data!.data!.isNotEmpty) {
+                      return MainGridWidget(view: s.data!.data![0], viewKey: null, subTable: true, 
+                            forceOrder: s.data!.data?[0].order ?? [],
+                            links: {}, subSize: 0, subWidthSize: 100);
+                    }
+                    return Container( 
+                      height: height - 80,
+                      decoration: BoxDecoration( color: Theme.of(context).splashColor), 
+                        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+                        child: Center(
+                          child: Text(TranslateConstants.emptyData, 
+                            style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
+                        ));
+              })
+    )]);
+  }    
 }

@@ -407,7 +407,6 @@ class Convertor {
         autofill: autofill,
       );
     } else if (type.contains("upload")) {
-      print("pRRRRR $url");
       return UploadWidget(
         form : form, 
         url: url,

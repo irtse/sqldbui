@@ -184,7 +184,6 @@ class _UploadState extends State<UploadWidget> {
         if (m[widget.url ?? ""] == null) {
           m[widget.url ?? ""] = [];
         }
-        print(widget.url);
         m[widget.url ?? ""]?.add(_selectedFile!);
         widget.form[widget.name] = m;
       }

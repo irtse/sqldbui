@@ -48,7 +48,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     } 
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     if (showFunctions[viewID] == null) { showFunctions[viewID] = false; }
-    var o = realOrder(currentView, false, true);
+    var o = realOrder(currentView, false, true, null, 5);
     return Row( children: [ 
       o.isNotEmpty && editMode[viewID] == "math" ? Padding( padding: const EdgeInsets.only(top: 2), 
         child: InkWell( mouseCursor: SystemMouseCursors.click,

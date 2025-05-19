@@ -263,11 +263,11 @@ class ActionService {
           var newBody = <String, dynamic> {};
           for (var f in schema[fieldName]!.schema.keys) {
             var ff = schema[fieldName]!.schema[f];
-            if ((ff?.linkID ?? "") == schemaID && values["id"] != null) { 
+            if (((ff?.linkID ?? "") == schemaID || (f.contains("_id") && f.contains(schemaName)))  && values["id"] != null) { 
               newBody[f]=values["id"];
               await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&$f=${values["id"]}", null
               ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); }); 
-            } else if ((ff?.linkID ?? "") != "" && (item["id"] ?? "" ) != "") { 
+            } else if (((ff?.linkID ?? "") != ""  || (f.contains("_id") && !f.contains(schemaName))) && (item["id"] ?? "" ) != "") { 
               newBody[f]=item["id"];  
             } else if(f == "name" && (item[f] ?? "" ) != "") {
               newBody[f]=item[f];  

@@ -121,12 +121,9 @@ class ViewWidgetState extends State<ViewWidget> {
       isTriggerOpen = true;
       Future.delayed(const Duration(milliseconds: 100), () {
         var triggers = TriggerCacheService.getTriggers();
-        var trigger = triggers.first;
         showDialog(context: context, barrierDismissible: false,
         builder: (builder) => TriggerBoxWidget(
-          triggers: triggers, isCached: true,
-          title: trigger.name ?? "", actionPath: trigger.actionPath,
-          body: trigger.body, schema: trigger.schema,));
+          triggers: triggers, isCached: true,));
       });
     }
     List<Widget> comps = <Widget>[];

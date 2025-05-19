@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -10,7 +11,7 @@ import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 
-Map<String,String> currentDropdown = {};
+Map<String,Map<String,String>> currentDropdown = {};
 Map<String, Map<String,String>> newDropDownValue = {};
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
@@ -51,7 +52,7 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    var val = widget.value  ?? widget.autofill ?? currentDropdown[viewID!];
+    var val = widget.value  ?? widget.autofill ?? currentDropdown[viewID!]?[widget.name];
     if (val != null) {
       widget.form[widget.name]=val;
     }
@@ -182,7 +183,7 @@ class DropDownState extends State<DropDownWidget> {
                   name: widget.name,
                   readOnly: widget.readOnly,
                   require: widget.require,
-                  value: widget.value,
+                  value: val,
                   path: widget.path,
                   url: widget.url,
                   type: widget.type,
@@ -212,7 +213,7 @@ class DropDownState extends State<DropDownWidget> {
               name: widget.name,
               readOnly: widget.readOnly,
               require: widget.require,
-              value: widget.value,
+              value: val,
               path: widget.path,
               url: widget.url,
               type: widget.type,
@@ -402,7 +403,12 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           try {
                             var item = mapped[values[0]];
                             if (widget.url != null && item != null) {
-                              currentDropdown[viewID!] = values[0];
+                              if (currentView?.isEmpty ?? false) {
+                                if (currentDropdown[viewID] == null) {
+                                  currentDropdown[viewID!] = {};
+                                }
+                                currentDropdown[viewID!]?[widget.name] = values[0];
+                              }
                               widget.wrappers?.currentState?.setState( () { 
                                 widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                               }); 

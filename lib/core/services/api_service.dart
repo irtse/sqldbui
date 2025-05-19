@@ -228,7 +228,6 @@ class APIService {
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
-        print(e); print(s);
         if (e.toString().contains("connection error")) {
           err = "server unreachable";
         } else {

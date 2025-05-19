@@ -14,17 +14,13 @@ import 'package:sqldbui2/model/view.dart' as model;
 // ignore: must_be_immutable
 class TriggerBoxWidget extends StatefulWidget {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  String title;
-  int index = 1;
+  int index = 0;
 
   bool isCached;
   List<Trigger> triggers;
-  Map<String, dynamic> body;
-  Map<String, SchemaField> schema;
-  String actionPath;
-  TriggerBoxWidget ({ super.key, required this.body, required this.schema, 
+  TriggerBoxWidget ({ super.key,  
     required this.isCached,
-    required this.title, required this.actionPath, required this.triggers });
+    required this.triggers });
   @override TriggerBoxWidgetState createState() => TriggerBoxWidgetState();
 }
 class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
@@ -38,17 +34,16 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> widgets = [];
-    List<String> order = widget.body.keys.toList();
-    order.sort( (a, b) => (widget.schema[a]?.index ?? 0) - (widget.schema[b]?.index ?? 0) );
+    List<String> order = widget.triggers[widget.index].body.keys.toList();
+    order.sort( (a, b) => (widget.triggers[widget.index].schema[a]?.index ?? 0) - (widget.triggers[widget.index].schema[b]?.index ?? 0) );
     for (var k in order) {
-      if (widget.schema[k] != null) {
+      if (widget.triggers[widget.index].schema[k] != null) {
         var scheme = widget.triggers.first.schema[k];
         if (!scheme!.readonly) {
           try {
-            print("$k ${scheme.actionPath}, ${scheme.valuesPath}, ");
             var w = await Convertor.formFieldByType(
-              widget.body, context, "", widget.schema, scheme.type, k, scheme.label, 
-              scheme.description, scheme.require, scheme.readonly, widget.body[k] == "" ? null : widget.body[k], 
+              widget.triggers[widget.index].body, context, "", widget.triggers[widget.index].schema, scheme.type, k, scheme.label, 
+              scheme.description, scheme.require, scheme.readonly, widget.triggers[widget.index].body[k] == "" ? null : widget.triggers[widget.index].body[k], 
               scheme.actionPath, scheme.valuesPath, 
               "", null, currentView?.isEmpty ?? false, scheme.autoFill, scheme.translatable, null);
               widgets.add(
@@ -82,19 +77,24 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           )))
       );
     }
+    try {
     return AlertWidget(
       widget: Column(
         mainAxisSize: MainAxisSize.min, 
       children: [
-      Padding(padding: EdgeInsets.all(20), 
-        child :  Text((await getOnFlow(widget.title)).toUpperCase(), overflow: TextOverflow.ellipsis,
+      Padding(padding: EdgeInsets.only(top:20, left: 20, right:20), 
+        child :  Text(widget.triggers[widget.index].name == null ? "" : (await getOnFlow(widget.triggers[widget.index].name ?? "")).toUpperCase(), overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor))),
+      if (widget.triggers[widget.index].description != null && widget.triggers[widget.index].description != "")
+        Padding(padding: EdgeInsets.only(left: 20, right:20), 
+            child :  Text((await getOnFlow(widget.triggers[widget.index].description ?? "")).toLowerCase(), overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 15, color: Theme.of(context).splashColor))),
       Padding( 
         padding: EdgeInsets.symmetric(vertical: 10),
         child: Row( mainAxisAlignment: MainAxisAlignment.center, 
         children : [...trigsNav]
       )),
-      Container( height: MediaQuery.of(context).size.height / 1.7,
+      SizedBox( height: MediaQuery.of(context).size.height / 1.7,
         child: SingleChildScrollView( child: Form( key: widget.formKey, 
         autovalidateMode: AutovalidateMode.always, 
         child: Column(
@@ -111,23 +111,26 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             ),
           ),
           onPressed: () async {
-            var trigger = widget.triggers[widget.index -1];
+            var trigger = widget.triggers[widget.index];
             if (!(widget.formKey.currentState?.validate() ?? false)) {
               return;
             }
-            var body = await ActionService.getBody("POST", {...widget.body }, {}, trigger.schema, context);
-            var files = await ActionService.getFiles("POST", {...widget.body }, trigger.schema, context);
-            await APIService().post<model.View>(widget.actionPath, body, context).then( (e) {
+            var body = await ActionService.getBody("POST", {...widget.triggers[widget.index].body }, {}, trigger.schema, context);
+            var files = await ActionService.getFiles("POST", {...widget.triggers[widget.index].body }, trigger.schema, context);
+            await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
-                  ActionService.onSuccessMethod("POST", e.data!.first, {...widget.body }, trigger.schema, files, context);
+                  ActionService.onSuccessMethod("POST", e.data!.first, {...widget.triggers[widget.index].body }, trigger.schema, files, context);
                 }
-              }).catchError( (e) => ActionService.listSubForms(trigger.schema, {...widget.body }, "POST", trigger.name ?? "", "", context, true)
+              }).catchError( (e) => ActionService.listSubForms(trigger.schema, {...widget.triggers[widget.index].body }, "POST", trigger.name ?? "", "", context, true)
             );
             if (widget.isCached) {
-              TriggerCacheService.deleteTriggers(widget.index - 1);
+              TriggerCacheService.deleteTriggers(widget.index);
             }
-            widget.triggers.removeAt(widget.index - 1);
-            widget.index = 1;
+            try{
+              widget.triggers.removeAt(widget.index);
+            } catch(e) {}
+            
+            widget.index = 0;
             if (widget.triggers.isEmpty) {
               isTriggerOpen = false;
               context.pop();
@@ -157,5 +160,10 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
     ],));
+    } catch(e,s) {
+      print(e);
+      print(s);
+      return Container();
+    }
   }
 }

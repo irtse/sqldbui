@@ -417,12 +417,14 @@ class RawData extends SerializerDeserializer<RawData> {
 class Trigger extends SerializerDeserializer<Trigger> {
   Trigger({
     this.name,
+    this.description,
     this.mode,
     this.actionPath = "",
     this.schema = emptySchema,
     this.body = const {},
   });
   String? name;
+  String? description;
   String? mode;
   String actionPath;
   Map<String, SchemaField> schema;
@@ -431,6 +433,7 @@ class Trigger extends SerializerDeserializer<Trigger> {
   @override deserialize(Map<String, dynamic> json) {
     return Trigger(
     name: json.containsKey("name") ?  json["name"] : null,
+    description: json.containsKey("description") ?  json["description"] : null,
     mode: json.containsKey("type") ?  json["type"] : null,
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
     body: json.containsKey("body") && json["body"] != null ? json["body"] : {}, 

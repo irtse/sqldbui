@@ -61,16 +61,13 @@ class ActionBarState extends State<ActionBarWidget> {
             if (currentView!.actions.contains("put") && !currentView!.isEmpty 
             && (currentView!.triggers.where( (e) => e.mode == "mail") ).isNotEmpty) {
               var triggers = currentView!.triggers.where( (e) => e.mode == "mail").toList();
-              var trigger = triggers.first;
               actions.add(getIconOffset((await getOnFlow(TranslateConstants.sendMail)).toLowerCase(), 
               Icons.mail, 20, () {
                 showDialog(
                   context: context, 
                   barrierDismissible: false,
                   builder: (builder) => TriggerBoxWidget(
-                        triggers: triggers, isCached: false,
-                        title: trigger.name ?? "", actionPath: trigger.actionPath,
-                        body: trigger.body, schema: trigger.schema)
+                        triggers: triggers, isCached: false)
                 );
               }, false));
             }
