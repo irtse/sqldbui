@@ -1,6 +1,7 @@
 
 // ignore: must_be_immutable
 import 'package:sqldbui2/core/sections/homeview.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -24,6 +25,7 @@ class MenuTileWidget extends StatefulWidget {
 class MenuTileWidgetState extends State<MenuTileWidget> {
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: getOnFlow(widget.view.label ?? widget.view.name), builder: (a,s) {
+        print("${widget.view.id} ${viewID?.substring(1)}"); 
         if (s.data != null) {
           try {
             return Material(
@@ -48,6 +50,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                   padding: EdgeInsets.only(right: widget.view.newIds.isNotEmpty ? (("${widget.view.newIds.length}".length + 1) * 10) : 0), 
                   child: InkWell( 
                     onTap: () {
+                      navigate = true;
                       widget.view.isFavorize = !widget.view.isFavorize;
                       var urlPath = widget.view.favorizePath;
                       for (var k in widget.view.favorizeBody.keys.where((element) => !widget.view.isFavorize)) { 

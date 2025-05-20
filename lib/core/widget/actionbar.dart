@@ -47,16 +47,16 @@ class ActionBarState extends State<ActionBarWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async{
+    try {
       List<Widget> actions = <Widget>[];
-      if (viewID != null) {
+      if (viewID != null && widget.view != null) {
         if (widget.view!.isList) {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
             translation = !translation;
             globalMainViewKey.currentState?.setState(() { });
           }, false));
-        } else if (currentView?.items.isNotEmpty ?? false) {
-          
+        } else if (currentView?.items.isNotEmpty ?? false) { 
           if (currentView != null && !currentView!.readOnly) {
             if (currentView!.actions.contains("put") && !currentView!.isEmpty 
             && (currentView!.triggers.where( (e) => e.mode == "mail") ).isNotEmpty) {
@@ -72,14 +72,14 @@ class ActionBarState extends State<ActionBarWidget> {
               }, false));
             }
           }
-        }
-        if (!(currentView?.isEmpty ?? false)) {
+          if (!(currentView?.isEmpty ?? false)) {
           actions.add(Padding( padding: EdgeInsets.only(right: 10),
                 child: LinkBoxWidget(
                   color: Colors.white,
                   path: "@${currentView?.schemaID}:${currentView?.id}",
                   sharing: currentView?.items.first.sharing,
                 )));
+          }
         }
       }
       if (widget.gridKey != null) {
@@ -241,6 +241,11 @@ class ActionBarState extends State<ActionBarWidget> {
           color: Theme.of(context).secondaryHeaderColor,
           boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: rows));      
+        child: Row(mainAxisSize: MainAxisSize.min, children: rows)); 
+    } catch(e,s) {
+      print(e);
+      print(s);
+      return Container();
+    }     
   }
 }

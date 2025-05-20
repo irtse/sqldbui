@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
 import 'dart:async';
 
+bool navigate = true;
 model.View? currentView;
 String? currentCat;
 GlobalKey<MainViewWidgetState> globalMainViewKey = GlobalKey<MainViewWidgetState>();
@@ -29,7 +30,6 @@ class MainViewWidget extends StatefulWidget{
 }
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
-    
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
       return ViewWidget(view: currentView, views: widget.views);
     }
@@ -49,9 +49,10 @@ class MainViewWidgetState extends State<MainViewWidget> {
     if (isList || reForge) {
         var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
         return FutureBuilder<APIResponse<model.View>>(
-          future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), firstAPI, context) : 
-          APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  firstAPI || widget.url != null, context), // a previously-obtained Future<String> or null
+          future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), navigate, context) : 
+            APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
+            navigate = false;
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0]; 
               currentView!.isList = isList && !currentView!.isEmpty;
@@ -68,8 +69,9 @@ class MainViewWidgetState extends State<MainViewWidget> {
                 var v = widget.views?.firstWhere((element) => "${element.id}" == viewID?.substring(1));
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
               } catch(e) { /* */ }
+              Future.delayed(const Duration(seconds: 1), () { setState() { } });
             } 
-            Future.delayed(const Duration(seconds:5), () => firstAPI = false);
+            Future.delayed(const Duration(seconds:5), () { firstAPI = false; });
             widget.url = null;
             selectedGrid = [];
             unselectedGrid = [];
@@ -81,7 +83,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       subViewID=null;
       AppRouter.setRouteCookie("", context);
     }
-    return ViewWidget(view: currentView, views: widget.views); 
+    return ViewWidget(stillLoading: true, view: currentView, views: widget.views); 
   }
   void refreshUrl(String? path, String? id, bool load) {
     subViewID = id;
@@ -106,9 +108,10 @@ class MainViewWidgetState extends State<MainViewWidget> {
 bool isTriggerOpen = false;
 // ignore: must_be_immutable
 class ViewWidget extends StatefulWidget{
+  bool stillLoading = false;
   List<model.View>? views;
   model.View? view;
-  ViewWidget ({ super.key, required this.view, required this.views });
+  ViewWidget ({ super.key, required this.view, required this.views, this.stillLoading = false });
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
@@ -128,7 +131,9 @@ class ViewWidgetState extends State<ViewWidget> {
     }
     List<Widget> comps = <Widget>[];
     Future.delayed(const Duration(seconds: 2), () => globalLoading = false);
-    comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
+    if (widget.stillLoading) {
+      comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
+    }
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 
         DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view,);
