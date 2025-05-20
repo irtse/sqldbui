@@ -88,7 +88,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
       if (widget.triggers[widget.index].description != null && widget.triggers[widget.index].description != "")
         Padding(padding: EdgeInsets.only(left: 20, right:20), 
             child :  Text((await getOnFlow(widget.triggers[widget.index].description ?? "")).toLowerCase(), overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 15, color: Theme.of(context).splashColor))),
+              style: TextStyle(fontSize: 15, color: Colors.grey))),
       Padding( 
         padding: EdgeInsets.symmetric(vertical: 10),
         child: Row( mainAxisAlignment: MainAxisAlignment.center, 
