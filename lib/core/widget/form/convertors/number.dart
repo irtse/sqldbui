@@ -59,6 +59,7 @@ class _NumberState extends State<NumberWidget> {
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro, color: Colors.black) : Icon(Icons.onetwothree, color: Theme.of(context).secondaryHeaderColor),
             hintText: TranslateConstants.writeNumber.toLowerCase(),
+            labelStyle: TextStyle(color:Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
           ),

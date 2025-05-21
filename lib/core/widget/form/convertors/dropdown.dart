@@ -60,7 +60,12 @@ class DropDownState extends State<DropDownWidget> {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {
       try {
-        val = (await getOnFlow(val)).toLowerCase();
+        val = (await getOnFlow(val));
+        if (val.toUpperCase() == val) {
+          val = val.toUpperCase();
+        } else {
+          val = val.toLowerCase();
+        }
       } catch(e) {}
     }
     if (widget.type.contains("enum") || widget.mainUrl == null) {
@@ -82,7 +87,7 @@ class DropDownState extends State<DropDownWidget> {
                 fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                 border: const OutlineInputBorder(),
-                labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+                labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                 hintText: TranslateConstants.selectValue.toLowerCase(),
@@ -99,9 +104,14 @@ class DropDownState extends State<DropDownWidget> {
           if (widget.translatable) {
             try {
               v = await getOnFlow(item);
+              if (v.toUpperCase() == v) {
+                v = v.toUpperCase();
+              } else {
+                v = v.toLowerCase();
+              }
             } catch(e) {}
           }
-          items.add(DropdownMenuItem<String>(value: item, child:  Text(v.toLowerCase(), overflow: TextOverflow.ellipsis)));
+          items.add(DropdownMenuItem<String>(value: item, child:  Text(v, overflow: TextOverflow.ellipsis)));
         }
       }
       return DropdownButtonFormField<String>( 
@@ -129,7 +139,7 @@ class DropDownState extends State<DropDownWidget> {
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,
             constraints: const BoxConstraints(minWidth: 0),
-            labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+            labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             fillColor: widget.readOnly ? Theme.of(context).splashColor : (
               widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),
@@ -296,7 +306,12 @@ class SubDropDownState extends State<SubDropDownWidget> {
           }
           try {
             if (widget.translatable || item.translatable) {
-              vv = (await getOnFlow(vv)).toLowerCase();
+              vv = (await getOnFlow(vv));
+              if (vv.toUpperCase() == vv) {
+                vv = vv.toUpperCase();
+              } else {
+                vv = vv.toLowerCase();
+              }
             }
           } catch(e) {}
           items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
@@ -341,7 +356,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           labelText: "${widget.label}${widget.require ? "*" : ""}",
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
-                          labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+                          labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                           hintText: TranslateConstants.selectValue.toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                           prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
@@ -397,9 +412,9 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           return null;
                         },
                         onSelectionChange: (values) {
+                          if (values.isEmpty) { return; }
                           widget.component?.widget.detectChange = true;
-                          if (values.isEmpty) { widget.form[widget.name]=null;
-                          } else { widget.form[widget.name]=mapped[values[0]]?.id; }
+                          widget.form[widget.name]=mapped[values[0]]?.id;
                           try {
                             var item = mapped[values[0]];
                             if (widget.url != null && item != null) {
@@ -433,7 +448,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                 }
               } catch(e) {}
               mapped["${item.id}"]=item;
-              items.add(DropdownItem<String>(value: "${item.id}", label: v.toLowerCase(), selected: false));
+              items.add(DropdownItem<String>(value: "${item.id}", label: v, selected: false));
               ctrls.addItem(items.last);
             }
           }

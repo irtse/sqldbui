@@ -16,6 +16,7 @@ import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
+import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/page/translate.dart';
 
@@ -60,8 +61,8 @@ class ActionService {
     if (method != "delete" && errors.isEmpty) {
       if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) { 
         if (form.formKey.currentState != null && form.subForm) {
-          mainForm.currentState?.widget.error = TranslateConstants.errorRequire;
-          mainForm.currentState?.setState((){});
+          errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
+          errorFormKey.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }
         return []; 

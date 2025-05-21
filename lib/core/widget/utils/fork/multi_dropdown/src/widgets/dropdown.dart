@@ -190,9 +190,8 @@ class _Dropdown<T> extends StatelessWidget {
         selectedTileColor: dropdownItemDecoration.selectedBackgroundColor ??
             Colors.grey.shade200,
         onTap: () {
-          if (option.disabled) return;
-
-          if (singleSelect || !_reachedMaxSelection(option)) {
+          if (option.disabled || (option.selected && singleSelect)) return;
+          if (singleSelect && !option.selected  || (!_reachedMaxSelection(option))) {
             onItemTap(option);
             return;
           }

@@ -1,12 +1,11 @@
+import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
-
 
 Map<Key, bool> formularyRef = {};
 // ignore: must_be_immutable
@@ -147,8 +146,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
       if (fields.length == widget.hideField.length) {
         return Container();
       }
-      if (widget.error != "") {
-        fields = [ Text(widget.error, style: TextStyle(color: Colors.red), overflow: TextOverflow.ellipsis), ...fields];
+      if (fields.isNotEmpty) {
+        fields = [ ErrorFormularyWidget(), ...fields];
       }
       return Form( key: widget.formKey, 
         autovalidateMode: AutovalidateMode.always, 

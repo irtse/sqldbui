@@ -216,7 +216,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
             message: (currentView!.isList ? TranslateConstants.rowsListDelete : TranslateConstants.rowsDelete).toLowerCase(),
             child: InkWell( 
               onTap: () { 
-                print(selectedGrid);
                 if (selectedGrid.isEmpty) { return; }
                 List<String> ids = [];
                 String schemaID = selectedGrid[0].schemaID;

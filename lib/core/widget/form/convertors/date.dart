@@ -59,7 +59,7 @@ class _DateState extends State<DateWidget> {
             fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
             hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
             border: const OutlineInputBorder(),
-            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             hintText: TranslateConstants.selectDate.toLowerCase(),

@@ -55,6 +55,12 @@ class ManyToManyState extends State<ManyToManyWidget> {
           String str = (val.label ?? val.name ?? "${val.id}").replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
           if (widget.translatable) {
             str = await getOnFlow(str);
+
+            if (str.toUpperCase() == str) {
+                str = str.toUpperCase();
+            } else {
+              str = str.toLowerCase();
+            }
           }
           tags.add(Container( margin: const EdgeInsets.only(top:5, left: 10, right: 10), 
             child: TextButton(onPressed: (){}, 
@@ -62,7 +68,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
                   backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor),
                   mouseCursor: WidgetStateProperty.all(MouseCursor.uncontrolled),
                 ),
-                child: Text(str.toLowerCase(), style: const TextStyle(color: Colors.white))
+                child: Text(str, style: const TextStyle(color: Colors.white))
               )
             )
           );
@@ -212,9 +218,14 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
         try {
           if (widget.translatable || item.translatable) {
             v = await getOnFlow(v);
+            if (v.toUpperCase() == v) {
+                v = v.toUpperCase();
+            } else {
+              v = v.toLowerCase();
+            }
           }
         } catch(e) {}
-        items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v.toLowerCase(), selected: select));
+        items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v, selected: select));
         for (var val in (widget.value ?? []) as List<dynamic>) {
           if (val.id == item.id) { widget.form[widget.name].add(ser); }
         }
@@ -258,7 +269,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         ),
                         fieldDecoration: FieldDecoration(
                           labelText: "${l.toLowerCase()}${widget.require ? "*" : ""}",
-                          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                           hintText: TranslateConstants.selectValue.toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                           prefixIcon: Icon(Icons.checklist_rtl, color: Colors.grey.shade200),
@@ -331,10 +342,15 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
           try {
             if (widget.translatable || item.translatable) {
               v = await getOnFlow(v);
+              if (v.toUpperCase() == v) {
+                v = v.toUpperCase();
+              } else {
+                v = v.toLowerCase();
+              }
             }
           } catch(e) {}
           items.add(DropdownItem<Map<String, dynamic>>(
-            value: item.serialize(), label: v.toLowerCase(), selected: false));
+            value: item.serialize(), label: v, selected: false));
           ctrls.addItem(items.last);
         }
       }

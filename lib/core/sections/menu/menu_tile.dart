@@ -25,7 +25,6 @@ class MenuTileWidget extends StatefulWidget {
 class MenuTileWidgetState extends State<MenuTileWidget> {
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: getOnFlow(widget.view.label ?? widget.view.name), builder: (a,s) {
-        print("${widget.view.id} ${viewID?.substring(1)}"); 
         if (s.data != null) {
           try {
             return Material(

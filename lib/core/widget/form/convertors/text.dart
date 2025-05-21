@@ -60,7 +60,12 @@ class _TextState extends State<TextWidget> {
     if (val == null || val == "") {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {
-      val = (await getOnFlow(val)).toLowerCase();
+      val = (await getOnFlow(val));
+      if (val.toUpperCase() == val) {
+        val = val.toUpperCase();
+      } else {
+        val = val.toLowerCase();
+      }
     }
     return TextFormField(
       obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
@@ -94,7 +99,7 @@ class _TextState extends State<TextWidget> {
           })),
         child: Icon(Icons.link, size: 20)) : Icon(Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
         hintText: TranslateConstants.writeValue.toLowerCase(),
-        labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
+        labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
         labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
         errorStyle: const TextStyle(fontSize: 0,),
       ),

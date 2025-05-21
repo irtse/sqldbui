@@ -13,7 +13,6 @@ import 'package:sqldbui2/model/view.dart' as model;
 
 // ignore: must_be_immutable
 class TriggerBoxWidget extends StatefulWidget {
-  GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int index = 0;
 
   bool isCached;
@@ -24,6 +23,8 @@ class TriggerBoxWidget extends StatefulWidget {
   @override TriggerBoxWidgetState createState() => TriggerBoxWidgetState();
 }
 class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -95,7 +96,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
         children : [...trigsNav]
       )),
       SizedBox( height: MediaQuery.of(context).size.height / 1.7,
-        child: SingleChildScrollView( child: Form( key: widget.formKey, 
+        child: SingleChildScrollView( child: Form( key: formKey, 
         autovalidateMode: AutovalidateMode.always, 
         child: Column(
         children: widgets,
@@ -112,7 +113,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           ),
           onPressed: () async {
             var trigger = widget.triggers[widget.index];
-            if (!(widget.formKey.currentState?.validate() ?? false)) {
+            if (!(formKey.currentState?.validate() ?? false)) {
               return;
             }
             var body = await ActionService.getBody("POST", {...widget.triggers[widget.index].body }, {}, trigger.schema, context);

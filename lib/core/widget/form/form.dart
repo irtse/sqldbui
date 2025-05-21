@@ -20,7 +20,6 @@ GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
-  String error = "";
   GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   bool reloadWorkflow = true;
   List<String> hideField = [];
@@ -104,7 +103,6 @@ class FormWidgetState extends State<DataFormWidget> {
               width: mainWidth, 
               refItem: refItem, 
               view: widget.view!,
-              error: widget.error,
               formKey: widget.formKey,       
               isSplitted: isSplitted,
               subForm: widget.subForm,

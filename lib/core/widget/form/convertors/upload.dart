@@ -53,7 +53,7 @@ class _UploadState extends State<UploadWidget> {
           fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
           border: const OutlineInputBorder(),
-          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
           hintText: TranslateConstants.writePath.toLowerCase(),
@@ -81,8 +81,8 @@ class _UploadState extends State<UploadWidget> {
               autocorrect: true,
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
+                border: const OutlineInputBorder(),
                 isDense: true,
                 suffixIconColor: Theme.of(context).primaryColor,
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
@@ -96,12 +96,12 @@ class _UploadState extends State<UploadWidget> {
                   : ( widget.type.contains("link") ? InkWell( 
                 child: Icon(Icons.attach_file, size: 20)) : Icon(Icons.attach_file, color: Theme.of(context).secondaryHeaderColor)),
                 hintText: TranslateConstants.writePath.toLowerCase(),
-                labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                 labelText: label,
                 errorStyle: const TextStyle(fontSize: 0,),
               ),
               validator: (String? value) {
-                var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
+                var t = ((value ?? "") == "" || (value?.isEmpty ?? false)) && widget.require && !widget.readOnly ? "" : null;
                 return t;
               },
             )
