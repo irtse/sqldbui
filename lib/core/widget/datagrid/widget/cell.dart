@@ -98,7 +98,12 @@ class GridCellWidgetState extends State<GridCellWidget> {
       widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
     }
     if (widget.translatable) {
-      v = (await getOnFlow(widget.value)).toLowerCase();
+      v = (await getOnFlow(widget.value));
+      if (widget.value.toUpperCase() == widget.value) {
+        widget.value = widget.value.toUpperCase();
+      } else {
+        widget.value = widget.value.toLowerCase();
+      }
     }
     return Column( mainAxisAlignment: MainAxisAlignment.center, children: [
       edit ? SizedBox(height: widget.maxheight - 20, 
