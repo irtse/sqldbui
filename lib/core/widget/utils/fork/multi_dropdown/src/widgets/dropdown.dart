@@ -261,8 +261,8 @@ class _SearchField extends StatelessWidget {
                 if (alreadySearch[label] == null) {
                   alreadySearch[label] = [];
                 }
-                alreadySearch[label]?.add(search[label]!);
-                changeFunction!(searchCtrl[label]!.text);
+                alreadySearch[label]?.add(search[label] ?? "");
+                changeFunction!(searchCtrl[label]?.text ?? "");
               }
             });
           }

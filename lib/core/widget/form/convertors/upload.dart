@@ -24,6 +24,7 @@ class UploadWidget extends StatefulWidget {
   _UploadState createState() => _UploadState();
 }
 class _UploadState extends State<UploadWidget> {
+  bool error = false;
   PlatformFile? _selectedFile;
   TextEditingController text = TextEditingController();
   @override Widget build(BuildContext context) {
@@ -52,8 +53,11 @@ class _UploadState extends State<UploadWidget> {
           floatingLabelBehavior: FloatingLabelBehavior.always,
           fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
           hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+          focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
           hintText: TranslateConstants.writePath.toLowerCase(),
@@ -80,9 +84,16 @@ class _UploadState extends State<UploadWidget> {
               enabled: false,
               autocorrect: true,
               keyboardType: TextInputType.multiline,
+              onChanged: (String value) {
+                text.text = iv ?? "";
+              },
               decoration: InputDecoration(
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
-                border: const OutlineInputBorder(),
+                focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
+                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
+                disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
+                border: OutlineInputBorder(borderSide:  BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
                 isDense: true,
                 suffixIconColor: Theme.of(context).primaryColor,
                 hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
@@ -102,10 +113,12 @@ class _UploadState extends State<UploadWidget> {
               ),
               validator: (String? value) {
                 var t = ((value ?? "") == "" || (value?.isEmpty ?? false)) && widget.require ? "" : null;
+                setState(() {
+                  error = ((value ?? "") == "" || (value?.isEmpty ?? false)) && widget.require;
+                });
                 return t;
               },
-            )
-          );
+            ));
       if (widget.type.contains("multiple")) {
         return Column(children: [
           Wrap( children: widget.value == null ? [] : ("${widget.value}".split(",").map( 
@@ -147,7 +160,7 @@ class _UploadState extends State<UploadWidget> {
                   )
                 ])
             ))).toList()),
-          w,
+          w
         ]);
       }
       return w;
@@ -170,7 +183,7 @@ class _UploadState extends State<UploadWidget> {
     if (result != null) {
       _selectedFile = result.files.first;
       widget.component?.widget.detectChange = true;
-      if ("${widget.value ?? ""}" == "" || !widget.type.contains("multiple")) {
+      if ("${widget.value ?? ""}" == "") {
         widget.value = _selectedFile?.name;
       } else {
         widget.value += ",${_selectedFile?.name}";
@@ -191,3 +204,4 @@ class _UploadState extends State<UploadWidget> {
     }
   }
 }
+

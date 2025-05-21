@@ -77,8 +77,11 @@ class _TextState extends State<TextWidget> {
       autocorrect: true,
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
+        focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+        errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
         enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).splashColor, width: 1.0)),
-        border: const OutlineInputBorder(),
+        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+        border: OutlineInputBorder(borderSide: BorderSide(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).splashColor, width: 1.0)),
         isDense: true,
         suffixIconColor: Theme.of(context).primaryColor,
         hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
