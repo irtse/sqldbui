@@ -277,6 +277,7 @@ class APIService {
   }
 
   Future<APIResponse<T>> sendFile<T extends SerializerDeserializer>(String url, String path, String name, Uint8List? b, BuildContext context) async {
+    print("$path $name $b");
     FormData formData = FormData.fromMap({
       "file": b != null ? MultipartFile.fromBytes(
         b,

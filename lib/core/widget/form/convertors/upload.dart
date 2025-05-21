@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
@@ -177,6 +178,7 @@ class _UploadState extends State<UploadWidget> {
       extension = ['xls', 'xlsx', 'csv', 'ods'];
     }
     FilePickerResult? result = await FilePicker.platform.pickFiles(
+      withData: kIsWeb,
       type: FileType.custom,
       allowedExtensions: extension,
     );

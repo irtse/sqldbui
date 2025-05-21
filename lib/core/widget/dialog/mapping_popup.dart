@@ -120,6 +120,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             child: InkWell( 
               onTap: () async {
                 var files = await FilePicker.platform.pickFiles(
+                  withData: kIsWeb,
                   initialDirectory: directory, 
                   type: FileType.custom,
                   allowedExtensions: widget.importFormat, 
