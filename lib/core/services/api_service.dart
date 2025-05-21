@@ -1,8 +1,9 @@
 
 import 'dart:developer' as developer;
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
+ import 'package:http_parser/http_parser.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 
 import 'package:sqldbui2/main.dart';
@@ -275,18 +276,13 @@ class APIService {
     throw Exception(err);
   }
 
-   Future<APIResponse<T>> sendPlatformFile<T extends SerializerDeserializer>(String url, PlatformFile file, BuildContext context) async {
+  Future<APIResponse<T>> sendFile<T extends SerializerDeserializer>(String url, String path, String name, Uint8List? b, BuildContext context) async {
     FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(file.path!, filename:file.name),
-    });
-    // ignore: use_build_context_synchronously
-    return main("$url/import", formData, "post", "send succeed", true, context, null, null, false, 
-            null, Options(contentType: 'multipart/form-data'));
-  }
-
-  Future<APIResponse<T>> sendFile<T extends SerializerDeserializer>(String url, File file, BuildContext context) async {
-    FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(file.path, filename:file.path.split("/").last),
+      "file": b != null ? MultipartFile.fromBytes(
+        b,
+        filename: name,
+        contentType: MediaType("application", "octet-stream"),
+      ) : await MultipartFile.fromFile( path, filename: name ),
     });
     // ignore: use_build_context_synchronously
     return main(url, formData, "post", "send succeed", true, context, null, null, false, 

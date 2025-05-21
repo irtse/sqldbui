@@ -223,7 +223,8 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                   if (widget.files.isNotEmpty) {
                     for (var file in widget.files) {
                       if (file.path == null) { continue; }
-                      await APIService().sendFile<model.View>(currentView!.actionPath, File(file.path!), context);
+                      
+                      await APIService().sendFile<model.View>(currentView!.actionPath, file.path ?? "", file.name, file.bytes, context);
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, currentView, false); // TO REMOVE
                       // ignore: use_build_context_synchronously
                       Navigator.of(context).pop();
