@@ -172,15 +172,15 @@ class ActionService {
     Map<String, model.SchemaField> schema, Map<String, PlatformFile> files, BuildContext context) async {
     
     if ((method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") && (values["id"] ?? "") != "") {
-      TriggerCacheService.setTriggers(view.triggers);
       for (var pathFile in files.keys) {
         await submitFile(pathFile.replaceAll("rows=all", "rows=${values["id"]}"), files[pathFile]!, context);
       }
     }
     if (view.items.isNotEmpty) {            
       values["id"]=view.items.first.values["id"];
-      await listSubForms(schema, values, method, view.schemaName, "${view.schemaID}", context, false);
-    } 
+      listSubForms(schema, values, method, view.schemaName, "${view.schemaID}", context, false);
+    }
+    TriggerCacheService.setTriggers(view.triggers); 
   }
 
   static Future<Map<String, PlatformFile>> getFiles(String method, Map<String, dynamic> values, 

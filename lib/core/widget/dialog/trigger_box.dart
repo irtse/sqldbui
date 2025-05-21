@@ -67,12 +67,12 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           padding: EdgeInsets.symmetric(horizontal: 5),
           child: InkWell( 
             onTap: () => setState(() {
-              widget.index = i + 1;
+              widget.index = i;
             }),
             child: Container(
               width: 10, height: 10, 
               decoration: BoxDecoration(
-                color: i + 1 == widget.index ? Theme.of(context).primaryColor : Colors.grey, 
+                color: i == widget.index ? Theme.of(context).primaryColor : Colors.grey, 
                 borderRadius: BorderRadius.all(Radius.circular(30))
               ),
           )))

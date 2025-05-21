@@ -87,6 +87,7 @@ class _DateState extends State<DateWidget> {
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: TranslateConstants.selectDate.toLowerCase(),
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             labelText: (await getOnFlow("${widget.label.toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(

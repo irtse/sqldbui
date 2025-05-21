@@ -101,7 +101,7 @@ class _UploadState extends State<UploadWidget> {
                 errorStyle: const TextStyle(fontSize: 0,),
               ),
               validator: (String? value) {
-                var t = ((value ?? "") == "" || (value?.isEmpty ?? false)) && widget.require && !widget.readOnly ? "" : null;
+                var t = ((value ?? "") == "" || (value?.isEmpty ?? false)) && widget.require ? "" : null;
                 return t;
               },
             )
