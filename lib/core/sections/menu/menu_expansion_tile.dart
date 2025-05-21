@@ -25,9 +25,9 @@ class MenuExpansionTileWidget extends StatefulWidget {
 }
 class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
   @override Widget build(BuildContext context) {
-    var datas = categories[widget.category]!.where( (v) {
+    var datas = categories[widget.category]?.where( (v) {
       return !MenuConstants.isFavorite || ( MenuConstants.isFavorite && v.isFavorize);
-    } );
+    } ) ?? [];
     if (datas.isEmpty && widget.category != "general") {
       return Container();
     }

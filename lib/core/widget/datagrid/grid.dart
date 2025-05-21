@@ -163,6 +163,7 @@ class GridWidgetState extends State<GridWidget> {
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = (currentView?.items.length ?? 0); 
                                   }
+                                  navigate = true;
                                   globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
                                 }
                               }

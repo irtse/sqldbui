@@ -4,6 +4,7 @@ import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/save_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -215,13 +216,21 @@ class DatagridWidgetState extends State<DatagridWidget> {
             message: (currentView!.isList ? TranslateConstants.rowsListDelete : TranslateConstants.rowsDelete).toLowerCase(),
             child: InkWell( 
               onTap: () { 
+                print(selectedGrid);
                 if (selectedGrid.isEmpty) { return; }
                 List<String> ids = [];
                 String schemaID = selectedGrid[0].schemaID;
                 for (var item in selectedGrid) { 
-                  ids.add(item.cells[0].value?.toString() ?? ""); 
+                  ids.add(item.cells[0].cellID.toString()); 
                 }
-                APIService().delete("${APIConstants.genericEndpost}$schemaID?rows=${ids.join(",")}", context);
+                showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete element(s) <${ids.join(',')}>", validate: () {
+                  globalMainViewKey.currentState?.setState(() { 
+                    APIService().delete("${APIConstants.genericEndpost}$schemaID?rows=${ids.join(",")}", context).then( (e) {
+                      globalMainViewKey.currentState?.setState(() {
+                        navigate = true;
+                      });
+                    }); });
+                }));                
               }, 
               child: Icon(Icons.delete, color: Theme.of(context).highlightColor, size: 20)
           ))));

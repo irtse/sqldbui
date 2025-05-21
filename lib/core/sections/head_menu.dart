@@ -1,12 +1,12 @@
-import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/services/router.dart';
+import 'package:sqldbui2/core/services/auth_service.dart';
+
 // ignore: must_be_immutable
 class HeadMenuWidget extends StatefulWidget{
   const HeadMenuWidget ({ super.key });
@@ -43,10 +43,11 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
         ));
   }
   void clear() {
-    homeKey.currentState?.setState(() {
+    globalMainViewKey.currentState?.setState(() {
       currentView = null;
       viewID = TranslateConstants.dashboard.toLowerCase();
       subViewID = null;
+      globalMenuKey.currentState?.setState(() { });
     });
   }
 }

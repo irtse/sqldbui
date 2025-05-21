@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_login/flutter_login.dart';
+import 'package:sqldbui2/core/widget/utils/fork/login/flutter_login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // @RoutePage<bool>()
 class LoginScreen extends StatefulWidget {
@@ -31,35 +32,37 @@ class _LoginWidgetState extends State<LoginScreen> {
     });
   }
 
-  Future<String?> _signupUser(SignupData data) {
-    return Future.delayed(loginTime).then((_) {
-      return null;
-    });
+  @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+        if (a.hasData && a.data != null) {
+          return a.data!;
+        }
+        return Container();
+      });
   }
-
-  Future<String> _recoverPassword(String name) {
-    return Future.delayed(loginTime).then((_) {
-      return "Not implemented";
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Future<Widget> futureBuild(BuildContext context) async {
     return FlutterLogin(
       title: '',
       userValidator: (value) {
         if (value == null || value == "") { return "Must not be empty";}
         return null;
       },
-      messages: LoginMessages(userHint: "Username/Email"),
+      hideForgotPasswordButton: true,
       userType: LoginUserType.name,
       logo: const AssetImage('assets/images/logo.png'),
       onLogin: _authUser,
-      onSignup: _signupUser,
+      onSignup: null,
+      messages: LoginMessages(
+        userHint: (await getOnFlow('username/email')).toLowerCase(),
+        passwordHint: (await getOnFlow('password')).toLowerCase(),
+        loginButton: (await getOnFlow('LOGIN')).toUpperCase(),
+        forgotPasswordButton: '',
+        recoverPasswordButton: '',
+      ),
       onSubmitAnimationCompleted: () {
         if (AuthService.isLoggedIn) {  setState(() { context.go("/"); }); }   
       },
-      onRecoverPassword: _recoverPassword,
+      onRecoverPassword: null,
     );
   }
 }
