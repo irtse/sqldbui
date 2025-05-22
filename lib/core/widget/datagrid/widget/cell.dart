@@ -81,6 +81,9 @@ class GridCellWidgetState extends State<GridCellWidget> {
     }
     widget.value = widget.cell.value != null ? widget.cell.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...";
     widget.value = widget.shal != null ? (widget.shal!.label ?? widget.shal!.name ?? "${widget.shal!.id}") : widget.value;
+    if ( widget.shal != null && widget.value == "") {
+      widget.value = widget.shal!.id;
+    }
     var edit = (isEditMode[viewID] ?? false) && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
                 && !widget.cell.readOnly && !widget.readOnly;
     String url = currentView!.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]!.actionPath == "" ? 
