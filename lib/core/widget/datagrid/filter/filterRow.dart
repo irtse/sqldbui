@@ -48,7 +48,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     }
     widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
-    String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
+    String url = currentView!.schema[widget.columnName] != null && currentView!.schema[widget.columnName]?.valuesPath != ""  ? "${currentView!.schema[widget.columnName]!.valuesPath}&shallow=enable" : "";
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), this, true, false, url, ""), 
       builder: (a,b) {
         if ((b.data != null)) {
@@ -122,7 +122,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                       border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
                     ), validator: (String? value) { return null; }))),
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), 
-                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 4, child: 
+                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / ( widget.type == "boolean" ? 6 : 4) , child: 
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
                       DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                       DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,))], 

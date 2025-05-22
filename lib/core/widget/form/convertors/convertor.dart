@@ -58,7 +58,7 @@ class Convertor {
             floatingLabelBehavior: FloatingLabelBehavior.always, 
             filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
-            suffixIcon: Icon(isText ? Icons.text_fields : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
+            suffixIcon: Icon(isText ? (type.contains("upload") ? Icons.manage_search_outlined : Icons.text_fields)  : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
             hintText: (await getOnFlow("$label...")).toLowerCase(),  
             errorStyle: const TextStyle(fontSize: 0,),
           ),

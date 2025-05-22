@@ -76,14 +76,6 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
 }
 class GridCellWidgetState extends State<GridCellWidget> {
   @override Widget build(BuildContext context) { 
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     if (cacheChanges["${widget.cellID}:${widget.cell.columnName}"] != null) { 
       widget.cell.value = cacheChanges["${widget.cellID}:${widget.cell.columnName}"]; 
     }
@@ -97,21 +89,52 @@ class GridCellWidgetState extends State<GridCellWidget> {
     if (widget.shal?.name != null) {
       widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
     }
+    Widget wid = Text( "$v", 
+          textAlign: TextAlign.center, 
+          style: TextStyle(
+            fontSize: widget.cell.fontSize, 
+            // ignore: use_build_context_synchronously
+            color: Theme.of(context).primaryColorLight)
+          );
     if (widget.translatable) {
-      v = (await getOnFlow(widget.value));
-      if (widget.value.toUpperCase() == widget.value) {
-        widget.value = widget.value.toUpperCase();
-      } else {
-        widget.value = widget.value.toLowerCase();
-      }
+      wid = FutureBuilder(future: getOnFlow(widget.value), builder: (a,b) {
+        String t = "";
+        if (b.data != null) {
+          t = b.data!;
+          if (widget.value.toUpperCase() == widget.value) {
+            t = b.data!.toUpperCase();
+          } else {
+            t = b.data!.toLowerCase();
+          }
+          return Text( t, 
+          textAlign: TextAlign.center, 
+          style: TextStyle(
+            fontSize: widget.cell.fontSize, 
+            // ignore: use_build_context_synchronously
+            color: Theme.of(context).primaryColorLight)
+          );
+        }
+        return Text( "$v", 
+          textAlign: TextAlign.center, 
+          style: TextStyle(
+            fontSize: widget.cell.fontSize, 
+            // ignore: use_build_context_synchronously
+            color: Theme.of(context).primaryColorLight)
+          );
+      });      
     }
     return Column( mainAxisAlignment: MainAxisAlignment.center, children: [
       edit ? SizedBox(height: widget.maxheight - 20, 
-        child: await Convertor.filterFieldByType(
+        child: FutureBuilder( future: Convertor.filterFieldByType(
         // ignore: use_build_context_synchronously
         context, widget, widget.cell.type, "", 
         this, false, true, url, 
-        "${widget.cellID}:${widget.cell.columnName}")) : 
+        "${widget.cellID}:${widget.cell.columnName}"), builder: (a,b) {
+          if (b.data != null) {
+            return b.data!;
+          }
+          return Container();
+        })) : 
       ListTile( 
         mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 
@@ -128,13 +151,6 @@ class GridCellWidgetState extends State<GridCellWidget> {
           AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
-        child: Center(child: Text( "$v", 
-          textAlign: TextAlign.center, 
-          style: TextStyle(
-            fontSize: widget.cell.fontSize, 
-            // ignore: use_build_context_synchronously
-            color: Theme.of(context).primaryColorLight)
-          )
-        )))]);
+        child: Center(child: wid )))]);
   }
 }

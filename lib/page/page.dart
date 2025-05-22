@@ -31,6 +31,14 @@ class PageWidgetState extends State<PageWidget> {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     noMenu = currentWidth - menuSize < 600;
     menuSize = isMenu && !noMenu ? (250 <= currentWidth ? (
               menuSize == 0 ? 250 : (menuSize <= (currentWidth / 2) ? menuSize : (currentWidth / 2))) : currentWidth) : 0;
@@ -57,18 +65,18 @@ class PageWidgetState extends State<PageWidget> {
         actions: <Widget>[
           Stack( children: [
             Tooltip(
-             message: TranslateConstants.notifications.toLowerCase(),
+             message: (await getOnFlow(TranslateConstants.notifications)).toLowerCase(),
              child: IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
              onPressed: () { 
               if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
              })),
              NotificationWidget(key: appBarKey),
           ],),
-          DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: TranslateConstants.tutorial.toLowerCase(), left: 12.5),
+          DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
           DialogButtonWidget( left: 12.5, right: 50,
             icon: Icons.logout_outlined,
             widget: ConfirmBoxWidget(purpose: "disconnect your account", validate: () { _authProvider.logOut(context); }), 
-            tooltip: TranslateConstants.logout),
+            tooltip: (await getOnFlow(TranslateConstants.logout)).toLowerCase()),
         ],
       ),
       body: Stack( 

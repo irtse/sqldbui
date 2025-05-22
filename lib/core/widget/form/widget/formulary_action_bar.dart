@@ -43,10 +43,10 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
     if (widget.refItem.values["state"] != null) {
       var value = widget.refItem.values["state"];
       if (widget.view.actions.contains("put") && !widget.view.isEmpty && value != "completed" && value != "dismiss" && value != "refused") {
-        for (var state in { "completed" : "validate task", 
-                            "dismiss" : "dismiss task", 
-                            "refused": "refused task"}.entries) {
-          var purpose = await getOnFlow(state.value);
+        for (var state in { "completed" : { "purpose": "validate task", "color": Colors.green, "icon": Icons.check },
+                            "dismiss" :  { "purpose": "dismiss task", "color": Colors.orange, "icon": Icons.back_hand_outlined }, 
+                            "refused":  { "purpose": "refused task", "color": Colors.red, "icon": Icons.close}, }.entries) {
+          var purpose = await getOnFlow("${state.value["purpose"]}");
           positionnedBar.add(Padding( padding: const EdgeInsets.only(left: 20), child: FloatingActionButton(
             tooltip: (await getOnFlow(TranslateConstants.validate)).toLowerCase(),
             onPressed: () {
@@ -58,7 +58,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
                   ActionService.pressed(null, false, widget.view.schemaName, widget.view.actionPath, <String>["id"], widget.view.schema, "put", false, context)();
               }));
             }, 
-            backgroundColor: Colors.green, child: const Icon(Icons.check, color: Colors.white))));
+            backgroundColor: state.value["color"] as Color, child: Icon(state.value["icon"] as IconData?, color: Colors.white))));
         }
       }
       return Positioned( bottom: 30, right: 0, 

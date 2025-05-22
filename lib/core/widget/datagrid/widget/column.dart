@@ -3,8 +3,6 @@ import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
