@@ -75,6 +75,8 @@ class ActionService {
     if (resp.isNotEmpty) {
       if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
       body["dbschema_id"]=resp.first.schemaID;
+    } else {
+      return views;
     }
     
     if (errors.isNotEmpty) {

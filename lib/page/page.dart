@@ -45,7 +45,9 @@ class PageWidgetState extends State<PageWidget> {
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
-      endDrawer: const NotificationDrawerWidget(),
+      endDrawer: Drawer(
+        child: const NotificationDrawerWidget()
+      ),
       appBar: AppBar(
         elevation: 3,
         leading: noMenu ? Builder(
