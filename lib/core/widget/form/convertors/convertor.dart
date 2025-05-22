@@ -35,7 +35,7 @@ class Convertor {
                 hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
-    bool isText = type.contains("text") || type.contains("varchar");
+    bool isText = type.contains("text") || type.contains("varchar") || type.contains("upload");
     bool isInt = type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int");
     Widget w = Container();
     if (isText || (isInt && url == "")) { 

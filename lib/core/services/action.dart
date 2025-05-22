@@ -126,7 +126,6 @@ class ActionService {
           } 
         }
         consentCache.remove(viewID);
-        print("$path $body");
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {

@@ -58,7 +58,8 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
       }) ;
 
     List<DropdownMenuItem<String>> conn = [];
-    var indications = widget.type.contains("enum") || widget.type == "link" ? ["=", "!="] : ["like", "not like", "=", "!="];
+    var indications = widget.type.contains("enum") || widget.type.contains("link") ? ["=", "!="] : (  
+      widget.type.contains("link") ? ["like", "not like"] : ["like", "not like", "=", "!="]);
     for (var indication in ( isText ? indications : [...indications, "<", ">", "<=", ">="])) {
       conn.add( DropdownMenuItem<String>(
         value: indication, 

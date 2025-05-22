@@ -246,7 +246,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
         this, false, false, url, "");
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
     if (!isText) { togglesMode.add("MATH"); }
-    var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") ? ['=', "!=" ] : ["LIKE", "!LIKE", '=', "!=" ]);
+    var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));
     if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
     return Column(children: [ 
       Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch( minHeight: 25,
