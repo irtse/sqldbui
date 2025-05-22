@@ -43,7 +43,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
         var scheme = widget.triggers.first.schema[k];
         if (!scheme!.readonly) {
           try {
-            print(widget.triggers[widget.index].body[k]);
+            b[k] = widget.triggers[widget.index].body[k];
             var w = await Convertor.formFieldByType(
               b, context, "", widget.triggers[widget.index].schema, scheme.type, k, scheme.label, 
               scheme.description, scheme.require, scheme.readonly, widget.triggers[widget.index].body[k] == "" ? null : widget.triggers[widget.index].body[k], 

@@ -68,7 +68,8 @@ class PageWidgetState extends State<PageWidget> {
              message: (await getOnFlow(TranslateConstants.notifications)).toLowerCase(),
              child: IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
              onPressed: () { 
-              if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
+              scaffoldKey.currentState!.openEndDrawer();
+              // if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
              })),
              NotificationWidget(key: appBarKey),
           ],),
