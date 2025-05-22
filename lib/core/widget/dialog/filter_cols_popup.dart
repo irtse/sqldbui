@@ -272,11 +272,8 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
             width: 165, height: 30.0, disabledOpacity: 0.5,
             onChanged: (value) { 
               if (value) { 
-                var tmp = filterTempOrderView[viewID]!;
-                var b = tmp.sublist(0, index);
-                b.add(fieldName);
-                b.addAll(tmp.sublist(index, tmp.length));
-                filterTempOrderView[viewID] = b; 
+                filterTempOrderView[viewID]?.add(fieldName);      
+                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
               } else { 
                 filterTempOrderView[viewID]?.remove(fieldName); 
               }
