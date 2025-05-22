@@ -83,9 +83,13 @@ class ManyToManyState extends State<ManyToManyWidget> {
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
         Row(children: [Wrap(children: tags)]) ]),);
     } else if ((widget.url ?? "") != "") {
-      if (widget.value != null) {
+      if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
+        List<String> ids = [];
+        for (var v in widget.value) {
+          ids.add("${v["id"]}");
+        }
         return FutureBuilder<APIResponse<model.Shallowed>>(
-          future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${widget.value.join(",")}"), true, null), 
+          future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), true, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get(widget.url!, true, null), 
@@ -249,7 +253,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         controller: ctrls,
                         items: items,
                         enabled: true,
-                        searchEnabled: true,
+                        searchEnabled: max > 10,
                         max: max,
                         changeFunction: (String value) async {
                           if (value == "") {

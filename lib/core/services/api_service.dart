@@ -188,7 +188,11 @@ class APIService {
         dio.options.headers["authorization"] = auth;
         dio.interceptors.clear(); 
         var cmdCol = getCmdCol();
-        var orderBy = getOrderDir(url);
+        var orderBy = "";
+        if (!url.contains("shallow")) {
+          orderBy = getOrderDir(url);
+        }
+        
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
         var cols = getColumns(url, offset != null);
         if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
@@ -196,6 +200,7 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
+        print("$method ${"$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter"}");
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');

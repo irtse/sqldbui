@@ -36,7 +36,9 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           child: InkWell( 
             child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
               color: show ? Colors.white : Theme.of(context).splashColor, size: 20), 
-            onTap: () { globalMainViewKey.currentState?.setState(() { show = !show; }); }
+            onTap: () { 
+              navigate = true;
+              globalMainViewKey.currentState?.setState(() { show = !show; }); }
           )),
         ),
         filterRowsWidget.isNotEmpty ? Container(
@@ -59,12 +61,19 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               "elder" : globalNew[viewID] ?? "all", "is_selected" : true, "filter_fields" : globalFilter[viewID]?.serialize() }; 
             if (currentView == null) { return; }
             (viewID != null && filterRestr[viewID] != null && filterRestr[viewID] != "" ? 
-            APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), body, context) :
+            APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), body, context) :
             APIService().post<model.Shallowed>(currentView!.filterPath, body, context)).then((value) {
-              setState(() { 
-                forceFilter = true;
-                refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); 
-              }); 
+              Future.delayed(Duration(seconds: 1), () {
+                setState(() { 
+                  try {
+                    filterRestr[viewID] = "${value.data?.first.id}";
+                  } catch(e) {}
+                  forceFilter = true;
+                  refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); 
+                  navigate = true;
+                  globalMainViewKey.currentState?.setState(() { });
+                }); 
+              });
             });
           })) : Container(),
         filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(right: 5), 
@@ -74,16 +83,18 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           icon: Icon(Icons.delete, size: 18, color: Theme.of(context).splashColor, ),
           onPressed: () { 
             showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
-                globalMainViewKey.currentState?.setState(() { 
-                  APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), context).then((value) {
-                    removeFilter(); 
-                    filterRestr[viewID] = ""; 
-                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-                }); });
+                removeFilter(); 
+                navigate = true;
+                var id = filterRestr[viewID];
+                filterRestr[viewID] = ""; 
+                APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=${id}"), context).then((value) {
+                  forceFilter = true; 
+                  setState(() {});
+                  globalMainViewKey.currentState?.setState(() { }); });
               }));
             })) : Container() ,
         currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", 
-        firstAPI && forceFilter, null), 
+        firstAPI || forceFilter, null), 
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
           forceFilter = false;
           if (snapshot.data?.data != null) {
@@ -98,6 +109,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           icon: Icon( Icons.add, size: 17, color: Theme.of(context).highlightColor, ),
           onPressed: () { 
             show = true;
+            navigate = true;
             filterRestr.remove(viewID);
             filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length)); 
             globalMainViewKey.currentState?.setState(() { });
@@ -115,6 +127,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
             }
             noFilterRetrieval = true;
+            navigate = true;
             globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
           })),
         filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
@@ -126,12 +139,17 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           onPressed: () async { 
             setState(() { });
             removeFilter();
-            if (filterRestr[viewID] == null || filterRestr[viewID] == "") { 
+            if ((filterRestr[viewID] ?? "") == "") { 
+              filterRestr[viewID] = ""; 
               return Future.delayed(const Duration(seconds: 1), 
-                () => globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true)); 
+                () {
+                  navigate = true; 
+                  globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+                }); 
             }
             filterRestr[viewID] = ""; 
-            APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[filterRestr[viewID]]}"), <String, dynamic> { "is_selected" : false }, null).then((value) {
+            APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
+              <String, dynamic> { "is_selected" : false }, null).then((value) {
               Future.delayed(const Duration(seconds: 1), () => setState(() {
                 forceFilter = true;
                 refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []);
@@ -144,6 +162,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
                 onToggle: (index) { 
                     globalNew[viewID] = toggles[index ?? 0]; 
+                    navigate = true;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
               ),
@@ -176,12 +195,11 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
     List<DropdownMenuItem<String>> dpItems = [];
     if (widget.datas != null) { 
             for (var i in widget.datas!) { 
-              if (dpItems.where((element) => element.value == i.label).isEmpty) {
-                dpItems.add( DropdownMenuItem<String>(value: i.label, child: Text(await getOnFlow(i.label!), overflow: TextOverflow.ellipsis)));
+              if (dpItems.where((element) => element.value == i.id.toString()).isEmpty) {
+                dpItems.add( DropdownMenuItem<String>(value: "${i.id}", child: Text(await getOnFlow(i.label!), overflow: TextOverflow.ellipsis)));
               }
-              filterIDName[i.label!] = i.id!;
               if (i.selected && filterRestr[viewID] != "") { 
-                filterRestr[viewID] = i.label!;                 
+                filterRestr[viewID] = "${i.id}";                 
               }
               if ((i.selected && ( widget.filterMain == null || widget.filterMain!.isEmpty) && filterRestr[viewID] != ""
               && filterRestr[viewID] != null && !noFilterRetrieval)
@@ -205,11 +223,13 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
                       if (value == null) { return; }
                       noFilterRetrieval = false;
                       filterRestr[viewID] = value; 
-                      APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterIDName[value]}"), 
+                      APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=$value"), 
                         <String, dynamic> { "is_selected" : true }, null).then( 
                           (value) => setState(() { 
                             forceFilter = true;
-                            refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); 
+                            refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []);
+                            navigate = true;
+                            globalMainViewKey.currentState?.setState(() { });
                           }));
                     }, dropdownColor: Theme.of(context).secondaryHeaderColor,
                     decoration: InputDecoration(

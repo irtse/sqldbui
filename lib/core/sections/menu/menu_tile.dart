@@ -4,6 +4,7 @@ import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -26,6 +27,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: getOnFlow(widget.view.label ?? widget.view.name), builder: (a,s) {
         if (s.data != null) {
+          fastTranslaste[widget.view.label ?? widget.view.name] = s.data ?? "";
           try {
             return Material(
               type: MaterialType.transparency,

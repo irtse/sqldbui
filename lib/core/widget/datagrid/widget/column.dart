@@ -113,11 +113,8 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             if (currentView !=  null && viewID != null) {
               globalOffset = 0;
               globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "asc" || globalOrder[viewID]![widget.columnName] == null  ? "asc" : "desc";
-              APIService().get<model.View>(currentView!.linkPath, true, context).then((value){
-                if (value.data != null && value.data!.isNotEmpty) {
-                  globalMainViewKey.currentState?.refresh(viewID, subViewID, value.data![0], false);
-                }
-              },);
+              navigate = true;
+              globalMainViewKey.currentState?.refresh(viewID, subViewID, currentView, false);
             }
           }, 
           icon: Icon( currentView != null && globalOrder.containsKey(viewID) && (
@@ -135,6 +132,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( message: TranslateConstants.filterResetT.toLowerCase(),  child: IconButton(
         onPressed: () async { 
           resetFilter(widget.columnName);
+          navigate = true;
           globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
         }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 15,)))));
       } 

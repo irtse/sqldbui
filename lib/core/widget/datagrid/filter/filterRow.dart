@@ -43,21 +43,19 @@ class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
 
 class FilterRowWidgetState extends State<FilterRowWidget> {
   @override Widget build(BuildContext context) {
-  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     if (viewID == null || MediaQuery.of(context).size.width < 1000) { 
       return SizedBox(height: 45, width: MediaQuery.of(context).size.width - menuSize,); 
     }
     widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
     String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
-    Widget w = await Convertor.filterFieldByType(context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), this, true, false, url, "");
+    Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), this, true, false, url, ""), 
+      builder: (a,b) {
+        if ((b.data != null)) {
+          return b.data!;
+        }
+        return Container();
+      }) ;
 
     List<DropdownMenuItem<String>> conn = [];
     var indications = widget.type.contains("enum") || widget.type == "link" ? ["=", "!="] : ["like", "not like", "=", "!="];
@@ -81,7 +79,9 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
       ));
     }
     
-    return Form( key: widget.formKey, autovalidateMode: AutovalidateMode.always, 
+    return Form( 
+      key: widget.formKey, 
+      autovalidateMode: AutovalidateMode.always, 
       child: SizedBox(height: 45, child: Row(children: [
               Padding(  padding: const EdgeInsets.only(left: 37, right: 10, top: 0), 
                 child: Text("${widget.index}", style : TextStyle( color: Theme.of(context).splashColor, fontSize: 15))),
@@ -121,7 +121,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                       border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
                     ), validator: (String? value) { return null; }))),
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), 
-                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 6, child: 
+                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 4, child: 
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
                       DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                       DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,))], 
@@ -162,6 +162,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                   widget.connector = widget.connector == "and" ? "" : "and"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
+                  navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
                     } else if (filterRowsWidget.length - 1 == widget.index) {
@@ -174,6 +175,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                   widget.connector = widget.connector == "or" ? "" : "or"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
+                  navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {
                       filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 

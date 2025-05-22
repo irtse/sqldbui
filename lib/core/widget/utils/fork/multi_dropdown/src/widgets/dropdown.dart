@@ -101,7 +101,7 @@ class _Dropdown<T> extends StatelessWidget {
               if (searchEnabled)
                 if (max > 20) 
                   Column(children: [
-                    Center(child: Padding(padding: EdgeInsets.only(bottom: 5, top: 15),
+                    Center(child: Padding(padding: EdgeInsets.only(bottom: 5, top: 15, left: 10, right: 10),
                       child: Text("$max ${TranslateConstants.searchInfo}", 
                         style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
                     )),

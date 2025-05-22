@@ -41,6 +41,7 @@ class SaveDatagridButtonWidgetState extends State<SaveDatagridButtonWidget> {
             }
           }
         }
+        navigate = true;
         globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
         setState(() { change = false; });
       }, 

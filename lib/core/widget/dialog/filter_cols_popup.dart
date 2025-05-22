@@ -14,11 +14,13 @@ import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 bool setLatest = false;
+
+Map<String?, List<dynamic>> filterIndexOrderView = <String?, List<dynamic>>{};
+
 Map<String?, List<dynamic>> filterOrderView = <String?, List<dynamic>>{};
 Map<String?, bool> filterTempID = <String?, bool>{};
 Map<String?, List<dynamic>> filterTempOrderView = <String?, List<dynamic>>{};
 Map<String?, String?> filterView = <String?, String?>{};
-Map<String?, int> filterViewIDName = <String, int>{};
 GlobalKey<FilterColsPopUpState> filterColsPopUpKey = GlobalKey<FilterColsPopUpState>();
 // ignore: must_be_immutable
 class FilterColsPopUpWidget extends StatefulWidget{
@@ -71,7 +73,7 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
       var dpItems = <DropdownMenuItem<String>>[];
         for (var i in widget.datas) { 
           if (setLatest) {
-            filterView[viewID] = i.label ?? i.name;
+            filterView[viewID] = i.id.toString();
             setLatest = false;
           }
           if (i.selected && (i.label ?? i.name) == filterView[viewID]) { 
@@ -86,10 +88,9 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
             }
             filterTempOrderView[viewID] = i.fields.map((e) => e.column).toList();
           }
-          filterViewIDName[i.label!] = i.id!;
           var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
-          dpItems.add(DropdownMenuItem<String>(value: await getOnFlow(i.label ?? i.name ?? ""), 
-            child: Text(filterLabel.toLowerCase(), overflow: TextOverflow.ellipsis,),));
+          dpItems.add(DropdownMenuItem<String>(value: i.id.toString(), 
+            child: Text(filterLabel.toLowerCase(), overflow: TextOverflow.ellipsis)));
         }
       return PopupButtonWidget(
         color: Colors.white,
@@ -119,14 +120,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
   bool force = false;
   bool noSelection =false;
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 20),
       child: StatefulBuilder(
@@ -153,7 +146,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () async { 
                     await APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", 
-                      "rows=${filterViewIDName[filterView[viewID]]}"), <String, dynamic> { "is_selected" : false }, null);
+                      "rows=${filterView[viewID]}"), <String, dynamic> { "is_selected" : false }, null);
                       filterView[viewID] = null;
                       filterOrderView.remove(viewID);
                       filterTempOrderView.remove(viewID);  
@@ -170,21 +163,26 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       fields.add(<String, dynamic>{ "name" : fieldName, "index" : index, "width" : rects[viewID]?[fieldName]?.width, });
                     }
                     filterOrderView[viewID] = filterTempOrderView[viewID]!;
-                    var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
+                    var body = <String, dynamic>{ "link" : currentView!.schemaName, "is_selected" : true, "view_fields" : fields  };
                     APIService().post<model.Shallowed>(currentView!.filterPath, body, null).then((v) async { 
                         forceViewFilter = true;
                         globalOffset = 0; 
                         rects.remove(viewID);
-                        widget.comp.setState((){  });
                         setLatest = true;
                         if (v.data != null && v.data!.isNotEmpty) {
                           var i = v.data?[0];
-                          filterView[viewID] = i!.label ?? i.name ?? "";
+                          filterView[viewID] = i!.id.toString();
                           var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
-                          widget.items.add(DropdownMenuItem<String>(value: i.label ?? i.name, child: Text(
-                            (await getOnFlow(filterLabel)).toLowerCase(), overflow: TextOverflow.ellipsis,),));
+                          widget.items.add(DropdownMenuItem<String>(value: i.id.toString(), 
+                            child: FutureBuilder(future: getOnFlow(filterLabel), builder: (a,s) {
+                              if (s.data != null) {
+                                return Text( s.data?.toLowerCase() ?? "", overflow: TextOverflow.ellipsis);
+                              }
+                              return Text( filterLabel.toLowerCase(), overflow: TextOverflow.ellipsis);
+                            })));
                         }
                         setState((){});
+                        widget.comp.setState((){});
                         Future.delayed( const Duration(seconds: 1), () {
                           globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                         });
@@ -228,7 +226,8 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
     
     List<Widget> items = [];
     if (filterTempOrderView[viewID] == null) { filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; }
-    var list = currentView!.order.where( (fieldName) => !(widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")));
+    filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( 
+      (fieldName) => !(widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many"))).toList();
     items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), child:  Row( children : [ 
           Container( width: 44),
           Padding( padding: const EdgeInsets.only(right: 10), 
@@ -246,19 +245,22 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
           Container()
         ]))));
     
-    for (var (index,fieldName) in list.where( (el) => widget.schema[el] != null).indexed) {
+    for (var (index,fieldName) in (filterIndexOrderView[viewID] ?? []).where( (el) => widget.schema[el] != null).indexed) {
         if (widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")) { continue; }
         var scheme =  widget.schema[fieldName]!; 
         var label = await getOnFlow(scheme.label);
         items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), child:  Row( children : [ 
           index == 0 ? Container(width: 44) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
             onTap: () {
-              var tmp = filterTempOrderView[viewID]!;
+              var tmp = filterIndexOrderView[viewID]!;
               var i = tmp.removeAt(index);
               var b = tmp.sublist(0, index > 0 ? index - 1 : 0);
               b.add(i);
               b.addAll(tmp.sublist(index > 0 ? index - 1 : 0, tmp.length));
-              setState(() { filterTempOrderView[viewID] = b; }); 
+              setState(() { 
+                filterIndexOrderView[viewID] = b; 
+                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+              }); 
             }, child: const Icon(Icons.arrow_upward))),
           Padding( padding: const EdgeInsets.only(right: 10), 
           child: Tooltip( message: label.toLowerCase(), child: AdvancedSwitch(
@@ -275,36 +277,42 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                 b.add(fieldName);
                 b.addAll(tmp.sublist(index, tmp.length));
                 filterTempOrderView[viewID] = b; 
-              } else { filterTempOrderView[viewID]?.remove(fieldName); }
+              } else { 
+                filterTempOrderView[viewID]?.remove(fieldName); 
+              }
             }
           ))),
-          index == list.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child:  InkWell(onTap: () {
-              var tmp = filterTempOrderView[viewID]!;
+          index == filterIndexOrderView[viewID]!.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child: InkWell( onTap: () {
+              var tmp = filterIndexOrderView[viewID]!;
               var i = tmp.removeAt(index);
               var b = tmp.sublist(0, index + 1);
               b.add(i);
               b.addAll(tmp.sublist(index + 1, tmp.length));
-              widget.comp.setState(() { filterTempOrderView[viewID] = b; }); 
-            }, child: const Icon(Icons.arrow_downward))),
+              setState(() { 
+                filterIndexOrderView[viewID] = b; 
+                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+                print(filterTempOrderView);
+              }); 
+          }, child: const Icon(Icons.arrow_downward))),
         ]))));
       }
     return Column(children: [
       Padding(padding: EdgeInsets.symmetric(horizontal: 10),
-        child:  DropdownButtonFormField<String>( 
-        items: widget.items, 
+        child: Container( child: DropdownButtonFormField<String>( isExpanded: true,
+                    items: widget.items, 
                     value: fView,
                     hint: Text(TranslateConstants.filterPlaceholder.toLowerCase(), overflow: TextOverflow.ellipsis),
                     style: const TextStyle(fontSize: 14, color: Colors.black),
                     onChanged: (value) async {
                       await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
-                        "rows=all", "rows=${filterViewIDName[value]}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
+                        "rows=all", "rows=$value"), <String, dynamic> { "is_selected" : true }, null).then((v) {
                         globalOffset = 0; 
                         rects.remove(viewID);
                         filterView[viewID] = value;
                         filterTempOrderView.remove(viewID);
                         noSelection=false;
                         if (v.data != null && v.data!.isNotEmpty) { 
-                          filterTempOrderView[viewID] = v.data![0].fields.map((e) => e.column).toList();
+                          filterTempOrderView[viewID] = v.data![0].fields.map((e) => e.column ?? "id").toList();
                           filterOrderView[viewID] = filterTempOrderView[viewID]!;
                         } 
                         setState((){});
@@ -327,7 +335,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       labelText: TranslateConstants.filterLabel.toLowerCase(),
                     ),
                     validator: (String? value) { return null; },
-                  )),
+                  ))),
                   Row(mainAxisAlignment: MainAxisAlignment.center, 
                     children: filterView[viewID] != null && filterView[viewID] != "" ? [
                     IconButton(onPressed: () {
@@ -339,13 +347,13 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
                       var body = <String, dynamic>{  "name" : filterView[viewID], "link" : currentView!.schemaName, "view_fields" : fields  };
                       APIService().put<model.View>(currentView!.filterPath.replaceAll(
-                        "rows=all", "rows=${filterViewIDName[filterView[viewID]]}"), body, null).then((value) {
+                        "rows=all", "rows=${filterView[viewID]}"), body, null).then((value) {
                           globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                         });
                     }, icon: const Icon(Icons.save), color: Theme.of(context).secondaryHeaderColor),
                     IconButton(onPressed: () { 
                       showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
-                        APIService().delete<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterViewIDName[filterView[viewID]]}"), null).then((value) {
+                        APIService().delete<model.View>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterView[viewID]}"), null).then((value) {
                           widget.items.removeWhere((element) => element.value == filterView[viewID]);
                           filterView[viewID] = null;
                           filterTempOrderView.remove(viewID);

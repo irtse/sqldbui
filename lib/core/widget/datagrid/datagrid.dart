@@ -102,12 +102,26 @@ class DatagridWidgetState extends State<DatagridWidget> {
       datas.sort( (a, b) =>  (b.values["id"] != null ? int.parse( b.values["id"]) : 0) -  (a.values["id"] != null ? int.parse(a.values["id"]) : 0) );
     }
     
-    var index = 0;
-    Filters? filterMain = globalFilter[viewID];
-    
+    var index = 0;    
     if (!(isEditMode[viewID] ?? false)) {
       if (filterRestr[viewID] != null && !tempRemoval) {
-        filterRowsWidget = filterMain?.toRow(schema) ?? [];
+        if ((globalFilter[viewID]?.filters ?? {}).isNotEmpty) {
+          filterRowsWidget = globalFilter[viewID]?.toRow(schema) ?? [];
+        } else {
+          var resp = await APIService().get<model.Shallowed>("${currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}")}&is_view=false", true, null);
+          if ((resp.data ?? []).isNotEmpty) {
+            var i = resp.data![0];
+            if ((i.selected && !noFilterRetrieval) || (filterRowsWidget.isEmpty && i.fields.isNotEmpty)) { 
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  globalNew[viewID] = i.elder;
+                  refreshFilter(i.fields);
+                }); 
+              }
+          } else {
+            filterRestr[viewID] = "";
+          }
+        }
+        
       } else if (tempRemoval) { tempRemoval = false; }
       for (var i in filterRowsWidget) { 
         if (filterRowsWidget.length - 1 > index && i.connector == "") { 
@@ -137,7 +151,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
             currentWidth > 1000 ? 
             Positioned( top: 3.5, left: 32, child: (isEditMode[viewID] ?? false) ? 
                 FunctionsSelectorWidget(mathAllowed: realOrder(widget.view, false, false, null, 5).length > 2)
-              : FilterSelectorWidget(schema: schema, filterMain: filterMain, schemaName: widget.view?.schemaName ?? "")) 
+              : FilterSelectorWidget(schema: schema, filterMain: globalFilter[viewID], schemaName: widget.view?.schemaName ?? "")) 
             : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 

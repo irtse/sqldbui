@@ -58,7 +58,11 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
               style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 11),
               onChanged: (value) {
                 MenuConstants.value = value;
-                globalMenuKey.currentState?.setState(() { });
+                Future.delayed(Duration(milliseconds: 500), () {
+                  if(MenuConstants.value == value) {
+                    globalMenuKey.currentState?.setState(() { });
+                  }
+                });
               },
               decoration: InputDecoration(
                 filled: true,

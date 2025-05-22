@@ -41,6 +41,7 @@ class ActionService {
         widget?.loaded();
         
         if (widget == null) { 
+          navigate = true;
           globalMainViewKey.currentState!.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
         }
       };
@@ -125,6 +126,7 @@ class ActionService {
           } 
         }
         consentCache.remove(viewID);
+        print("$path $body");
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
@@ -306,7 +308,6 @@ class ActionService {
   }
 
   static Future<void> submitFile(String path, PlatformFile file, BuildContext context) async {
-    print(file.bytes);
     await APIService().sendFile(path, file.path ?? "", file.name, file.bytes, context);
   }
 }

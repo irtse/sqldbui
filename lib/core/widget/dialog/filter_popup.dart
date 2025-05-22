@@ -145,12 +145,14 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       stateSort!(() {}); stateFilter!(() {});
                     }
                     noFilterRetrieval = true;  
+                    navigate = true;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                   style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
                     child: Text(TranslateConstants.filterApply.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),)),
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
+                    navigate = true;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                     stateSort!(() { widget.ascOrder=null;  widget.descOrder=null; });
                     stateFilter!(() { advancedSearch = []; });

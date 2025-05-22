@@ -113,6 +113,8 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.onSearchChange,
     this.changeFunction,
     this.max = 0,
+    this.label,
+    this.style,
     this.closeOnBackButton = false,
     Key? key,
   })  : future = null,
@@ -164,11 +166,14 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.changeFunction,
     this.closeOnBackButton = false,
     this.addFunction,
+    this.label,
     this.max = 0,
+    this.style,
     Key? key,
   })  : items = const [],
         super(key: key);
   final int max;
+  final String? label;
   final Future<void> Function(String)? changeFunction;
   final void Function(String)? addFunction;
   /// The list of dropdown items.
@@ -179,7 +184,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
 
   /// The configuration for the chips.
   final ChipDecoration chipDecoration;
-
+  final TextStyle? style;
   /// The decoration of the field.
   final FieldDecoration fieldDecoration;
 
@@ -441,7 +446,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
                   child: RepaintBoundary(
                     child: _Dropdown<T>(
                       max: widget.max,
-                      label: widget.fieldDecoration.labelText ?? "",
+                      label: widget.label ?? widget.fieldDecoration.labelText ?? "",
                       changeFunction: widget.changeFunction,
                       addFunction: widget.addFunction,
                       decoration: widget.dropdownDecoration,
@@ -477,6 +482,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
                   canRequestFocus: widget.enabled,
                   borderRadius: _getFieldBorderRadius(),
                   child: InputDecorator(
+                    baseStyle: widget.style,
                     isEmpty: _dropdownController.selectedItems.isEmpty,
                     isFocused: _dropdownController.isOpen,
                     decoration: _buildDecoration(),
@@ -591,7 +597,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
     final selectedOptions = _dropdownController.selectedItems;
 
     if (widget.singleSelect) {
-      return Text(selectedOptions.first.label);
+      return Text(selectedOptions.first.label, style: widget.style, overflow: TextOverflow.ellipsis,);
     }
 
     return _buildSelectedItems(selectedOptions);

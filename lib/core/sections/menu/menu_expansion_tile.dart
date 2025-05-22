@@ -31,6 +31,14 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
     if (datas.isEmpty && widget.category != "general") {
       return Container();
     }
+    for (var view in categories[widget.category] ?? []) {
+      try {
+        getOnFlow(view.label ?? view.name).then( (e) {
+          fastTranslaste[view.label ?? view.name] = e;
+        });
+      } catch(e) {}
+      
+    }
     return ExpansionTile(
       onExpansionChanged: (bool ok) {
         widget.isExpanded = ok;

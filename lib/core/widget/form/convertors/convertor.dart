@@ -11,8 +11,9 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/upload.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:intl/intl.dart' as intl;
@@ -59,7 +60,6 @@ class Convertor {
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
             suffixIcon: Icon(isText ? Icons.text_fields : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
             hintText: (await getOnFlow("$label...")).toLowerCase(),  
-            labelText: isDark ? "" : (await getOnFlow("value ${isText ? "" : "(numeric)"}")).toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
           ),
           onChanged: (String? value) { 
@@ -98,9 +98,15 @@ class Convertor {
           },);
     } else if (type.contains("time") || type.contains("date")) { 
       var def = cacheChanges[id] ?? widget.value;
+      DateTime? d;
+      try {
+        d = DateTime.parse(def!);
+      } catch(e) {
+        return Container();
+      }
       w = DateTimeField( key: formKey,
         textAlign: isGrid ? TextAlign.center : TextAlign.start,
-        initialValue: def == null ? null : DateTime.parse(def!),
+        initialValue: def == null ? null : d,
         validator: (DateTime? value) {
           if (value == null) { return ""; }
           return null;
@@ -121,7 +127,6 @@ class Convertor {
             fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: "",
-            labelText: isDark ? "" : label.toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(
               context: context,
@@ -147,8 +152,7 @@ class Convertor {
             child: Text((await getOnFlow(item)).toLowerCase(), overflow: TextOverflow.ellipsis)));
         }
       }
-      try {
-        w = DropdownButtonFormField<String>( key: formKey, items: items, isExpanded: true,
+      w = DropdownButtonFormField<String>( key: formKey, items: items, isExpanded: true,
         alignment: isGrid ? Alignment.center : Alignment.centerLeft,
         value: (cacheChanges[id]?.toString() ?? widget.value?.toString()), elevation: 1,
         validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder; } return null; },
@@ -167,7 +171,6 @@ class Convertor {
         }, 
         dropdownColor: isDark ? Theme.of(context).secondaryHeaderColor : null,
         decoration: isGrid ? dec : InputDecoration( 
-          labelText: isDark ? "" : "value",
           errorStyle: const TextStyle(fontSize: 0),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           filled: true, constraints: const BoxConstraints(minWidth: 0),
@@ -179,17 +182,40 @@ class Convertor {
           hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey),
           border: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0) ),
         ),
-      );
-      } catch (e) {
-        print(e);
-      }
-      
+      );    
     } else if (type.contains("link") && url != "") {
+      if ((widget.value ?? "") != "") {
+      return FutureBuilder<APIResponse<model.Shallowed>>(
+        future: APIService().get<model.Shallowed>("${(url).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
+        builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
+           return FutureBuilder<APIResponse<model.Shallowed>>(
+            future: APIService().get<model.Shallowed>("${(url)}&shallow=enable", firstAPI, null), 
+            builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+              if (snap.data?.data != null) {
+                return FutureBuilder<APIResponse<model.Shallowed>>(
+                  future: APIService().get(url, true, null), 
+                  builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+                    return FutureBuilder<Widget>(
+                    future: getLink(url, context, widget, id, dec,  formKey, label, 
+                    type, (snap.data?.data ?? [])..addAll(s.data?.data ?? []), isGrid, isDark, isText), 
+                    builder: (BuildContext c, AsyncSnapshot<Widget> q) {
+                      if (q.data != null) {
+                        return q.data!;
+                      }
+                      return Container();
+                    });
+                });
+              } else {
+                return Container();
+              }
+            });   
+        });
+      }
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(url, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           return FutureBuilder<Widget>(
-          future: getLink(context, id, widget.value, dec,  formKey, label, 
+          future: getLink(url, context, widget, id, dec,  formKey, label, 
           type, snap.data?.data, isGrid, isDark, isText), 
           builder: (BuildContext c, AsyncSnapshot<Widget> q) {
             if (q.data != null) {
@@ -201,99 +227,137 @@ class Convertor {
     }
     return w;
   }
-
-  static Future<Widget> getLink(BuildContext context, String id, dynamic value, 
+  static Future<Widget> getLink(String url, BuildContext context, ConvertorWidget widget, String id, 
     InputDecoration? dec, GlobalKey<FormFieldState<dynamic>> formKey,
     String label, String type, List<model.Shallowed>? datas,
     bool isGrid, bool isDark, bool isText) async {
-    List<DropdownMenuItem<String>> items = <DropdownMenuItem<String>>[];
+    MultiSelectController<String> ctrls = MultiSelectController<String>();
+    List<DropdownItem<String>> items = <DropdownItem<String>>[];
     Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
-    bool found = false;
+    int max = 0;
     if (datas != null) {
       for (var item in datas) {
-        var v = item.name ?? "${item.id}";
-              
-        v = v.replaceAll("db", "").replaceAll("_", " ");
-        if (item.id.toString() == value) { value = v.toString(); }
-        var t = items.where((element) => element.value == v);
+        max = item.max;
+        var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+        var t = items.where((e) => e.value == "${item.id}"); 
         if (!mapped.containsKey(v) && t.isEmpty){
           mapped[v]=item;
-          if((currentView!.isEmpty || !(currentView!.isEmpty && !item.actions.contains("post")))
-            && items.where((element) => element.value == v,).isEmpty) {
-            if ( v.toString() == value.toString() ) { 
-              found = true; 
-              value = item.id.toString();
+          if(items.where((element) => element.value == v,).isEmpty) {
+            if ( v.toString() == widget.value.toString() ) { 
+              widget.value = item.id.toString();
             }
-            items.add(DropdownMenuItem<String>(value: item.id.toString(),  alignment: isGrid ? Alignment.center : Alignment.centerLeft,
-              child: Text((await getOnFlow(v.toString())).toLowerCase(), overflow: TextOverflow.ellipsis,),));
+            bool select = false;
+            if ( item.id.toString() == widget.value.toString() ) { 
+              select = true; 
+            }
+            try {
+              if (item.translatable) {
+                v = (await getOnFlow(v));
+                if (v.toUpperCase() == v) {
+                  v = v.toUpperCase();
+                } else {
+                  v = v.toLowerCase();
+                }
+              }
+            } catch(e) {}
+            try {
+              items.add(DropdownItem<String>(value: "${item.id}", label: v, selected: select));
+              ctrls.addItem(items.last);
+            }catch(e) {}
           }
         }
       }
     }
-    if (!found &&  value != null) { 
-      return TextFormField(
-              textAlign: isGrid ? TextAlign.center : TextAlign.start,
-              initialValue: cacheChanges[id]?.toString() ?? value?.toString(),
-              style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black, 
-                overflow: TextOverflow.ellipsis, fontWeight: FontWeight.w300),
-              enabled: false, 
-              autocorrect: true,  
-              expands: isGrid,
-              minLines: null,
-              maxLines: null,
-              decoration: isGrid ? dec : InputDecoration(
-                suffixIconColor: Theme.of(context).splashColor,
-                enabledBorder: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 0) ),
-                border: OutlineInputBorder( borderRadius: BorderRadius.circular(5),
-                  borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0)),
-                isDense: true, 
-                hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300), // you need this
-                floatingLabelBehavior: FloatingLabelBehavior.always, 
-                filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
-                contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                suffixIcon: Icon(isText ? Icons.text_fields : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
-                hintText: (await getOnFlow("filter $label...")).toLowerCase(),  
-                labelText: isDark ? "" : "value ${isText ? "" : "(numeric)"}",
-                errorStyle: const TextStyle(fontSize: 0,),
-              ),
-              validator: (String? value) {
-                if (value == null) { return "please enter a filter value..."; }  
-                if (value.isEmpty || !RegExp(r'^-?[0-9]*\.?[0-9]*$').hasMatch(value)) { return "please enter a valid number..."; }
-                return null; 
-              });
-    }
-    return DropdownButtonFormField<String>( key: formKey, items: items,
-            alignment: isGrid ? Alignment.center : Alignment.centerLeft, isExpanded: true,
-            hint: Text(TranslateConstants.placeHolderValue.toLowerCase(), 
-              overflow: TextOverflow.ellipsis, softWrap: true, 
-              style: TextStyle(color: isGrid ? Colors.grey : Theme.of(context).splashColor, 
-                      fontSize: 13, fontWeight: FontWeight.w300)),
-            value: cacheChanges[id]?.toString() ?? value?.toString(),
-            validator: (values) { if (values == null) { return "please select a value..."; } return null; },
-            style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black, 
-              overflow: TextOverflow.ellipsis),
-            onChanged: (value) { 
-              value = value; 
-              if (id != "") {
-                detectChanges[id] = formKey;
-                cacheChanges[id] = value;
-              }
-            }, 
-            dropdownColor: isDark ? Theme.of(context).secondaryHeaderColor : null,
-            decoration: isGrid ? dec : InputDecoration( 
-              labelText: isDark ? "" : "value",
-              errorStyle: const TextStyle(fontSize: 0),
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              filled: true, constraints: const BoxConstraints(minWidth: 0),
-              labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-              suffixIconColor: isDark ? Theme.of(context).splashColor : Colors.grey,
-              fillColor:isDark ? Theme.of(context).secondaryHeaderColor : Colors.white, 
-              contentPadding: EdgeInsets.only(top: isDark ? 10 : 17, left: 20.0, right: 20.0),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
-              hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
-              border: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0) ),
-            ),
-    );
+    var decF = FieldDecoration( 
+      hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
+                border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
+                hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
+    return MultiDropdown<String>(
+        key: formKey,
+        max: max,
+        enabled: true,
+        label: label,
+        changeFunction: (dynamic value) async {
+          if (value == "") {
+            return;
+          }
+          var filters = Filters();
+          filters.add("name", Filter(value: value, column: "name"));
+          load(url, 0, 10, APIService().getFilter(url, true, filters), value, items, ctrls, mapped, label);
+        },
+        controller: ctrls,
+        singleSelect: true,
+        items: items,
+        searchEnabled: max > 10,
+        style: TextStyle(color: Colors.white),
+        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
+        ),
+        fieldDecoration: isGrid ? decF : FieldDecoration(
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                          backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
+                          labelStyle: TextStyle(fontSize: 0),
+                          hintText: TranslateConstants.placeHolderValue.toLowerCase(),
+                          hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
+                          prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
+                          showClearIcon: false,
+                          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+                          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+        ),
+        searchDecoration: SearchFieldDecoration(
+                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          border : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                            borderRadius: BorderRadius.all(Radius.circular(5)))
+        ),
+        dropdownDecoration: DropdownDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          marginTop: 2,
+                          maxHeight: 400,
+                          header: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                              "       ${TranslateConstants.selectValue.toLowerCase()}",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        dropdownItemDecoration: DropdownItemDecoration(
+                          backgroundColor: Theme.of(context).highlightColor,
+                          selectedIcon:
+                              const Icon(Icons.check_box, color: Colors.green),
+                          disabledIcon:
+                              Icon(Icons.lock, color: Colors.grey.shade300),
+                        ),
+                        validator: (value) {
+                          if ((value == null || value.isEmpty)) {
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSelectionChange: (values) {
+                          if (values.isEmpty) { return; }
+                          widget.value = values[0]; 
+                          if (id != "") {
+                            detectChanges[id] = formKey;
+                            cacheChanges[id] = widget.value;
+                          }
+                        },
+        );
   }
 
   static Future<Widget?> formFieldByType(
@@ -450,4 +514,32 @@ class Convertor {
     }
     return null;
   }
+  static Future<void> load(String url, int start, int interval, String filter, 
+  String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls, 
+  Map<String, model.Shallowed> mapped, String label) async {
+    if (filter == "") { return; }
+    var found = false;
+      var e = await APIService().get<model.Shallowed>("$url$filter&offset=$start&limit=$interval", filter != "", null);
+        if (e.data != null) {
+          for (var item in e.data!) {
+            if (items.where( (e) => e.value == "${item.id}").isEmpty) {
+              found = true;
+              var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+              try {
+                if (item.translatable) {
+                  v = await getOnFlow(v);
+                }
+              } catch(e) {}
+              mapped["${item.id}"]=item;
+              items.add(DropdownItem<String>(value: "${item.id}", label: v, selected: false));
+              ctrls.addItem(items.last);
+            }
+          }
+    } 
+    if (ctrls.isOpen && found) {
+      ctrls.closeDropdown();
+      ctrls.openDropdown(value, label);
+    }
+  }
 }
+

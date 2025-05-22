@@ -37,13 +37,15 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
     List<Widget> widgets = [];
     List<String> order = widget.triggers[widget.index].body.keys.toList();
     order.sort( (a, b) => (widget.triggers[widget.index].schema[a]?.index ?? 0) - (widget.triggers[widget.index].schema[b]?.index ?? 0) );
+    Map<String, dynamic> b = {};
     for (var k in order) {
       if (widget.triggers[widget.index].schema[k] != null) {
         var scheme = widget.triggers.first.schema[k];
         if (!scheme!.readonly) {
           try {
+            print(widget.triggers[widget.index].body[k]);
             var w = await Convertor.formFieldByType(
-              widget.triggers[widget.index].body, context, "", widget.triggers[widget.index].schema, scheme.type, k, scheme.label, 
+              b, context, "", widget.triggers[widget.index].schema, scheme.type, k, scheme.label, 
               scheme.description, scheme.require, scheme.readonly, widget.triggers[widget.index].body[k] == "" ? null : widget.triggers[widget.index].body[k], 
               scheme.actionPath, scheme.valuesPath, 
               "", null, currentView?.isEmpty ?? false, scheme.autoFill, scheme.translatable, null);
@@ -116,13 +118,13 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             if (!(formKey.currentState?.validate() ?? false)) {
               return;
             }
-            var body = await ActionService.getBody("POST", {...widget.triggers[widget.index].body }, {}, trigger.schema, context);
-            var files = await ActionService.getFiles("POST", {...widget.triggers[widget.index].body }, trigger.schema, context);
+            var body = await ActionService.getBody("POST", {...b }, {}, trigger.schema, context);
+            var files = await ActionService.getFiles("POST", {...b }, trigger.schema, context);
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
-                  ActionService.onSuccessMethod("POST", e.data!.first, {...widget.triggers[widget.index].body }, trigger.schema, files, context);
+                  ActionService.onSuccessMethod("POST", e.data!.first, {...b }, trigger.schema, files, context);
                 }
-              }).catchError( (e) => ActionService.listSubForms(trigger.schema, {...widget.triggers[widget.index].body }, "POST", trigger.name ?? "", "", context, true)
+              }).catchError( (e) => ActionService.listSubForms(trigger.schema, {...b }, "POST", trigger.name ?? "", "", context, true)
             );
             if (widget.isCached) {
               TriggerCacheService.deleteTriggers(widget.index);
@@ -135,6 +137,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             if (widget.triggers.isEmpty) {
               isTriggerOpen = false;
               context.pop();
+              navigate = true;
               globalMainViewKey.currentState?.setState(() { });
             } else {
               setState(() {});
@@ -154,6 +157,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             TriggerCacheService.triggers = [];
             isTriggerOpen = false;
             context.pop();
+            navigate = true;
             globalMainViewKey.currentState?.setState(() { });
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 

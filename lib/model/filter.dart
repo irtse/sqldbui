@@ -114,6 +114,7 @@ class Filters {
     }
     filterRowsWidget = [];
     noFilterRetrieval = true;
+    navigate = true;
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }
 

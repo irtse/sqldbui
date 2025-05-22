@@ -11,10 +11,10 @@ import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
-import 'package:sqldbui2/page/translate.dart';
 
 bool isMenu = true;
 double menuSize = 250;
+Map<String,String>fastTranslaste = {};
 Map<String, List<model.View>> categories = <String, List<model.View>>{};
 List<GlobalKey<MenuExpansionTileWidgetState>> globalExpandedKey = [];
 GlobalKey<MenuWidgetState> globalMenuKey = GlobalKey<MenuWidgetState>();
@@ -45,8 +45,8 @@ class MenuWidgetState extends State<MenuWidget> {
       List<model.View> views = [];
       for (var view in widget.views!) {
         if ((MenuConstants.value ?? "") != "") {
-          var label = await getOnFlow(view.label ?? view.name);
-          if (label.toLowerCase().contains(MenuConstants.value?.toLowerCase() ?? "")
+          var label = view.label ?? view.name;
+          if ((fastTranslaste[label]?.toLowerCase() ?? "").contains(MenuConstants.value?.toLowerCase() ?? "")
           && ((MenuConstants.isFavorite && !view.isFavorize) || !MenuConstants.isFavorite)) {
             views.add(view);
           }

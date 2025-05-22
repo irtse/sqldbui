@@ -54,6 +54,7 @@ class ActionBarState extends State<ActionBarWidget> {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
             translation = !translation;
+            navigate = true;
             globalMainViewKey.currentState?.setState(() { });
           }, false));
         } else if (currentView?.items.isNotEmpty ?? false) { 
@@ -85,6 +86,7 @@ class ActionBarState extends State<ActionBarWidget> {
       if (widget.gridKey != null) {
         actions.add( getIconOffset( (await getOnFlow(TranslateConstants.resetUI)).toLowerCase(), Icons.auto_fix_off, 20, () {
             globalOffset = 0;
+            navigate = true;
             globalMainViewKey.currentState?.setState(() {rects.remove(viewID); });
           }, false)
         );
@@ -177,7 +179,7 @@ class ActionBarState extends State<ActionBarWidget> {
         row.add(
           Padding(
             padding: const EdgeInsets.only(left: 10), 
-            child: Text("${widget.view == null ? "0" : widget.view?.max} ${await getOnFlow(TranslateConstants.found.toLowerCase())}", 
+            child: Text("${widget.view == null ? "0" : widget.view?.max} ${TranslateConstants.found.toLowerCase()}", 
             overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
           )
         );

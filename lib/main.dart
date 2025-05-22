@@ -137,8 +137,12 @@ class HomeScreenState extends State<HomeScreen> {
         f.isEmpty = true;
         if (viewID != null) { 
           if (globalNew[viewID] == null) { globalNew[viewID] = "all"; }
-          globalFilter[viewID] = f; 
-          globalOrder[viewID] = {};
+          if (globalFilter[viewID] == null) {
+            globalFilter[viewID] = f; 
+          }
+          if (globalOrder[viewID] == null) {
+            globalOrder[viewID] = {}; 
+          }
         } 
       }
       // ignore: use_build_context_synchronously

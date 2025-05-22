@@ -31,6 +31,7 @@ class MenuTileTextWidgetState extends State<MenuTileTextWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     var label = await getOnFlow(widget.view);
+    fastTranslaste[widget.view] = label;
     return Material(
       type: MaterialType.transparency,
       child: Tooltip( message: label.toLowerCase(), child: ListTile(
