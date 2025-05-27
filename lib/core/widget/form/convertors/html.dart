@@ -72,6 +72,7 @@ class HTMLState extends State<HTMLWidget> {
       widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
     }
     var val = widget.value  ?? widget.autofill;
+    val = val?.replaceAll("''", "'");
     if (val == null) {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {
