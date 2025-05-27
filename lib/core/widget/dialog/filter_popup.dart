@@ -15,7 +15,6 @@ class FilterPopUpWidget extends StatefulWidget {
   String label;
   String type;
   bool? ascOrder;
-  bool? descOrder;
   String? searchValue;
   GridColumnWidgetState component; 
   List<DropdownMenuItem<String>> items;
@@ -44,8 +43,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
       itemBuilder: (BuildContext bc) {
         if (viewID != null && globalOrder.containsKey(viewID)) {
           if (globalOrder[viewID]!.containsKey(widget.columnName)) {
-            if(globalOrder[viewID]![widget.columnName] == "asc") { widget.ascOrder = true; }
-            if(globalOrder[viewID]![widget.columnName] == "desc") { widget.descOrder = true; }
+            widget.ascOrder = globalOrder[viewID]![widget.columnName] == "asc"; 
           }
         }
         return [
@@ -63,22 +61,18 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), child: Text(TranslateConstants.sortDesc.toUpperCase())),
                     ];
               if (widget.ascOrder == true) { rows1.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
-              if (widget.descOrder == true) { rows2.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
+              if (widget.ascOrder == false) { rows2.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
               return Column(children: [
                 TextButtonWidget(
                   onPressed: () { 
                     setState(() { 
                       widget.ascOrder = widget.ascOrder != null ? !widget.ascOrder! : true; 
-                      if (widget.ascOrder == true) { widget.descOrder = !widget.ascOrder!; 
-                      } else { widget.ascOrder = null; }
                     });
                   }, rows: rows1),
                 TextButtonWidget(
                   onPressed: () { 
                     setState(() { 
-                      widget.descOrder =  widget.descOrder != null ? !widget.descOrder! : true; 
-                      if (widget.descOrder == true) { widget.ascOrder = !widget.descOrder!; 
-                      } else { widget.descOrder = null; }
+                      widget.ascOrder =  widget.ascOrder != null ? !widget.ascOrder! : false; 
                     });
                   }, rows: rows2),
                 Padding( 
@@ -117,8 +111,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                   Padding( padding: const EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
                     if (viewID != null) { 
                       if (widget.ascOrder != null) { globalOrder[viewID]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
-                      if (widget.descOrder != null) { globalOrder[viewID]![widget.columnName]=widget.descOrder! ? "desc" : "asc"; }
-                      if (widget.ascOrder == null && widget.descOrder == null) { globalOrder[viewID]?.remove(widget.columnName); }
+                      if (widget.ascOrder == null) { globalOrder[viewID]?.remove(widget.columnName); }
                       globalFilter[viewID]!.remove(widget.columnName);
                       var founded = filterRowsWidget.where((element) => element.columnName == widget.columnName).toList();
                       for (var search in advancedSearch) { 
@@ -154,7 +147,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     resetFilter(widget.columnName);
                     navigate = true;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-                    stateSort!(() { widget.ascOrder=null;  widget.descOrder=null; });
+                    stateSort!(() { widget.ascOrder=null; });
                     stateFilter!(() { advancedSearch = []; });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), child: Text(TranslateConstants.filterCancel.toUpperCase(),  style: TextStyle(color: Colors.white, fontSize: 12
@@ -241,6 +234,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
     }
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
     String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
+    
     Widget w = await Convertor.filterFieldByType(
       context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
         this, false, false, url, "");

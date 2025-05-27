@@ -94,14 +94,14 @@ class MenuExpansionTileWidgetState extends State<MenuExpansionTileWidget> {
             if (MenuConstants.isFavorite && !categories[widget.category]![index].isFavorize) {
               return null;
             }
-            List<Widget> badge = catIndex.newIds.isNotEmpty ? [
+            List<Widget> badge = catIndex.news > 0 ? [
               Positioned(
                 right: 20, 
                 top: 8, 
                 child: Container(
                   decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(7)), color: Theme.of(context).primaryColor),
                   child: Padding(
-                    padding: const EdgeInsets.all(5), child: Text("${catIndex.newIds.length}", 
+                    padding: const EdgeInsets.all(5), child: Text("${catIndex.news}", 
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
                   ))

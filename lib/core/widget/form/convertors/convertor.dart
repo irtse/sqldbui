@@ -35,7 +35,7 @@ class Convertor {
                 hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
-    bool isText = type.contains("text") || type.contains("varchar") || type.contains("upload");
+    bool isText = type.contains("text") || type.contains("varchar") || type.contains("upload") || (type.contains("link") && url == "");
     bool isInt = type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int");
     Widget w = Container();
     if (isText || (isInt && url == "")) { 
@@ -81,7 +81,7 @@ class Convertor {
           || (cacheChanges[id]?.toString() ?? widget.value.toString()) == "yes";
         ValueNotifier<bool> ctrl = ValueNotifier(def);
         w = AdvancedSwitch( key: formKey,
-          width: isGrid ? 150 : (isDark ? 175 : 212), 
+          width: 100, 
           initialValue: def, 
           controller: ctrl,
           activeColor: Colors.green, inactiveColor: isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).splashColor,
@@ -163,11 +163,11 @@ class Convertor {
               style: TextStyle(fontSize: 13, color: isGrid ? Colors.grey : Theme.of(context).splashColor)),
         onChanged: (value) { 
           widget.value = value; 
-          if (isGrid) { globalGridWidgetKey.currentState?.setState(() { }); }
           if (id != "") {
             detectChanges[id] = formKey;
             cacheChanges[id] = widget.value;
           }
+          if (isGrid) { globalGridWidgetKey.currentState?.setState(() { }); }
         }, 
         dropdownColor: isDark ? Theme.of(context).secondaryHeaderColor : null,
         decoration: isGrid ? dec : InputDecoration( 

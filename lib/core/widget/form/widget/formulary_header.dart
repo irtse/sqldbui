@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/dialog/link_box.dart';
-import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/model/view.dart';
 
@@ -52,10 +49,10 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     List<Widget> widgets = [];
     List<Widget> states = [];
     List<Widget> title = [];    
-    name = widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
+    name = await getOnFlow(widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " "));
     description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
     if (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null) { 
-      name += ": ${widget.refItem.values["name"].toUpperCase()}"; 
+      name += ": ${await getOnFlow(widget.refItem.values["name"].toUpperCase())}"; 
     }
     if (widget.refItem.values.containsKey("description") && widget.refItem.values["description"] != null) { 
       description = widget.refItem.values["description"].toLowerCase(); 
@@ -88,7 +85,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     title.add(Padding( padding: const EdgeInsets.only(left: 53), 
       child: Row( 
         children: [ Flexible( 
-          child: Text( (await getOnFlow(name)).toLowerCase(), overflow: TextOverflow.ellipsis,
+          child: Text( name.toLowerCase(), overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))), 
           widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),

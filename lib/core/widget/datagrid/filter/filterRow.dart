@@ -13,6 +13,7 @@ Map<String, List<GlobalKey<FormState>>> formRowFilterKeys = <String,List<GlobalK
 
 // ignore: must_be_immutable
 class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
+  late GlobalKey<FilterRowWidgetState> rowKey;
   String comparator = "like";  
   String connector = ""; 
   String type = "text"; 
@@ -25,7 +26,6 @@ class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   FilterRowWidget ({ 
-    super.key, 
     required this.schema, 
     this.label, 
     this.type = "text", 
@@ -36,7 +36,9 @@ class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
     this.columnName, 
     this.value, 
     this.connector = ""
-  });
+  }): super(key: GlobalKey<FilterRowWidgetState>()) {
+     rowKey = key as GlobalKey<FilterRowWidgetState>;
+  }
 
   @override FilterRowWidgetState createState() => FilterRowWidgetState();
 }
@@ -48,7 +50,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     }
     widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
-    String url = currentView!.schema[widget.columnName] != null && currentView!.schema[widget.columnName]?.valuesPath != ""  ? "${currentView!.schema[widget.columnName]!.valuesPath}&shallow=enable" : "";
+    String url = currentView!.schema[widget.columnName] != null && currentView!.schema[widget.columnName]?.actionPath != ""  ? "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable" : "";
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), this, true, false, url, ""), 
       builder: (a,b) {
         if ((b.data != null)) {

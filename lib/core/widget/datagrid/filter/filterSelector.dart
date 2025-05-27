@@ -93,8 +93,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                   globalMainViewKey.currentState?.setState(() { }); });
               }));
             })) : Container() ,
-        currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", 
-        firstAPI || forceFilter, null), 
+        currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", firstAPI || forceFilter, null), 
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
           forceFilter = false;
           if (snapshot.data?.data != null) {
@@ -102,7 +101,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           }
           return SubFilterSelectorWidget( filterMain: widget.filterMain, schema: widget.schema, datas: []);
         }) : Container(), 
-        filterRowsWidget.isEmpty ? Padding(padding: const EdgeInsets.only(left: 5), 
+        Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterNew.toLowerCase(), 
         style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
@@ -113,23 +112,24 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             filterRestr.remove(viewID);
             filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length)); 
             globalMainViewKey.currentState?.setState(() { });
-          })) 
-        : Padding(padding: const EdgeInsets.only(left: 5), 
-        child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterApplyT.toLowerCase(), 
-          style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
-          icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor, ),
-          onPressed: () {
-            if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
-            globalFilter[viewID] = Filters(); // empty filter to refill with new
-            for (var filter in filterRowsWidget) {
-              if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
-              globalFilter[viewID]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
-                type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
-            }
-            noFilterRetrieval = true;
-            navigate = true;
-            globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
           })),
+        if (filterRowsWidget.isNotEmpty)
+          Padding(padding: const EdgeInsets.only(left: 5), 
+          child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterApplyT.toLowerCase(), 
+            style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
+            icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor, ),
+            onPressed: () {
+              if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
+              globalFilter[viewID] = Filters(); // empty filter to refill with new
+              for (var filter in filterRowsWidget) {
+                if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
+                globalFilter[viewID]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
+                  type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
+              }
+              noFilterRetrieval = true;
+              navigate = true;
+              globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+            })),
         filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), 
         tooltip: TranslateConstants.filterResetT.toLowerCase(), 

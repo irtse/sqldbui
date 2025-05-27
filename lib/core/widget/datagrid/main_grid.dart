@@ -50,6 +50,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
         if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
         datas.add(Value(
           schema: schema,
+          isNew: item.news,
           isDraft: item.isDraft,
           cellID: item.values["id"],
           values: item.values, 
@@ -159,6 +160,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
       filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < max ? (forceOrder ?? view.order).length : max);
     }
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
+    print("$order $isMath $forceOrder ${filterTempOrderView[viewID]}");
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description"  && !type.contains("many") && schema[f] != null

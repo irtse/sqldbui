@@ -34,6 +34,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
               child: Tooltip( message: s.data!.toLowerCase(), child: ListTile(
                 selected: "${widget.view.id}" == viewID?.substring(1),
                 onTap: () async { setState(() { 
+                  navigate = true;
                   widget.refreshView("#${widget.view.id}", widget.category, true, false, false);  
                   // globalMenuKey.currentState?.setState(() {});
                 }); },
@@ -48,7 +49,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 selectedColor: Colors.white, 
                 hoverColor: Theme.of(context).primaryColorLight,
                 trailing: Padding( 
-                  padding: EdgeInsets.only(right: widget.view.newIds.isNotEmpty ? (("${widget.view.newIds.length}".length + 1) * 10) : 0), 
+                  padding: EdgeInsets.only(right: widget.view.news > 0 ? (("${widget.view.news}".length + 1) * 10) : 0), 
                   child: InkWell( 
                     onTap: () {
                       navigate = true;

@@ -45,7 +45,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       }
     }
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
-    bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@"));
+    bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@") || subViewID != null);
     if (isList || reForge) {
         var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
         return FutureBuilder<APIResponse<model.View>>(
@@ -89,6 +89,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     subViewID = id;
     firstAPI = true;
     globalLoading = load;
+    navigate = true;
     setState(() { widget.url = path;});
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
   }

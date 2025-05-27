@@ -1,4 +1,6 @@
 
+import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
+import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -87,6 +89,7 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
               ); }
             }
             filterTempOrderView[viewID] = i.fields.map((e) => e.column).toList();
+            print(filterTempOrderView[viewID]?.length);
           }
           var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
           dpItems.add(DropdownMenuItem<String>(value: i.id.toString(), 
@@ -139,6 +142,9 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       globalOffset = 0; 
                       rects.remove(viewID);
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                      for (var row in filterRowsWidget) {
+                        row.rowKey.currentState?.setState(() {});
+                      }
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                     child: Padding( padding: EdgeInsets.all(10), 
                       child: Text(TranslateConstants.filterApply.toUpperCase(), style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
@@ -225,7 +231,10 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
     }
     
     List<Widget> items = [];
-    if (filterTempOrderView[viewID] == null) { filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; }
+    if (filterTempOrderView[viewID] == null) { 
+      filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; 
+      print("2 ${filterTempOrderView[viewID]?.length}");
+    }
     filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( 
       (fieldName) => !(widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many"))).toList();
     items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), child:  Row( children : [ 
@@ -260,6 +269,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
               setState(() { 
                 filterIndexOrderView[viewID] = b; 
                 filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+                print("3 ${filterTempOrderView[viewID]?.length}");
               }); 
             }, child: const Icon(Icons.arrow_upward))),
           Padding( padding: const EdgeInsets.only(right: 10), 
@@ -277,6 +287,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
               } else { 
                 filterTempOrderView[viewID]?.remove(fieldName); 
               }
+              print("4 ${filterTempOrderView[viewID]?.length}");
             }
           ))),
           index == filterIndexOrderView[viewID]!.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child: InkWell( onTap: () {
@@ -288,7 +299,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
               setState(() { 
                 filterIndexOrderView[viewID] = b; 
                 filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-                print(filterTempOrderView);
+                print("5 ${filterTempOrderView[viewID]?.length}");
               }); 
           }, child: const Icon(Icons.arrow_downward))),
         ]))));
@@ -311,6 +322,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                         if (v.data != null && v.data!.isNotEmpty) { 
                           filterTempOrderView[viewID] = v.data![0].fields.map((e) => e.column ?? "id").toList();
                           filterOrderView[viewID] = filterTempOrderView[viewID]!;
+                          print("6 ${filterTempOrderView[viewID]?.length}");
                         } 
                         setState((){});
                         widget.comp.setState((){});

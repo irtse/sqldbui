@@ -163,7 +163,6 @@ class GridWidgetState extends State<GridWidget> {
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = (currentView?.items.length ?? 0); 
                                   }
-                                  navigate = true;
                                   globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
                                 }
                               }
@@ -195,6 +194,7 @@ class GridWidgetState extends State<GridWidget> {
     return datas.map<GridRowWidget>((mapped) {
       bool found = selectedGrid.where((element) => element.cellID == mapped.values["id"]).isNotEmpty;
       return GridRowWidget( 
+        news: mapped.isNew,
         cellID: "${mapped.values["id"]}",
         sharing: mapped.sharing,
         borderWidth: widget.borderWidth, 
@@ -205,6 +205,7 @@ class GridWidgetState extends State<GridWidget> {
         isEnum : widget.isEnum, 
         cells: columns.map<GridCell>((column) {
         return GridCell( 
+          isNew: mapped.isNew,
           schemaField: mapped.schema[column.columnName],
           translatable: mapped.schema[column.columnName]?.translatable ?? true,
           isDraft: mapped.isDraft,

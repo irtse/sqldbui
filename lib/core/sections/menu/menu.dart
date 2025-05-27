@@ -60,8 +60,7 @@ class MenuWidgetState extends State<MenuWidget> {
         if (!categories.containsKey(cat)) {  categories[cat] = <model.View>[]; }
         if (eldestCat.containsKey(cat)) {
           try { 
-            view.newIds = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).newIds.where(
-                                (element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
+            view.news = eldestCat[cat]!.firstWhere((v) => view.id == v.id && view.items.isNotEmpty).news;
           } catch(e) { /* */ }     
         }
         categories[cat]!.add(view);
@@ -75,7 +74,7 @@ class MenuWidgetState extends State<MenuWidget> {
       }
       if (!categories[cat]!.isNotEmpty) { continue; }
       for (var catIndex in categories[cat]!) { 
-        count += catIndex.newIds.length; 
+        count += catIndex.news; 
       }
       List<Widget> badgeCat = count > 0 && !initiallyExpanded[cat]! ? [
         Positioned(left: 190 - ("$count".length * 8), top: 13, 
@@ -130,7 +129,7 @@ class MenuWidgetState extends State<MenuWidget> {
           if (value.data != null) { widget.views = value.data; }
           for (var view in widget.views!) {
             if (view.id.toString() == viewID?.substring(1) && subViewID != null) {
-              try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
+              try { view.news - 1; } catch(e) { /* */ }     
             }
           }
           setState(() {}); 
@@ -139,7 +138,7 @@ class MenuWidgetState extends State<MenuWidget> {
       } else {
         for (var view in widget.views!) {
           if (viewID != null && view.id.toString() == viewID?.substring(1) && subViewID != null) {
-            try { view.newIds.remove(subViewID); } catch(e) { /* */ }     
+            try { view.news - 1; } catch(e) { /* */ }     
           }
         }
         globalMainViewKey.currentState?.setState(() {}); 
@@ -168,6 +167,7 @@ class MenuWidgetState extends State<MenuWidget> {
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 
       || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
+    navigate = true;
     globalMainViewKey.currentState?.refresh(viewID, null, currentView, true);
   }
 }

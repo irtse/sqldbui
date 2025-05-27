@@ -27,6 +27,7 @@ class GridRowWidget extends StatefulWidget {
   double borderWidth; 
   String schemaID; 
   String cellID;
+  bool news = false;
   Map<String, model.Shallowed> contentShallowed;
   List<GridCell> cells;  
   List<GridCellWidget> widgetCells = [];  
@@ -35,6 +36,7 @@ class GridRowWidget extends StatefulWidget {
   GridRowWidget ({ 
     super.key, 
     required this.cellID,
+    required this.news,
     required this.cells, 
     required this.schemaID, 
     required this.contentShallowed,
@@ -106,15 +108,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
     }
     for (var e in widget.cells) {
       bool readOnly = currentView?.schema[e.columnName] != null && (currentView?.schema[e.columnName]?.readonly ?? false);
-      List<dynamic> ids = [];
-      for( var cat in categories.values) {
-        for( var v in cat.where( (v) => "${v.id}" == viewID?.substring(1))) {
-          ids=v.newIds.where((element) => notNew[viewID] == null || !notNew[viewID]!.contains(element)).toList();
-        }
-      }
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
       List<Widget> bs = [];
-      if (ids.contains(cellID) && first || isNew == cellID && first) {
+      if (widget.news && first) {
         bs.add(Container(
           decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
           child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
@@ -150,7 +146,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
       widget.widgetCells.add(
         GridCellWidget(
           cell: e, 
-          value: v, 
+          value: v,
+          isNew: e.isNew, 
           cellID: cellID, 
           isLink: e.isLink,
           readOnly: readOnly, 
@@ -166,7 +163,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           Container( 
             height: maxheight,
             alignment: Alignment.center, 
-            decoration: BoxDecoration( color: ids.contains(cellID) || isNew == cellID 
+            decoration: BoxDecoration( color: widget.news 
             || ((isEditMode[viewID] ?? false) && (e.readOnly || readOnly || ["id", "description", mathColName[viewID] ?? "total"].contains(e.columnName))) ? 
               (widget.isHovered ? Colors.grey : Theme.of(context).splashColor) : (widget.isHovered ? Theme.of(context).splashColor  : Colors.white),
             border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth), bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),

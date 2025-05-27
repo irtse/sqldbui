@@ -110,7 +110,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           onPressed: () async { 
             if (currentView !=  null && viewID != null) {
               globalOffset = 0;
-              globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "asc" || globalOrder[viewID]![widget.columnName] == null  ? "asc" : "desc";
+              globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "asc"  ? "desc" : "asc";
               navigate = true;
               globalMainViewKey.currentState?.refresh(viewID, subViewID, currentView, false);
             }

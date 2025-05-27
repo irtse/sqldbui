@@ -132,7 +132,9 @@ class Item extends SerializerDeserializer<Item> {
     this.isDraft = false,
     this.synthesisPath,
     this.commentsPath,
+    this.news = false,
   });
+  bool news;
   bool isDraft;
   Sharing? sharing;
   Map<String,dynamic> valuesManyPath;
@@ -150,6 +152,7 @@ class Item extends SerializerDeserializer<Item> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      news: json.containsKey("new") ? json["new"] : "",
       commentsPath: json.containsKey("comments_path") ? json["comments_path"] : "",
       synthesisPath: json.containsKey("synthesis_path") && json["synthesis_path"] != null ? json["synthesis_path"] : null,
       isDraft: json.containsKey("is_draft") && json["is_draft"] != null ? bool.parse("${json["is_draft"]}") : false,
@@ -260,7 +263,7 @@ class View extends SerializerDeserializer<View> {
     this.schemaID,
     this.isEmpty = false,
     this.viewID,
-    this.newIds = emptyStr,
+    this.news = 0,
     this.max = 0,
     this.workflow,
     this.isFavorize = false,
@@ -301,7 +304,7 @@ class View extends SerializerDeserializer<View> {
   Map<String, SchemaField>? wrapperSchema;
   Map<String, dynamic> favorizeBody;
   List<dynamic> order;
-  List<dynamic> newIds;
+  int news;
   int max;
   bool isWrapper = false;
   Workflow? workflow;
@@ -318,7 +321,7 @@ class View extends SerializerDeserializer<View> {
     id: json.containsKey("id") && json["id"] != null ? int.parse("${json["id"]}") : -1, 
     shortcuts: json.containsKey("shortcuts") && json["shortcuts"] != null ? json["shortcuts"] : <String, dynamic>{},
     max: json.containsKey("max") && json["max"] != null ? int.parse("${json["max"]}") : 0, 
-    newIds: json.containsKey("new") && json["new"] != null ? json["new"] : <String>[], 
+    news: json.containsKey("new") && json["new"] != null ? json["new"] : 0, 
     favorizeBody : json.containsKey("favorize_body") && json["favorize_body"] != null ? json["favorize_body"] : {},
     favorizePath : json.containsKey("favorize_path") && json["favorize_path"] != null ? json["favorize_path"] : "",
     isWrapper: json.containsKey("is_wrapper") && json["is_wrapper"] != null ? bool.parse("${json["is_wrapper"]}") : false,
@@ -330,7 +333,7 @@ class View extends SerializerDeserializer<View> {
     actionPath: json.containsKey("action_path") && json["action_path"] != null ? json["action_path"] : "", 
     actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
     items: json.containsKey("items") && json["items"] != null ? fromListJson(json["items"], Item()) : <Item>[], 
-    name: json.containsKey("name") && json["name"] != null ? json["name"] : "Unknown name",  
+    name: json.containsKey("name") && json["name"] != null ? json["name"] : "",  
     category: json.containsKey("category") && json["category"] != null ? json["category"] : "General", 
     description: json.containsKey("description") && json["description"] != null ? json["description"] : "no description...", 
     isList: json.containsKey("is_list") && json["is_list"] != null ? bool.parse("${json["is_list"]}") : false, 
@@ -363,6 +366,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.elder = "all",
     this.triggers = const [],
     this.max = 0,
+    this.valuesPath
   });
   String? label;
   String? name;
@@ -373,6 +377,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   String elder;
   bool readOnly;
   String linkPath;
+  String? valuesPath;
   String schemaName;
   String actionPath;
   List<dynamic> actions;
@@ -400,6 +405,7 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
       actions: json.containsKey("actions") && json["actions"] != null ? json["actions"] : <String>[], 
       schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
       linkPath: json.containsKey("link_path") && json["link_path"] != null ? json["link_path"] : "",
+      valuesPath: json.containsKey("values_path") && json["values_path"] != null ? json["values_path"] : null,
       schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{}); 
   }
   @override Map<String, dynamic> serialize() => {

@@ -18,6 +18,7 @@ class GridCell {
   dynamic wasValue;
   String columnName; 
   dynamic value; 
+  bool isNew = false;
   Color backgroundColor; 
   double borderWidth; 
   Color borderColor; 
@@ -38,6 +39,7 @@ class GridCell {
     required this.wasValue,
     required this.value, 
     required this.width, 
+    required this.isNew, 
     this.fontSize = 13, 
     this.type = "text",
     this.readOnly = false, 
@@ -52,6 +54,7 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   String cellID; String schemaID;
   double maxheight;
   bool translatable = true;
+  bool isNew = false;
 
   GridCell cell;
   model.Shallowed? shal;
@@ -60,6 +63,7 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
 
   GridCellWidget ({ 
     super.key, 
+    required this.isNew,
     required this.shal, 
     required this.cell,
     required this.value,
@@ -100,11 +104,11 @@ class GridCellWidgetState extends State<GridCellWidget> {
             color: Theme.of(context).primaryColorLight)
           );
     if (widget.translatable) {
-      wid = FutureBuilder(future: getOnFlow(widget.value), builder: (a,b) {
+      wid = FutureBuilder(future: getOnFlow("$v"), builder: (a,b) {
         String t = "";
         if (b.data != null) {
           t = b.data!;
-          if (widget.value.toUpperCase() == widget.value) {
+          if ("$v".toUpperCase() == "$v") {
             t = b.data!.toUpperCase();
           } else {
             t = b.data!.toLowerCase();
@@ -148,7 +152,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
             for (var cat in categories.values) { v = cat.where( (v) => "${v.id}" == viewID?.substring(1)).toList(); }
             if (isNew == widget.cellID) { isNew = null; }
             if (!notNew.containsKey(viewID)) { notNew[viewID] = [widget.cellID]; } else { notNew[viewID]!.add(widget.cellID); }
-            if (v.isNotEmpty) { v.first.newIds.remove(widget.cellID); }
+            if (v.isNotEmpty && widget.isNew) { v.first.news -= 1; }
           } catch (e) { /* */ }
           globalMenuKey.currentState!.setState(() {});
           AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");

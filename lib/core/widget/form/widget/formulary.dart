@@ -51,21 +51,14 @@ class FormularyWidget extends StatefulWidget {
 }
 class FormularyWidgetState extends State<FormularyWidget> {
     @override Widget build(BuildContext context) {
-      return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
+    try {
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
+
       for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
           if (widget.schema[fieldName] == null || ["id", "description"].contains(fieldName) ||
           (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { continue; }
-
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
           var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
@@ -80,17 +73,15 @@ class FormularyWidgetState extends State<FormularyWidget> {
           if (widget.refItem.valuesManyPath.containsKey(fieldName)) { value = widget.refItem.valuesManyPath[fieldName]!; }
 
           widget.newCacheEntry[fieldName] = widget.newCacheEntry[fieldName] ?? value;
-          
           if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { 
             continue; 
           }
           
           String? mainUrl, url;
-
           if (!readOnly && field.actionPath != "") { mainUrl = field.actionPath; }
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
           double max = widget.width - 100 > 0 ? widget.width - 100 : 1;
-          var f = await Convertor.formFieldByType(
+          var f = FutureBuilder( future: Convertor.formFieldByType(
               widget.newCacheEntry, 
               context, 
               widget.view.schemaName, 
@@ -110,7 +101,12 @@ class FormularyWidgetState extends State<FormularyWidget> {
               field.autoFill,
               field.translatable,
               widget.wrappers,
-            );
+            ), builder: (a,b) {
+              if (b.data != null) {
+                return b.data!;
+              }
+              return Container();
+            });
             if (![OneToManyWidget].contains(f.runtimeType) && widget.show) {
               var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
@@ -134,10 +130,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
               ); 
             }
         }
-      if (widget.view.isEmpty) {
-        for (var consent in widget.view.consents) {
-          widget.additionnalWidgets.add(ConsentWidget(consent: consent, value: false));
-        }
+      for (var consent in widget.view.consents) {
+        widget.additionnalWidgets.add(ConsentWidget(consent: consent, value: false));
       }
       // widget.additionnalWidgets.add(getSynthesis(widget.refItem.synthesisPath ?? ""));
       if (widget.key != null) {
@@ -165,5 +159,10 @@ class FormularyWidgetState extends State<FormularyWidget> {
           ]
         )
       );
-    }
+    }catch (e,s) {
+    print(e);
+    print(s);
+    return Container();
+  }
+  } 
 }

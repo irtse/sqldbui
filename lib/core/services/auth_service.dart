@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 var timeBomb = 60;
 @lazySingleton
@@ -25,9 +26,17 @@ class AuthService extends ChangeNotifier {
   static User? user;
   String? error;
   static bool get isLoggedIn => _isAuthenticated;
+  final key = encrypt.Key.fromUtf8('zpnbsswigxgnttgjqjlcnowoaishpqel'); // 32 bytes
+  final iv = encrypt.IV.fromUtf8('mhtwqevzehivjzjj'); // 16 bytes
+
+  String encryptPassword(String plainText) {
+    final encrypter = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc, padding: 'PKCS7'));
+    final encrypted = encrypter.encrypt(plainText, iv: iv);
+    return encrypted.base64;
+  }
 
   Future<void> login(String name, String password) async {
-    await service.post<User>("/auth/login", User(name: name.trim(), password: password.trim()).serialize(), null
+    await service.post<User>("/auth/login", User(name: name.trim(), password: encryptPassword(password.trim())).serialize(), null
                       ).then((value) { authenticate(value.data![0]); }
                       ).catchError( (e) { return err(e.toString()); }); 
   }

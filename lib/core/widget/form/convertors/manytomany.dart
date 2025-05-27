@@ -272,6 +272,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           spacing: 10,
                         ),
                         fieldDecoration: FieldDecoration(
+                          backgroundColor: Colors.white,
                           labelText: "${l.toLowerCase()}${widget.require ? "*" : ""}",
                           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                           hintText: TranslateConstants.selectValue.toLowerCase(),

@@ -20,34 +20,38 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    var len = currentWidth > 430 ? 40 : ((currentWidth ~/ 11));
+    try{
     List<Widget> notifs = [
       Container( 
-        padding: const EdgeInsets.only(top: 10, bottom: 10), 
-        width: 430 < currentWidth ? 430 : currentWidth,
+        width: currentWidth / 2,
+        padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20), 
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Theme.of(context).splashColor ))
         ),
         child: Row( 
-          mainAxisSize: MainAxisSize.min, 
           mainAxisAlignment: MainAxisAlignment.center, 
           children : [ 
             Padding(
               padding: const EdgeInsets.only(right: 10), 
               child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20)
             ),
-            Text(TranslateConstants.notifications.toUpperCase(), 
+            Text(TranslateConstants.notifications.toUpperCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 15)) 
           ]))
     ];
     for ( var notif in AuthService.user!.notifications ) {
-        var name = await getOnFlow(notif.name);
-        var desc = await getOnFlow(notif.description);
-        notifs.add(Stack( children : [ 
+        var name = notif.name;
+        var desc = notif.description;
+        try { name = await getOnFlow(notif.name);
+        } catch(e) {}
+        try { desc = await getOnFlow(notif.description);
+        } catch(e) {}
+        
+        notifs.add(Stack( alignment: Alignment.center, children : [ 
           Padding(padding: const EdgeInsets.only(bottom: 10), 
-          child: Row( mainAxisSize: MainAxisSize.min, children: [ Container(
+          child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ Container(
+          width: currentWidth / 1.2,
           padding: const EdgeInsets.only(bottom: 20, top: 15),
-          width: 430 < currentWidth ? 430 : currentWidth,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).splashColor, ))),
           child: Column(children: [
           Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: TextButton( onPressed: () { 
@@ -60,15 +64,11 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
           child: Row(
             children: [
               Icon(Icons.message, color: Theme.of(context).splashColor), Padding( padding: const EdgeInsets.only(left: 10), 
-                child: Text(name[0].toUpperCase()
-                  + name.substring(1, len > name.length ? name.length : len).toLowerCase() 
-                  + (len > name.length ? "" : "...")
+                child: Text( name.toUpperCase()
                   , overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
             ]))),
           Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
-            child: Row( children: [Text(desc == "" ? "" : desc[0] 
-            + desc.substring(1, len > desc.length ? desc.length : len).toLowerCase() 
-            + (len > desc.length ? "" : "..."), 
+            child: Row( children: [Text(desc == "" ? "" : desc.toLowerCase(), 
               style: TextStyle(color: Theme.of(context).splashColor), overflow: TextOverflow.ellipsis,)])),
         ]))])),
         Positioned(
@@ -84,12 +84,17 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
                 } ))
             }
           )) 
-      ]));
+      ])); 
     }
     return Container(
-        constraints: const BoxConstraints(minWidth: 200),
+        width: currentWidth / 1.2,
         height: currentHeigth,
         color: Theme.of(context).secondaryHeaderColor,
         child: SingleChildScrollView( child: Column(children: notifs) ));
+    } catch(e, s) {
+     print(e);
+     print(s); 
+     return Container();
+    }
   }
 }

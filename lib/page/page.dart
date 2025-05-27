@@ -46,6 +46,9 @@ class PageWidgetState extends State<PageWidget> {
       key: scaffoldKey,
       drawer: buildDrawer(),
       endDrawer: Drawer(
+        width: currentWidth / 1.2,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(0), bottomRight: Radius.circular(0))),
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
         child: const NotificationDrawerWidget()
       ),
       appBar: AppBar(

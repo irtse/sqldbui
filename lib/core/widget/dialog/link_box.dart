@@ -12,6 +12,7 @@ class LinkBoxWidget extends StatefulWidget {
   String path;
   Color? color;
   bool success = false;
+  String? value;
   Map<String,String> values = {};
   LinkBoxWidget ({ super.key, required this.path, required this.sharing, this.color, });
   @override LinkBoxWidgetState createState() => LinkBoxWidgetState();
@@ -19,11 +20,64 @@ class LinkBoxWidget extends StatefulWidget {
 bool forceUser = false;
 class LinkBoxWidgetState extends State<LinkBoxWidget> {
   @override Widget build(BuildContext context) {
+    List<Widget> d = [];
     List<Widget> drops = [];
     if (widget.sharing != null) {
       var len = 0;
+      d.add(FutureBuilder(future: APIService().get<model.Shallowed>("${widget.sharing?.sharedWithPath ?? ""}&scope=enable", forceUser, context), builder: (a,s) {
+          forceUser = false;
+          List<DropdownMenuItem<String>> dpItems = [];
+          if (s.data?.data != null) {
+            for (var data in s.data!.data!) {
+                dpItems.add(DropdownMenuItem<String>(
+                value: "${data.id}",
+                child: Text(data.label ?? data.name ?? "", overflow: TextOverflow.ellipsis),
+              ));
+            }
+          }
+          return Row( children : [  SizedBox( 
+                      width: 166, 
+                      height: 25, 
+                      child: DropdownButtonFormField<String>( 
+                        items: dpItems, 
+                        hint: Text(TranslateConstants.filterPlaceholder.toLowerCase(), overflow: TextOverflow.ellipsis, 
+                          style: TextStyle(color: Colors.grey)),
+                        isExpanded: true, 
+                        style: TextStyle(fontSize: 12, color: Colors.black),
+                        onChanged: (value) {
+                          if (value == null) { return; }
+                            setState(() {
+                                widget.value = value;
+                            });
+                          }, dropdownColor: Colors.white,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(top: 0, left: 10.0, right: 10.0, bottom: 0),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey, width: 1.0)),
+                          border: const OutlineInputBorder(),
+                          filled: true, 
+                          fillColor: Theme.of(context).splashColor),
+                      )), len == widget.sharing!.shallowPath.length ? Padding( 
+                    padding: const EdgeInsets.only(left: 10), 
+                    child: IconButton(
+                      enableFeedback: widget.value != null,
+                      onPressed: () {
+                        if (widget.value == null) {
+                          return;
+                        }
+                        APIService().delete<model.Shallowed>(
+                          widget.sharing!.sharePath!, context
+                        ).then( (value) { 
+                          forceUser = true;
+                          setState(() { Navigator.pop(context); }); 
+                        });
+                    }, icon: Icon(Icons.delete, size: 20, color: widget.value != null ? Colors.grey.shade200 :Colors.grey))
+                  ) : Container(), 
+                ]);
+        }));
       for (var m in widget.sharing!.shallowPath.entries) {
         len++;
+        
         drops.add(FutureBuilder(future: APIService().get<model.Shallowed>("${m.value}&scope=enable", forceUser, context), builder: (a,s) {
           forceUser = false;
           List<DropdownMenuItem<String>> dpItems = [];
@@ -73,7 +127,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                         }
                         APIService().post<model.Shallowed>(
                           widget.sharing!.sharePath!, 
-                          widget.sharing!.body, null
+                          widget.sharing!.body, context
                         ).then( (value) { 
                           forceUser = true;
                           setState(() { Navigator.pop(context); }); 
@@ -122,6 +176,8 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                     }, icon: const Icon(Icons.copy, size: 20, color: Colors.grey))
                   ),
                 ]),
+                Text(TranslateConstants.userShared.toLowerCase(), style: TextStyle(fontSize: 12.5, color: Colors.grey)),
+                ...(widget.sharing != null ? d : []),
                 Text(TranslateConstants.shareToUser.toLowerCase(), style: TextStyle(fontSize: 12.5, color: Colors.grey)),
                 ...(widget.sharing != null ? drops : []),
                 Column(children: [

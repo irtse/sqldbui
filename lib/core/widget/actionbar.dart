@@ -156,7 +156,7 @@ class ActionBarState extends State<ActionBarWidget> {
       try {
         row.add(getDescription(
           ( await getOnFlow( widget.view == null ? (globalLoading ? TranslateConstants.loading : TranslateConstants.home)
-          : (widget.view!.name != "" ?  widget.view!.name : ""))).toLowerCase(),  
+          : (widget.view!.label ?? widget.view!.name ?? ""))).toLowerCase(),  
           // ignore: use_build_context_synchronously
           null, Theme.of(context).highlightColor));
       } catch(e) {

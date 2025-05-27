@@ -69,10 +69,9 @@ class FormWidgetState extends State<DataFormWidget> {
       List<Widget> fields = <Widget>[];
       List<Widget> subMenu = [];
       
-      Widget? synthetisis;
       bool isSplitted = (widget.isSplitted || (widget.view?.isWrapper ?? false)) && !currentView!.isEmpty && widget.subMenuIndex == 0;
       bool isLower = currentWidth < 1200;
-      double ratioSplit = isSplitted && !isLower ? 0.7 : 1;
+      double ratioSplit = isSplitted && !isLower ? 0.75 : 1;
       Widget? content;
       if (widget.view != null && widget.view!.items.isNotEmpty) {
         double mainWidth = ((currentWidth - menuSize) * ratioSplit) > 0 ?  ((currentWidth - menuSize) * ratioSplit) : 0;
@@ -80,14 +79,14 @@ class FormWidgetState extends State<DataFormWidget> {
         double mainHeight =  currentHeigth - wfSize > 0 ? currentHeigth - wfSize : 0;
 
         var refItem = widget.view!.items[0];
-        synthetisis = getSynthesis(refItem.synthesisPath ?? "", mainHeight);
         workflow = refItem.workflow;
         var schema = widget.view!.schema;
         widget.wrappers = [];
         additionnal = [];
         widget.wrappersGlobalKey = [];
+        
         additionnal.add(SubFormularyWidget( key: widget.subKey, item: refItem,
-        component: widget, isEmpty: widget.view?.isEmpty ?? false, relatedDatas: refItem.dataPath)); 
+          component: widget, isEmpty: widget.view?.isEmpty ?? false, relatedDatas: refItem.dataPath)); 
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         
       
@@ -118,10 +117,10 @@ class FormWidgetState extends State<DataFormWidget> {
             width: widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40),
             view: widget.view!);
           case 2:
-            content = synthetisis;
+            content = getSynthesis(refItem.synthesisPath ?? "", mainHeight);
         }
         var menuItems = [TranslateConstants.formulary, TranslateConstants.comments];
-        if (synthetisis != null) {
+        if ((refItem.synthesisPath ?? "") != "") {
           menuItems.add(TranslateConstants.synthesis);
         }
         for (var (i, menu) in menuItems.indexed) {
@@ -269,7 +268,7 @@ class FormWidgetState extends State<DataFormWidget> {
               Container(
                 height: 40,
                 color: Theme.of(context).primaryColor,
-                width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+                width: currentWidth - menuSize - 200 > 0 ? currentWidth - menuSize  - 200 : 0,
                 child: Center( child: Text( TranslateConstants.synthesis.toLowerCase(), 
                   style: TextStyle( color: Colors.white, fontSize: 18 ) ) )
               ),

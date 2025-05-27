@@ -143,7 +143,7 @@ class APIService {
     return command;
   }
   String getColumns(String url, bool isFilter) {
-    if (!isFilter) { return ""; }
+    if (!isFilter || subViewID != null) { return ""; }
     var columns = ""; 
     if (url.contains("?") && filterOrderView.containsKey(viewID)) {
       columns += "&columns=";
@@ -214,6 +214,7 @@ class APIService {
             return APIResponse<T>(); 
           }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
+
           if (resp.error == "") {    
             if (method == "get") { 
               if (limit != null && cache.containsKey(url) && offset != null && offset > 0) { 
@@ -282,7 +283,6 @@ class APIService {
   }
 
   Future<APIResponse<T>> sendFile<T extends SerializerDeserializer>(String url, String path, String name, Uint8List? b, BuildContext context) async {
-    print("$path $name $b");
     FormData formData = FormData.fromMap({
       "file": b != null ? MultipartFile.fromBytes(
         b,

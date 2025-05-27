@@ -89,6 +89,7 @@ class TranslateConstants {
   static String share = "share data";
   static String pathToCopy = "navigation path for the browser :";
   static String shareToUser = "share to a user :";
+  static String userShared = "user already shared :";
   static String successCopy = "successfully copied to clipboard";
 
   static String and = "and";
@@ -232,6 +233,7 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.draft, to: TranslateConstants.lang).then( (e) => TranslateConstants.draft = e.text.toLowerCase());
   translator.translate(TranslateConstants.publish, to: TranslateConstants.lang).then( (e) => TranslateConstants.publish = e.text.toLowerCase());
   translator.translate(TranslateConstants.empty, to: TranslateConstants.lang).then( (e) => TranslateConstants.empty = e.text.toLowerCase());
+  translator.translate(TranslateConstants.userShared, to: TranslateConstants.lang).then( (e) => TranslateConstants.userShared = e.text.toLowerCase());
   translator.translate(TranslateConstants.shareToUser, to: TranslateConstants.lang).then( (e) => TranslateConstants.shareToUser = e.text.toLowerCase());
 
   translator.translate(TranslateConstants.savedFolder, to: TranslateConstants.lang).then( (e) => TranslateConstants.savedFolder = e.text.toLowerCase());

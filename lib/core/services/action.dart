@@ -25,30 +25,30 @@ List<String> errors = <String>[];
 class ActionService {
   static void Function() pressed(ButtonWidgetState? widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, 
-                                 String method, bool isDraft, BuildContext context) {
+                                 String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, bool overrideDest,) {
       errors = [];
-      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft);
+      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap);
     }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
   static void Function() pressedForm(ButtonWidgetState? widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
-                                Map<String,model.SchemaField> schema, String method, BuildContext context, bool isDraft) { 
+                                Map<String,model.SchemaField> schema, String method, BuildContext context, bool isDraft, bool overrideDest, Map<String,dynamic> overrideMap) { 
       return () async {
         widget?.loading();
         if (mainForm.currentState != null) {
-          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, {}, isDraft);
+          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest);
         }
         widget?.loaded();
-        
-        if (widget == null) { 
-          navigate = true;
-          globalMainViewKey.currentState!.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
+        if (widget == null && errors.isEmpty) { 
+          Future.delayed(Duration(seconds: 1), () {
+            globalMainViewKey.currentState!.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
+          });
         }
       };
   }
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
-                                                    BuildContext context, Map<String, dynamic> add, bool isDraft) async {  
+                                                    BuildContext context, Map<String, dynamic> add, bool isDraft, bool overrideDest) async {  
 
     if (consentCache[viewID] != null) {
       for (var consent in consentCache[viewID]!.values) {
@@ -71,12 +71,12 @@ class ActionService {
     }  
     var body = <String, dynamic>{};
     List<model.View> views = [];
-    var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft);
-    if (resp.isNotEmpty) {
-      if (resp.first.items.isNotEmpty) { body["dbdest_table_id"]=resp.first.items[0].values["id"]; }
+    var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest);
+    if (resp.isNotEmpty  && !overrideDest) {
+      if (resp.first.items.isNotEmpty) { 
+        body["dbdest_table_id"]=resp.first.items[0].values["id"]; 
+      }
       body["dbschema_id"]=resp.first.schemaID;
-    } else {
-      return views;
     }
     
     if (errors.isNotEmpty) {
@@ -93,7 +93,7 @@ class ActionService {
     if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
         form.detectChange = true;
         // ignore: use_build_context_synchronously
-        formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false, isDraft);
+        formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false, isDraft, overrideDest);
     }
     if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
     && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) { return views; }
@@ -117,21 +117,25 @@ class ActionService {
         }
       }
       body["is_draft"]=isDraft;
-      if (form.view!.actions.contains(method.toLowerCase())) {
-        if (!isDraft && (consentCache[viewID]?.length ?? 0) > 0) {
-          for (var consent in consentCache[viewID]!.values) {
-            if (consent.body == null) {
-              continue;
-            }
-            consent.body!["is_consenting"]=consent.consent;
-            await APIService().post(consent.actionPath!, consent.body!, context);
-          } 
-        }
-        consentCache.remove(viewID);
+      if (form.view!.actions.contains(method.toLowerCase())) {        
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
+            if (!isDraft && (consentCache[viewID]?.length ?? 0) > 0) {
+              for (var consent in consentCache[viewID]!.values) {
+                if (consent.body == null) {
+                  continue;
+                }
+                if (value.data!.first.items.isNotEmpty) { 
+                  consent.body!["dbdest_table_id"]=value.data!.first.items[0].values["id"]; 
+                }
+                consent.body!["dbschema_id"]=value.data!.first.schemaID;
+                consent.body!["is_consenting"]=consent.consent;
+                await APIService().post(consent.actionPath!, consent.body!, context);
+              } 
+            }
+            consentCache.remove(viewID);
             onSuccessMethod(method, views.last, { ...form.cacheForm}, views.last.schema, files, context);
             if (views.last.items.isNotEmpty) {
               if (form.view!.isEmpty) { 
@@ -151,9 +155,9 @@ class ActionService {
           listSubForms(schema, form.cacheForm, method, schemaName, "", context, true);
           APIResponse<model.View>(data: null);
         });      
-        formSubForms(form.oneToManiesForm, body, method, schemaName, context, false, false, isDraft); // ignore: use_build_context_synchronously
-        formSubForms(form.existingOneToManiesForm, body, method, schemaName, context, false, false, isDraft); // ignore: use_build_context_synchronously
-        formSubForms(form.oneToManiesFormDelete, body, method, schemaName, context, false, true, isDraft); // ignore: use_build_context_synchronously
+        formSubForms(form.oneToManiesForm, body, method, schemaName, context, false, false, isDraft, overrideDest); // ignore: use_build_context_synchronously
+        formSubForms(form.existingOneToManiesForm, body, method, schemaName, context, false, false, isDraft, overrideDest); // ignore: use_build_context_synchronously
+        formSubForms(form.oneToManiesFormDelete, body, method, schemaName, context, false, true, isDraft, overrideDest); // ignore: use_build_context_synchronously
       }
       Future.delayed(const Duration(seconds: 1), () {
         for (var state in form.oneToManiesStateForm.values) { state.setState(() { form.oneToManiesForm = []; }); }
@@ -289,7 +293,7 @@ class ActionService {
     }
   }
   static Future<List<model.View>> formSubForms(List<DataFormWidget> widgets, Map<String, dynamic> values, String method, 
-                                                 String schemaName, BuildContext context, bool add, bool delete, bool isDraft) async {
+                                                 String schemaName, BuildContext context, bool add, bool delete, bool isDraft, bool overrideDest) async {
     List<model.View> views = [];
     for (var many in widgets) { 
       if (delete && many.view != null && many.view!.actions.contains("delete") && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
@@ -298,10 +302,10 @@ class ActionService {
       } else if (many.view != null && many.view!.actions.contains(method)) {
         if (add) { views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
-                                                        context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft));
+                                                        context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest));
         } else { 
           await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
-                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft);
+                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest);
         } 
       }
     }

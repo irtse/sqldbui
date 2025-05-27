@@ -52,7 +52,8 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    var val = widget.value  ?? widget.autofill ?? currentDropdown[viewID!]?[widget.name];
+    var val = currentDropdown[viewID!]?[widget.name] ?? widget.value  ?? widget.autofill;
+    val = val?.replaceAll("''", "'");
     if (val != null) {
       widget.form[widget.name]=val;
     }
@@ -298,14 +299,15 @@ class SubDropDownState extends State<SubDropDownWidget> {
     for (var item in widget.datas) {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+      v = v.replaceAll("''", "'");
       var t = items.where((e) => e.value == "${item.id}"); 
       if (!mapped.containsKey(v) && t.isEmpty){
         mapped["${item.id}"]=item;
         if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
           var vv = v;
           bool select = false;
-          if ("${widget.value}" == "${item.id}" || "${widget.autofill}" == "${item.id}" || currentDropdown[viewID!] == "${item.id}") {
-            widget.form[widget.name]=widget.value ?? widget.autofill;
+          if ("${currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill ?? ""}" == "${item.id}") {
+            widget.form[widget.name]= currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill;
             select = true;
             if (widget.url != null) {
                widget.wrappers?.currentState?.setState( () { 
@@ -324,9 +326,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
             }
           } catch(e) {}
           items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
+          //ctrls.addItem(items.last);
         }
       }
     }
+    try {
     return MultiDropdown<String>(
         max: max,
         changeFunction: (dynamic value) async {
@@ -442,6 +446,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           } catch(e) {} 
                         },
                       );
+    } catch(e,s) {
+      print(e);
+      print(s);
+      return Container();
+    }
   }
 
   Future<void> load(int start, int interval, String filter, String value, List<DropdownItem<String>> items) async {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
@@ -115,6 +116,14 @@ class StepWidgetState extends State<StepWidget> {
       for ( var step in widget.steps!.where( (step) => step.name.length > maxLength) ) { 
         maxLength = step.name.length.toDouble();
       }
+      if (!(currentView?.isEmpty ?? true)) {
+        for ( var step in widget.steps! ) {
+          if (step.isCurrent) {
+            widget.current = true;
+          }
+        }
+      }
+      
       icons.add(Positioned(
         left: widget.width - 50,
         child: PopupMenuButton(
@@ -167,24 +176,25 @@ class StepWidgetState extends State<StepWidget> {
             child: Container(
               color: widget.beforeCurrent ? Theme.of(context).primaryColor : ( 
                 widget.beforeDismissible ? Colors.red : ( widget.beforeActive ? Colors.green : (
-                   widget.beforeDoing ? Colors.orange : Theme.of(context).splashColor))),
+                   widget.beforeDoing ? Colors.orange : Colors.grey))),
               height: 14,
               width: 30,
             ),
           ))) ]);
     }
+    print(widget.current);
     return Stack( 
       children : [
       Container(
           width: widget.width,
           height: 40,
           decoration: BoxDecoration(
-            border: const Border(right: BorderSide(width: 2, color: Colors.white),),
+            border: const Border(right: BorderSide(width: 2, color: Colors.white) ),
             color: widget.current ? Theme.of(context).primaryColor : (
               widget.isDismissible ? Colors.red : (
-                 widget.active ?  Colors.green : (widget.doing ? Colors.orange : Theme.of(context).splashColor))),
+                 widget.active ?  Colors.green : (widget.doing ? Colors.orange : Colors.grey))),
           ),
-          child: Center(child: widget.content,), ),
+          child: Center(child: widget.content), ),
       ...icons,
     ]);
   }

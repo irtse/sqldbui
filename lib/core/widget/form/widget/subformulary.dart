@@ -51,7 +51,7 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                       linkPath: data.linkPath, schema: data.schema, order: data.order, 
                       actionPath: data.actionPath.contains(data.schemaName) ? data.actionPath : data.linkPath,
                       actions: data.actions, 
-                      readOnly: widget.component.view!.readOnly || data.readOnly, 
+                      readOnly: data.readOnly, 
                       schemaName: data.schemaName, 
                       consents: data.consents,
                       items: data.items.isNotEmpty && !widget.component.view!.isEmpty ? data.items : <model.Item>[model.Item()] 

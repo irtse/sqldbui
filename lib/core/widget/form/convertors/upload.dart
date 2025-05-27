@@ -185,7 +185,7 @@ class _UploadState extends State<UploadWidget> {
     if (result != null) {
       _selectedFile = result.files.first;
       widget.component?.widget.detectChange = true;
-      if ("${widget.value ?? ""}" == "") {
+      if ("${widget.value ?? ""}" == "" && !widget.type.contains("multiple")) {
         widget.value = _selectedFile?.name;
       } else {
         widget.value += ",${_selectedFile?.name}";

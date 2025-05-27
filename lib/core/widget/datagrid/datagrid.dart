@@ -33,6 +33,7 @@ bool isFilter() {
 class Value {
   Map<String, model.SchemaField> schema = {};
   String cellID;
+  bool isNew = false;
   bool isDraft = false;
   bool isLink = false;
   bool readOnly = false;
@@ -42,7 +43,7 @@ class Value {
   Value({ 
     required this.cellID, required this.isDraft,
     this.values = const {}, this.isLink = true, 
-    this.readOnly = false, this.sharing, 
+    this.readOnly = false, this.sharing, this.isNew = false,
     required this.schema,
   });
 }
@@ -94,9 +95,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
     dpItems = [];
     if (widget.view != null) {
       schema = widget.view!.schema;
-      if (!filterTempOrderView.containsKey(viewID)) {
-        filterTempOrderView[viewID] = [];
-      }
     }
     if ( globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
       datas.sort( (a, b) =>  (b.values["id"] != null ? int.parse( b.values["id"]) : 0) -  (a.values["id"] != null ? int.parse(a.values["id"]) : 0) );

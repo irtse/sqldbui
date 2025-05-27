@@ -40,13 +40,14 @@ class ConsentState extends State<ConsentWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    return Padding( padding: EdgeInsets.only(bottom: 30), 
-            child: Row( 
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+    return Padding( padding: EdgeInsets.only(left: 30, right: 30), 
+            child: Wrap( 
+              spacing: 10,
+              runAlignment: WrapAlignment.center,
+              alignment: WrapAlignment.center,
               children: [
-              Padding( padding: EdgeInsets.only(right: 15), child: Text(
-                "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}",
+                Padding( padding: EdgeInsets.only(top: 13),
+                  child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}",
                 style: TextStyle( color: consentErrCache[viewID]?[widget.consent.name] ?? false ? Colors.red : Colors.black))),
               Container( width: 48, height: 48, padding: EdgeInsets.only(right: 20), child: CheckboxListTile(
                 value: widget.value,
