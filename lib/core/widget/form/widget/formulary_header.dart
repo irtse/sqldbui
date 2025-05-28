@@ -45,6 +45,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    print("HEADER");
     try {
     List<Widget> widgets = [];
     List<Widget> states = [];
@@ -52,21 +53,28 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     name = widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
     var scheme = widget.schema["name"];
     if (scheme?.translatable ?? true) {
-      name = await getOnFlow(name);
+      try {
+        name = await getOnFlow(name);
+      } catch(e) {}
     }
     description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
     var name2 = "";
     if (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null) { 
       name2 = widget.refItem.values["name"].toUpperCase(); 
       if (scheme?.translatable ?? true) {
-        name = await getOnFlow(name2);
+        try {
+          name2 = await getOnFlow(name2);
+        } catch(e) {}
       } 
     }
     List<String> desc = [];
     if (widget.refItem.values.containsKey("description") && widget.refItem.values["description"] != null) { 
       description = widget.refItem.values["description"].toLowerCase(); 
       for (var d in description.split(":")) {
-        desc.add(await getOnFlow(d));
+        try {
+          desc.add(await getOnFlow(d));
+        } catch(e) {}
+        
       } 
     }
     if (widget.refItem.isDraft) {
@@ -96,9 +104,9 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     }
     title.add(Padding( padding: const EdgeInsets.only(left: 53), 
       child: Row( 
-        children: [ Flexible( 
-          child: Text( name.toLowerCase(), overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19))), 
+        children: [ 
+          Text( name.toLowerCase(), overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19)), 
           widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),
             child: InkWell( onTap: () => setState(() {
@@ -110,16 +118,16 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         ])
       )
     );
-    if (description != "" && !description.contains("no description")) {
+    if (desc.isNotEmpty && !desc.contains("no description")) {
       title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
         children: [ 
           Padding( 
             padding: const EdgeInsets.only(right: 10), 
             child: Icon(Icons.info_outline, size: 20 , color: Theme.of(context).splashColor)), 
-              Flexible( child: Text(desc.join(":").toLowerCase(), 
+          Text(desc.join(":").toLowerCase(), 
                 overflow: TextOverflow.ellipsis,  
                 style: const TextStyle(color: Colors.grey, fontSize: 12))
-              )
+              
         ] )));
     }
     List<Widget> actions = [];
@@ -185,18 +193,18 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               // ignore: use_build_context_synchronously
               child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 20 )
             ), 
-            Flexible( child: Text(
-              (await getOnFlow(name)).toLowerCase(), 
+            Text(
+              name.toLowerCase(), 
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
-              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) 
+              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15)) 
             ]
           )),
-          name2.toLowerCase() != name.toLowerCase() ? Flexible( child: Text(
+          name2.toLowerCase() != name.toLowerCase() ? Text(
               name2.toLowerCase(), 
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
-              style: TextStyle(color: Colors.grey, fontSize: 12))) : Container(),
+              style: TextStyle(color: Colors.grey, fontSize: 12)) : Container(),
       ])));
     }
     return Stack( children: widgets);

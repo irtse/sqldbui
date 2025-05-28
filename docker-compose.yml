@@ -9,9 +9,9 @@ services:
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:8000"
     ports:
-      - "80:80"  # Expose Traefik on port 8000    
+      - "8000:8000"  # Expose Traefik on port 8000    
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   sqldbui:

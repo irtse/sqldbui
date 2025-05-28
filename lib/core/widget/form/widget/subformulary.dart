@@ -27,6 +27,7 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
   Map<String, String> wrappersURL = <String, String>{};
 
   @override Widget build(BuildContext context) {
+    print("SUB");
     if (wrappersURL.isEmpty && widget.isEmpty && !widget.component.subForm) {
       return EmptyFormularyWidget();
     }
