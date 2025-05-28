@@ -45,7 +45,7 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
   void clear() {
     globalMainViewKey.currentState?.setState(() {
       currentView = null;
-      viewID = TranslateConstants.dashboard.toLowerCase();
+      viewID = "dashboard";
       subViewID = null;
       globalMenuKey.currentState?.setState(() { });
     });

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -19,16 +20,10 @@ class HomeViewWidget extends StatefulWidget{
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
-  final Completer<WebViewController> _controller =  Completer<WebViewController>();
+ 
+  Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
+     GlobalKey<html.HtmlWidgetState> htmlKey = GlobalKey<html.HtmlWidgetState>();
     List<Widget> comps = [];
     List<RedirectButtonWidget> views = [];
     Widget? web;
@@ -39,7 +34,9 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            return html.HtmlWidget(
+            print(v.values["url"]);
+            return html.HtmlWidget( 
+              key: htmlKey,
               '''
                 <iframe src="${ v.values["url"]! }"</iframe>
               ''',
@@ -84,6 +81,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
+            print(v.values["url"]);
             return WebView(
               initialUrl: v.values["url"]!,
               onWebViewCreated: (WebViewController webViewController) {
@@ -134,9 +132,14 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),
           Padding( padding: const EdgeInsets.only(right: 20),
-          child: Text(await getOnFlow("${cat[0].toUpperCase()}${cat.substring(1).toLowerCase()}"),
-          style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20))),
-            Expanded( child: Divider(color: Theme.of(context).splashColor,))],),
+          child: FutureBuilder(future: getOnFlow("${cat[0].toUpperCase()}${cat.substring(1).toLowerCase()}"), builder: (a,s) { 
+            if (s.data != null) {
+              return Text(s.data!,
+                style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 20) );
+            }
+            return Container();
+          })),
+          Expanded( child: Divider(color: Theme.of(context).splashColor))]),
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))
       ],)));
     }
@@ -153,12 +156,14 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
       }
       return Stack( children: [
           Container(
+            margin: EdgeInsets.only(top: 80),
             width: currentWidth - menuSize,
             color: Colors.grey.shade300,
-            height: currentHeigth - 40,
+            height: currentHeigth - 120,
             child: web
           ),
-          Column( children: [
+          Positioned(
+          child: Column( children: [
             Container( 
               height: 40, 
               padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -171,7 +176,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                 Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
                   overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) ),
                   Padding(padding: EdgeInsets.only(left: 10),
-                    child: Icon(Icons.dashboard, color: Colors.grey.shade200, size: 18)
+                    child: Icon(Icons.home, color: Colors.grey.shade200, size: 18)
                 ),
               ])),
             Container(
@@ -180,9 +185,26 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                     boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
                     color: Theme.of(context).primaryColor),
                   child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: views))
+                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [ 
+                    Tooltip( message: "${TranslateConstants.goto} ${TranslateConstants.dashboard}", child:  InkWell( 
+                      onTap: () {
+                        globalMainViewKey.currentState?.setState(() { viewID = null; });
+                        Future.delayed(Duration(milliseconds: 50), () {
+                          globalMainViewKey.currentState?.setState(() {
+                            currentView = null;
+                            viewID = "dashboard";
+                            subViewID = null;
+                            globalMenuKey.currentState?.setState(() { });
+                          });
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration( border: Border(right: BorderSide(color: Theme.of(context).splashColor))),
+                        child: Icon(Icons.dashboard, color: Colors.white)
+                    ))), ...views]))
           ),
-      ])
+      ]))
       ]);
     }); 
   }  

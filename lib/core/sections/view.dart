@@ -30,7 +30,8 @@ class MainViewWidget extends StatefulWidget{
 }
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
-    if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
+    print(viewID);
+    if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return ViewWidget(view: currentView, views: widget.views);
     }
     model.View? view; 
@@ -118,7 +119,7 @@ class ViewWidget extends StatefulWidget{
 class ViewWidgetState extends State<ViewWidget> {
   @override Widget build(BuildContext context) { return Container(child: _build(context));  }
   Widget _build(BuildContext context) {
-    if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase())) {
+    if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return HomeViewWidget();
     }
     if (TriggerCacheService.getTriggers().isNotEmpty && !isTriggerOpen) {
