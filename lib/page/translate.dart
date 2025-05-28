@@ -175,6 +175,9 @@ Future<String> getOnFlow(String value) async {
     var translator = GoogleTranslator();
     var trans = await translator.translate(value, to: TranslateConstants.lang);
     TranslateConstants.onFlowTrad[value] = trans.text;
+    if (TranslateConstants.onFlowTrad[value]!.contains("affiche")) {
+      TranslateConstants.onFlowTrad[value] = TranslateConstants.onFlowTrad[value]!.replaceAll("affiche", "poster"); // to AD HOC
+    }
   }
   return TranslateConstants.onFlowTrad[value]!;
 }
