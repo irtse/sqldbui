@@ -41,7 +41,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             var v = a.data!.data![0].items[0];
             return html.HtmlWidget(
               '''
-                <iframe title="YouTube video player" src="${ v.values["url"]! }"</iframe>
+                <iframe src="${ v.values["url"]! }"</iframe>
               ''',
             );
           }
@@ -86,9 +86,6 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             var v = a.data!.data![0].items[0];
             return WebView(
               initialUrl: v.values["url"]!,
-              initialCookies: const [
-                WebViewCookie(name: 'mycookie', value: 'foo', domain: 'flutter.dev')
-              ],
               onWebViewCreated: (WebViewController webViewController) {
                 _controller.complete(webViewController);
               },
@@ -154,39 +151,38 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           } 
         } 
       }
-      return Column( children: [
-        Container( 
-          height: 40, 
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
-          decoration: BoxDecoration(
-            color: Theme.of(context).secondaryHeaderColor,
-            boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
-          ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
-              overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) ),
-              Padding(padding: EdgeInsets.only(left: 10),
-                child: Icon(Icons.dashboard, color: Colors.grey.shade200, size: 18)
-            ),
-          ])),
-        Column( children: [
-          Container(
-              width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
-              decoration: BoxDecoration( 
-                boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
-                color: Theme.of(context).primaryColor),
-              child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: views))
-          ),
+      return Stack( children: [
           Container(
             width: currentWidth - menuSize,
             color: Colors.grey.shade300,
-            height: currentHeigth - 80 - (views.isEmpty ? 0 : 40),
+            height: currentHeigth - 40,
             child: web
           ),
-        ])
-      
+          Column( children: [
+            Container( 
+              height: 40, 
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+              decoration: BoxDecoration(
+                color: Theme.of(context).secondaryHeaderColor,
+                boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
+                  overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) ),
+                  Padding(padding: EdgeInsets.only(left: 10),
+                    child: Icon(Icons.dashboard, color: Colors.grey.shade200, size: 18)
+                ),
+              ])),
+            Container(
+                  width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
+                  decoration: BoxDecoration( 
+                    boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+                    color: Theme.of(context).primaryColor),
+                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: views))
+          ),
+      ])
       ]);
     }); 
   }  
