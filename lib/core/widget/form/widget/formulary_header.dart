@@ -129,6 +129,8 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                 style: const TextStyle(color: Colors.grey, fontSize: 12))
               
         ] )));
+    } else {
+      title.add(Container(margin: EdgeInsets.only(bottom: 20)));
     }
     List<Widget> actions = [];
     if (!widget.subForm) {
