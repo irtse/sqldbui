@@ -1,6 +1,7 @@
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/dialog/link_box.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/utils.dart';
@@ -11,8 +12,10 @@ import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+MultiSelectController<String> navigatorCtrls = MultiSelectController<String>();
 bool translation = true;
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
@@ -49,7 +52,7 @@ class ActionBarState extends State<ActionBarWidget> {
   Future<Widget> futureBuild(BuildContext context) async{
     try {
       List<Widget> actions = <Widget>[];
-      if (viewID != null && widget.view != null) {
+      /*if (viewID != null && widget.view != null) {
         if (widget.view!.isList) {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
@@ -83,6 +86,7 @@ class ActionBarState extends State<ActionBarWidget> {
           }
         }
       }
+      print("THERE");
       if (widget.gridKey != null) {
         actions.add( getIconOffset( (await getOnFlow(TranslateConstants.resetUI)).toLowerCase(), Icons.auto_fix_off, 20, () {
             globalOffset = 0;
@@ -90,7 +94,7 @@ class ActionBarState extends State<ActionBarWidget> {
             globalMainViewKey.currentState?.setState(() {rects.remove(viewID); });
           }, false)
         );
-      }
+      }*/
       if (widget.view != null && (currentWidth - menuSize) > 650) {
         if (widget.view!.shortcuts.keys.length == 1) {
           var t = await getOnFlow(widget.view!.shortcuts.keys.first);
@@ -192,6 +196,99 @@ class ActionBarState extends State<ActionBarWidget> {
       }
       List<Widget> rows = [];
       if (currentWidth > 700) {
+        List<DropdownItem<String>> items = [];
+        print("dfsklsldfk ${items.length}");
+        for (var v in views) {
+          var i = items.where( (e) => e.value == "${v.id}");
+          if (i.isEmpty) {
+            items.add(DropdownItem<String>(selected: viewID?.replaceAll("#", "") == "${v.id}" && (subViewID ?? "") == "",
+              value: "#${v.id}", label: (await getOnFlow(v.label ?? v.name)).toLowerCase()));
+          } else {
+            i.first.selected = viewID?.replaceAll("#", "") == "${v.id}" && (subViewID ?? "") == "";
+          }
+        }
+        print("dfsklsldfk ${items.length} $viewID");
+        if (currentView != null && (subViewID ?? "") != "") {
+            items.add(DropdownItem<String>( selected: true,
+              value: "@${currentView!.id}${ currentView!.items.isNotEmpty ? ":${currentView!.items.first.values["id"]}" : "" }", 
+              label: "${(await getOnFlow(currentView!.label ?? currentView!.name)).replaceAll("_", "").replaceAll("db", "")} -> ${ 
+                currentView!.items.isNotEmpty ? await getOnFlow(currentView!.items.first.values["name"] ?? "data") : ""}".toLowerCase()));
+        }
+        var dp = MultiDropdown<String>(
+        enabled: true,
+        singleSelect: true,
+        items: items,
+        searchEnabled: true,
+        style: TextStyle(color: Colors.grey.shade200),
+        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
+        ),                             // ignore: use_build_context_synchronously
+        fieldDecoration: FieldDecoration(
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                          padding: const EdgeInsets.all(1),
+                          backgroundColor: Theme.of(context).secondaryHeaderColor,
+                          labelStyle: TextStyle(fontSize: 0),
+                          hintText: await getOnFlow(TranslateConstants.url.toLowerCase()),
+                          hintStyle: TextStyle(color: Theme.of(context).splashColor, fontSize: 15),
+                          prefixIcon: Icon(Icons.account_tree, size: 18,  color: Theme.of(context).splashColor),
+                          showClearIcon: false,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                            // ignore: use_build_context_synchronously
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                            // ignore: use_build_context_synchronously
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+        ),
+        searchDecoration: SearchFieldDecoration(
+                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          border : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                            borderRadius: BorderRadius.all(Radius.circular(5)))
+        ),
+        dropdownDecoration: DropdownDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          marginTop: 2,
+                          maxHeight: 400,
+                          header: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                              "       ${TranslateConstants.selectValue.toLowerCase()}",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        dropdownItemDecoration: DropdownItemDecoration(
+                          backgroundColor: Theme.of(context).highlightColor,
+                          selectedIcon:
+                              const Icon(Icons.check_box, color: Colors.green),
+                          disabledIcon:
+                              Icon(Icons.lock, color: Colors.grey.shade300),
+                        ),
+                        validator: (value) {
+                          if ((value == null || value.isEmpty)) {
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSelectionChange: (values) {
+                          if (values.isNotEmpty) {
+                            AppRouter.navigateTo(values[0]);
+                          }
+                        },
+        );
         rows = [ 
           Flexible(child: Row( children: row,)),
           Flexible( 
@@ -223,7 +320,7 @@ class ActionBarState extends State<ActionBarWidget> {
                             // ignore: use_build_context_synchronously
                             borderSide: BorderSide(color: Theme.of(context).primaryColor))
                         )
-                      )
+                      ) 
                     ),
                   ),
                   getIconOffset( await getOnFlow(TranslateConstants.goto.toLowerCase()), 

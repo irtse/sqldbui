@@ -24,7 +24,8 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
     List<Widget> drops = [];
     if (widget.sharing != null) {
       var len = 0;
-      d.add(FutureBuilder(future: APIService().get<model.Shallowed>("${widget.sharing?.sharedWithPath ?? ""}&scope=enable", forceUser, context), builder: (a,s) {
+      print(widget.sharing?.sharedWithPath);
+      d.add(FutureBuilder(future: APIService().get<model.Shallowed>(widget.sharing?.sharedWithPath ?? "", forceUser, context), builder: (a,s) {
           forceUser = false;
           List<DropdownMenuItem<String>> dpItems = [];
           if (s.data?.data != null) {

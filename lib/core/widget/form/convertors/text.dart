@@ -85,7 +85,7 @@ class _TextState extends State<TextWidget> {
         border: OutlineInputBorder(borderSide: BorderSide(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).splashColor, width: 1.0)),
         isDense: true,
         suffixIconColor: Theme.of(context).primaryColor,
-        hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+        hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: true,
         fillColor: widget.readOnly ? Theme.of(context).splashColor : (widget.isDark ? Theme.of(context).primaryColorLight : Colors.white),

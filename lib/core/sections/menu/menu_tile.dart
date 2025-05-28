@@ -35,7 +35,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 selected: "${widget.view.id}" == viewID?.substring(1),
                 onTap: () async { setState(() { 
                   navigate = true;
-                  widget.refreshView("#${widget.view.id}", widget.category, true, false, false);  
+                  widget.refreshView("#${widget.view.id}", widget.category, true, false, false); 
                   // globalMenuKey.currentState?.setState(() {});
                 }); },
                 tileColor: Theme.of(context).secondaryHeaderColor,

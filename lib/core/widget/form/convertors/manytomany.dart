@@ -276,7 +276,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           labelText: "${l.toLowerCase()}${widget.require ? "*" : ""}",
                           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                           hintText: TranslateConstants.selectValue.toLowerCase(),
-                          hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
+                          hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.checklist_rtl, color: Colors.grey.shade200),
                           showClearIcon: false,
                           border: OutlineInputBorder(

@@ -17,11 +17,11 @@ import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/page/translate.dart';
 
 bool noMenu = false;
-final _authProvider = AuthService();          
+final _authProvider = AuthService(); 
+List<model.View> views = [];
 /// Flutter code sample for [FutureBuilder].
 // ignore: must_be_immutable
 class PageWidget extends StatefulWidget {
-  List<model.View> views = [];
   PageWidget({super.key});
   @override
   State<PageWidget> createState() => PageWidgetState();
@@ -102,9 +102,9 @@ class PageWidgetState extends State<PageWidget> {
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
           filterMenuMain = false;
           if (snapshot.hasData && snapshot.data!.data != null) { 
-            widget.views = snapshot.data!.data!;
+            views = snapshot.data!.data!;
           }
-          return MenuWidget(key: globalMenuKey, views: widget.views);
+          return MenuWidget(key: globalMenuKey, views: views);
         })) : null;
   }
   Widget buildMenu() {
@@ -127,14 +127,14 @@ class PageWidgetState extends State<PageWidget> {
     );
   }
   Widget buildView() {
-    return widget.views.isNotEmpty ? buildPage(widget.views) :
+    return views.isNotEmpty ? buildPage(views) :
       FutureBuilder<APIResponse<model.View>>(
         future: APIService().get<model.View>(APIConstants.mainEndpost, filterMenuMain, null), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
           var c = <Widget>[];
           if (snapshot.hasData && snapshot.data!.data != null) { 
-            widget.views = snapshot.data!.data!;
-            return buildPage(widget.views);
+            views = snapshot.data!.data!;
+            return buildPage(views);
           }
           return Row(crossAxisAlignment: CrossAxisAlignment.start, children: c);
         }

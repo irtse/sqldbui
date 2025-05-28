@@ -48,7 +48,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
                             "refused":  { "purpose": "refused task", "color": Colors.red, "icon": Icons.close}, }.entries) {
           var purpose = await getOnFlow("${state.value["purpose"]}");
           positionnedBar.add(Padding( padding: const EdgeInsets.only(left: 20), child: FloatingActionButton(
-            tooltip: (await getOnFlow(TranslateConstants.validate)).toLowerCase(),
+            tooltip: purpose.toLowerCase(),
             onPressed: () {
               showDialog(context: context, builder: (builder) => ConfirmBoxWidget(
                 purpose: purpose, 

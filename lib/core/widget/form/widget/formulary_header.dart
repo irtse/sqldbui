@@ -49,13 +49,25 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     List<Widget> widgets = [];
     List<Widget> states = [];
     List<Widget> title = [];    
-    name = await getOnFlow(widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " "));
-    description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
-    if (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null) { 
-      name += ": ${await getOnFlow(widget.refItem.values["name"].toUpperCase())}"; 
+    name = widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
+    var scheme = widget.schema["name"];
+    if (scheme?.translatable ?? true) {
+      name = await getOnFlow(name);
     }
+    description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
+    var name2 = "";
+    if (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null) { 
+      name2 = widget.refItem.values["name"].toUpperCase(); 
+      if (scheme?.translatable ?? true) {
+        name = await getOnFlow(name2);
+      } 
+    }
+    List<String> desc = [];
     if (widget.refItem.values.containsKey("description") && widget.refItem.values["description"] != null) { 
       description = widget.refItem.values["description"].toLowerCase(); 
+      for (var d in description.split(":")) {
+        desc.add(await getOnFlow(d));
+      } 
     }
     if (widget.refItem.isDraft) {
       states.add(Padding(
@@ -104,7 +116,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
           Padding( 
             padding: const EdgeInsets.only(right: 10), 
             child: Icon(Icons.info_outline, size: 20 , color: Theme.of(context).splashColor)), 
-              Flexible( child: Text((await getOnFlow( description )).toLowerCase(), 
+              Flexible( child: Text(desc.join(":").toLowerCase(), 
                 overflow: TextOverflow.ellipsis,  
                 style: const TextStyle(color: Colors.grey, fontSize: 12))
               )
@@ -163,8 +175,11 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         ),
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.only(left: 30, top: 20, bottom: 20),
-        child: Stack( children: [ 
-          Row( children: [ 
+        child: Wrap( children: [ 
+          Padding(
+          padding: const EdgeInsets.only(right: 30), 
+            // ignore: use_build_context_synchronously
+          child: Row( children: [ 
             Padding(
               padding: const EdgeInsets.only(right: 15, top: 1), 
               // ignore: use_build_context_synchronously
@@ -174,8 +189,15 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               (await getOnFlow(name)).toLowerCase(), 
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
-              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) ]),
-          ])));
+              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15))) 
+            ]
+          )),
+          name2.toLowerCase() != name.toLowerCase() ? Flexible( child: Text(
+              name2.toLowerCase(), 
+              overflow: TextOverflow.ellipsis,
+              // ignore: use_build_context_synchronously
+              style: TextStyle(color: Colors.grey, fontSize: 12))) : Container(),
+      ])));
     }
     return Stack( children: widgets);
     } catch (e, s) {

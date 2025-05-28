@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/main.dart';
@@ -142,6 +143,8 @@ class AppRouter {
     globalLoading = true;
     selectedGrid = []; unselectedGrid = [];
     navigate = true;
+    print("$viewID $subViewID");
+    print("kbkjj ${navigatorCtrls.selectedItems}");
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }
 }   

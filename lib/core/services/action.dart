@@ -54,8 +54,10 @@ class ActionService {
       for (var consent in consentCache[viewID]!.values) {
         if (!consent.consent && !consent.optionnal) {
           consentErrCache[viewID ?? ""]?[consent.name] = true;
-          errors = ["should consent !"]; 
-          consent.key?.currentState?.setState(() {});
+          errors = ["we need your consent"]; 
+          consent.key?.currentState?.setState(() {
+            consent.key?.currentState?.error = true;
+          });
         }
       } 
     }
@@ -69,8 +71,18 @@ class ActionService {
         return []; 
       } else { form.formKey.currentState!.save(); }
     }  
-    var body = <String, dynamic>{};
     List<model.View> views = [];
+
+    if (errors.isNotEmpty) {
+      var errorStr = "";
+        for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
+        if (errorStr != "") {
+          // ignore: use_build_context_synchronously
+          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
+        }
+      return views;
+    }
+    var body = <String, dynamic>{};
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest);
     if (resp.isNotEmpty  && !overrideDest) {
       if (resp.first.items.isNotEmpty) { 
@@ -143,9 +155,8 @@ class ActionService {
               }
               if (form.view!.id == mainForm.currentState!.widget.view!.id) {
                 showAlertBanner(context, () {}, 
-                  InfoAlertBannerChild(text: "${schemaName.replaceAll("_", " ").replaceAll("db", "")} ${method == "post" ? "create" : (
-                    method == "put" ? TranslateConstants.filterSave.toUpperCase() : await getOnFlow(method))} datas suceed :)"), // <-- Put any widget here you want!
-                                      alertBannerLocation:  AlertBannerLocation.bottom,);
+                  InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
+                                      alertBannerLocation:  AlertBannerLocation.bottom);
               }
             }
           }

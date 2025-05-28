@@ -62,7 +62,9 @@ class FormularyWidgetState extends State<FormularyWidget> {
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
           var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
+          print("$fieldName $readOnly ${widget.view.readOnly} ${widget.view.name}");
           readOnly = readOnly || !((widget.view.actions.contains("post") && widget.view.isEmpty) || widget.view.actions.contains("put")); // to remove if change its mind
+          print("2 $fieldName $readOnly");
           String path = "";
           if (widget.refItem.valuesShallow.containsKey(fieldName)) { 
             var v = widget.refItem.valuesShallow[fieldName]!;
@@ -124,14 +126,14 @@ class FormularyWidgetState extends State<FormularyWidget> {
                       // ignore: use_build_context_synchronously
                       color: Theme.of(context).splashColor,
                     ), 
-                    child: Padding(padding: const EdgeInsets.all(10), child: f!)
+                    child: Padding(padding: const EdgeInsets.all(10), child: f)
                   )
                 )
               ); 
             }
-        }
+      }
       for (var consent in widget.view.consents) {
-        widget.additionnalWidgets.add(ConsentWidget(consent: consent, value: false));
+        fields.add(ConsentWidget(consent: consent, value: false));
       }
       // widget.additionnalWidgets.add(getSynthesis(widget.refItem.synthesisPath ?? ""));
       if (widget.key != null) {

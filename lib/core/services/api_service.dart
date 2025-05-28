@@ -181,9 +181,6 @@ class APIService {
                                                                 bool isFilter, String? extend, Options? options) async {
     var err = ""; 
     if (url != "") {
-      if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
-        return cache[url]! as APIResponse<T>;
-      }
       try {
         dio.options.headers["authorization"] = auth;
         dio.interceptors.clear(); 
@@ -200,8 +197,12 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-        print("$method ${"$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter"}");
-        var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
+        url = "$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter";
+        if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
+          return cache[url]! as APIResponse<T>;
+        }
+        print("$method $url");
+        var response = await request(url, method, body, options);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {

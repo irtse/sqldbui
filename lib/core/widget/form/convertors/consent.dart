@@ -18,6 +18,8 @@ class ConsentWidget extends StatefulWidget {
   ConsentState createState() => ConsentState();
 }
 class ConsentState extends State<ConsentWidget> {
+  bool error = true;
+
   @override Widget build(BuildContext context) {
     if (consentCache[viewID ?? ""] == null) {
       consentCache[viewID ?? ""] = {};
@@ -48,7 +50,7 @@ class ConsentState extends State<ConsentWidget> {
               children: [
                 Padding( padding: EdgeInsets.only(top: 13),
                   child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}",
-                style: TextStyle( color: consentErrCache[viewID]?[widget.consent.name] ?? false ? Colors.red : Colors.black))),
+                style: TextStyle( color: error ? Colors.red : Colors.black))),
               Container( width: 48, height: 48, padding: EdgeInsets.only(right: 20), child: CheckboxListTile(
                 value: widget.value,
                 onChanged: (value) { 

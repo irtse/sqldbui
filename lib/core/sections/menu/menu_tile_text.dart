@@ -2,6 +2,7 @@
 // ignore: must_be_immutable
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -37,6 +38,7 @@ class MenuTileTextWidgetState extends State<MenuTileTextWidget> {
       child: Tooltip( message: label.toLowerCase(), child: ListTile(
         selected: widget.view == viewID?.substring(1),
         onTap: () async { setState(() { 
+          globalActionBar.currentState?.setState(() { });
           navigate = true;
           widget.refreshView("#${widget.view}", widget.category, true, false, false);  
           globalMenuKey.currentState?.setState(() {});

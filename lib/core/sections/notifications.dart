@@ -23,7 +23,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     try{
     List<Widget> notifs = [
       Container( 
-        width: currentWidth / 2,
+        width: currentWidth / 3,
         padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20), 
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Theme.of(context).splashColor ))

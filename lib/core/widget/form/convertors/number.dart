@@ -56,7 +56,7 @@ class _NumberState extends State<NumberWidget> {
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,
             suffixIconColor: Theme.of(context).primaryColor,
-            hintStyle: const TextStyle(fontSize: 12, ),
+            hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             fillColor: widget.readOnly ? Theme.of(context).splashColor : Colors.white,
             border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
