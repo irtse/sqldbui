@@ -29,20 +29,20 @@ class SaveDatagridButtonWidgetState extends State<SaveDatagridButtonWidget> {
             Map<String, dynamic> body = {};
             for (var j in i.widgetCells) {
               if (j.cell.columnName != "id" 
-              && detectChanges["${i.cells.first.value}:${j.cell.columnName}"] != null 
-              && detectChanges["${i.cells.first.value}:${j.cell.columnName}"]!.currentState != null
-              && detectChanges["${i.cells.first.value}:${j.cell.columnName}"]!.currentState!.validate()) {
-                body[j.cell.columnName] = detectChanges["${i.cells.first.value}:${j.cell.columnName}"]?.currentState!.value;
+              && detectChanges["${i.cellID}:${j.cell.columnName}"] != null 
+              && detectChanges["${i.cellID}:${j.cell.columnName}"]!.currentState != null
+              && detectChanges["${i.cellID}:${j.cell.columnName}"]!.currentState!.validate()) {
+                body[j.cell.columnName] = cacheChanges["${i.cellID}:${j.cell.columnName}"];
               }
             }
             if (body.isNotEmpty && i.cells.isNotEmpty) {
               await APIService().put<model.View>(
-                currentView!.actionPath.replaceAll("rows=all", "rows=${i.cells.first.value}"), body, null);
+                currentView!.actionPath.replaceAll("rows=all", "rows=${i.cellID}"), body, null);
             }
           }
         }
-        navigate = true;
-        globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+        //navigate = true;
+        //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
         setState(() { change = false; });
       }, 
       icon: Icon(Icons.save, color: Theme.of(context).highlightColor, size: 20));

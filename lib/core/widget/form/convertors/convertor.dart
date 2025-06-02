@@ -42,7 +42,7 @@ class Convertor {
         w = TextFormField( key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,
           initialValue: cacheChanges[id]?.toString() ?? widget.value?.toString(),
-          style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black, overflow: TextOverflow.ellipsis),
+          style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
           enabled: true, 
           autocorrect: true,  
           expands: isGrid,
@@ -113,7 +113,7 @@ class Convertor {
         },
         format: intl.DateFormat('y-M-dd'),
         // mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
-        style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black),
+        style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor ),
         decoration: isGrid ? dec : InputDecoration(
             suffixIcon: const Icon(Icons.calendar_month, size: 18,),
             suffixIconColor: Theme.of(context).splashColor,
@@ -157,7 +157,7 @@ class Convertor {
         value: (cacheChanges[id]?.toString() ?? widget.value?.toString()), elevation: 1,
         validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder; } return null; },
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300,
-         color: isDark ? Colors.white : Colors.black, overflow: TextOverflow.ellipsis),
+         color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
         hint: Text(TranslateConstants.placeHolderValue.toLowerCase(), 
               overflow: TextOverflow.ellipsis, softWrap: true, 
               style: TextStyle(fontSize: 13, color: isGrid ? Colors.grey : Theme.of(context).splashColor)),
@@ -185,7 +185,7 @@ class Convertor {
       );    
     } else if (type.contains("link") && url != "") {
       if ((widget.value ?? "") != "") {
-      return FutureBuilder<APIResponse<model.Shallowed>>(
+        w = FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(url).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
            return FutureBuilder<APIResponse<model.Shallowed>>(
@@ -210,20 +210,21 @@ class Convertor {
               }
             });   
         });
+      } else {
+        w = FutureBuilder<APIResponse<model.Shallowed>>(
+          future: APIService().get(url, true, null), 
+          builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+            return FutureBuilder<Widget>(
+            future: getLink(url, context, widget, id, dec,  formKey, label, 
+            type, snap.data?.data, isGrid, isDark, isText), 
+            builder: (BuildContext c, AsyncSnapshot<Widget> q) {
+              if (q.data != null) {
+                return q.data!;
+              }
+              return Container();
+            });
+        });
       }
-      return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(url, true, null), 
-        builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-          return FutureBuilder<Widget>(
-          future: getLink(url, context, widget, id, dec,  formKey, label, 
-          type, snap.data?.data, isGrid, isDark, isText), 
-          builder: (BuildContext c, AsyncSnapshot<Widget> q) {
-            if (q.data != null) {
-              return q.data!;
-            }
-            return Container();
-          });
-      });
     }
     return w;
   }
@@ -235,6 +236,10 @@ class Convertor {
     List<DropdownItem<String>> items = <DropdownItem<String>>[];
     Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};
     int max = 0;
+    if (datas == null || datas.isEmpty) {
+      return Container();
+    }
+    bool found = false;
     if (datas != null) {
       for (var item in datas) {
         max = item.max;
@@ -248,6 +253,7 @@ class Convertor {
             }
             bool select = false;
             if ( item.id.toString() == widget.value.toString() ) { 
+              found = true;
               select = true; 
             }
             try {
@@ -268,12 +274,15 @@ class Convertor {
         }
       }
     }
+    if (datas == null || datas.isEmpty || (widget.value ?? "") != "" && !found) {
+      return Container();
+    }
     var decF = FieldDecoration( 
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
     return MultiDropdown<String>(
-        key: formKey,
+        formFieldKey: formKey,
         max: max,
         enabled: true,
         label: label,
@@ -289,7 +298,7 @@ class Convertor {
         singleSelect: true,
         items: items,
         searchEnabled: max > 10,
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: isDark ?  Colors.white : Theme.of(context).secondaryHeaderColor ),
         chipDecoration: ChipDecoration(
                           backgroundColor: Theme.of(context).primaryColor,
                           labelStyle: TextStyle(color: Colors.white),

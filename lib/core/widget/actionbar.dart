@@ -211,6 +211,7 @@ class ActionBarState extends State<ActionBarWidget> {
                 currentView!.items.isNotEmpty ? await getOnFlow(currentView!.items.first.values["name"] ?? "data") : ""}".toLowerCase()));
         }
         var dp = MultiDropdown<String>(
+        formFieldKey: GlobalKey(),
         enabled: true,
         singleSelect: true,
         items: items,

@@ -1,16 +1,15 @@
 
 // ignore: must_be_immutable
-import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/router.dart';
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class GridCell {
   double height = 100; 
@@ -90,6 +89,9 @@ class GridCellWidgetState extends State<GridCellWidget> {
     }
     var edit = (isEditMode[viewID] ?? false) && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
                 && !widget.cell.readOnly && !widget.readOnly;
+    if (edit && widget.shal != null) {
+      widget.value = "${widget.shal!.id ?? widget.value}";
+    }
     String url = currentView!.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]!.actionPath == "" ? 
       "" : "${currentView!.schema[widget.cell.columnName]!.actionPath}&shallow=enable";
     var v = widget.value;

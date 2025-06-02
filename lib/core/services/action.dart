@@ -144,9 +144,7 @@ class ActionService {
                 }
                 consent.body!["dbschema_id"]=value.data!.first.schemaID;
                 consent.body!["is_consenting"]=consent.consent;
-                print(consent.body);
                 await APIService().post(consent.actionPath!, consent.body!, context);
-                print("BR");
               } 
             }
             consentCache.remove(viewID);
@@ -203,7 +201,6 @@ class ActionService {
     if (view.items.isNotEmpty) {            
       listSubForms(schema, values, method, view.schemaName, "${view.schemaID}", context, false);
     }
-    print("TEST ${view.triggers}");
     TriggerCacheService.setTriggers(view.triggers); 
   }
 

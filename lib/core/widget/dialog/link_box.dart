@@ -46,6 +46,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                       width: 250,   
                       height: 25, 
                       child: MultiDropdown<String>(
+                        formFieldKey: GlobalKey(),
         max: max,
         changeFunction: (dynamic value) async {
           if (value == "") {
@@ -163,11 +164,11 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
               ));
             }
           }
-          print(dpItems.length);
           return Row( children : [  SizedBox( 
                       width: 250,   
                       height: 25, 
                       child: MultiDropdown<String>(
+                        formFieldKey: GlobalKey(),
                       max: max,
                       changeFunction: (dynamic value) async {
                         if (value == "") {

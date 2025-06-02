@@ -236,6 +236,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
       }
     }
     return MultiDropdown<Map<String, dynamic>>(
+                        formFieldKey: GlobalKey(),
                         addFunction: widget.type == "manytomany_add" ? (String value) {
                             ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
                               "name": value,
