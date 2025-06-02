@@ -23,7 +23,6 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     try{
     List<Widget> notifs = [
       Container( 
-        width: currentWidth / 3,
         padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20), 
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Theme.of(context).splashColor ))
@@ -42,34 +41,45 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     for ( var notif in AuthService.user!.notifications ) {
         var name = notif.name;
         var desc = notif.description;
+        List<String> d = [];
         try { name = await getOnFlow(notif.name);
         } catch(e) {}
-        try { desc = await getOnFlow(notif.description);
-        } catch(e) {}
         
+        for (var dd in desc.split(":")) {
+          try { 
+            d.add(await getOnFlow(dd));
+          } catch(e) {}
+        }
         notifs.add(Stack( alignment: Alignment.center, children : [ 
           Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ Container(
-          width: currentWidth / 1.2,
           padding: const EdgeInsets.only(bottom: 20, top: 15),
           decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Theme.of(context).splashColor, ))),
           child: Column(children: [
-          Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: TextButton( onPressed: () { 
+          Padding(padding: const EdgeInsets.only(left: 20, right: 30), child: InkWell( onTap: () { 
             var splitted = notif.ref.replaceAll(":", "/").split("/");
             viewID = splitted.length > 1 && splitted[1] == "" ? splitted[1] : null;
             subViewID=splitted.length > 2 && splitted[2] == "" ? splitted[2] : null;
             AppRouter.navigateTo(notif.ref); 
             Future.delayed(const Duration(seconds: 1), () => setState(() { APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), null); }));
           }, 
-          child: Row(
+          child: Container( width: currentWidth / 3.5, child: Row(
             children: [
-              Icon(Icons.message, color: Theme.of(context).splashColor), Padding( padding: const EdgeInsets.only(left: 10), 
-                child: Text( name.toUpperCase()
-                  , overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor))),
-            ]))),
-          Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
-            child: Row( children: [Text(desc == "" ? "" : desc.toLowerCase(), 
-              style: TextStyle(color: Theme.of(context).splashColor), overflow: TextOverflow.ellipsis,)])),
+              Padding( padding: const EdgeInsets.only(right: 10), 
+                child: Icon(Icons.message, color: Theme.of(context).splashColor)), Expanded( child: Text( 
+                  name.toUpperCase(), softWrap: true,
+                  maxLines: null,        // No line limit
+                  overflow: TextOverflow.visible,
+                  style: TextStyle(color: Theme.of(context).highlightColor))),
+            ])))),
+           Container( width: currentWidth / 3.5, child: Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
+            child: Row( children: [ Expanded( 
+            child: Text(d.isEmpty ? "" : d.join(":").toLowerCase(), 
+             style: TextStyle(color: Theme.of(context).splashColor), 
+             softWrap: true,
+             maxLines: null,        // No line limit
+             overflow: TextOverflow.visible,
+            ))])))
         ]))])),
         Positioned(
           right: 10, 
@@ -87,7 +97,6 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
       ])); 
     }
     return Container(
-        width: currentWidth / 1.2,
         height: currentHeigth,
         color: Theme.of(context).secondaryHeaderColor,
         child: SingleChildScrollView( child: Column(children: notifs) ));
