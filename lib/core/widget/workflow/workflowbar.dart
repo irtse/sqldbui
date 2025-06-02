@@ -182,7 +182,6 @@ class StepWidgetState extends State<StepWidget> {
             ),
           ))) ]);
     }
-    print(widget.current);
     return Stack( 
       children : [
       Container(

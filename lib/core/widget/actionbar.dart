@@ -52,8 +52,8 @@ class ActionBarState extends State<ActionBarWidget> {
   Future<Widget> futureBuild(BuildContext context) async{
     try {
       List<Widget> actions = <Widget>[];
-      /*if (viewID != null && widget.view != null) {
-        if (widget.view!.isList) {
+      if (viewID != null && widget.view != null) {
+        /*if (widget.view!.isList) {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
             translation = !translation;
@@ -75,8 +75,8 @@ class ActionBarState extends State<ActionBarWidget> {
                 );
               }, false));
             }
-          }
-          if (!(currentView?.isEmpty ?? false)) {
+          }*/
+          if (!(currentView?.isEmpty ?? false) && !widget.view!.isList && (currentView?.items.isNotEmpty ?? false)) {
           actions.add(Padding( padding: EdgeInsets.only(right: 10),
                 child: LinkBoxWidget(
                   color: Colors.white,
@@ -85,9 +85,7 @@ class ActionBarState extends State<ActionBarWidget> {
                 )));
           }
         }
-      }
-      print("THERE");
-      if (widget.gridKey != null) {
+      /*if (widget.gridKey != null) {
         actions.add( getIconOffset( (await getOnFlow(TranslateConstants.resetUI)).toLowerCase(), Icons.auto_fix_off, 20, () {
             globalOffset = 0;
             navigate = true;
@@ -197,7 +195,6 @@ class ActionBarState extends State<ActionBarWidget> {
       List<Widget> rows = [];
       if (currentWidth > 700) {
         List<DropdownItem<String>> items = [];
-        print("dfsklsldfk ${items.length}");
         for (var v in views) {
           var i = items.where( (e) => e.value == "${v.id}");
           if (i.isEmpty) {
@@ -207,7 +204,6 @@ class ActionBarState extends State<ActionBarWidget> {
             i.first.selected = viewID?.replaceAll("#", "") == "${v.id}" && (subViewID ?? "") == "";
           }
         }
-        print("dfsklsldfk ${items.length} $viewID");
         if (currentView != null && (subViewID ?? "") != "") {
             items.add(DropdownItem<String>( selected: true,
               value: "@${currentView!.id}${ currentView!.items.isNotEmpty ? ":${currentView!.items.first.values["id"]}" : "" }", 

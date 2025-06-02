@@ -34,6 +34,13 @@ class _DateState extends State<DateWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
       DateTime? dateValue;
+      var label = "${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
+      try {
+        label = await getOnFlow(label);
+      } catch(e) {}
+      try {
+        TranslateConstants.selectDate = TranslateConstants.selectDate.toLowerCase();
+      } catch(e) {}
       if (widget.form[widget.name] != null) { 
         widget.value = widget.form[widget.name]; 
       }
@@ -66,7 +73,7 @@ class _DateState extends State<DateWidget> {
             disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             hintText: TranslateConstants.selectDate.toLowerCase(),
-            labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
+            labelText: label.toLowerCase(),
           ) ));
       }
       return DateTimeField(
@@ -94,7 +101,7 @@ class _DateState extends State<DateWidget> {
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: TranslateConstants.selectDate.toLowerCase(),
             labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-            labelText: (await getOnFlow("${widget.label.toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
+            labelText: label.toLowerCase().toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(
               context: context,

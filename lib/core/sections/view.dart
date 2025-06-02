@@ -30,7 +30,6 @@ class MainViewWidget extends StatefulWidget{
 }
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
-    print(viewID);
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return ViewWidget(view: currentView, views: widget.views);
     }

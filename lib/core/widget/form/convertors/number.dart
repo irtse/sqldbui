@@ -32,6 +32,13 @@ class _NumberState extends State<NumberWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    var label="${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}";
+    try {
+      label = await getOnFlow(label);
+    } catch(e) {}
+    try {
+      TranslateConstants.writeNumber = await getOnFlow(TranslateConstants.writeNumber);
+    } catch(e) {}
     if (widget.form[widget.name] != null) { 
       widget.value = widget.form[widget.name]; 
     }
@@ -63,7 +70,7 @@ class _NumberState extends State<NumberWidget> {
             suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro, color: Colors.black) : Icon(Icons.onetwothree, color: Theme.of(context).secondaryHeaderColor),
             hintText: TranslateConstants.writeNumber.toLowerCase(),
             labelStyle: TextStyle(color:Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-            labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
+            labelText: label.toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
           ),
           onSaved: func,

@@ -34,7 +34,6 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            print(v.values["url"]);
             return html.HtmlWidget( 
               key: htmlKey,
               '''
@@ -81,7 +80,6 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            print(v.values["url"]);
             return WebView(
               initialUrl: v.values["url"]!,
               onWebViewCreated: (WebViewController webViewController) {

@@ -39,7 +39,8 @@ class ActionService {
           await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest);
         }
         widget?.loaded();
-        if (widget == null && errors.isEmpty) { 
+        
+        if ((widget == null || (!isDraft && !(currentView?.isEmpty ?? true))) && errors.isEmpty) { 
           Future.delayed(Duration(seconds: 1), () {
             globalMainViewKey.currentState!.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
           });
@@ -49,7 +50,6 @@ class ActionService {
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, bool isDraft, bool overrideDest) async {  
-
     if (consentCache[viewID] != null) {
       for (var consent in consentCache[viewID]!.values) {
         if (!consent.consent && !consent.optionnal) {
@@ -72,7 +72,6 @@ class ActionService {
       } else { form.formKey.currentState!.save(); }
     }  
     List<model.View> views = [];
-
     if (errors.isNotEmpty) {
       var errorStr = "";
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
@@ -90,7 +89,6 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    
     if (errors.isNotEmpty) {
       var errorStr = "";
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
@@ -107,10 +105,12 @@ class ActionService {
         // ignore: use_build_context_synchronously
         formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false, isDraft, overrideDest);
     }
-    if (method != "delete" && !form.detectChange && form.wrappers.where((element) => element.detectChange).isEmpty
-    && (globalWorkflowPanelWidgetKey.currentState == null || !globalWorkflowPanelWidgetKey.currentState!.change)) { return views; }
-    
-    
+
+    if (isDraft && form.view!.id == mainForm.currentState!.widget.view!.id) {
+      mainForm.currentState?.setState(() { firstAPI = true; });
+      return views;
+    }
+
     var path = url;
     if (form.cacheForm["id"] != null) { 
       body["id"]=int.parse(form.cacheForm["id"]); 
@@ -134,9 +134,9 @@ class ActionService {
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
-            if (!isDraft && (consentCache[viewID]?.length ?? 0) > 0) {
+            if ((consentCache[viewID]?.length ?? 0) > 0) {
               for (var consent in consentCache[viewID]!.values) {
-                if (consent.body == null) {
+                if (consent.body == null || consent.body!["dbschema_id"] == value.data!.first.schemaID) {
                   continue;
                 }
                 if (value.data!.first.items.isNotEmpty) { 
@@ -144,7 +144,9 @@ class ActionService {
                 }
                 consent.body!["dbschema_id"]=value.data!.first.schemaID;
                 consent.body!["is_consenting"]=consent.consent;
+                print(consent.body);
                 await APIService().post(consent.actionPath!, consent.body!, context);
+                print("BR");
               } 
             }
             consentCache.remove(viewID);
@@ -153,19 +155,21 @@ class ActionService {
               if (form.view!.isEmpty) { 
                 isNew = value.data![0].items[0].values["id"]; 
               }
-              if (form.view!.id == mainForm.currentState!.widget.view!.id) {
-                showAlertBanner(context, () {}, 
-                  InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
-                                      alertBannerLocation:  AlertBannerLocation.bottom);
-              }
             }
+            if (!form.subForm) {
+              globalMainViewKey.currentState?.setState(() { firstAPI = true; });
+                showAlertBanner(context, () {}, 
+                      InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
+                                          alertBannerLocation:  AlertBannerLocation.bottom);
+            } 
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
           errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}");
           listSubForms(schema, form.cacheForm, method, schemaName, "", context, true);
           APIResponse<model.View>(data: null);
-        });      
+        });        
+        
         formSubForms(form.oneToManiesForm, body, method, schemaName, context, false, false, isDraft, overrideDest); // ignore: use_build_context_synchronously
         formSubForms(form.existingOneToManiesForm, body, method, schemaName, context, false, false, isDraft, overrideDest); // ignore: use_build_context_synchronously
         formSubForms(form.oneToManiesFormDelete, body, method, schemaName, context, false, true, isDraft, overrideDest); // ignore: use_build_context_synchronously
@@ -199,6 +203,7 @@ class ActionService {
     if (view.items.isNotEmpty) {            
       listSubForms(schema, values, method, view.schemaName, "${view.schemaID}", context, false);
     }
+    print("TEST ${view.triggers}");
     TriggerCacheService.setTriggers(view.triggers); 
   }
 

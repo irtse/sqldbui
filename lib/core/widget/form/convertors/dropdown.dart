@@ -52,6 +52,13 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
+    try {
+      label = await getOnFlow(label);
+    }  catch(e) {}
+    try {
+      TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
+    } catch(e) {}
     var val = currentDropdown[viewID!]?[widget.name] ?? widget.value  ?? widget.autofill;
     val = val?.replaceAll("''", "'");
     if (val != null) {
@@ -71,7 +78,6 @@ class DropDownState extends State<DropDownWidget> {
     }
     if (widget.type.contains("enum") || widget.mainUrl == null) {
       if (widget.readOnly) {
-         
         return SizedBox(width: 400, height: 30, 
           child: TextFormField(
             readOnly: true,
@@ -95,7 +101,7 @@ class DropDownState extends State<DropDownWidget> {
                 disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                 hintText: TranslateConstants.selectValue.toLowerCase(),
-                labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
+                labelText: label.toLowerCase(),
               )
             )
           );
@@ -121,7 +127,7 @@ class DropDownState extends State<DropDownWidget> {
       return DropdownButtonFormField<String>( 
           items: items, 
           isExpanded: true,
-          hint: Text(TranslateConstants.select.toLowerCase(), 
+          hint: Text(TranslateConstants.selectValue.toLowerCase(), style: TextStyle(fontSize: 12, color: Colors.grey),
             overflow: TextOverflow.ellipsis, softWrap: true),
           value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
           style: TextStyle(fontSize: 14, 
@@ -153,7 +159,7 @@ class DropDownState extends State<DropDownWidget> {
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-            labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
+            labelText: label.toLowerCase(),
           ),
           validator: (String? value) {
             return (value == null || value.isEmpty) && widget.require ? "" : null;
@@ -181,10 +187,9 @@ class DropDownState extends State<DropDownWidget> {
                         border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
                         hintText: TranslateConstants.selectValue.toLowerCase(),
-                        labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
+                        labelText: label.toLowerCase(),
                       ) ));
     }
-    var lab = await getOnFlow(widget.label);
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
@@ -194,7 +199,7 @@ class DropDownState extends State<DropDownWidget> {
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
               if (snap.data?.data != null) {
                 return SubDropDownWidget(
-                  label: lab,
+                  label: label,
                   dp: this,
                   mainUrl: widget.mainUrl!,
                   component: widget.component,
@@ -224,7 +229,7 @@ class DropDownState extends State<DropDownWidget> {
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           if (snap.data?.data != null) {
             return SubDropDownWidget(
-              label: lab,
+              label: label,
               dp: this,
               mainUrl: widget.mainUrl!,
               component: widget.component,
@@ -310,9 +315,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
             widget.form[widget.name]= currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill;
             select = true;
             if (widget.url != null) {
-               widget.wrappers?.currentState?.setState( () { 
-                widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
-              }); 
+                try {
+                widget.wrappers?.currentState?.setState( () { 
+                  widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+                }); 
+              } catch(e) { print(e); }
             }
           }
           try {
@@ -324,7 +331,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                 vv = vv.toLowerCase();
               }
             }
-          } catch(e) {}
+          } catch(e) {  }
           items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
           //ctrls.addItem(items.last);
         }
@@ -368,7 +375,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         fieldDecoration: FieldDecoration(
                           errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                          labelText: "${widget.label}${widget.require ? "*" : ""}",
+                          labelText: widget.label,
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),

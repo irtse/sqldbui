@@ -60,10 +60,10 @@ class GridRowWidgetState extends State<GridRowWidget> {
       onExit: (b) { setState(() { widget.isHovered = false; }); },
       child: Stack( alignment: Alignment.center, children: [ 
         Row(children: getCellsContent(context)),
-        widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
+        /*widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
           path: "@${widget.schemaID}:${widget.cellID}",
           sharing: widget.sharing,
-        )) : Container(),
+        )) : Container(),*/
       ])
     );
   }

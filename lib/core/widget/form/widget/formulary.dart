@@ -62,9 +62,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
           var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
-          print("$fieldName $readOnly ${widget.view.readOnly} ${widget.view.name}");
           readOnly = readOnly || !((widget.view.actions.contains("post") && widget.view.isEmpty) || widget.view.actions.contains("put")); // to remove if change its mind
-          print("2 $fieldName $readOnly");
           String path = "";
           if (widget.refItem.valuesShallow.containsKey(fieldName)) { 
             var v = widget.refItem.valuesShallow[fieldName]!;

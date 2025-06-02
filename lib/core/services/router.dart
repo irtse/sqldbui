@@ -143,8 +143,6 @@ class AppRouter {
     globalLoading = true;
     selectedGrid = []; unselectedGrid = [];
     navigate = true;
-    print("$viewID $subViewID");
-    print("kbkjj ${navigatorCtrls.selectedItems}");
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }
 }   
