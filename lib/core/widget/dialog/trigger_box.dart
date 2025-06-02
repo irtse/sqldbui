@@ -144,7 +144,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             }
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
-          child: Text(TranslateConstants.send.toUpperCase(), 
+          child: Text((await getOnFlow(TranslateConstants.send)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15))))),
         TextButton(
           style: TextButton.styleFrom(
@@ -161,7 +161,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             globalMainViewKey.currentState?.setState(() { });
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
-          child: Text(TranslateConstants.filterCancel.toUpperCase(), 
+          child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
     ],));

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
 
@@ -146,7 +145,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   /// ```
   /// 
   // the global key for the form field state to update the form field state when the controller changes
-  final GlobalKey<FormFieldState<dynamic>> formFieldKey;
+  final GlobalKey<FormFieldState<List<DropdownItem<T>>?>> formFieldKey;
   MultiDropdown.future({
     required this.future,
     required this.formFieldKey,

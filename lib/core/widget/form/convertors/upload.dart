@@ -38,13 +38,17 @@ class _UploadState extends State<UploadWidget> {
   }
   var stringTagController = StringTagController();
   Future<Widget> futureBuild(BuildContext context) async {
+    var label = "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}";
+    try {
+      label = await getOnFlow(label);
+    } catch (e) {}
     if ("${widget.value}" == "") {
       widget.value = null;
     }
     if (widget.readOnly) {
       return SizedBox(width: 400, height: 30, child: TextFormField(
         readOnly: true,
-        initialValue: widget.value != null ? await getOnFlow(widget.value) : (widget.readOnly ? TranslateConstants.empty : null),
+        initialValue: widget.value ?? (widget.readOnly ? TranslateConstants.empty : null),
         style: TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
           filled: true,
@@ -62,13 +66,12 @@ class _UploadState extends State<UploadWidget> {
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
           hintText: TranslateConstants.writePath.toLowerCase(),
-          labelText: (await getOnFlow("${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}")).toLowerCase(),
+          labelText: label.toLowerCase(),
         )
       ));
     }
-    String? iv = widget.value ?? (widget.autofill != null ? (await getOnFlow("${widget.autofill}")) 
-                                                               : (widget.readOnly ? TranslateConstants.empty : null));
-    var label = (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase();
+    String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null));
+    
     
     if (iv != null && !widget.type.contains("multiple")) {
       text = TextEditingController(text: iv);

@@ -24,22 +24,23 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
         widget: Column(mainAxisSize: MainAxisSize.min, children: [
       Center(child: Padding( padding: EdgeInsets.only(bottom: 10), 
         child: Icon(Icons.help_outline_outlined, size: 80, color: Colors.grey,))),
-      Center(child: Text(TranslateConstants.sure.toUpperCase(), 
+      Center(child: Text((await getOnFlow(TranslateConstants.sure)).toUpperCase(), 
         style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor),)),
       Center(child: Text(await getOnFlow("Do you really want to ${widget.purpose.toUpperCase()} ?"), 
         style: const TextStyle(fontSize: 12.5, color: Colors.grey),)),
-      Center(child: Text(TranslateConstants.undoAction, 
+      Center(child: Text(await getOnFlow(TranslateConstants.undoAction), 
         style: TextStyle(fontSize: 12.5, color: Colors.grey),)),
       Padding( padding: EdgeInsets.only(top: 20), child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
         Padding( padding: EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
           widget.validate();
           context.pop();
         }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(TranslateConstants.yes.toUpperCase(), 
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(
+          (await getOnFlow(TranslateConstants.yes)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15),)))),
         TextButton(onPressed: () => context.pop(), style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).splashColor)), 
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(
-          TranslateConstants.no.toUpperCase(), 
+          (await getOnFlow(TranslateConstants.no)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15),)))]))
     ],));
   }

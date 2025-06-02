@@ -140,14 +140,14 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
           } catch (e) {}
             actions.add(ButtonWidget( method: "post", 
-                  text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true));
+                  text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true));
           }
           try {
             TranslateConstants.publish = await getOnFlow(TranslateConstants.publish);
           } catch (e) {}
           if (widget.view.items.isNotEmpty && widget.view.items[0].isDraft) {
             actions.add(ButtonWidget(method: "put",
-              text: TranslateConstants.publish.toUpperCase(), color: Colors.grey));
+              text: TranslateConstants.publish.toUpperCase(), color: Colors.grey, explicitDraft: true));
           }
           
           try {

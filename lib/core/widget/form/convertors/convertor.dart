@@ -277,12 +277,13 @@ class Convertor {
     if (datas == null || datas.isEmpty || (widget.value ?? "") != "" && !found) {
       return Container();
     }
+    GlobalKey<FormFieldState<List<DropdownItem<String>>?>> formFieldKey = GlobalKey();
     var decF = FieldDecoration( 
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
     return MultiDropdown<String>(
-        formFieldKey: formKey,
+        formFieldKey: formFieldKey,
         max: max,
         enabled: true,
         label: label,

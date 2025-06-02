@@ -49,6 +49,10 @@ class _TextState extends State<TextWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    var label = "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}";
+    try {
+      label = await getOnFlow(label);
+    } catch (e) {}
     if (widget.form[widget.name] != null) { widget.value = widget.form[widget.name]; }
     if ((widget.type.contains("time") || widget.type.contains("date")) && widget.value != null) {
       widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
@@ -104,7 +108,7 @@ class _TextState extends State<TextWidget> {
         child: Icon(Icons.link, size: 20)) : Icon(Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
         hintText: TranslateConstants.writeValue.toLowerCase(),
         labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-        labelText: (await getOnFlow("${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}")).toLowerCase(),
+        labelText: label.toLowerCase(),
         errorStyle: const TextStyle(fontSize: 0,),
       ),
       onChanged: (String? value) {

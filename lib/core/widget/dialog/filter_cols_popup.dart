@@ -1,6 +1,3 @@
-
-import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
-import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -97,7 +94,7 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
       return PopupButtonWidget(
         color: Colors.white,
         width: 277,
-        tooltip: TranslateConstants.filterViewPlaceholder.toLowerCase(), 
+        tooltip: (await getOnFlow(TranslateConstants.filterViewPlaceholder)).toLowerCase(), 
         icon: Icons.settings, 
         widget: MenuColsPopUpWidget(comp: widget.comp, items: dpItems, schema: widget.schema,),
       ); 
@@ -335,7 +332,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                       border: const OutlineInputBorder(),
                       contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                      labelText: TranslateConstants.filterLabel.toLowerCase(),
+                      labelText: (await getOnFlow(TranslateConstants.filterLabel)).toLowerCase(),
                     ),
                     validator: (String? value) { return null; },
                   ))),
