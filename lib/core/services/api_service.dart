@@ -200,7 +200,7 @@ class APIService {
         if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
           return cache[url]! as APIResponse<T>;
         }
-        print("$method $url");
+        print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
         var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');

@@ -72,6 +72,10 @@ class _TextState extends State<TextWidget> {
         val = val.toLowerCase();
       }
     }
+    try {
+      TranslateConstants.writeValue = await getOnFlow(TranslateConstants.writeValue);
+    } catch(e) {}
+    
     return TextFormField(
       obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
       readOnly: widget.readOnly,

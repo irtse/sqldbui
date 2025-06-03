@@ -31,7 +31,7 @@ class MainViewWidget extends StatefulWidget{
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
-      return ViewWidget(view: currentView, views: widget.views);
+      return ViewWidget(stillLoading: globalLoading, view: currentView, views: widget.views);
     }
     model.View? view; 
     try { 
@@ -75,7 +75,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
             widget.url = null;
             selectedGrid = [];
             unselectedGrid = [];
-            return ViewWidget(view: currentView, views: widget.views);
+            return ViewWidget(stillLoading: globalLoading, view: currentView, views: widget.views);
         });
     } 
     if (currentView == null) {   
@@ -146,6 +146,8 @@ class ViewWidgetState extends State<ViewWidget> {
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 25), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, form: w ), ...comps] ); 
+      } else {
+        Stack( children: [...comps] );
       }
     }
     List<Widget> childs = [];

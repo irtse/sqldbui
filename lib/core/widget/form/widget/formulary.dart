@@ -59,7 +59,6 @@ class FormularyWidgetState extends State<FormularyWidget> {
           fieldName = "$fieldName";
           if (widget.schema[fieldName] == null || ["id", "description"].contains(fieldName) ||
           (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { 
-            print("BAM $fieldName ${widget.schema[fieldName]}");
             continue; 
           }
           var field = widget.schema[fieldName]!; 
@@ -77,7 +76,6 @@ class FormularyWidgetState extends State<FormularyWidget> {
 
           widget.newCacheEntry[fieldName] = widget.newCacheEntry[fieldName] ?? value;
           if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { 
-            print("qsd $fieldName");
             continue; 
           }
           
@@ -114,7 +112,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
             if (![OneToManyWidget].contains(f.runtimeType) && widget.show) {
               var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
-                  width: field.type.contains("bool") ? 210 : (widget.subForm ? max - 50 : max), 
+                  width: field.type.contains("bool") ? 200 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : 40, child: f));
               fields.add(w);
             }

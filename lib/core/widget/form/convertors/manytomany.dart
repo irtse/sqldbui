@@ -43,7 +43,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    print("qkjsdkjqsdnkjqsd");
     var actions = widget.component?.widget.view?.actions ?? currentView?.actions ?? [];
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
@@ -87,9 +86,17 @@ class ManyToManyState extends State<ManyToManyWidget> {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
         for (var v in widget.value) {
-          ids.add("${v["id"]}");
+          try {
+            if (v is model.Shallowed && v.id != null) {
+              ids.add("${v.id}");
+            } else if (v["id"] != null) {
+              ids.add("${v["id"]}");
+            }
+          } catch(e) {}
         }
-        return FutureBuilder<APIResponse<model.Shallowed>>(
+        print("IDS $ids");
+        if (ids.isNotEmpty) {
+          return FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), true, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
@@ -115,9 +122,9 @@ class ManyToManyState extends State<ManyToManyWidget> {
                 }
                 return Container();
             });
-        });
+          });
+        }
       }
-      print("efe");
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.url ?? "", true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
@@ -214,7 +221,12 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
           } else {
             for (var val in widget.value ?? []) {
               val = val as model.Shallowed;
-              if (val.id == item.id) {
+              if (val.id == null) {
+                if (items.where( (e)  => e.value["name"] == val.name).isEmpty) {
+                  items.add(DropdownItem<Map<String, dynamic>>(value: val.serialize(), label:val.label ?? val.name ?? "", selected: true));
+                }
+                
+              } else if (val.id == item.id) {
                 select = true;
                 break;
               }

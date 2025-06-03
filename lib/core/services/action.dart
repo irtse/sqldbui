@@ -139,7 +139,6 @@ class ActionService {
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
-            print("inner ! ${views.last.schemaID} ${views.last.innerRedirection}");
             bool killConsent = false;
             if ((consentCache[viewID]?.length ?? 0) > 0) {
               for (var consent in consentCache[viewID]!.values) {

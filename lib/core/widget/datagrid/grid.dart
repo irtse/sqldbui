@@ -161,7 +161,7 @@ class GridWidgetState extends State<GridWidget> {
                               if (info.visibleFraction > 0) {
                                 if (currentView != null && currentView!.items.length < currentView!.max) {
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
-                                    globalOffset = (currentView?.items.length ?? 0); 
+                                    globalOffset = globalOffset + globalLimit; 
                                   }
                                   globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
                                 }
