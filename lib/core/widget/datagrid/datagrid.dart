@@ -37,11 +37,12 @@ class Value {
   bool isDraft = false;
   bool isLink = false;
   bool readOnly = false;
+  String schemaID;
   model.Sharing? sharing;
   
   Map<String, dynamic> values = {};
   Value({ 
-    required this.cellID, required this.isDraft,
+    required this.cellID, required this.isDraft, required this.schemaID,
     this.values = const {}, this.isLink = true, 
     this.readOnly = false, this.sharing, this.isNew = false,
     required this.schema,

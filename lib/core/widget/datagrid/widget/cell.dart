@@ -12,6 +12,7 @@ import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 // ignore: must_be_immutable
 class GridCell {
+  String schemaID;
   double height = 100; 
   double width; 
   dynamic wasValue;
@@ -30,6 +31,7 @@ class GridCell {
   bool translatable = true;
   model.SchemaField? schemaField;
   GridCell({ 
+    required this.schemaID,
     required this.schemaField,
     required this.translatable,
     required this.isDraft,
@@ -140,7 +142,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
         this, false, true, url, 
         "${widget.cellID}:${widget.cell.columnName}"), builder: (a,b) {
           if (b.data != null) {
-            return b.data!;
+            return Center( child: b.data! );
           }
           return Container();
         })) : 

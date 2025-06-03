@@ -78,7 +78,8 @@ class ActionService {
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
         if (errorStr != "") {
           // ignore: use_build_context_synchronously
-          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
+          showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), 
+          () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
         }
       return views;
     }
@@ -95,7 +96,7 @@ class ActionService {
         for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
         if (errorStr != "") {
           // ignore: use_build_context_synchronously
-          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
+          showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
         }
       return views;
     }
@@ -138,10 +139,10 @@ class ActionService {
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
+            print("inner ! ${views.last.schemaID} ${views.last.innerRedirection}");
             bool killConsent = false;
             if ((consentCache[viewID]?.length ?? 0) > 0) {
               for (var consent in consentCache[viewID]!.values) {
-                print("${consent.body} ${value.data!.first.schemaID}");
                 if (consent.body == null || consent.body!["dbschema_id"] != value.data!.first.schemaID) {
                   continue;
                 }
@@ -164,9 +165,19 @@ class ActionService {
                 isNew = value.data![0].items[0].values["id"]; 
               }
             }
-            if (!form.subForm) {
+            if (views.last.innerRedirection != "") { 
+              Future.delayed(Duration(seconds: 1), () {
+                var splitted = views.last.innerRedirection.split("?rows=");
+                if (splitted.length >= 2) {
+                  viewID = "@${splitted[0].split("/").last}";
+                  subViewID = splitted[1];
+                  globalMainViewKey.currentState!.refreshUrl("$baseURL${views.last.innerRedirection}", subViewID, true); 
+                }
+              });
+            } else if (!form.subForm) {
               globalMainViewKey.currentState?.setState(() { firstAPI = true; });
-                showAlertBanner(context, () {}, 
+              globalMenuKey.currentState?.setState(() { navigate = true; });
+              showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
                       InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
                                           alertBannerLocation:  AlertBannerLocation.bottom);
             } 
@@ -191,7 +202,7 @@ class ActionService {
         for (var error in errors) { errorStr += "- ${error.replaceAll("Exception: ", "")} \n"; }
         if (errorStr != "") {
           // ignore: use_build_context_synchronously
-          showAlertBanner(context, () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
+          showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
         if (form.view != null && form.view!.isEmpty && errorStr == "") { globalMenuKey.currentState?.refresh(true); }

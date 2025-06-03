@@ -121,6 +121,7 @@ const emptyManyValues = <String, List<Shallowed>>{};
 class Item extends SerializerDeserializer<Item> {
   Item({
     this.dataPath = "",
+    this.schemaID = "",
     this.valuesShallow = emptyValues,
     this.linkPath= "",
     this.valuesManyPath = emptyDyn,
@@ -134,6 +135,7 @@ class Item extends SerializerDeserializer<Item> {
     this.commentsPath,
     this.news = false,
   });
+  String schemaID;
   bool news;
   bool isDraft;
   Sharing? sharing;
@@ -152,6 +154,7 @@ class Item extends SerializerDeserializer<Item> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      schemaID: json.containsKey("schema_id") && json["schema_id"] != null ? "${json["schema_id"]}" : "",
       news: json.containsKey("new") ? json["new"] : "",
       commentsPath: json.containsKey("comments_path") ? json["comments_path"] : "",
       synthesisPath: json.containsKey("synthesis_path") && json["synthesis_path"] != null ? json["synthesis_path"] : null,
@@ -275,8 +278,10 @@ class View extends SerializerDeserializer<View> {
     this.shortcuts = emptyDyn,
     this.consents = const [],
     this.triggers = const [],
-    this.commentBody = const {}
+    this.commentBody = const {},
+    this.innerRedirection = "",
   });
+  String innerRedirection;
   Map<String, dynamic> commentBody;
   List<Trigger> triggers;
   bool isEnum;
@@ -313,6 +318,7 @@ class View extends SerializerDeserializer<View> {
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    innerRedirection: json.containsKey("inner_redirection") && json["inner_redirection"] != null ? json["inner_redirection"] : "",
     isEnum:  json.containsKey("is_enum") && json["is_enum"] != null ? bool.parse("${json["is_enum"]}") : false,
     commentBody: json.containsKey("comment_body") && json["comment_body"] != null ? json["comment_body"] : {},
     triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],

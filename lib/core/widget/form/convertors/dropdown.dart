@@ -339,7 +339,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
     }
     try {
     return MultiDropdown<String>(
-        formFieldKey: GlobalKey(),
         max: max,
         changeFunction: (dynamic value) async {
           if (value == "") {

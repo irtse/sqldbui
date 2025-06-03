@@ -49,7 +49,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
       return SizedBox(height: 45, width: MediaQuery.of(context).size.width - menuSize,); 
     }
     widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
-    bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
+    bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link") || widget.type.contains("enum");
     String url = currentView!.schema[widget.columnName] != null && currentView!.schema[widget.columnName]?.actionPath != ""  ? "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable" : "";
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), this, true, false, url, ""), 
       builder: (a,b) {
@@ -89,7 +89,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
               Padding(  padding: const EdgeInsets.only(left: 37, right: 10, top: 0), 
                 child: Text("${widget.index}", style : TextStyle( color: Theme.of(context).splashColor, fontSize: 15))),
               Padding( padding: const EdgeInsets.only(left: 0, right: 20, top: 0), child: Icon(Icons.circle, color: Theme.of(context).splashColor, size: 15)),
-              SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 6, 
+              SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 7, 
                 child: DropdownButtonFormField<String>( 
                   items: items, 
                     value: widget.columnName, 
@@ -112,7 +112,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                       border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
                     ))),
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 10), 
-                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 10, child: DropdownButtonFormField<String>( 
+                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 12, child: DropdownButtonFormField<String>( 
                     items: conn, value: widget.comparator, hint: Text(TranslateConstants.colCompFilter.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                     onChanged: (value) { widget.comparator = value ?? "like"; },  onSaved: (value) {},
@@ -124,7 +124,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                       border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
                     ), validator: (String? value) { return null; }))),
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), 
-                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / ( widget.type == "boolean" ? 6 : 4) , child: 
+                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / ( widget.type == "boolean" ? 6 : 5) , child: 
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
                       DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                       DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,))], 

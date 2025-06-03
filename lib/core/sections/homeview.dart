@@ -25,7 +25,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
   @override Widget build(BuildContext context) {
      GlobalKey<html.HtmlWidgetState> htmlKey = GlobalKey<html.HtmlWidgetState>();
     List<Widget> comps = [];
-    List<RedirectButtonWidget> views = [];
+    List<Widget> views = [];
     Widget? web;
     if (kIsWeb) {
       web= FutureBuilder(future: APIService().get<model.View>(
@@ -122,11 +122,6 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
         });
     }
     for (var cat in categories.keys) {
-      for (var view in categories[cat]!.where( (e) => e.isFavorize)) {
-        views.add(
-          RedirectButtonWidget(id: "${view.id}", name: view.label ?? view.name, category: cat)
-        );
-      }
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),
           Padding( padding: const EdgeInsets.only(right: 20),
@@ -144,14 +139,40 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     return FutureBuilder<APIResponse<Shallowed>>(future:APIService().get<Shallowed>(
       "${APIConstants.genericEndpost}/dbview?rows=all&shallow=enable&shortcut_on_main=true", false, context), 
     builder: (a,s) {
+      List<Shallowed> dd = [];
       if (s.data?.data != null) {
         for (var d in s.data!.data!) {
-          var l =  d.label ?? d.name ?? "";
-          if (views.where( (e) => e.name == l).isEmpty) {
-            views.add(RedirectButtonWidget(id: "${d.id}", name: l, category: ""));
+          if (dd.where( (e) => (e.label ?? e.name ?? "") == (d.label ?? d.name ?? "")).isEmpty) {
+            dd.add(d);
           } 
         } 
       }
+      if (dd.length > 3) {
+        List<PopupMenuItem<String>> item = [];
+        for (var d in dd) {
+          item.add(PopupMenuItem(value: "${d.id}", child: FutureBuilder(future: getOnFlow(d.label ?? d.name ?? ""), builder: (a,s) {
+            if (s.data != null) {
+              return Text(s.data!);
+            }
+            return Text(d.label ?? d.name ?? "");
+          }))); 
+        }
+        views.add(PopupMenuButton<String>(
+            iconColor:  Colors.white,
+            color: Colors.white,
+            shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
+            onSelected: (value) {
+              globalMenuKey.currentState?.refreshView("#$value", "", false, false, false);
+            },
+            itemBuilder: (BuildContext context) { return item; }
+          )
+        );
+      } else {
+        for (var d in dd) {
+          views.add(RedirectButtonWidget(id: "${d.id}", name: d.label ?? d.name ?? "", category: ""));
+        }
+      }
+      
       return Stack( children: [
           Container(
             margin: EdgeInsets.only(top: 80),

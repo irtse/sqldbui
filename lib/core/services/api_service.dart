@@ -225,7 +225,7 @@ class APIService {
             }
             if (context != null && succeed != "") {
               // ignore: use_build_context_synchronously
-              showAlertBanner(context, () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
+              showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
                 alertBannerLocation:  AlertBannerLocation.bottom,);
             }
             if (method == "get") {  return cache[url] as APIResponse<T>;  }
@@ -244,7 +244,7 @@ class APIService {
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
-      Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
+      Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
                        alertBannerLocation:  AlertBannerLocation.bottom,))
       ;
     } 

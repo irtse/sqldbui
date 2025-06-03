@@ -49,6 +49,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
         } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
         if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
         datas.add(Value(
+          schemaID: item.schemaID,
           schema: schema,
           isNew: item.news,
           isDraft: item.isDraft,

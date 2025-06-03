@@ -277,13 +277,13 @@ class Convertor {
     if (datas == null || datas.isEmpty || (widget.value ?? "") != "" && !found) {
       return Container();
     }
-    GlobalKey<FormFieldState<List<DropdownItem<String>>?>> formFieldKey = GlobalKey();
+    GlobalKey<MultiDropdownState> formFieldKey = GlobalKey();
     var decF = FieldDecoration( 
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
     return MultiDropdown<String>(
-        formFieldKey: formFieldKey,
+        overrideKey: formFieldKey,
         max: max,
         enabled: true,
         label: label,
@@ -363,7 +363,7 @@ class Convertor {
                           if (values.isEmpty) { return; }
                           widget.value = values[0]; 
                           if (id != "") {
-                            detectChanges[id] = formKey;
+                            detectChanges[id] = formFieldKey.currentState?.formFieldKey ?? GlobalKey();
                             cacheChanges[id] = widget.value;
                           }
                         },

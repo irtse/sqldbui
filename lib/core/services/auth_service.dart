@@ -102,7 +102,7 @@ class AuthService extends ChangeNotifier {
     if (timeBomb > 0) {
       timeBomb--;  Future.delayed(const Duration(seconds: 1), () => timer());
     } else { 
-      timeBomb = 60; 
+      timeBomb = 10; 
       refresh(false);
     }
   }

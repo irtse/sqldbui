@@ -171,6 +171,9 @@ class TranslateConstants {
 }
 
 Future<String> getOnFlow(String value) async {
+  if (value == "type") {
+    return "type";
+  }
   if (!TranslateConstants.onFlowTrad.containsKey(value)) {
     var translator = GoogleTranslator();
     var trans = await translator.translate(value, to: TranslateConstants.lang);

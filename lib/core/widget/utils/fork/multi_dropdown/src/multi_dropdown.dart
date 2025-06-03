@@ -89,10 +89,10 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   /// Note: This option requires the app to have a router, such as MaterialApp.router, in order to work properly.
   ///
   ///
-  const MultiDropdown({
+  MultiDropdown({
     required this.items,
     this.addFunction,
-    required this.formFieldKey,
+    this.overrideKey,
     this.fieldDecoration = const FieldDecoration(),
     this.dropdownDecoration = const DropdownDecoration(),
     this.searchDecoration = const SearchFieldDecoration(),
@@ -145,10 +145,10 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   /// ```
   /// 
   // the global key for the form field state to update the form field state when the controller changes
-  final GlobalKey<FormFieldState<List<DropdownItem<T>>?>> formFieldKey;
+   GlobalKey<MultiDropdownState>? overrideKey;
   MultiDropdown.future({
     required this.future,
-    required this.formFieldKey,
+    required this.overrideKey,
     this.fieldDecoration = const FieldDecoration(),
     this.dropdownDecoration = const DropdownDecoration(),
     this.searchDecoration = const SearchFieldDecoration(),
@@ -248,10 +248,10 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   final bool closeOnBackButton;
 
   @override
-  State<MultiDropdown<T>> createState() => _MultiDropdownState<T>();
+  State<MultiDropdown<T>> createState() => MultiDropdownState<T>();
 }
 
-class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
+class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
   final LayerLink _layerLink = LayerLink();
 
   final OverlayPortalController _portalController = OverlayPortalController();
@@ -346,7 +346,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
 
   void _controllerListener() {
     // update the form field state when the controller changes
-    widget.formFieldKey.currentState?.didChange(_dropdownController.selectedItems);
+    formFieldKey.currentState?.didChange(_dropdownController.selectedItems);
 
     if (_dropdownController.isOpen) {
       _portalController.show();
@@ -395,11 +395,12 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
 
     super.dispose();
   }
+  final GlobalKey<FormFieldState<List<DropdownItem<T>>?>> formFieldKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return FormField<List<DropdownItem<T>>?>(
-      key: widget.formFieldKey,
+      key: formFieldKey,
       validator: widget.validator ?? (_) => null,
       autovalidateMode: widget.autovalidateMode,
       initialValue: _dropdownController.selectedItems,
@@ -505,7 +506,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
     } else {
       _dropdownController.toggleWhere((element) => element == item);
     }
-    widget.formFieldKey.currentState?.didChange(_dropdownController.selectedItems);
+    formFieldKey.currentState?.didChange(_dropdownController.selectedItems);
 
     if (widget.singleSelect) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -543,7 +544,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
       hintStyle: fieldDecoration.hintStyle,
       floatingLabelBehavior: FloatingLabelBehavior.always,
       errorStyle: TextStyle(fontSize: 0),
-      errorText: widget.formFieldKey.currentState?.errorText,
+      errorText: formFieldKey.currentState?.errorText,
       filled: fieldDecoration.backgroundColor != null,
       fillColor: fieldDecoration.backgroundColor,
       border: fieldDecoration.border ?? border,
@@ -568,7 +569,7 @@ class _MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
         child: const Icon(Icons.clear),
         onTap: () {
           _dropdownController.clearAll();
-          widget.formFieldKey.currentState
+          formFieldKey.currentState
               ?.didChange(_dropdownController.selectedItems);
         },
       );
