@@ -58,7 +58,10 @@ class FormularyWidgetState extends State<FormularyWidget> {
       for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
           if (widget.schema[fieldName] == null || ["id", "description"].contains(fieldName) ||
-          (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { continue; }
+          (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { 
+            print("BAM $fieldName ${widget.schema[fieldName]}");
+            continue; 
+          }
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
           var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
@@ -74,6 +77,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
 
           widget.newCacheEntry[fieldName] = widget.newCacheEntry[fieldName] ?? value;
           if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { 
+            print("qsd $fieldName");
             continue; 
           }
           

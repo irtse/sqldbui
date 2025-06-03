@@ -36,7 +36,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 onTap: () async { setState(() { 
                   navigate = true;
                   widget.refreshView("#${widget.view.id}", widget.category, true, false, false); 
-                  // globalMenuKey.currentState?.setState(() {});
+                  globalMenuKey.currentState?.setState(() {});
                 }); },
                 tileColor: Theme.of(context).secondaryHeaderColor,
                 iconColor: Theme.of(context).splashColor,

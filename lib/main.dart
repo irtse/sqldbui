@@ -69,6 +69,7 @@ class MyApp extends StatelessWidget {
     }
     TranslateConstants.lang = const String.fromEnvironment("LANG", defaultValue: "fr");
     return MaterialApp.router(
+      title: 'OPPS',
       theme: myTheme,
       routerConfig: GoRouter(routes: _appRouter.routes),
     );

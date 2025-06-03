@@ -43,6 +43,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    print("qkjsdkjqsdnkjqsd");
     var actions = widget.component?.widget.view?.actions ?? currentView?.actions ?? [];
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
@@ -116,6 +117,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
             });
         });
       }
+      print("efe");
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.url ?? "", true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
