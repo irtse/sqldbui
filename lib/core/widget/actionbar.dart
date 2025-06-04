@@ -85,14 +85,6 @@ class ActionBarState extends State<ActionBarWidget> {
                 )));
           }
         }
-      /*if (widget.gridKey != null) {
-        actions.add( getIconOffset( (await getOnFlow(TranslateConstants.resetUI)).toLowerCase(), Icons.auto_fix_off, 20, () {
-            globalOffset = 0;
-            navigate = true;
-            globalMainViewKey.currentState?.setState(() {rects.remove(viewID); });
-          }, false)
-        );
-      }*/
       if (widget.view != null && (currentWidth - menuSize) > 650) {
         if (widget.view!.shortcuts.keys.length == 1) {
           var t = await getOnFlow(widget.view!.shortcuts.keys.first);
