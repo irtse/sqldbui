@@ -160,6 +160,7 @@ class GridWidgetState extends State<GridWidget> {
                             onVisibilityChanged: (VisibilityInfo info) {
                               if (info.visibleFraction > 0) {
                                 if (currentView != null && currentView!.items.length < currentView!.max) {
+                                  print("${ (currentView?.items.length ?? 0)} $globalOffset");
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = globalOffset + globalLimit; 
                                   }
