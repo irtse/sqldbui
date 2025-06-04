@@ -44,7 +44,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
         AppRouter.setRouteCookie(viewID!, context);
       }
     }
-    currentView = null;
+    
 
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@") || subViewID != null);
@@ -90,7 +90,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       subViewID=null;
       AppRouter.setRouteCookie("", context);
     }
-    return ViewWidget(stillLoading: true, view: currentView, views: widget.views); 
+    return ViewWidget(stillLoading: true, view: null, views: widget.views); 
   }
   void refreshUrl(String? path, String? id, bool load) {
     subViewID = id;
@@ -138,7 +138,6 @@ class ViewWidgetState extends State<ViewWidget> {
       });
     }
     List<Widget> comps = <Widget>[];
-    Future.delayed(const Duration(seconds: 2), () => globalLoading = false);
     if (widget.stillLoading) {
       comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
     }
