@@ -120,12 +120,6 @@ class GridWidgetState extends State<GridWidget> {
     if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
       bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
     }
-    if (globalOffset < currentView!.max && globalOffset <= 20) {
-      Future.delayed(Duration(seconds: 1), () {
-        globalOffset = globalOffset + globalLimit; 
-        globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false);
-      });
-    }
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: Scrollbar(

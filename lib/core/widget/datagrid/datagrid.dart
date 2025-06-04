@@ -55,7 +55,7 @@ class Value {
 }
 bool tempRemoval = false;
 bool noFilterRetrieval = false;
-int globalLimit = 5;
+int globalLimit = 20;
 int globalOffset = 0;
 List<GridRowWidget> unselectedGrid = [];
 List<GridRowWidget> selectedGrid = []; 

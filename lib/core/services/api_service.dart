@@ -23,7 +23,7 @@ import 'package:sqldbui2/model/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 var firstAPI = false;
-var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
+var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/v1';
 class APIConstants {
   static String filterLine = "";
   static String mainEndpost = '/main';
