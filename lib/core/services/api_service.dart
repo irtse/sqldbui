@@ -12,7 +12,6 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/abstract.dart';
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
@@ -196,6 +195,7 @@ class APIService {
         
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
         var cols = getColumns(url, offset != null);
+        // if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var command = "";
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 

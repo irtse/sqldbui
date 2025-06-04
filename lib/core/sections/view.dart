@@ -44,10 +44,14 @@ class MainViewWidgetState extends State<MainViewWidget> {
         AppRouter.setRouteCookie(viewID!, context);
       }
     }
+    currentView = null;
+
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@") || subViewID != null);
     if (isList || reForge) {
         var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
+        print(navigate);
+
         return FutureBuilder<APIResponse<model.View>>(
           future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), navigate, context) : 
             APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
@@ -172,7 +176,7 @@ class ViewWidgetState extends State<ViewWidget> {
       Container(margin: const EdgeInsets.only(top: 40),
         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
         height: currentHeigth - 65 > 0 ? currentHeigth - 65 : 0, 
-        decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+        decoration: BoxDecoration(color: Theme.of(context).splashColor),
         child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : childs))),
       ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]); 
   }
