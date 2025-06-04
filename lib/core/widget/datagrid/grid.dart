@@ -123,10 +123,8 @@ class GridWidgetState extends State<GridWidget> {
     if (globalOffset < currentView!.max && globalOffset <= 20) {
       Future.delayed(Duration(seconds: 1), () {
         print("${(currentView?.items.length ?? 0)} ${currentView!.max}");
-        if ((currentView?.items.length ?? 0) < currentView!.max) { 
-          globalOffset = globalOffset + globalLimit; 
-          globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false);
-        }
+        globalOffset = globalOffset + globalLimit; 
+        globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false);
       });
     }
     return ScrollConfiguration(

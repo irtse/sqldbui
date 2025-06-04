@@ -58,6 +58,9 @@ class MainViewWidgetState extends State<MainViewWidget> {
               currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.length > 1 && currentView!.isList) {
                 for (var view in snap.data!.data!.sublist(1)) { 
+                  if (view.items.isEmpty) {
+                    currentView?.max = view.items.length;
+                  }
                   for (var item in view.items) { 
                     if (currentView!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { 
                       currentView!.items.add(item); 
