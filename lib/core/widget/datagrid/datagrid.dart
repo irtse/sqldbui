@@ -42,15 +42,20 @@ class Value {
   
   Map<String, dynamic> values = {};
   Value({ 
-    required this.cellID, required this.isDraft, required this.schemaID,
-    this.values = const {}, this.isLink = true, 
-    this.readOnly = false, this.sharing, this.isNew = false,
+    required this.cellID, 
+    required this.isDraft, 
+    required this.schemaID,
+    this.values = const {}, 
+    this.isLink = true, 
+    this.readOnly = false, 
+    this.sharing, 
+    this.isNew = false,
     required this.schema,
   });
 }
 bool tempRemoval = false;
 bool noFilterRetrieval = false;
-int globalLimit = 20;
+int globalLimit = 5;
 int globalOffset = 0;
 List<GridRowWidget> unselectedGrid = [];
 List<GridRowWidget> selectedGrid = []; 

@@ -120,8 +120,14 @@ class GridWidgetState extends State<GridWidget> {
     if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
       bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
     }
-    if (currentView!.items.length < currentView!.max ) {
-      Future.delayed(Duration(seconds: 1), () => VisibilityDetectorController.instance.notifyNow());
+    if (globalOffset < currentView!.max && globalOffset <= 20) {
+      Future.delayed(Duration(seconds: 1), () {
+        print("${(currentView?.items.length ?? 0)} ${currentView!.max}");
+        if ((currentView?.items.length ?? 0) < currentView!.max) { 
+          globalOffset = globalOffset + globalLimit; 
+          globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false);
+        }
+      });
     }
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -162,11 +168,8 @@ class GridWidgetState extends State<GridWidget> {
                           child: VisibilityDetector(
                             key: Key(Uuid().toString()),
                             onVisibilityChanged: (VisibilityInfo info) {
-                              print("${info.visibleFraction}");
                               if (info.visibleFraction > 0) {
-                                print("${ (currentView?.items.length ?? 0)} ${currentView!.max}");
-                                if (currentView != null && currentView!.items.length < currentView!.max) {
-                                  print("${ (currentView?.items.length ?? 0)} $globalOffset");
+                                if (currentView != null && currentView!.items.length < currentView!.max && currentView!.items.length > 20) {
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = globalOffset + globalLimit; 
                                   }
