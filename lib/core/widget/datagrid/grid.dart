@@ -6,6 +6,7 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:uuid/uuid.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
@@ -119,6 +120,9 @@ class GridWidgetState extends State<GridWidget> {
     if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
       bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
     }
+    if (currentView!.items.length < currentView!.max ) {
+      Future.delayed(Duration(seconds: 1), () => VisibilityDetectorController.instance.notifyNow());
+    }
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: Scrollbar(
@@ -156,7 +160,7 @@ class GridWidgetState extends State<GridWidget> {
                         ? Center(child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10), 
                           child: VisibilityDetector(
-                            key: Key('my-widget-key'),
+                            key: Key(Uuid().toString()),
                             onVisibilityChanged: (VisibilityInfo info) {
                               print("${info.visibleFraction}");
                               if (info.visibleFraction > 0) {
@@ -170,7 +174,7 @@ class GridWidgetState extends State<GridWidget> {
                                 }
                               }
                             },
-                            child: SpinKitCircle(color: Theme.of(context).primaryColor))))
+                            child: Container( child: SpinKitCircle(color: Theme.of(context).primaryColor)))))
                         : const SizedBox(height: 10, child: null)
                       ])
                     )
