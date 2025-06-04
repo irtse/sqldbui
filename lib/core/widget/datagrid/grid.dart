@@ -157,10 +157,10 @@ class GridWidgetState extends State<GridWidget> {
                         ? Center(child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10), 
                           child: VisibilityDetector(
-                            key: Key(Uuid().toString()),
+                            key: Key("my-widget"),
                             onVisibilityChanged: (VisibilityInfo info) {
                               if (info.visibleFraction > 0) {
-                                if (currentView != null && currentView!.items.length < currentView!.max && currentView!.items.length > 20) {
+                                if (currentView != null && currentView!.items.length < currentView!.max) {
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = globalOffset + globalLimit; 
                                   }

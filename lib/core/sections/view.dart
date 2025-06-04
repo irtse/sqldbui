@@ -31,7 +31,7 @@ class MainViewWidget extends StatefulWidget{
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
-      return ViewWidget(stillLoading: globalLoading, view: currentView, views: widget.views);
+      return ViewWidget(view: currentView, views: widget.views);
     }
     model.View? view; 
     try { 
@@ -50,19 +50,21 @@ class MainViewWidgetState extends State<MainViewWidget> {
     bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@") || subViewID != null);
     if (isList || reForge) {
         var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
-        print(navigate);
-
         return FutureBuilder<APIResponse<model.View>>(
           future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), navigate, context) : 
             APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             navigate = false;
+            currentView = null;
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0]; 
               currentView!.isList = isList && !currentView!.isEmpty;
+              if (snap.data!.data!.isEmpty ) {
+                currentView?.max = currentView?.items.length ?? 0;
+              }
               if (snap.data!.data!.length > 1 && currentView!.isList) {
                 for (var view in snap.data!.data!.sublist(1)) { 
-                  if (view.items.isEmpty) {
+                  if (view.items.isEmpty || ((currentView?.max ?? 0) <= globalOffset && (currentView?.max ?? 0) > (currentView?.items.length ?? 0))) {
                     currentView?.max = currentView?.items.length ?? 0;
                   }
                   for (var item in view.items) { 
@@ -82,7 +84,8 @@ class MainViewWidgetState extends State<MainViewWidget> {
             widget.url = null;
             selectedGrid = [];
             unselectedGrid = [];
-            return ViewWidget(stillLoading: globalLoading, view: currentView, views: widget.views);
+            print("${currentView?.id} $viewID");
+            return ViewWidget( view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, views: widget.views);
         });
     } 
     if (currentView == null) {   
@@ -90,7 +93,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       subViewID=null;
       AppRouter.setRouteCookie("", context);
     }
-    return ViewWidget(stillLoading: true, view: null, views: widget.views); 
+    return ViewWidget(view: null, views: widget.views); 
   }
   void refreshUrl(String? path, String? id, bool load) {
     subViewID = id;
@@ -116,10 +119,10 @@ class MainViewWidgetState extends State<MainViewWidget> {
 bool isTriggerOpen = false;
 // ignore: must_be_immutable
 class ViewWidget extends StatefulWidget{
-  bool stillLoading = false;
+  bool stillLoading = true;
   List<model.View>? views;
   model.View? view;
-  ViewWidget ({ super.key, required this.view, required this.views, this.stillLoading = false });
+  ViewWidget ({ super.key, required this.view, required this.views });
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
@@ -138,17 +141,23 @@ class ViewWidgetState extends State<ViewWidget> {
       });
     }
     List<Widget> comps = <Widget>[];
-    if (widget.stillLoading) {
+    if (widget.stillLoading || widget.view == null) {
       comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
     }
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 
         DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view,);
+       if (widget.stillLoading) {
+        Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
+      }
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 40), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, grid: w, gridKey: globalGridKey), ...comps]);
       } else if (widget.view!.items.isNotEmpty) { 
         DataFormWidget w =  DataFormWidget(key: mainForm, view: widget.view);
+        if (widget.stillLoading) {
+          Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
+        }
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 25), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, form: w ), ...comps] ); 
@@ -158,6 +167,10 @@ class ViewWidgetState extends State<ViewWidget> {
     }
     List<Widget> childs = [];
     if (viewID == null) {
+      if (widget.stillLoading) {
+        Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
+      }
+        
       return Stack(children: [ 
         HomeViewWidget(), 
         ActionBarWidget(key: globalActionBar, view: widget.view ) 
