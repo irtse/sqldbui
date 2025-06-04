@@ -300,23 +300,33 @@ class ActionService {
   }
 
   static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, String schemaID, BuildContext context, bool warn) async {
+    
     for (var fieldName in schema.keys) {
       if (values[fieldName] is List) {
+        for (var f in schema[fieldName]!.schema.keys) {
+          var ff = schema[fieldName]!.schema[f];
+          if (((ff?.linkID ?? "") == schemaID || (f.contains("_id") && f.contains(schemaName)))  && values["id"] != null) { 
+            var datas = await APIService().get<model.Shallowed>("${schema[fieldName]!.actionPath}&$f=${values["id"]}&shallow=enable", true, context);
+            if (datas.data != null) {
+              for (var d in datas.data!) {
+                await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&$f=${values["id"]}".replaceAll("rows=all", "rows=${d.id}"), null
+                  ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); }); 
+              }
+            }
+          }
+        }
         for (var item in values[fieldName] as List) {
           var newBody = <String, dynamic> {};
           for (var f in schema[fieldName]!.schema.keys) {
             var ff = schema[fieldName]!.schema[f];
-            if (((ff?.linkID ?? "") == schemaID || (f.contains("_id") && f.contains(schemaName)))  && values["id"] != null) { 
-              newBody[f]=values["id"];
-              await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&$f=${values["id"]}", null
-              ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); }); 
-            } else if (((ff?.linkID ?? "") != ""  || (f.contains("_id") && !f.contains(schemaName))) && (item["id"] ?? "" ) != "") { 
+            if (((ff?.linkID ?? "") != ""  || (f.contains("_id") && !f.contains(schemaName))) && (item["id"] ?? "" ) != "") { 
               newBody[f]=item["id"];  
             } else if(f == "name" && (item[f] ?? "" ) != "") {
               newBody[f]=item[f];  
             }
           } 
           // ignore: use_build_context_synchronously
+          print("post ${schema[fieldName]!.actionPath} $newBody");
           await APIService().post<model.View>(schema[fieldName]!.actionPath, newBody, null
                                              ).catchError( (e) { 
                                               errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); 

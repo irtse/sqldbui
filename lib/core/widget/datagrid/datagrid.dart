@@ -223,6 +223,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
       if (isEditMode[viewID] ?? false) {
         buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid));
       } else {
+        print(widget.view?.actions);
         if (widget.view?.actions.contains("delete") ?? false) {
           buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
           child: Tooltip( 

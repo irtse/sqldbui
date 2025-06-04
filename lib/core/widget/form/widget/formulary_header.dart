@@ -162,7 +162,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         }
         if (widget.view.actions.contains("delete") && !widget.view.isEmpty) {
           try {
-            TranslateConstants.update = await getOnFlow(TranslateConstants.delete);
+            TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
           } catch (e) {}
           actions.add(ButtonWidget(method: "delete", text: (TranslateConstants.delete).toUpperCase(), color: Colors.red));
         }

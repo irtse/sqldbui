@@ -1,6 +1,5 @@
 
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
  import 'package:http_parser/http_parser.dart';
@@ -27,6 +26,7 @@ import 'package:url_launcher/url_launcher.dart';
 var firstAPI = false;
 var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
 class APIConstants {
+  static String filterLine = "";
   static String mainEndpost = '/main';
   static String genericEndpost = '/generic/';
 }
@@ -171,6 +171,10 @@ class APIService {
         }
       }
       if (globalNew[viewID] != null && globalNew[viewID] != "all") { filter += "&filter_status=${globalNew[viewID]}"; }
+    }
+    if (APIConstants.filterLine != "") {
+      filter = "&filter_line=${APIConstants.filterLine}";
+      APIConstants.filterLine = "";
     }
     return filter;
   }

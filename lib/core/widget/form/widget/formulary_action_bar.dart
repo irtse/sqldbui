@@ -13,6 +13,7 @@ class FormularyActionBarWidget extends StatefulWidget {
   bool isSplitted;
   model.View view;
   model.Item refItem;
+  bool isFirst = false;
   FormWidgetState component;
   Map<String, model.SchemaField> schema;
   
@@ -22,6 +23,7 @@ class FormularyActionBarWidget extends StatefulWidget {
     required this.show,
     required this.view, 
     required this.schema,
+    this.isFirst = false,
     required this.refItem,
     required this.component,
     required this.isSplitted,
@@ -46,6 +48,9 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
         for (var state in { "completed" : { "purpose": "validate task", "color": Colors.green, "icon": Icons.check },
                             "dismiss" :  { "purpose": "dismiss task", "color": Colors.orange, "icon": Icons.back_hand_outlined }, 
                             "refused":  { "purpose": "refused task", "color": Colors.red, "icon": Icons.close}, }.entries) {
+          if (widget.isFirst && state.key == "dismiss") {
+            continue;
+          }
           var purpose = await getOnFlow("${state.value["purpose"]}");
           positionnedBar.add(Padding( padding: const EdgeInsets.only(left: 20), child: FloatingActionButton(
             tooltip: purpose.toLowerCase(),

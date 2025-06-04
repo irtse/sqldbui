@@ -248,6 +248,7 @@ class FormWidgetState extends State<DataFormWidget> {
                 canUpdate: widget.view!.actions.contains("put") && widget.view!.actions.contains("delete"),
               ), 
           FormularyActionBarWidget(
+            isFirst: int.parse(workflow?.current ?? "0") <= 1,
             show: show, 
             schema: schema,
             component: this, 

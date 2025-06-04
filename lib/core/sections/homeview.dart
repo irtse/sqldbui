@@ -139,6 +139,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     return FutureBuilder<APIResponse<Shallowed>>(future:APIService().get<Shallowed>(
       "${APIConstants.genericEndpost}/dbview?rows=all&shallow=enable&shortcut_on_main=true", false, context), 
     builder: (a,s) {
+      views = [];
       List<Shallowed> dd = [];
       if (s.data?.data != null) {
         for (var d in s.data!.data!) {

@@ -1,7 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/main.dart';
@@ -14,7 +13,7 @@ import 'package:sqldbui2/page/translate.dart';
 GlobalKey<RouterWidgetState> routerKey = GlobalKey<RouterWidgetState>();
 
 class RouterWidget extends StatefulWidget {
-  const RouterWidget({Key? key}) : super(key: key);
+  const RouterWidget({super.key});
   @override RouterWidgetState createState() => RouterWidgetState();
 }
 
@@ -128,6 +127,18 @@ class AppRouter {
       name: "home",
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
+        final id = state.uri.queryParameters['view_id'];
+        if ((id ?? "") != "") {
+          viewID = id;
+        }
+        final subid = state.uri.queryParameters['sub_id'];
+        if ((subid ?? "") != "") {
+          subViewID = subid;
+        }
+        final filterLine = state.uri.queryParameters['filter_line'];
+        if ((filterLine ?? "") != "") {
+          APIConstants.filterLine = filterLine!;
+        }
         return HomeScreen();
       },
     )
