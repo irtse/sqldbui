@@ -158,7 +158,9 @@ class GridWidgetState extends State<GridWidget> {
                           child: VisibilityDetector(
                             key: Key('my-widget-key'),
                             onVisibilityChanged: (VisibilityInfo info) {
+                              print("${info.visibleFraction}");
                               if (info.visibleFraction > 0) {
+                                print("${ (currentView?.items.length ?? 0)} ${currentView!.max}");
                                 if (currentView != null && currentView!.items.length < currentView!.max) {
                                   print("${ (currentView?.items.length ?? 0)} $globalOffset");
                                   if ((currentView?.items.length ?? 0) >= globalOffset) { 
