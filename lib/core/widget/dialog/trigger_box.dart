@@ -118,14 +118,13 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             if (!(formKey.currentState?.validate() ?? false)) {
               return;
             }
-            var body = await ActionService.getBody("POST", {...b }, {}, trigger.schema, context);
+            var body = await ActionService.getBody("POST", {...b }, {}, trigger.schema, {}, context);
             var files = await ActionService.getFiles("POST", {...b }, trigger.schema, context);
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
                   ActionService.onSuccessMethod("POST", e.data!.first, {...b }, trigger.schema, files, context);
                 }
-              }).catchError( (e) => ActionService.listSubForms(trigger.schema, {...b }, "POST", trigger.name ?? "", "", context, true)
-            );
+              }).catchError( (e) {});
             if (widget.isCached) {
               TriggerCacheService.deleteTriggers(widget.index);
             }

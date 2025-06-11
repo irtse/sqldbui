@@ -352,7 +352,7 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
       _portalController.show();
     } else {
       _dropdownController._clearSearchQuery();
-      _portalController.hide();
+      Future.delayed(Duration(milliseconds: 100), () =>  _portalController.hide());
     }
   }
 

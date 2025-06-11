@@ -25,19 +25,19 @@ List<String> errors = <String>[];
 class ActionService {
   static void Function() pressed(ButtonWidgetState? widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, 
-                                 String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, bool overrideDest, bool explicitDraft) {
+                                 String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, bool overrideDest, bool explicitDraft, bool avoidConsent) {
       errors = [];
-      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft);
+      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent);
     }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
   static void Function() pressedForm(ButtonWidgetState? widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context, bool isDraft, bool overrideDest, 
-                                Map<String,dynamic> overrideMap, bool explicitDraft) { 
+                                Map<String,dynamic> overrideMap, bool explicitDraft, bool avoidConsent) { 
       return () async {
         widget?.loading();
         if (mainForm.currentState != null) {
-          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft);
+          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent);
         }
         widget?.loaded();
         
@@ -48,11 +48,12 @@ class ActionService {
         }
       };
   }
-  static Future<List<model.View>> pressedFormFuture(DataFormWidget form,  String schemaName, String url, 
+  static Future<List<model.View>> pressedFormFuture(DataFormWidget form, String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
-                                                    BuildContext context, Map<String, dynamic> add, bool isDraft, bool overrideDest, bool explicitDraft) async {  
-    if (consentCache[viewID] != null) {
-      for (var consent in consentCache[viewID]!.values) {
+                                                    BuildContext context, Map<String, dynamic> add, 
+                                                    bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent) async {  
+    if (consentCache[viewID]?[form.key] != null && !avoidConsent) {
+      for (var consent in consentCache[viewID]![form.key]!.values) {
         if (!consent.consent && !consent.optionnal) {
           consentErrCache[viewID ?? ""]?[consent.name] = true;
           errors = ["we need your consent"]; 
@@ -84,7 +85,7 @@ class ActionService {
       return views;
     }
     var body = <String, dynamic>{};
-    var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft);
+    var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent);
     if (resp.isNotEmpty  && !overrideDest) {
       if (resp.first.items.isNotEmpty) { 
         body["dbdest_table_id"]=resp.first.items[0].values["id"]; 
@@ -100,14 +101,14 @@ class ActionService {
         }
       return views;
     }
-
-    if (form.oneToManiesForm.where((element) => element.detectChange).isNotEmpty) { form.detectChange = true; }
-    if (form.existingOneToManiesForm.where((element) => element.detectChange).isNotEmpty) {
-        form.detectChange = true;
-        // ignore: use_build_context_synchronously
-        formSubForms(form.existingOneToManiesForm, form.cacheForm, method, schemaName, context, false, false, isDraft, overrideDest, explicitDraft);
+    for (var v in form.oneToManiesForm.values) {
+      for (var vv in v) {
+        if (vv.detectChange) {
+          form.detectChange = true; 
+          break;
+        }
+      }
     }
-
     if (isDraft && form.view!.id == mainForm.currentState!.widget.view!.id) {
       mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
@@ -118,7 +119,7 @@ class ActionService {
       body["id"]=int.parse(form.cacheForm["id"]); 
       if (method.toUpperCase() == "DELETE") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
-    body = await getBody(method, { ...form.cacheForm}, body, schema, context);
+    body = await getBody(method, { ...form.cacheForm}, body, schema, form.oneToManiesForm, context);
     var files = await getFiles(method, { ...form.cacheForm}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
@@ -140,8 +141,8 @@ class ActionService {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
             bool killConsent = false;
-            if ((consentCache[viewID]?.length ?? 0) > 0) {
-              for (var consent in consentCache[viewID]!.values) {
+            if ((consentCache[viewID]?[form.key]?.length ?? 0) > 0) {
+              for (var consent in consentCache[viewID]![form.key]!.values) {
                 if (consent.body == null || consent.body!["dbschema_id"] != value.data!.first.schemaID) {
                   continue;
                 }
@@ -184,16 +185,11 @@ class ActionService {
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
           errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}");
-          listSubForms(schema, form.cacheForm, method, schemaName, "", context, true);
           APIResponse<model.View>(data: null);
-        });        
-        
-        formSubForms(form.oneToManiesForm, body, method, schemaName, context, false, false, isDraft, overrideDest, explicitDraft); // ignore: use_build_context_synchronously
-        formSubForms(form.existingOneToManiesForm, body, method, schemaName, context, false, false, isDraft, overrideDest, explicitDraft); // ignore: use_build_context_synchronously
-        formSubForms(form.oneToManiesFormDelete, body, method, schemaName, context, false, true, isDraft, overrideDest, explicitDraft); // ignore: use_build_context_synchronously
+        });                
       }
       Future.delayed(const Duration(seconds: 1), () {
-        for (var state in form.oneToManiesStateForm.values) { state.setState(() { form.oneToManiesForm = []; }); }
+        for (var state in form.oneToManiesStateForm.values) { state.setState(() { form.oneToManiesForm = {}; }); }
         form.oneToManiesStateForm = {};
       });
     if (form.view!.id == mainForm.currentState!.widget.view!.id) {
@@ -217,9 +213,6 @@ class ActionService {
       for (var pathFile in files.keys) {
         await submitFile(pathFile.replaceAll("rows=all", "rows=${values["id"]}"), files[pathFile]!, context);
       }
-    }
-    if (view.items.isNotEmpty) {            
-      listSubForms(schema, values, method, view.schemaName, "${view.schemaID}", context, false);
     }
     TriggerCacheService.setTriggers(view.triggers); 
   }
@@ -249,7 +242,7 @@ class ActionService {
     return files;
   }
   static Future<Map<String, dynamic>> getBody(String method, Map<String, dynamic> values, Map<String, dynamic> body, 
-    Map<String, model.SchemaField> schema, BuildContext context) async {
+    Map<String, model.SchemaField> schema, Map<String, List<DataFormWidget>> oneToManies, BuildContext context) async {
     if (newDropDownValue.isNotEmpty && (method == "post" || method == "put")) {
       for(var url in newDropDownValue.keys) {
           for (var name in newDropDownValue[url]!.keys) {
@@ -276,10 +269,8 @@ class ActionService {
           if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
           if (schema[fieldName] != null && schema[fieldName]!.type.toLowerCase().contains("many")) { continue; }
           
-          if (!["dbdest_table_id"].contains(fieldName) 
-          && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
-          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
-          && values[fieldName] is! List) { 
+          if (!["dbdest_table_id"].contains(fieldName) && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
+          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)) { 
             if (values[fieldName] is Map<String, List<PlatformFile>>){
               for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
                 for (var file in values[fieldName][fileStr] as List<PlatformFile>) {
@@ -290,6 +281,8 @@ class ActionService {
                   }
                 }
               }
+            } else if ( (oneToManies[fieldName] ?? []).isNotEmpty) {
+              body[fieldName] = oneToManies[fieldName] ?? [];
             } else {
               body[fieldName]=values[fieldName]; 
             }
@@ -298,45 +291,8 @@ class ActionService {
     }
     return body;
   }
-
-  static listSubForms(Map<String, model.SchemaField> schema, Map<String, dynamic> values, String method, String schemaName, String schemaID, BuildContext context, bool warn) async {
-    
-    for (var fieldName in schema.keys) {
-      if (values[fieldName] is List) {
-        for (var f in schema[fieldName]!.schema.keys) {
-          var ff = schema[fieldName]!.schema[f];
-          if (((ff?.linkID ?? "") == schemaID || (f.contains("_id") && f.contains(schemaName)))  && values["id"] != null) { 
-            var datas = await APIService().get<model.Shallowed>("${schema[fieldName]!.actionPath}&$f=${values["id"]}&shallow=enable", true, context);
-            if (datas.data != null) {
-              for (var d in datas.data!) {
-                await APIService().delete<model.View>("${schema[fieldName]!.actionPath}&$f=${values["id"]}".replaceAll("rows=all", "rows=${d.id}"), null
-                  ).catchError( (e) { errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); }); 
-              }
-            }
-          }
-        }
-        for (var item in values[fieldName] as List) {
-          var newBody = <String, dynamic> {};
-          for (var f in schema[fieldName]!.schema.keys) {
-            var ff = schema[fieldName]!.schema[f];
-            if (((ff?.linkID ?? "") != ""  || (f.contains("_id") && !f.contains(schemaName))) && (item["id"] ?? "" ) != "") { 
-              newBody[f]=item["id"];  
-            } else if(f == "name" && (item[f] ?? "" ) != "") {
-              newBody[f]=item[f];  
-            }
-          } 
-          // ignore: use_build_context_synchronously
-          print("post ${schema[fieldName]!.actionPath} $newBody");
-          await APIService().post<model.View>(schema[fieldName]!.actionPath, newBody, null
-                                             ).catchError( (e) { 
-                                              errors.add("${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}"); return APIResponse<model.View>(data: null); 
-                                            });
-        }
-      }
-    }
-  }
   static Future<List<model.View>> formSubForms(List<DataFormWidget> widgets, Map<String, dynamic> values, String method, 
-                                                 String schemaName, BuildContext context, bool add, bool delete, bool isDraft, bool overrideDest, bool explicitDraft) async {
+                                                 String schemaName, BuildContext context, bool add, bool delete, bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent) async {
     List<model.View> views = [];
     for (var many in widgets) { 
       if (delete && many.view != null && many.view!.actions.contains("delete") && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
@@ -345,10 +301,10 @@ class ActionService {
       } else if (many.view != null && many.view!.actions.contains(method)) {
         if (add) { views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
-                                                        context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft));
+                                                        context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent));
         } else { 
           await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
-                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft);
+                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent);
         } 
       }
     }

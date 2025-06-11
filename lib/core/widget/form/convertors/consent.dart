@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 Map<String, Map<String,bool>> consentErrCache = {};
-Map<String, Map<String,model.Consent>> consentCache = {};
+Map<String, Map<GlobalKey<FormWidgetState>, Map<String,model.Consent>>> consentCache = {};
 
 // ignore: must_be_immutable
 class ConsentWidget extends StatefulWidget {
+  GlobalKey<FormWidgetState> state;
   model.Consent consent;
   dynamic value;
   ConsentWidget ({ 
     required this.consent,
+    required this.state,
     this.value,
   }) : super(key: GlobalKey<ConsentState>()) ;
   @override
@@ -27,7 +30,10 @@ class ConsentState extends State<ConsentWidget> {
     if (consentErrCache[viewID ?? ""] == null) {
       consentErrCache[viewID ?? ""] = {};
     }
-    consentCache[viewID ?? ""]![widget.consent.name] = model.Consent(
+    if (consentCache[viewID ?? ""]?[widget.state] == null) {
+      consentCache[viewID ?? ""]![widget.state] = {};
+    }
+    consentCache[viewID ?? ""]![widget.state]![widget.consent.name] = model.Consent(
       consent: widget.value ?? false, 
       body: widget.consent.body,
       optionnal: widget.consent.optionnal, 
@@ -57,7 +63,7 @@ class ConsentState extends State<ConsentWidget> {
                     setState(() {
                         widget.value = value ?? false;
                         consentErrCache[viewID ?? ""]?.remove(widget.consent.name);
-                        consentCache[viewID ?? ""]![widget.consent.name] = model.Consent(
+                        consentCache[viewID ?? ""]![widget.state]![widget.consent.name] = model.Consent(
                           consent: value ?? false, 
                           body: widget.consent.body,
                           optionnal: widget.consent.optionnal, 

@@ -19,262 +19,263 @@ class LinkBoxWidget extends StatefulWidget {
   LinkBoxWidget ({ super.key, required this.path, required this.sharing, this.color, });
   @override LinkBoxWidgetState createState() => LinkBoxWidgetState();
 }
-bool forceSharedUser = true;
-bool forceUser = true;
 class LinkBoxWidgetState extends State<LinkBoxWidget> {
+  bool forceShared = true;
   @override Widget build(BuildContext context) {
+    List<DropdownItem<String>> dpItems = [];
+    List<DropdownItem<String>> dpItems2 = [];
+
     List<Widget> d = [];
     List<Widget> drops = [];
     if (widget.sharing != null) {
       var len = 0;
       MultiSelectController<String> ctrls = MultiSelectController<String>();
       MultiSelectController<String> ctrlsDP = MultiSelectController<String>();
-      d.add(FutureBuilder(future: APIService().get<model.Shallowed>("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", forceSharedUser, context), builder: (a,s) {
-          forceSharedUser = false;
-          List<DropdownItem<String>> dpItems = [];
-          int max = 0;
-          if (s.data?.data != null) {
-            for (var data in s.data!.data!) {
-                max = data.max;
-                dpItems.add(DropdownItem<String>(
-                value: "${data.id}",
-                label: data.label ?? data.name ?? "",
-              ));
-            }
-          }
-          return Row( children : [  SizedBox( 
-                      width: 250,   
-                      height: 25, 
-                      child: MultiDropdown<String>(
-        max: max,
-        changeFunction: (dynamic value) async {
-          if (value == "") {
-            return;
-          }
-          var filters = Filters();
-          filters.add("name", Filter(value: value, column: "name"));
-          load("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", 0, 10, APIService().getFilter("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", true, filters), value, dpItems, ctrls);
-        },
-        enabled: true,
-                        controller: ctrls,
-                        singleSelect: true,
-                        items: dpItems,
-                        searchEnabled: true,
-                        chipDecoration: ChipDecoration(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          labelStyle: TextStyle(color: Colors.white),
-                          wrap: true,
-                          runSpacing: 2,
-                          spacing: 10,
-                        ),
-                        fieldDecoration: FieldDecoration(
-                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
-                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                          backgroundColor:Theme.of(context).splashColor,
-                          hintText: TranslateConstants.userShared.toLowerCase(),
-                          hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-                          prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
-                          showClearIcon: false,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide(color: Theme.of(context).splashColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                        ),
-                        searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
-                          border : const OutlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                          ),
-                          focusedBorder : const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                            borderRadius: BorderRadius.all(Radius.circular(5)))
-                        ),
-                        dropdownDecoration: DropdownDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          marginTop: 2,
-                          maxHeight: 400,
-                          header: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Text(
-                              "       ${TranslateConstants.selectValue.toLowerCase()}",
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        dropdownItemDecoration: DropdownItemDecoration(
-                          backgroundColor: Theme.of(context).highlightColor,
-                          selectedIcon:
-                              const Icon(Icons.check_box, color: Colors.green),
-                          disabledIcon:
-                              Icon(Icons.lock, color: Colors.grey.shade300),
-                        ),
-                        validator: (value) {
-                          return null;
-                        },
-                        onSelectionChange: (values) {
-                          if (values.isEmpty) { return; }
-                            setState(() {
-                                widget.value = values[0];
-                            });
-                        },
-                      )), len == widget.sharing!.shallowPath.length ? Padding( 
-                    padding: const EdgeInsets.only(left: 10), 
-                    child: IconButton(
-                      enableFeedback: widget.value != null,
-                      onPressed: () {
-                        if (widget.value == null) {
-                          return;
-                        }
-                        APIService().delete<model.Shallowed>(
-                          widget.sharing!.sharePath!, context
-                        ).then( (value) { 
-                          forceSharedUser = true;
-                          setState(() { Navigator.pop(context); }); 
-                        });
-                    }, icon: Icon(Icons.delete, size: 20, color:  widget.value != null ? Colors.grey.shade200 :Colors.grey))
-                  ) : Container(), 
-                ]);
-        }));
-      for (var m in widget.sharing!.shallowPath.entries) {
-        len++;
-        
-        drops.add(FutureBuilder(future: APIService().get<model.Shallowed>("${m.value}", forceUser, context), builder: (a,s) {
-          
-          forceUser = false;
-          List<DropdownItem<String>> dpItems = [];
+      d.add(FutureBuilder(
+        future: APIService().get<model.Shallowed>(widget.sharing?.sharedWithPath ?? "", true, context),
+        builder: (a,s) {
           int max = 0;
           if (s.data?.data != null) {
             for (var data in s.data!.data!) {
               max = data.max;
-              dpItems.add(DropdownItem<String>(
-                value: "${m.key}~${data.id}",
-                label: data.label ?? data.name ?? "",
-              ));
+              if (dpItems.where( (e) => e.value.toString() == data.id.toString()).isEmpty) {
+                dpItems.add(DropdownItem<String>(
+                  value: "${data.id}",
+                  label: data.label ?? data.name ?? "",
+                ));
+                ctrls.addItem(dpItems.last);
+              }
             }
           }
+          print("test ${s.data?.data?.length} $max");
           return Row( children : [  SizedBox( 
-                      width: 250,   
-                      height: 25, 
-                      child: MultiDropdown<String>(
-                      max: max,
-                      changeFunction: (dynamic value) async {
-                        if (value == "") {
-                          return;
-                        }
-                        var filters = Filters();
-                        filters.add("name", Filter(value: value, column: "name"));
-                        load("${m.value}", 0, 10, APIService().getFilter("${m.value}", true, filters), value, dpItems, ctrlsDP);
-                      },
-                      enabled: true,
-                        controller: ctrlsDP,
-                        singleSelect: true,
-                        items: dpItems,
-                        searchEnabled: true,
-                        chipDecoration: ChipDecoration(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          labelStyle: TextStyle(color: Colors.white),
-                          wrap: true,
-                          runSpacing: 2,
-                          spacing: 10,
-                        ),
-                        fieldDecoration: FieldDecoration(
-                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
-                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                          backgroundColor:Theme.of(context).splashColor,
-                          hintText: TranslateConstants.filterPlaceholder.toLowerCase(),
-                          hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-                          prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
-                          showClearIcon: false,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide(color: Theme.of(context).splashColor),
+            width: 250,   
+            height: 25, 
+            child: MultiDropdown<String>(
+              max: max,
+              changeFunction: (dynamic value) async {
+                if (value == "") {
+                  return;
+                }
+                var filters = Filters();
+                filters.add("name", Filter(value: value, column: "name"));
+                load("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", 0, 10, APIService().getFilter("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", true, filters), value, dpItems, ctrls);
+              },
+              enabled: true,
+                              controller: ctrls,
+                              singleSelect: true,
+                              items: dpItems,
+                              searchEnabled: true,
+                              chipDecoration: ChipDecoration(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                labelStyle: TextStyle(color: Colors.white),
+                                wrap: true,
+                                runSpacing: 2,
+                                spacing: 10,
+                              ),
+                              fieldDecoration: FieldDecoration(
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                                disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                                backgroundColor:Theme.of(context).splashColor,
+                                hintText: TranslateConstants.userShared.toLowerCase(),
+                                hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                                prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
+                                showClearIcon: false,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(color: Theme.of(context).splashColor),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ),
+                              searchDecoration: SearchFieldDecoration(
+                                hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                                border : const OutlineInputBorder(
+                                  borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                                ),
+                                focusedBorder : const OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey),
+                                  borderRadius: BorderRadius.all(Radius.circular(5)))
+                              ),
+                              dropdownDecoration: DropdownDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(5)),
+                                marginTop: 2,
+                                maxHeight: 400,
+                                header: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Text(
+                                    "       ${TranslateConstants.selectValue.toLowerCase()}",
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              dropdownItemDecoration: DropdownItemDecoration(
+                                backgroundColor: Theme.of(context).highlightColor,
+                                selectedIcon:
+                                    const Icon(Icons.check_box, color: Colors.green),
+                                disabledIcon:
+                                    Icon(Icons.lock, color: Colors.grey.shade300),
+                              ),
+                              validator: (value) {
+                                return null;
+                              },
+                              onSelectionChange: (values) {
+                                if (values.isEmpty) { return; }
+                                  setState(() {
+                                      widget.value = values[0];
+                                  });
+                              },
+                            )), len == widget.sharing!.shallowPath.length ? Padding( 
+                          padding: const EdgeInsets.only(left: 10), 
+                          child: IconButton(
+                            enableFeedback: widget.value != null,
+                            onPressed: () {
+                              if (widget.value == null) {
+                                return;
+                              }
+                              APIService().delete<model.Shallowed>(
+                                widget.sharing!.sharePath!, context
+                              ).then( (value) { 
+                                setState(() { Navigator.pop(context); }); 
+                              });
+                          }, icon: Icon(Icons.delete, size: 20, color:  widget.value != null ? Colors.grey.shade200 :Colors.grey))
+                        ) : Container(), 
+                      ]);
+              }));
+      for (var m in widget.sharing!.shallowPath.entries) {
+        len++;
+        drops.add(FutureBuilder(
+          future: APIService().get<model.Shallowed>("${m.value}", true, context), 
+          builder: (a,s) {
+            int max = 0;
+            if (s.data?.data != null) {
+              for (var data in s.data!.data!) {
+                max = data.max;
+                if (dpItems2.where( (e) => e.value.toString() == data.id.toString()).isEmpty) {
+                  dpItems2.add(DropdownItem<String>(
+                    value: "${data.id}",
+                    label: data.label ?? data.name ?? "",
+                  ));
+                  ctrlsDP.addItem(dpItems2.last);
+                }
+              }
+            }
+            return Row( children : [  SizedBox( 
+                        width: 250,   
+                        height: 25, 
+                        child: MultiDropdown<String>(
+                        max: max,
+                        changeFunction: (dynamic value) async {
+                          if (value == "") {
+                            return;
+                          }
+                          var filters = Filters();
+                          filters.add("name", Filter(value: value, column: "name"));
+                          load("${m.value}", 0, 10, APIService().getFilter("${m.value}", true, filters), value, dpItems2, ctrlsDP);
+                        },
+                        enabled: true,
+                          controller: ctrlsDP,
+                          singleSelect: true,
+                          items: dpItems2,
+                          searchEnabled: true,
+                          chipDecoration: ChipDecoration(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            labelStyle: TextStyle(color: Colors.white),
+                            wrap: true,
+                            runSpacing: 2,
+                            spacing: 10,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColor,
+                          fieldDecoration: FieldDecoration(
+                            errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                            disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                            backgroundColor:Theme.of(context).splashColor,
+                            hintText: TranslateConstants.filterPlaceholder.toLowerCase(),
+                            hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                            prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
+                            showClearIcon: false,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(color: Theme.of(context).splashColor),
                             ),
-                          ),
-                        ),
-                        searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
-                          border : const OutlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                          ),
-                          focusedBorder : const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                            borderRadius: BorderRadius.all(Radius.circular(5)))
-                        ),
-                        dropdownDecoration: DropdownDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          marginTop: 2,
-                          maxHeight: 400,
-                          header: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Text(
-                              "       ${TranslateConstants.selectValue.toLowerCase()}",
-                              textAlign: TextAlign.start,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ),
-                        ),
-                        dropdownItemDecoration: DropdownItemDecoration(
-                          backgroundColor: Theme.of(context).highlightColor,
-                          selectedIcon:
-                              const Icon(Icons.check_box, color: Colors.green),
-                          disabledIcon:
-                              Icon(Icons.lock, color: Colors.grey.shade300),
-                        ),
-                        validator: (value) {
-                          return null;
-                        },
-                        onSelectionChange: (values) {
-                          if (values.isEmpty) { return; }
-                            setState(() {
-                                widget.values[m.key] = values[0];
-                            });
-                        },
-                      )), len == widget.sharing!.shallowPath.length ? Padding( 
-                    padding: const EdgeInsets.only(left: 10), 
-                    child: IconButton(
-                      enableFeedback: widget.values[m.key] != null,
-                      onPressed: () {
-                        if (widget.values[m.key] == null) {
-                          return;
-                        }
-                        for (var k in widget.values.values) {
-                          var last = k.split("~");
-                          if (last.length == 2) {
-                            widget.sharing!.body[last[0]] = int.parse(last[1]);
+                          searchDecoration: SearchFieldDecoration(
+                            hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                            border : const OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                            ),
+                            focusedBorder : const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey),
+                              borderRadius: BorderRadius.all(Radius.circular(5)))
+                          ),
+                          dropdownDecoration: DropdownDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            marginTop: 2,
+                            maxHeight: 400,
+                            header: Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Text(
+                                "       ${TranslateConstants.selectValue.toLowerCase()}",
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          dropdownItemDecoration: DropdownItemDecoration(
+                            backgroundColor: Theme.of(context).highlightColor,
+                            selectedIcon:
+                                const Icon(Icons.check_box, color: Colors.green),
+                            disabledIcon:
+                                Icon(Icons.lock, color: Colors.grey.shade300),
+                          ),
+                          validator: (value) {
+                            return null;
+                          },
+                          onSelectionChange: (values) {
+                            if (values.isEmpty) { return; }
+                              setState(() {
+                                  widget.values[m.key] = values[0];
+                              });
+                          },
+                        )), len == widget.sharing!.shallowPath.length ? Padding( 
+                      padding: const EdgeInsets.only(left: 10), 
+                      child: IconButton(
+                        enableFeedback: widget.values[m.key] != null,
+                        onPressed: () {
+                          if (widget.values[m.key] == null) {
+                            return;
                           }
-                        }
-                        APIService().post<model.Shallowed>(
-                          widget.sharing!.sharePath!, 
-                          widget.sharing!.body, context
-                        ).then( (value) { 
-                          forceUser = true;
-                          setState(() { Navigator.pop(context); }); 
-                        });
-                    }, icon: Icon(Icons.share, size: 20, color: widget.values[m.key] != null ? Colors.grey.shade200 :Colors.grey))
-                  ) : Container(), 
-                ]);
-        }));
-        
+                          for (var k in widget.values.values) {
+                            widget.sharing!.body["shared_dbuser_id"] = int.parse(k);
+                          }
+                          APIService().post<model.Shallowed>(
+                            widget.sharing!.sharePath!, 
+                            widget.sharing!.body, context
+                          ).then( (value) { 
+                            setState(() { Navigator.pop(context); });  
+                          });
+                      }, icon: Icon(Icons.share, size: 20, color: widget.values[m.key] != null ? Colors.grey.shade200 :Colors.grey))
+                    ) : Container(), 
+                  ]);
+          }));
       }
     }
     return PopupMenuButton(

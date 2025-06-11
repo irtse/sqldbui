@@ -20,7 +20,6 @@ GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
-  GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   bool reloadWorkflow = true;
   List<String> hideField = [];
   bool formIsEmpty = false;
@@ -29,10 +28,9 @@ class DataFormWidget extends StatefulWidget {
   String superFormSchemaName;
   Map<String, dynamic> cacheForm = {};
   bool scroll, subForm, subSubForm, isSplitted;
-  List<DataFormWidget>wrappers = <DataFormWidget>[];
-  List<DataFormWidget> oneToManiesForm = <DataFormWidget>[];
-  List<DataFormWidget> oneToManiesFormDelete = <DataFormWidget>[];
-  List<DataFormWidget> existingOneToManiesForm = <DataFormWidget>[];
+  List<DataFormWidget> wrappers = <DataFormWidget>[];
+  Map<String, List<DataFormWidget>> oneToManiesForm = {};
+  GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   GlobalKey<FormularyHeaderWidgetState> headerKey = GlobalKey<FormularyHeaderWidgetState>();
   Map<DataFormWidget, OneToManyState> oneToManiesStateForm = <DataFormWidget, OneToManyState>{};
   List<GlobalKey<SubFormularyWidgetState>>wrappersGlobalKey = <GlobalKey<SubFormularyWidgetState>>[];
@@ -101,15 +99,16 @@ class FormWidgetState extends State<DataFormWidget> {
               component: this, 
               width: mainWidth, 
               refItem: refItem, 
-              view: widget.view!,
-              formKey: widget.formKey,       
+              view: widget.view!,     
               isSplitted: isSplitted,
               subForm: widget.subForm,
               wrappers: widget.subKey,
+              formKey: widget.formKey,
               hideField: widget.hideField, 
               newCacheEntry: newCacheEntry,
               additionnalWidgets: additionnal,
               formIsEmpty: widget.formIsEmpty,
+              state: widget.key as GlobalKey<FormWidgetState>,
               superFormSchemaName: widget.superFormSchemaName,
             );
           case 1: content = FormularyCommentsWidget(

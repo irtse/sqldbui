@@ -25,12 +25,14 @@ class FormularyWidget extends StatefulWidget {
   bool formIsEmpty = false;
   Map<String, model.SchemaField> schema;
   List<Widget> additionnalWidgets;
+  GlobalKey<FormWidgetState> state;
   GlobalKey<SubFormularyWidgetState>? wrappers;
   
   GlobalKey<FormState> formKey;
   FormularyWidget ({ 
     super.key, 
     this.error = "",
+    required this.state,
     required this.show,
     required this.view, 
     required this.width,
@@ -133,7 +135,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
             }
       }
       for (var consent in widget.view.consents) {
-        fields.add(ConsentWidget(consent: consent, value: false));
+        fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
       }
       // widget.additionnalWidgets.add(getSynthesis(widget.refItem.synthesisPath ?? ""));
       if (widget.key != null) {

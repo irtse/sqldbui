@@ -61,7 +61,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
                   widget.component.widget.detectChange = true;
                   mainForm.currentState!.widget.cacheForm["state"] = state.key;
                   ActionService.pressed(null, false, widget.view.schemaName, widget.view.actionPath, <String>["id"], 
-                    widget.view.schema, "put", false, context, { "state": state.key, }, true, false)();
+                    widget.view.schema, "put", false, context, { "state": state.key, }, true, false, state.key == "dismiss" || state.key == "refused")();
               }));
             }, 
             backgroundColor: state.value["color"] as Color, child: Icon(state.value["icon"] as IconData?, color: Colors.white))));

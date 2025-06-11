@@ -23,7 +23,7 @@ import 'package:sqldbui2/model/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 var firstAPI = false;
-var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/v1';
+var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
 class APIConstants {
   static String filterLine = "";
   static String mainEndpost = '/main';
@@ -200,11 +200,12 @@ class APIService {
         if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
+        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter";
         if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
           return cache[url]! as APIResponse<T>;
         }
         print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
-        var response = await request("$url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter", method, body, options);
+        var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
