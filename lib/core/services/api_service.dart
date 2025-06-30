@@ -205,7 +205,8 @@ class APIService {
           return cache[url]! as APIResponse<T>;
         }
         print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
-        var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);
+        var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);        
+      
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
@@ -215,13 +216,12 @@ class APIService {
         if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
           if (method == "delete") { 
             cache.remove(url); 
-            return APIResponse<T>(); 
           }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
 
           if (resp.error == "") {    
             if (method == "get") { 
-              if (limit != null && cache.containsKey(url) && offset != null && offset > 0) { 
+              if (limit != null && cache.containsKey(url) && offset != null && offset > 0) {
                   cache[url]!.data!.addAll(resp.data!);
                   cache[url]!.offset = offset; 
                   return cache[url]! as APIResponse<T>;
@@ -232,13 +232,18 @@ class APIService {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, InfoAlertBannerChild(text: succeed), // <-- Put any widget here you want!
                 alertBannerLocation:  AlertBannerLocation.bottom,);
             }
-            if (method == "get") {  return cache[url] as APIResponse<T>;  }
+            if (method == "get") {  
+              print("${cache[url]?.data?.length} ${url}");
+              return cache[url] as APIResponse<T>;  
+            }
             return resp; 
           }
           err = resp.error ?? "internal error";
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
+        print(e);
+        print(s);
         if (e.toString().contains("connection error")) {
           err = "server unreachable";
         } else {
@@ -248,7 +253,7 @@ class APIService {
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
-      Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
+      Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, durationOfStayingOnScreen: Duration(minutes: 1), () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
                        alertBannerLocation:  AlertBannerLocation.bottom,))
       ;
     } 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/model/view.dart';
 
@@ -18,11 +19,13 @@ class FormularyHeaderWidget extends StatefulWidget {
   bool edit = false;
   model.Item refItem;
   model.Workflow? workflow;
+  GlobalKey<FormWidgetState> parentFormKey; 
   Map<String, model.SchemaField> schema;
   
   final formKey = GlobalKey<FormState>();
   FormularyHeaderWidget ({ 
     super.key, 
+    required this.parentFormKey,
     required this.show,
     required this.view, 
     required this.schema,
@@ -140,14 +143,14 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
           } catch (e) {}
             actions.add(ButtonWidget( method: "post", 
-                  text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true));
+                  text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true, avoidConsent: true,));
           }
           try {
             TranslateConstants.publish = await getOnFlow(TranslateConstants.publish);
           } catch (e) {}
           if (widget.view.items.isNotEmpty && widget.view.items[0].isDraft) {
             actions.add(ButtonWidget(method: "put",
-              text: TranslateConstants.publish.toUpperCase(), color: Colors.grey, explicitDraft: true));
+              text: TranslateConstants.publish.toUpperCase(), color: Colors.grey, explicitDraft: true, avoidConsent: false));
           }
           
           try {
@@ -158,13 +161,18 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             text: (!widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish
                 : TranslateConstants.update).toUpperCase(), 
                 // ignore: use_build_context_synchronously
-            color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft));
+            color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
+            avoidConsent: true));
         }
         if (widget.view.actions.contains("delete") && !widget.view.isEmpty) {
           try {
             TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
           } catch (e) {}
-          actions.add(ButtonWidget(method: "delete", text: (TranslateConstants.delete).toUpperCase(), color: Colors.red));
+          actions.add(ButtonWidget(
+            method: "delete", 
+            text: (TranslateConstants.delete).toUpperCase(), 
+            color: Colors.red, 
+            avoidConsent: true));
         }
       }   
       widgets.add( 

@@ -206,6 +206,7 @@ class GridWidgetState extends State<GridWidget> {
         isEnum : widget.isEnum, 
         cells: columns.map<GridCell>((column) {
         return GridCell( 
+          dataRef: mapped.dataRef,
           schemaID: mapped.schemaID,
           isNew: mapped.isNew,
           schemaField: mapped.schema[column.columnName],

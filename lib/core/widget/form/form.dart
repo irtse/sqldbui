@@ -27,18 +27,19 @@ class DataFormWidget extends StatefulWidget {
   bool detectChange = false;
   String superFormSchemaName;
   Map<String, dynamic> cacheForm = {};
-  bool scroll, subForm, subSubForm, isSplitted;
+  bool scroll, subForm, subSubForm, isSplitted, noTitle;
   List<DataFormWidget> wrappers = <DataFormWidget>[];
   Map<String, List<DataFormWidget>> oneToManiesForm = {};
   GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   GlobalKey<FormularyHeaderWidgetState> headerKey = GlobalKey<FormularyHeaderWidgetState>();
   Map<DataFormWidget, OneToManyState> oneToManiesStateForm = <DataFormWidget, OneToManyState>{};
-  List<GlobalKey<SubFormularyWidgetState>>wrappersGlobalKey = <GlobalKey<SubFormularyWidgetState>>[];
-
+  List<GlobalKey<FormWidgetState>>wrappersGlobalKey = <GlobalKey<FormWidgetState>>[];
+  
   int subMenuIndex = 0;
   final formKey = GlobalKey<FormState>();
   DataFormWidget ({ super.key, 
     this.view, 
+    this.noTitle = false,
     this.scroll = true, 
     this.subForm = false, 
     this.subSubForm = false,
@@ -51,14 +52,7 @@ class FormWidgetState extends State<DataFormWidget> {
     model.Workflow? workflow;
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
-      return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
+    try{
       newDropDownValue = {};
       searchCtrl = {};
 
@@ -87,8 +81,8 @@ class FormWidgetState extends State<DataFormWidget> {
           component: widget, isEmpty: widget.view?.isEmpty ?? false, relatedDatas: refItem.dataPath)); 
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         
-      
         widget.cacheForm = newCacheEntry;
+
         switch (widget.subMenuIndex) {
           case 0: 
           GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
@@ -136,13 +130,18 @@ class FormWidgetState extends State<DataFormWidget> {
                   : BorderRadius.all(Radius.circular(5))
               ),
               height: 40, width: subMenu.length == widget.subMenuIndex ? 190 : 180,  
-              child: Center( child: Text((await getOnFlow(menu)).toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle( 
+              child: Center( child: FutureBuilder(future: getOnFlow(menu), builder: (a,s) {
+                if (s.data != null) {
+                  return Text(s.data!.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle( 
                 // ignore: use_build_context_synchronously
-                color: subMenu.length == widget.subMenuIndex ? Theme.of(context).primaryColor : Colors.grey)) )),
+                color: subMenu.length == widget.subMenuIndex ? Theme.of(context).primaryColor : Colors.grey));
+                }
+                return Container();
+              }))),
             )
           );
       }
-        if (!widget.scroll) {
+      if (!widget.scroll) {
           if (widget.subSubForm) {
             return Container( 
               padding: EdgeInsets.only(top: 20),
@@ -155,15 +154,15 @@ class FormWidgetState extends State<DataFormWidget> {
             ]));
           } else {
             return Container( 
-              padding: EdgeInsets.symmetric(vertical: 20),
-              margin: EdgeInsets.only(left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0),
+              padding: EdgeInsets.only(top: 20, bottom: 10),
+              margin: EdgeInsets.only(left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0, bottom: 20),
               decoration: BoxDecoration(
                 boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ],
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(widget.subForm ? 10 : 0))
               ),
               child: Column( children: [
-                FormularyHeaderWidget(
+                widget.noTitle ? Container() : FormularyHeaderWidget(
                   key: widget.headerKey,
                   show: show,
                   schema: schema,
@@ -171,6 +170,7 @@ class FormWidgetState extends State<DataFormWidget> {
                   view: widget.view!,
                   workflow: workflow,
                   subForm: widget.subForm,
+                  parentFormKey: widget.key as GlobalKey<FormWidgetState>,
                   canUpdate: widget.view!.actions.contains("put") && widget.view!.actions.contains("delete"),
                 ),
                 fields.isEmpty && content == null ? EmptyFormularyWidget() : content!
@@ -192,8 +192,12 @@ class FormWidgetState extends State<DataFormWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end, children: [
                     Row(children:[Container( margin: EdgeInsets.only(top: 20, left: 30, bottom: 5), 
-                    child: Text(
-                      (await getOnFlow(TranslateConstants.formularyMenu)).toUpperCase()))]),
+                    child: FutureBuilder(future: getOnFlow(TranslateConstants.formularyMenu), builder: (a,s) {
+                      if (s.data != null) {
+                        return Text(s.data!.toUpperCase(), overflow: TextOverflow.ellipsis);
+                      }
+                      return Container();
+                    }))]),
                     ...( widget.view!.isEmpty ? [] : subMenu)
                   ])
               ),
@@ -227,19 +231,22 @@ class FormWidgetState extends State<DataFormWidget> {
                 child: SingleChildScrollView(  scrollDirection: Axis.vertical,  
                   child : Column( children: [
                     Padding( padding: const EdgeInsets.only(top: 25, bottom: 5),
-                      child: Text((await getOnFlow(currentView?.schemaName.replaceAll("db", "") ?? "")).toUpperCase(),
-                        // ignore: use_build_context_synchronously
-                        style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),
-                      )), 
+                      child: FutureBuilder(future: getOnFlow(currentView?.schemaName.replaceAll("db", "") ?? ""), builder: (a,s) {
+                      if (s.data != null) {
+                        return Text(s.data!.toUpperCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 20),);
+                      }
+                      return Container();
+                    })),
                     Padding( padding: const EdgeInsets.only(bottom: 60), child: content),
                 ] )
               ))
             ] : [])
           ]), 
-          FormularyHeaderWidget(
+          widget.noTitle ? Container() : FormularyHeaderWidget(
                 key: widget.headerKey,
                 show: show,
                 schema: schema,
+                parentFormKey: widget.key as GlobalKey<FormWidgetState>,
                 refItem: refItem,
                 view: widget.view!,
                 workflow: workflow,
@@ -248,6 +255,7 @@ class FormWidgetState extends State<DataFormWidget> {
               ), 
           FormularyActionBarWidget(
             isFirst: int.parse(workflow?.current ?? "0") <= 1,
+            cacheForm: widget.cacheForm,
             show: show, 
             schema: schema,
             component: this, 
@@ -258,6 +266,11 @@ class FormWidgetState extends State<DataFormWidget> {
         ]);
     }
     return EmptyFormularyWidget();
+    } catch(e,s) {
+      print(s);
+      print(e);
+      return Container();
+    }
   }
 
    Widget? getSynthesis(String synthesisPath, double height) {

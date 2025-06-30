@@ -1,4 +1,5 @@
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/form/widget/empty_formulary.dart';
 import 'package:sqldbui2/main.dart';
@@ -41,27 +42,35 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                   for (var data in snap.data!.data!) {
                     if (data.workflow != null && widget.component.reloadWorkflow && !widget.component.subForm ) { 
                       widget.component.reloadWorkflow = false;
-                      Future.delayed(const Duration(seconds: 1), () { widget.component.headerKey.currentState?.setState(() { 
-                        widget.component.headerKey.currentState?.widget.workflow = data.workflow; 
-                      }); } );
+                      Future.delayed(const Duration(seconds: 1), () { 
+                        widget.component.headerKey.currentState?.setState(() { 
+                          widget.component.headerKey.currentState?.widget.workflow = data.workflow; 
+                        }); 
+                      } ); 
                     }
                     var newView = model.View(
                       name: TranslateConstants.dataFormulary,
                       workflow: data.workflow,
-                      linkPath: data.linkPath, schema: data.schema, order: data.order, 
+                      linkPath: data.linkPath, 
+                      schema: data.schema, 
+                      order: data.order, 
                       actionPath: data.actionPath.contains(data.schemaName) ? data.actionPath : data.linkPath,
                       actions: data.actions, 
                       readOnly: data.readOnly, 
                       schemaName: data.schemaName, 
                       consents: data.consents,
+                      triggers: data.triggers,
                       items: data.items.isNotEmpty && !widget.component.view!.isEmpty ? data.items : <model.Item>[model.Item()] 
                     );
                     newView.isEmpty = widget.component.view!.isEmpty;
-                    GlobalKey<SubFormularyWidgetState> newViewKey = GlobalKey<SubFormularyWidgetState>();
+                    GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
                     var w = DataFormWidget(key: newViewKey, view: newView, scroll: false, isSplitted: false, 
                                            subForm: true, subSubForm: widget.component.subForm);
                     widget.component.wrappersGlobalKey.add(newViewKey);
                     widget.component.wrappers.add(w);
+                    Future.delayed(Duration(seconds: 1), () {
+                      globalActionBar.currentState?.setState(() {});
+                    });
                     return w;
                   }
                 }
@@ -73,6 +82,6 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
               width: currentWidth - menuSize - 80 > 0 ? currentWidth - menuSize - 80 : 0,
               child: Padding( padding: const EdgeInsets.only(bottom: 30), child: w)));
     }  
-    return Column( children: additionnal);   
+    return Column( children: additionnal );   
   }
 }

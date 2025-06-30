@@ -49,11 +49,19 @@ class ActionBarState extends State<ActionBarWidget> {
       return Container();
     });
   }
+
+  List<model.Trigger> getTriggers(GlobalKey<FormWidgetState> form) {
+    var triggers = form.currentState?.widget.view?.triggers.where( (e) => e.mode == "mail").toList() ?? [];
+    form.currentState?.widget.wrappersGlobalKey.forEach( (f) {
+      triggers.addAll(getTriggers(f));
+    });
+    return triggers;
+  }
   Future<Widget> futureBuild(BuildContext context) async{
     try {
       List<Widget> actions = <Widget>[];
       if (viewID != null && widget.view != null) {
-        /*if (widget.view!.isList) {
+        if (widget.view!.isList) {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
             translation = !translation;
@@ -61,30 +69,40 @@ class ActionBarState extends State<ActionBarWidget> {
             globalMainViewKey.currentState?.setState(() { });
           }, false));
         } else if (currentView?.items.isNotEmpty ?? false) { 
-          if (currentView != null && !currentView!.readOnly) {
-            if (currentView!.actions.contains("put") && !currentView!.isEmpty 
-            && (currentView!.triggers.where( (e) => e.mode == "mail") ).isNotEmpty) {
-              var triggers = currentView!.triggers.where( (e) => e.mode == "mail").toList();
-              actions.add(getIconOffset((await getOnFlow(TranslateConstants.sendMail)).toLowerCase(), 
-              Icons.mail, 20, () {
-                showDialog(
-                  context: context, 
-                  barrierDismissible: false,
-                  builder: (builder) => TriggerBoxWidget(
-                        triggers: triggers, isCached: false)
-                );
-              }, false));
+          if (mainForm.currentState != null && !currentView!.readOnly) {
+            if (currentView!.actions.contains("put") && !currentView!.isEmpty) {
+              var triggers = getTriggers(mainForm);
+              if (triggers.isNotEmpty) {
+                actions.add(getIconOffset((await getOnFlow(TranslateConstants.sendMail)).toLowerCase(), 
+                  Icons.mail, 20, () {
+                    showDialog(
+                      context: context, 
+                      barrierDismissible: false,
+                      builder: (builder) => TriggerBoxWidget(
+                            triggers: triggers, isCached: false)
+                    );
+                  }, false));
+              }
             }
-          }*/
-          if (!(currentView?.isEmpty ?? false) && !widget.view!.isList && (currentView?.items.isNotEmpty ?? false)) {
-          actions.add(Padding( padding: EdgeInsets.only(right: 10),
+          }
+        }
+      if (!(currentView?.isEmpty ?? false) && !widget.view!.isList && (currentView?.items.isNotEmpty ?? false)) {
+          actions.add(Padding( padding: EdgeInsets.only(left: 20),
                 child: LinkBoxWidget(
+                  isDelete: true,
                   color: Colors.white,
                   path: "@${currentView?.schemaID}:${currentView?.id}",
                   sharing: currentView?.items.first.sharing,
                 )));
-          }
+          actions.add(Padding( padding: EdgeInsets.only(right: 10),
+                child: LinkBoxWidget(
+                  isDelete: false,
+                  color: Colors.white,
+                  path: "@${currentView?.schemaID}:${currentView?.id}",
+                  sharing: currentView?.items.first.sharing,
+                )));
         }
+      }
       if (widget.view != null && (currentWidth - menuSize) > 650) {
         if (widget.view!.shortcuts.keys.length == 1) {
           var t = await getOnFlow(widget.view!.shortcuts.keys.first);
@@ -182,12 +200,14 @@ class ActionBarState extends State<ActionBarWidget> {
       if (viewID != null) { path += "$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
       var controller = TextEditingController(text: path);
       if (widget.view != null && globalLoading) { 
-        Future.delayed(const Duration(seconds: 1), () { globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); }); 
+        Future.delayed(const Duration(seconds: 1), () { 
+          globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); 
+        }); 
       }
       List<Widget> rows = [];
       if (currentWidth > 700) {
         List<DropdownItem<String>> items = [];
-        for (var v in views) {
+        for (var v in pageViews) {
           var i = items.where( (e) => e.value == "${v.id}");
           if (i.isEmpty) {
             items.add(DropdownItem<String>(selected: viewID?.replaceAll("#", "") == "${v.id}" && (subViewID ?? "") == "",

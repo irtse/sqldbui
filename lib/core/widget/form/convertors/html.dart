@@ -115,7 +115,7 @@ class HTMLState extends State<HTMLWidget> {
                 scrollController: _editorScrollController,
                 controller: _controller,
                 configurations: QuillEditorConfigurations(
-                  placeholder: 'Start writing your notes...',
+                  placeholder: (await getOnFlow('Start writing your notes...')).toLowerCase(),
                   padding: const EdgeInsets.all(16),
                   embedBuilders: kIsWeb ? FlutterQuillEmbeds.editorWebBuilders() : FlutterQuillEmbeds.editorBuilders(),
                 ),
@@ -129,5 +129,6 @@ class HTMLState extends State<HTMLWidget> {
     var html = DeltaToHTML.encodeJson(deltaJson);
     widget.component?.widget.detectChange = true;
     widget.form[widget.name] = html;
+    print(widget.form);
   }
 }

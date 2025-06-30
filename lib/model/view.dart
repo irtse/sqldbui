@@ -24,6 +24,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     this.autoFill,
     this.translatable = false,
     this.linkID,
+    this.hidden = false,
   });
   bool translatable;
   dynamic autoFill;
@@ -40,12 +41,14 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
   String actionPath;
   List<dynamic> actions;
   String? linkID;
+  bool hidden;
   Map<String, SchemaField> schema;
 
   @override Map<String, dynamic> serialize() => { };
 
   @override SchemaField deserialize(Map<String, dynamic> json) {
     return SchemaField(
+    hidden: json.containsKey("hidden") && json["hidden"] != null ? bool.parse("${json["hidden"]}") : false,
     linkID: json.containsKey("link_id") && json["link_id"] != null ? "${json["link_id"]}" : null,
     translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : false,
     autoFill: json.containsKey("autofill") && json["autofill"] != null ? json["autofill"] : null,
@@ -97,16 +100,22 @@ class Sharing extends SerializerDeserializer<Sharing> {
     this.body = const {},
     this.sharePath,
     this.sharedWithPath,
+    this.additionnalBool = const [],
+    this.additionnalDate = const [],
   });
   Map<String, dynamic> shallowPath;
   Map<String, dynamic> body;
   String? sharedWithPath;
   String? sharePath;
+  List<dynamic> additionnalBool;
+  List<dynamic> additionnalDate;
 
   @override Map<String, dynamic> serialize() => {};
 
   @override deserialize(Map<String, dynamic> json) {
     return  Sharing(
+      additionnalDate: json.containsKey("additionnal_date") && json["additionnal_date"] != null ? json["additionnal_date"] : [], 
+      additionnalBool: json.containsKey("additionnal_bool") && json["additionnal_bool"] != null ? json["additionnal_bool"] : [], 
       sharedWithPath: json.containsKey("shared_with_path") && json["shared_with_path"] != null ? json["shared_with_path"] : null, 
       shallowPath: json.containsKey("shallow_path") && json["shallow_path"] != null ? json["shallow_path"] : <String,dynamic>{}, 
       body: json.containsKey("body") && json["body"] != null ? json["body"] : <String,dynamic>{}, 
@@ -134,6 +143,7 @@ class Item extends SerializerDeserializer<Item> {
     this.synthesisPath,
     this.commentsPath,
     this.news = false,
+    this.dataRef,
   });
   String schemaID;
   bool news;
@@ -148,12 +158,14 @@ class Item extends SerializerDeserializer<Item> {
   String? synthesisPath;
   Map<String,Shallowed> valuesShallow;
   Map<String,List<Shallowed>>valuesMany;
+  String? dataRef;
   String? commentsPath;
 
   @override Map<String, dynamic> serialize() => {};
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      dataRef: json.containsKey("data_ref") && json["data_ref"] != null ? "${json["data_ref"]}" : null,
       schemaID: json.containsKey("schema_id") && json["schema_id"] != null ? "${json["schema_id"]}" : "",
       news: json.containsKey("new") ? json["new"] : "",
       commentsPath: json.containsKey("comments_path") ? json["comments_path"] : "",

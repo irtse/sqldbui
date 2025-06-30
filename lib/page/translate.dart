@@ -86,10 +86,19 @@ class TranslateConstants {
   static String like = "similar to";
   static String notLike = "not similar to";
 
+  static String unshare = "cancel data sharing";
   static String share = "share data";
+
+  static String undelegate = "cancel data delegation";
+  static String delegate = "delegate data";
+
   static String pathToCopy = "navigation path for the browser :";
   static String shareToUser = "share to a user :";
   static String userShared = "user already shared :";
+
+  static String delegateToUser = "delegate to a user :";
+  static String userDelegated = "user already delegated :";
+
   static String successCopy = "successfully copied to clipboard";
 
   static String and = "and";
@@ -242,6 +251,10 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.userShared, to: TranslateConstants.lang).then( (e) => TranslateConstants.userShared = e.text.toLowerCase());
   translator.translate(TranslateConstants.shareToUser, to: TranslateConstants.lang).then( (e) => TranslateConstants.shareToUser = e.text.toLowerCase());
 
+  translator.translate(TranslateConstants.userDelegated, to: TranslateConstants.lang).then( (e) => TranslateConstants.userDelegated = e.text.toLowerCase());
+  translator.translate(TranslateConstants.delegateToUser, to: TranslateConstants.lang).then( (e) => TranslateConstants.delegateToUser = e.text.toLowerCase());
+
+
   translator.translate(TranslateConstants.savedFolder, to: TranslateConstants.lang).then( (e) => TranslateConstants.savedFolder = e.text.toLowerCase());
   translator.translate(TranslateConstants.allowedFormat, to: TranslateConstants.lang).then( (e) => TranslateConstants.allowedFormat = e.text.toLowerCase());
 
@@ -306,6 +319,12 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.valueFilterPlaceholder, to: TranslateConstants.lang).then( (e) => TranslateConstants.valueFilterPlaceholder = e.text.toLowerCase());
   translator.translate(TranslateConstants.like, to: TranslateConstants.lang).then( (e) => TranslateConstants.like = e.text.toLowerCase());
   translator.translate(TranslateConstants.notLike, to: TranslateConstants.lang).then( (e) => TranslateConstants.notLike = e.text.toLowerCase());
+  
+  translator.translate(TranslateConstants.undelegate, to: TranslateConstants.lang).then( (e) => TranslateConstants.undelegate = e.text.toLowerCase());
+  translator.translate(TranslateConstants.delegate, to: TranslateConstants.lang).then( (e) => TranslateConstants.delegate = e.text.toLowerCase());
+
+  translator.translate(TranslateConstants.unshare, to: TranslateConstants.lang).then( (e) => TranslateConstants.unshare = e.text.toLowerCase());
+
   translator.translate(TranslateConstants.share, to: TranslateConstants.lang).then( (e) => TranslateConstants.share = e.text.toLowerCase());
   translator.translate(TranslateConstants.pathToCopy, to: TranslateConstants.lang).then( (e) => TranslateConstants.pathToCopy = e.text.toLowerCase());
   translator.translate(TranslateConstants.successCopy, to: TranslateConstants.lang).then( (e) => TranslateConstants.successCopy = e.text.toLowerCase());

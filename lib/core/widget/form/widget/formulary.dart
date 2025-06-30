@@ -5,8 +5,6 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
-
 Map<Key, bool> formularyRef = {};
 // ignore: must_be_immutable
 class FormularyWidget extends StatefulWidget {
@@ -51,12 +49,13 @@ class FormularyWidget extends StatefulWidget {
   });
   @override FormularyWidgetState createState() => FormularyWidgetState();
 }
+var count = 0;
 class FormularyWidgetState extends State<FormularyWidget> {
     @override Widget build(BuildContext context) {
     try {
+      widget.component.widget.oneToManiesForm = {};
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
-
       for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
           if (widget.schema[fieldName] == null || ["id", "description"].contains(fieldName) ||
@@ -95,7 +94,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
               field.label, 
               field.description, 
               field.require, 
-              readOnly || (value != null && widget.view.isEmpty), 
+              readOnly || (value != null && widget.view.isEmpty) || fieldName == "state", 
               value == "" ? null : value, 
               mainUrl,
               url, 
@@ -111,20 +110,24 @@ class FormularyWidgetState extends State<FormularyWidget> {
               }
               return Container();
             });
-            if (![OneToManyWidget].contains(f.runtimeType) && widget.show) {
-              var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
+            if (!field.type.contains("onetomany") && widget.show) {
+              if (field.type.contains("manytomany") && readOnly) {
+                fields.add(f);
+              } else {
+                var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
                   width: field.type.contains("bool") ? 200 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : 40, child: f));
-              fields.add(w);
+                fields.add(w);
+              }
             }
-            if (([OneToManyWidget].contains(f.runtimeType) && widget.show) 
+            if ((field.type.contains("onetomany") && widget.show) 
             && !(widget.view.isEmpty && !widget.view.actions.contains("post"))) { 
-              bottomFields.add(
+              fields.add(
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 30, left: 30, right: 30), 
+                  padding: const EdgeInsets.only(bottom: 10, top: 10, left: 10, right: 10), 
                   child: Container( 
-                    decoration: BoxDecoration(  borderRadius: BorderRadius.circular(10), 
+                    decoration: BoxDecoration(  borderRadius: BorderRadius.circular(5), 
                       // ignore: use_build_context_synchronously
                       color: Theme.of(context).splashColor,
                     ), 
@@ -137,7 +140,6 @@ class FormularyWidgetState extends State<FormularyWidget> {
       for (var consent in widget.view.consents) {
         fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
       }
-      // widget.additionnalWidgets.add(getSynthesis(widget.refItem.synthesisPath ?? ""));
       if (widget.key != null) {
         formularyRef[widget.key!] = fields.length == widget.hideField.length;
       }

@@ -18,9 +18,10 @@ class OneToManyWidget extends StatefulWidget {
   final String? url;
   final String type;
   final String label;
+  List<DataFormWidget> filtered = [];
   var isFilled = true;
-  var flashed = <int, DataFormWidget>{};
   final FormWidgetState? component;
+  List<String> deleted = [];
   OneToManyWidget ({ super.key, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
                       required this.require, required this.type, required this.url, 
@@ -31,23 +32,18 @@ class OneToManyWidget extends StatefulWidget {
 }
 class OneToManyState extends State<OneToManyWidget> {
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     var schema =  widget.component?.widget.view!.schema;
     var scheme = schema?[widget.name];
+
     if (scheme == null) { return Container(); }
-    var filtered = widget.component?.widget.oneToManiesForm[widget.name]?.where((element) => element.view!.name.contains(widget.label)) ?? [];
+    widget.filtered = (widget.component?.widget.oneToManiesForm[widget.name] ?? []).where((e) {
+      return (e.view?.id ?? - 1) < 0;
+    }).toList();
     if (widget.value != null) { // TEST => nvnv
       return FutureBuilder<APIResponse<model.View>>(
         future: APIService().get(widget.value, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
-          return SubOneToManyWidget(schemaName: widget.schemaName, 
+        return SubOneToManyWidget(schemaName: widget.schemaName, 
           name: widget.name, 
           datas: snap.data?.data, 
           readOnly: widget.readOnly, 
@@ -58,23 +54,29 @@ class OneToManyState extends State<OneToManyWidget> {
           url: widget.url, 
           state: this,
           scheme: scheme,
-          filtered: filtered.toList(),
+          filtered: widget.filtered,
           component: widget.component);
       });
     }
-    return Column(children: [Row(children: await controlButtons(widget.readOnly, widget.canPost, scheme)), ...filtered],);
+    return Column(children: [
+      FutureBuilder(future: controlButtons(widget.readOnly, widget.canPost, scheme), builder: (a,s) {
+        if (s.data != null) {
+          return Row(children: s.data! );
+        }
+        return Row(children: [] );
+      }), ...widget.filtered],);
   }
 
   Future<List<Widget>> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) async {
-    var val = "${"related"} ${widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}";
+    var val = widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     if (widget.translatable) {
       val = await getOnFlow(val);
     }
     List<Widget> rows = [Padding( 
-      padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 20, bottom: !readOnly && canPost ? 0 : 20), 
+      padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10), 
       child: Text("$val ${widget.require ? '*' : ''}:"))]; 
     if (!readOnly && (canPost || widget.component?.widget.view != null) || (widget.component?.widget.view?.isEmpty ?? false)) {
-        var filtered = widget.component?.widget.oneToManiesForm[widget.name]?.where((element) => element.view!.name.contains(widget.label)) ?? [];
+        var filtered = widget.component?.widget.oneToManiesForm[widget.name] ?? [];
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
           widget.component?.widget.detectChange = true;
           var mapped = <String, dynamic>{};
@@ -83,31 +85,31 @@ class OneToManyState extends State<OneToManyWidget> {
             mapped[fieldName] = null; 
             order.add(fieldName);
           }
-          var newView = model.View(name: "${widget.label} ${filtered.length + 1}", actions: scheme.actions, actionPath: scheme.actionPath,
-                                  schema: scheme.schema, order: order, isEmpty: true, items: <model.Item>[model.Item(values: mapped)]);
+          var newView = model.View(
+            name: "${widget.label} ${(widget.component?.widget.oneToManiesForm[widget.name] ?? []).length + 1}", 
+            actions: scheme.actions, actionPath: scheme.actionPath,
+            schema: scheme.schema, order: order, isEmpty: true, 
+            items: <model.Item>[model.Item(values: mapped)]);
           widget.component?.widget.detectChange = true;
           setState(() { 
             var k = GlobalKey<FormWidgetState>();
             if (widget.component?.widget.oneToManiesForm[widget.name] == null) {
               widget.component?.widget.oneToManiesForm[widget.name] = [];
             }
-            widget.component?.widget.oneToManiesForm[widget.name]!.add(DataFormWidget(key: k, view: newView, scroll: false, subForm: true, 
-                                                                       superFormSchemaName: widget.schemaName)); 
-            if ( (widget.component?.widget.oneToManiesForm[widget.name] ?? []).isNotEmpty) {
-              widget.component!.widget.oneToManiesStateForm[widget.component!.widget.oneToManiesForm[widget.name]!.last]=this; 
-            }
+            widget.component?.widget.oneToManiesForm[widget.name]!.add( 
+              DataFormWidget(key: k, noTitle: true, view: newView, scroll: false, subForm: true, 
+              superFormSchemaName: widget.schemaName)); 
           });
         }));
-        if (filtered?.isNotEmpty ?? false) {
-          rows.add(IconButton(icon: const Icon(Icons.remove), onPressed: () { 
+        if (filtered.isNotEmpty) {
+          rows.add(IconButton(icon: const Icon(Icons.remove), onPressed: () {
             widget.component?.widget.detectChange = true;
             setState(() { 
               var val = widget.component?.widget.oneToManiesForm[widget.name]?.where((element) => element.view!.name.contains(widget.label)) ?? [];
               if (val.isNotEmpty) {
                 widget.component?.widget.oneToManiesForm[widget.name]?.remove(val.last); 
-                try { widget.component?.widget.oneToManiesStateForm.remove(val.last); } catch(e) { /* EMPTY and proud to be */ } 
               }
-          });},));
+          });}));
         }
     }
     return rows;
@@ -142,24 +144,19 @@ class SubOneToManyWidget extends StatefulWidget {
 }
 class SubOneToManyState extends State<SubOneToManyWidget> {
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> items = <Widget>[];
     if (widget.datas != null) {
-      for (var data in widget.datas!) {
+      for (var (i, data) in widget.datas!.indexed) {
+        if (widget.state.widget.deleted.contains(data.name.toString())) {
+          continue;
+        }
         widget.readOnly = widget.readOnly || !data.actions.contains("put");
         widget.canPost = data.actions.contains("post");
         for (var item in data.items) {
           item.readonly = widget.readOnly;
           var view = model.View(
             id: int.parse(item.values["id"]), 
-            name: data.name, 
+            name: "${widget.label} ${(widget.component?.widget.oneToManiesForm[widget.name] ?? []).length + 1}", 
             readOnly: widget.readOnly,
             workflow: data.workflow, 
             actions: data.actions, 
@@ -170,35 +167,57 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
             isEmpty: false, 
             items: <model.Item>[item]
           );
-          var dataForm = widget.flashed.containsKey(int.parse(item.values["id"])) ? widget.flashed[int.parse(item.values["id"])]! 
-            : DataFormWidget(view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
-          widget.flashed[dataForm.view!.id] = dataForm;
+          var k = GlobalKey<FormWidgetState>();
+          var dataForm = DataFormWidget(key: k, noTitle: true, view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
 
           if (!widget.readOnly && data.actions.contains("delete")) {
             var w = Stack( children: [ 
               dataForm,
-              Positioned(top: 10,  right: 100,  child: IconButton(onPressed: () {
+              Positioned(top: 30,  right: 30,  child: IconButton(onPressed: () {
                   showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete occurency", validate: () {
                   widget.component?.widget.detectChange = true;
-                  setState(() {
-                    widget.component?.widget.oneToManiesForm[widget.name]?.removeWhere( (e) => e.view?.id == view.id);
-                  });
+                  widget.datas?.removeAt(i);
+                  widget.state.widget.deleted.add(view.name.toString());
+                  widget.component?.widget.oneToManiesForm[widget.name]?.removeWhere( (e) => e.view?.name == view.name);
+                  setState(() { });
                 })); 
               }, 
               icon: const Icon(Icons.delete, color: Colors.grey)))
             ]);
             items.add(w);
-          } else {  items.add(dataForm); }
+          } else {  
+            items.add(dataForm); 
+          }
           if (widget.component?.widget.oneToManiesForm[widget.name] == null) {
             widget.component?.widget.oneToManiesForm[widget.name] = [];
           }
-          widget.component?.widget.oneToManiesForm[widget.name]!.add(dataForm);
-        }
+          if ((widget.component?.widget.oneToManiesForm[widget.name]?.where(
+            (e) => e.view?.name == dataForm.view?.name 
+          ) ?? []).isEmpty) {
+            if ((widget.component?.widget.oneToManiesForm[widget.name]?.where((e) {
+              return e.view?.id == dataForm.view?.id;
+            }) ?? []).isEmpty) {
+              widget.component?.widget.oneToManiesForm[widget.name]!.add(dataForm);
+            }
+          }
+        }      
       }
     }
-    return Column(children: [ Row(children: 
-      await widget.state.controlButtons(widget.readOnly, widget.canPost, widget.scheme)), ...items, ...widget.filtered
+    try {
+    return Column(children: [ 
+      FutureBuilder(future: widget.state.controlButtons(widget.readOnly, widget.canPost, widget.scheme), builder: (a,s) {
+        if (s.data != null) {
+          return Row(children: s.data! );
+        }
+        return Row(children: [] );
+      }),
+      ...items, ...widget.filtered
     ]);
+    } catch(e, s) {
+      print(e);
+      print(s);
+      return Container();
+    }
   }
 
 }

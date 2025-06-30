@@ -12,6 +12,7 @@ import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 // ignore: must_be_immutable
 class GridCell {
+  String? dataRef;
   String schemaID;
   double height = 100; 
   double width; 
@@ -31,6 +32,7 @@ class GridCell {
   bool translatable = true;
   model.SchemaField? schemaField;
   GridCell({ 
+    required this.dataRef,
     required this.schemaID,
     required this.schemaField,
     required this.translatable,
@@ -56,6 +58,7 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   double maxheight;
   bool translatable = true;
   bool isNew = false;
+  String? dataRef;
 
   GridCell cell;
   model.Shallowed? shal;
@@ -64,6 +67,7 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
 
   GridCellWidget ({ 
     super.key, 
+    required this.dataRef,
     required this.isNew,
     required this.shal, 
     required this.cell,
@@ -150,7 +154,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
         mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 
         onTap: () {
-          if (widget.cell.type.contains("enum") || (isEditMode[viewID] ?? false) || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
+          if ((isEditMode[viewID] ?? false) || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
           try {
             List<model.View> v = [];
             for (var cat in categories.values) { v = cat.where( (v) => "${v.id}" == viewID?.substring(1)).toList(); }
@@ -159,7 +163,11 @@ class GridCellWidgetState extends State<GridCellWidget> {
             if (v.isNotEmpty && widget.isNew) { v.first.news -= 1; }
           } catch (e) { /* */ }
           globalMenuKey.currentState!.setState(() {});
-          AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
+          if (widget.dataRef != null) {
+            AppRouter.navigateTo(widget.dataRef!);
+          } else {
+            AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
+          } 
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
         child: Center(child: wid )))]);

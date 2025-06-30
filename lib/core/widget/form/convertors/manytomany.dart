@@ -46,7 +46,8 @@ class ManyToManyState extends State<ManyToManyWidget> {
     var actions = widget.component?.widget.view?.actions ?? currentView?.actions ?? [];
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
-    var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || (mainForm.currentState?.widget.view?.readOnly ?? false);
+    var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) 
+    || (mainForm.currentState?.widget.view?.readOnly ?? false);
     if (readOnly) {
       List<Container> tags = <Container>[];
       if (widget.value != null && widget.value is List) {
@@ -68,7 +69,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
                   backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor),
                   mouseCursor: WidgetStateProperty.all(MouseCursor.uncontrolled),
                 ),
-                child: Text(str, style: const TextStyle(color: Colors.white))
+                child: Text(str, style: const TextStyle(fontSize: 12, color: Colors.white))
               )
             )
           );
@@ -81,7 +82,8 @@ class ManyToManyState extends State<ManyToManyWidget> {
       return Padding(padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),child: Column(children: [
         Row(children: [Text("$str${widget.require ? '*' : ''}:", 
             style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
-        Row(children: [Wrap(children: tags)]) ]),);
+        Wrap(children: tags) 
+      ]));
     } else if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
@@ -94,7 +96,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
             }
           } catch(e) {}
         }
-        print("IDS $ids");
         if (ids.isNotEmpty) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), true, null), 
@@ -219,6 +220,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               }
             }
           } else {
+            widget.form[widget.name] = [];
             for (var val in widget.value ?? []) {
               val = val as model.Shallowed;
               if (val.id == null) {
@@ -228,6 +230,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 
               } else if (val.id == item.id) {
                 select = true;
+                widget.form[widget.name].add(val.serialize());
                 break;
               }
             }
@@ -245,9 +248,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
           }
         } catch(e) {}
         items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v, selected: select));
-        for (var val in (widget.value ?? []) as List<dynamic>) {
-          if (val.id == item.id) { widget.form[widget.name].add(ser); }
-        }
       }
     }
     return MultiDropdown<Map<String, dynamic>>(
@@ -271,12 +271,13 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         searchEnabled: max > 10,
                         max: max,
                         changeFunction: (String value) async {
-                          if (value == "") {
-                            return;
-                          }
-                          var filters = Filters();
-                          filters.add("name", Filter(value: value, column: "name"));
-                          load(0, 10, APIService().getFilter(widget.url ?? "", true, filters), value, items);
+                            if (value == "") {
+                              return;
+                            }
+                            var filters = Filters();
+                            filters.add("name", Filter(value: value, column: "name"));
+                            load(0, 10, APIService().getFilter(widget.url ?? "", true, filters), value, items);
+                          
                         },
                         chipDecoration: ChipDecoration(
                           deleteIcon: Icon(Icons.close, size: 15, color: Colors.white),
@@ -344,8 +345,14 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           return null;
                         },
                         onSelectionChange: (values) {
+                          if (values.isEmpty) {
+                            return;
+                          }
                           widget.component?.widget.detectChange = true;
-                          widget.form[widget.name]=values;
+                          if (widget.form[widget.name] == null) {
+                            widget.form[widget.name] = [];
+                          }
+                          widget.form[widget.name].add(values[0]);
                         },
                       );
   }
@@ -353,31 +360,36 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
   Future<void> load(int start, int interval, String filter, String value, List<DropdownItem<Map<String, dynamic>>> items) async {
     if (filter == "") { return; }
     var found = false;
-    var e = await APIService().get<model.Shallowed>("${widget.url}$filter&offset=$start&limit=$interval", filter != "", null);
-    if (e.data != null) {
-      for (var item in e.data!) {
-        if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isEmpty) {
-          found = true;
-          var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-          try {
-            if (widget.translatable || item.translatable) {
-              v = await getOnFlow(v);
-              if (v.toUpperCase() == v) {
-                v = v.toUpperCase();
-              } else {
-                v = v.toLowerCase();
+    try {
+      var e = await APIService().get<model.Shallowed>("${widget.url}$filter&offset=$start&limit=$interval", filter != "", null);
+      if (e.data != null) {
+        for (var item in e.data!) {
+          if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isEmpty) {
+            found = true;
+            var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+            try {
+              if (widget.translatable || item.translatable) {
+                v = await getOnFlow(v);
+                if (v.toUpperCase() == v) {
+                  v = v.toUpperCase();
+                } else {
+                  v = v.toLowerCase();
+                }
               }
-            }
-          } catch(e) {}
-          items.add(DropdownItem<Map<String, dynamic>>(
-            value: item.serialize(), label: v, selected: false));
-          ctrls.addItem(items.last);
+            } catch(e) {}
+            items.add(DropdownItem<Map<String, dynamic>>(
+              value: item.serialize(), label: v, selected: false));
+            ctrls.addItem(items.last);
+          }
         }
+      } 
+      if (ctrls.isOpen && found) {
+        ctrls.closeDropdown();
+        ctrls.openDropdown(value, widget.label);
       }
-    } 
-    if (ctrls.isOpen && found) {
+    } catch(e) {
       ctrls.closeDropdown();
-      ctrls.openDropdown(value, widget.label);
+        ctrls.openDropdown(value, "");
     }
   }
 }

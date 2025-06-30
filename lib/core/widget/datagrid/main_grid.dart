@@ -49,6 +49,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
         } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
         if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
         datas.add(Value(
+          dataRef: item.dataRef,
           schemaID: item.schemaID,
           schema: schema,
           isNew: item.news,
@@ -162,11 +163,12 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     }
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
+      
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description"  && !type.contains("many") && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
-      return ok;
+      return !(schema[f]?.hidden ?? false) && (ok);
     }).toList();
     if (filterTempID[viewID] ?? false) {
       o = ["id", ...o];

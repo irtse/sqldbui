@@ -84,7 +84,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             widget.url = null;
             selectedGrid = [];
             unselectedGrid = [];
-            print("${currentView?.id} $viewID");
             return ViewWidget( view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, views: widget.views);
         });
     } 
@@ -147,17 +146,14 @@ class ViewWidgetState extends State<ViewWidget> {
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 
         DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view,);
-       if (widget.stillLoading) {
-        Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
-      }
+        if (widget.stillLoading) {
+          Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
+        }
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 40), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, grid: w, gridKey: globalGridKey), ...comps]);
       } else if (widget.view!.items.isNotEmpty) { 
         DataFormWidget w =  DataFormWidget(key: mainForm, view: widget.view);
-        if (widget.stillLoading) {
-          Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
-        }
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 25), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, form: w ), ...comps] ); 
@@ -195,7 +191,7 @@ class ViewWidgetState extends State<ViewWidget> {
 }
 
 class LoaderMainViewWidget extends StatefulWidget{
-  const LoaderMainViewWidget ({ super.key,});
+  const LoaderMainViewWidget ({ super.key });
   @override LoaderViewWidgetState createState() => LoaderViewWidgetState();
 }
 class LoaderViewWidgetState extends State<LoaderMainViewWidget> {

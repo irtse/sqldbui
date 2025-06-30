@@ -235,7 +235,7 @@ class _SearchField extends StatelessWidget {
     }
     if ((searchCtrl[label]?.text ?? "") != "" && (search[label] ?? "") == "") {
       Future.delayed(Duration(seconds: 1), () {
-        search[label]=searchCtrl[label]!.text;
+        search[label]=searchCtrl[label]?.text ?? "";
         onChanged(search[label]!);
       });
     }
@@ -254,7 +254,7 @@ class _SearchField extends StatelessWidget {
           suffixIcon: decoration.searchIcon,
         ),
         onChanged: (String v) {
-          search[label] = searchCtrl[label]!.text;
+          search[label] = searchCtrl[label]?.text ?? "";
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
               if (searchCtrl[label]?.text == search[label] && !(alreadySearch[label]?.contains(search[label]) ?? false)) {
@@ -271,8 +271,8 @@ class _SearchField extends StatelessWidget {
       ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
       child: InkWell( 
         onTap: () {
-          if (searchCtrl[label]!.text != "") {
-            function!(searchCtrl[label]!.text);
+          if ((searchCtrl[label]?.text ?? "") != "") {
+            function!(searchCtrl[label]?.text ?? "");
           }
         },
         child: Container(

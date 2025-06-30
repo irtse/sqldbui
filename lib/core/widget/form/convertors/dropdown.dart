@@ -195,7 +195,7 @@ class DropDownState extends State<DropDownWidget> {
         future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
            return FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", firstAPI, null), 
+            future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", true, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
               if (snap.data?.data != null) {
                 return SubDropDownWidget(
@@ -225,7 +225,7 @@ class DropDownState extends State<DropDownWidget> {
         });
     }
     return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.mainUrl!, firstAPI, null), 
+        future: APIService().get(widget.mainUrl!, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           if (snap.data?.data != null) {
             return SubDropDownWidget(
@@ -298,10 +298,12 @@ class SubDropDownState extends State<SubDropDownWidget> {
   MultiSelectController<String> ctrls = MultiSelectController<String>();
   
   Future<Widget> futureBuild(BuildContext context) async {
+    try {
     List<DropdownItem<String>> items = [];
     int max = 0;
+    var l = widget.datas.toList();
     ctrls = MultiSelectController<String>();
-    for (var item in widget.datas) {
+    for (var item in l) {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
       v = v.replaceAll("''", "'");
@@ -315,11 +317,12 @@ class SubDropDownState extends State<SubDropDownWidget> {
             widget.form[widget.name]= currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill;
             select = true;
             if (widget.url != null) {
-                try {
-                widget.wrappers?.currentState?.setState( () { 
-                  widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
-                }); 
-              } catch(e) { print(e); }
+                Future.delayed(Duration(seconds: 1), () {
+                  widget.wrappers?.currentState?.setState( () { 
+                    widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
+                  });
+                });
+                
             }
           }
           try {
@@ -337,7 +340,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
         }
       }
     }
-    try {
     return MultiDropdown<String>(
         max: max,
         changeFunction: (dynamic value) async {

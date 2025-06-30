@@ -145,6 +145,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
         GridCellWidget(
           cell: e, 
           value: v,
+          dataRef: e.dataRef,
           isNew: e.isNew, 
           cellID: cellID, 
           isLink: e.isLink,

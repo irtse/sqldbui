@@ -41,8 +41,6 @@ class SaveDatagridButtonWidgetState extends State<SaveDatagridButtonWidget> {
             }
           }
         }
-        //navigate = true;
-        //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
         setState(() { change = false; });
       }, 
       icon: Icon(Icons.save, color: Theme.of(context).highlightColor, size: 20));

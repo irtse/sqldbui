@@ -33,6 +33,7 @@ bool isFilter() {
 class Value {
   Map<String, model.SchemaField> schema = {};
   String cellID;
+  String? dataRef;
   bool isNew = false;
   bool isDraft = false;
   bool isLink = false;
@@ -42,6 +43,7 @@ class Value {
   
   Map<String, dynamic> values = {};
   Value({ 
+    required this.dataRef,
     required this.cellID, 
     required this.isDraft, 
     required this.schemaID,
@@ -228,7 +230,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
       if (isEditMode[viewID] ?? false) {
         buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid));
       } else {
-        print(widget.view?.actions);
         if (widget.view?.actions.contains("delete") ?? false) {
           buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
           child: Tooltip( 

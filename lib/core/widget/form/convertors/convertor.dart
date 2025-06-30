@@ -28,7 +28,6 @@ abstract class ConvertorWidget {
 class Convertor {
   static Future<Widget> filterFieldByType(BuildContext context, ConvertorWidget widget, String type, 
     String label, State<StatefulWidget> state, bool isDark, bool isGrid, String url, String id) async {
-      print("${type} $label");
     if (widget.value == "no info...") { widget.value = null; }
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     var dec = InputDecoration( errorStyle: const TextStyle(fontSize: 0), isDense: true, 
