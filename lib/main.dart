@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/model/view.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
@@ -72,6 +72,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'OPPS',
       theme: myTheme,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        FlutterQuillLocalizations.delegate, // This is key
+      ],
+      supportedLocales: const [
+        Locale('fr'),
+        Locale('en'), // Add other locales as needed
+      ],
       routerConfig: GoRouter(routes: _appRouter.routes),
     );
   }

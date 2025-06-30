@@ -71,7 +71,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
               }));
             }, 
             backgroundColor: state.value["color"] as Color, 
-            child: Icon(state.value["icon"] as IconData?, 
+            child: Icon(state.value["icon"] as IconData?, size: 18,
             color: Colors.white))));
         }
       }
