@@ -37,7 +37,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
     List<Widget> widgets = [];
     List<String> order = widget.triggers[widget.index].body.keys.toList();
     order.sort( (a, b) => (widget.triggers[widget.index].schema[a]?.index ?? 0) - (widget.triggers[widget.index].schema[b]?.index ?? 0) );
-    Map<String, dynamic> b = { ...widget.triggers[widget.index].body };
+    Map<String, dynamic> b = {};
     for (var k in order) {
       if (widget.triggers[widget.index].schema[k] != null) {
         var scheme = widget.triggers.first.schema[k];
@@ -119,6 +119,11 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             }
             var body = await ActionService.getBody("POST", {...b }, {}, trigger.schema, {}, context);
             var files = await ActionService.getFiles("POST", {...b }, trigger.schema, context);
+            for (var bb in widget.triggers[widget.index].body.keys) {
+              if (b[bb] == null) {
+                b[bb] =  widget.triggers[widget.index].body[bb];
+              }
+            }
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
                   ActionService.onSuccessMethod("POST", e.data!.first, {...b }, trigger.schema, files, context);
