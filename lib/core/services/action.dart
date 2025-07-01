@@ -3,7 +3,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
@@ -228,7 +227,9 @@ class ActionService {
         await submitFile(pathFile.replaceAll("rows=all", "rows=${values["id"]}"), files[pathFile]!, context);
       }
     }
-    TriggerCacheService.setTriggers(view.triggers); 
+    if ((method.toUpperCase() == "POST" || (method.toUpperCase() == "PUT"))) {
+      TriggerCacheService.setTriggers(view.triggers);
+    }
   }
 
   static Future<Map<String, PlatformFile>> getFiles(String method, Map<String, dynamic> values, 
