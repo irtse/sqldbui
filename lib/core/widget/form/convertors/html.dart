@@ -44,7 +44,7 @@ class HTMLState extends State<HTMLWidget> {
     ///[controller] create a QuillEditorController to access the editor methods
  final QuillController _controller = () {
     return QuillController.basic(
-        config: QuillControllerConfig( ));
+        configurations: QuillControllerConfigurations( ));
   }();
   final FocusNode _editorFocusNode = FocusNode();
   final ScrollController _editorScrollController = ScrollController();
@@ -88,7 +88,7 @@ class HTMLState extends State<HTMLWidget> {
       children: [
             QuillSimpleToolbar(
               controller: _controller,
-              config: QuillSimpleToolbarConfig(
+              configurations: QuillSimpleToolbarConfigurations(
                 showClipboardPaste: true,
                 embedButtons: FlutterQuillEmbeds.toolbarButtons(),
                 customButtons: [ ],
@@ -114,7 +114,7 @@ class HTMLState extends State<HTMLWidget> {
                 focusNode: _editorFocusNode,
                 scrollController: _editorScrollController,
                 controller: _controller,
-                config: QuillEditorConfig(
+                configurations: QuillEditorConfigurations(
                   placeholder: (await getOnFlow('Start writing your notes...')).toLowerCase(),
                   padding: const EdgeInsets.all(16),
                   embedBuilders: kIsWeb ? FlutterQuillEmbeds.editorWebBuilders() : FlutterQuillEmbeds.editorBuilders(),
