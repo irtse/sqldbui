@@ -81,6 +81,14 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                     }
                     return Text(add);
                 }),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                  borderSide: BorderSide(color: Theme.of(context).splashColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                  borderSide: BorderSide(color: Theme.of(context).splashColor),
+                ),
                 labelStyle: TextStyle(color: Colors.grey),
                 hintText: TranslateConstants.selectDate.toLowerCase(),
                 hintStyle: TextStyle(fontSize: 12, color: Colors.grey),

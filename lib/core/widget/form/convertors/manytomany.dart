@@ -48,43 +48,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
     if (scheme == null) { return Container(); }
     var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) 
     || (mainForm.currentState?.widget.view?.readOnly ?? false);
-    if (readOnly) {
-      List<Container> tags = <Container>[];
-      if (widget.value != null && widget.value is List) {
-        for (var val in widget.value) {
-          val = val as model.Shallowed;
-          String str = (val.label ?? val.name ?? "${val.id}").replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-          if (widget.translatable) {
-            str = await getOnFlow(str);
-
-            if (str.toUpperCase() == str) {
-                str = str.toUpperCase();
-            } else {
-              str = str.toLowerCase();
-            }
-          }
-          tags.add(Container( margin: const EdgeInsets.only(top:5, left: 10, right: 10), 
-            child: TextButton(onPressed: (){}, 
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor),
-                  mouseCursor: WidgetStateProperty.all(MouseCursor.uncontrolled),
-                ),
-                child: Text(str, style: const TextStyle(fontSize: 12, color: Colors.white))
-              )
-            )
-          );
-        }
-      }
-      String str =widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-      if (widget.translatable) {
-        str = await getOnFlow(str);
-      }
-      return Padding(padding: const EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),child: Column(children: [
-        Row(children: [Text("$str${widget.require ? '*' : ''}:", 
-            style:  const TextStyle( color: Colors.black, fontSize: 14, ), )]),
-        Wrap(children: tags) 
-      ]));
-    } else if ((widget.url ?? "") != "") {
+    if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
         for (var v in widget.value) {
@@ -110,7 +74,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
                     dp: this,
                     schemaName: widget.schemaName,
                     name: widget.name,
-                    readOnly: widget.readOnly,
+                    readOnly: readOnly,
                     value: widget.value,
                     component: widget.component,
                     datas: snap.data!.data!..addAll(s.data?.data ?? []),
@@ -267,7 +231,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         } : null,
                         controller: ctrls,
                         items: items,
-                        enabled: true,
+                        enabled: widget.readOnly,
                         searchEnabled: max > 10,
                         max: max,
                         changeFunction: (String value) async {

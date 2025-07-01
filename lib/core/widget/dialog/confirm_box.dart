@@ -53,12 +53,12 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
       Center(child: Text((await getOnFlow(TranslateConstants.sure)).toUpperCase(), 
         style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor),)),
       Wrap( alignment: WrapAlignment.center, children : [
-        Text("${(await getOnFlow("Do you really want to")).toLowerCase()} ${widget.purpose.toUpperCase()} ? ", 
+        Text("${(await getOnFlow("Do you really want to")).toLowerCase()} ${(await getOnFlow(widget.purpose)).toUpperCase()} ? ", 
         style: const TextStyle(fontSize: 12.5, color: Colors.grey)),
         Text(await getOnFlow(TranslateConstants.undoAction), 
         style: TextStyle(fontSize: 12.5, color: Colors.grey))
       ]),
-      Center( child: SingleChildScrollView( child: SizedBox( height: currentHeigth / 2, child: Row(children: widgets)))),
+      widgets.isEmpty ? Container() : Center( child: SingleChildScrollView( child: SizedBox( height: currentHeigth / 2, child: Row(children: widgets)))),
       Padding( padding: EdgeInsets.only(top: 20), child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
         Padding( padding: EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
           widget.validate();
