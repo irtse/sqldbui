@@ -120,8 +120,8 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             var body = await ActionService.getBody("POST", {...b }, {}, trigger.schema, {}, context);
             var files = await ActionService.getFiles("POST", {...b }, trigger.schema, context);
             for (var bb in widget.triggers[widget.index].body.keys) {
-              if (b[bb] == null) {
-                b[bb] =  widget.triggers[widget.index].body[bb];
+              if (body[bb] == null) {
+                body[bb] =  widget.triggers[widget.index].body[bb];
               }
             }
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
