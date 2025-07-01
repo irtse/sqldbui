@@ -37,13 +37,12 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
     List<Widget> widgets = [];
     List<String> order = widget.triggers[widget.index].body.keys.toList();
     order.sort( (a, b) => (widget.triggers[widget.index].schema[a]?.index ?? 0) - (widget.triggers[widget.index].schema[b]?.index ?? 0) );
-    Map<String, dynamic> b = {};
+    Map<String, dynamic> b = { ...widget.triggers[widget.index].body };
     for (var k in order) {
       if (widget.triggers[widget.index].schema[k] != null) {
         var scheme = widget.triggers.first.schema[k];
         if (!scheme!.readonly) {
           try {
-            b[k] = widget.triggers[widget.index].body[k];
             var w = await Convertor.formFieldByType(
               b, context, "", widget.triggers[widget.index].schema, scheme.type, k, scheme.label, 
               scheme.description, scheme.require, scheme.readonly, widget.triggers[widget.index].body[k] == "" ? null : widget.triggers[widget.index].body[k], 
