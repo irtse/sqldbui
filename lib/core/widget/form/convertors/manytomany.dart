@@ -231,7 +231,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         } : null,
                         controller: ctrls,
                         items: items,
-                        enabled: widget.readOnly,
+                        enabled: !widget.readOnly,
                         searchEnabled: max > 10,
                         max: max,
                         changeFunction: (String value) async {
