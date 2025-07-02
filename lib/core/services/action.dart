@@ -113,7 +113,7 @@ class ActionService {
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
     body = await getBody(method, { ...form.cacheForm}, body, schema, form.oneToManiesForm, context);
-    print("1 $path $body");
+    print("1 BODY $path $body");
     var files = await getFiles(method, { ...form.cacheForm}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
@@ -130,7 +130,7 @@ class ActionService {
       }
       if (form.view!.actions.contains(method.toLowerCase())) {    
         // ignore: use_build_context_synchronously
-        print("2 $path $body");
+        print("2 BODY $path $body");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);

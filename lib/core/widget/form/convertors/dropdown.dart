@@ -54,7 +54,6 @@ class DropDownState extends State<DropDownWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     String? val;
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
-    print("segvr ${widget.name}");
     try {
       label = await getOnFlow(label);
     }  catch(e) {}
@@ -62,10 +61,8 @@ class DropDownState extends State<DropDownWidget> {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) {}
     if ((currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill) != null) {
-      print("resf ${widget.name} ${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}");
       val = "${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }
-    print("esfcgf ${widget.name} ${val}");
     if (val != null) {
       widget.form[widget.name]=val;
     }
@@ -81,7 +78,6 @@ class DropDownState extends State<DropDownWidget> {
         }
       } catch(e) { print("3 ${widget.name} $e"); }
     }
-    print("rddrvd ${widget.name} ${widget.mainUrl}");
     if (widget.type.contains("enum")) {
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, 
@@ -204,7 +200,6 @@ class DropDownState extends State<DropDownWidget> {
            return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", true, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-              print("${widget.name} ${val} ${snap.data?.data}");
               if (snap.data?.data != null) {
                 return SubDropDownWidget(
                   label: label,
@@ -235,7 +230,6 @@ class DropDownState extends State<DropDownWidget> {
     return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.mainUrl!, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-          print("${widget.mainUrl} ${snap.data?.data}");
           if (snap.data?.data != null) {
             return SubDropDownWidget(
               label: label,
