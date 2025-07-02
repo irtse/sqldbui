@@ -40,7 +40,6 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
-                    print(data.workflow);
                     if (data.workflow != null) { 
                       if (!widget.component.subForm) {
                         widget.component.reloadWorkflow = false;
@@ -50,7 +49,6 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                           }); 
                         } ); 
                       } else {
-                        print("racac");
                         Future.delayed(const Duration(seconds: 1), () { 
                           mainForm.currentState?.widget.headerKey.currentState?.setState(() {
                             mainForm.currentState?.widget.headerKey.currentState?.widget.workflow = data.workflow;

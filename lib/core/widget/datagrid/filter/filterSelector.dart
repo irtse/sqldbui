@@ -27,7 +27,7 @@ class FilterSelectorWidget extends StatefulWidget {
 bool forceFilter = false;
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
   @override Widget build(BuildContext context) {
-    var toggles = ["all", "new", "old", "draft"];
+    var toggles = ["new", "old", "draft"];
     return Row( children: [ 
       Padding( 
         padding: const EdgeInsets.only(right: 10), 
@@ -156,18 +156,49 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               })); 
             }); })) : Container(),
           Padding(padding: const EdgeInsets.only(left: 10), 
-            child: ToggleSwitch( labels: toggles, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
-                initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == globalNew[viewID]?.toLowerCase()),
-                dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
-                totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
-                onToggle: (index) { 
-                    globalNew[viewID] = toggles[index ?? 0]; 
+            child: FutureBuilder(future: getLabels(toggles), builder: (a,s) {
+              if (s.data != null) {
+                return ToggleSwitch( labels: s.data, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
+                  initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == globalNew[viewID]?.toLowerCase()),
+                  dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
+                  totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
+                  onToggle: (index) { 
+                    if (globalNew[viewID] == toggles[index ?? 0] || index == null) {
+                      globalNew[viewID]="all";
+                    } else {
+                      globalNew[viewID] = toggles[index]; 
+                    }
                     navigate = true;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
-              ),
+                );
+              } else {
+                return ToggleSwitch( labels: toggles, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
+                  initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == globalNew[viewID]?.toLowerCase()),
+                  dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
+                  totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
+                  onToggle: (index) { 
+                    if (globalNew[viewID] == toggles[index ?? 0] || index == null) {
+                      globalNew[viewID]="all";
+                    } else {
+                      globalNew[viewID] = toggles[index]; 
+                    }
+                    navigate = true;
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                  },
+                );
+              }
+            }),
         )
       ] );
+  }
+
+  Future<List<String>> getLabels(List<String> toogles) async {
+    List<String> labels = [];
+    for (var t in toogles) {
+      labels.add(await getOnFlow(t));
+    }
+    return labels;
   }
 }
 
