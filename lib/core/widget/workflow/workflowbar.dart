@@ -12,6 +12,7 @@ class WorkflowBarWidget extends StatefulWidget{
 }
 class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
   @override Widget build(BuildContext context) {
+    print("HERE");
     double max = currentWidth - menuSize > 0 ? currentWidth - menuSize : 0;
     var itemWidth = (max - 200) / widget.workflow.steps.length;
     List<Widget> items = [];

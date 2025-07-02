@@ -188,6 +188,7 @@ Future<String> getOnFlow(String value) async {
     var trans = await translator.translate(value, to: TranslateConstants.lang);
     TranslateConstants.onFlowTrad[value] = trans.text;
     if (TranslateConstants.onFlowTrad[value]!.contains("affiche")) {
+      TranslateConstants.onFlowTrad[value] = TranslateConstants.onFlowTrad[value]!.replaceAll("l'affiche", "un poster"); // to AD HOC
       TranslateConstants.onFlowTrad[value] = TranslateConstants.onFlowTrad[value]!.replaceAll("affiche", "poster"); // to AD HOC
     }
   }
@@ -381,3 +382,4 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.needRule13, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule13 = e.text.toLowerCase());
   translator.translate(TranslateConstants.needRule14, to: TranslateConstants.lang).then( (e) => TranslateConstants.needRule14 = e.text.toLowerCase());
 }
+
