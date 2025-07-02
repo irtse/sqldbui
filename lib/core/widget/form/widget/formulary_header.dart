@@ -41,6 +41,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
   String description = "no description";
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      print("FormularyHeaderWidgetState ${a.data}");
       if (a.data != null) {
         return a.data!;
       }
