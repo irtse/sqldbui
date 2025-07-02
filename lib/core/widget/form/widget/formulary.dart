@@ -83,6 +83,10 @@ class FormularyWidgetState extends State<FormularyWidget> {
           String? mainUrl, url;
           if (!readOnly && field.actionPath != "") { mainUrl = field.actionPath; }
           if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
+          value = value == "" ? null : value;
+          if (readOnly && value == null) {
+            continue;
+          }
           double max = widget.width - 100 > 0 ? widget.width - 100 : 1;
           var f = FutureBuilder( future: Convertor.formFieldByType(
               widget.newCacheEntry, 
