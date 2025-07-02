@@ -53,9 +53,6 @@ class DropDownState extends State<DropDownWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     print("THERE ${widget.name}");
-    try {
-      var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
-    } catch(e) { print("${widget.name} $e"); }
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
@@ -64,7 +61,7 @@ class DropDownState extends State<DropDownWidget> {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) { }
     print("THERE 1 ${widget.name}");
-    var val = currentDropdown[viewID!]?[widget.name] ?? widget.value  ?? widget.autofill;
+    var val = currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill;
     val = val?.replaceAll("''", "'");
     if (val != null) {
       widget.form[widget.name]=val;
@@ -251,7 +248,7 @@ class DropDownState extends State<DropDownWidget> {
               path: widget.path,
               url: widget.url,
               type: widget.type,
-              datas: snap.data!.data!,
+              datas: snap.data?.data ?? [],
               autofill: widget.autofill,
               schema: widget.schema,
               translatable: widget.translatable,
