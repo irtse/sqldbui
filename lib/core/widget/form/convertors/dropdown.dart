@@ -448,7 +448,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                                 }
                                 currentDropdown[viewID!]?[widget.name] = values[0];
                               }
-                              widget.wrappers?.currentState?.setState( () { 
+                              mainForm.currentState?.setState( () { 
                                 widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                               }); 
                             }
