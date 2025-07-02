@@ -168,7 +168,7 @@ class ActionService {
                 isNew = value.data![0].items[0].values["id"]; 
               }
             }
-
+            (form.key as GlobalKey<FormWidgetState>).currentState?.setState((){});
             if (views.last.innerRedirection != "") { 
               redirection = true;
               Future.delayed(Duration(seconds: 3), () {
@@ -198,7 +198,7 @@ class ActionService {
               }
               redirection = false;
             } /* else {
-              (form.key as GlobalKey<FormWidgetState>).currentState?.setState((){});
+              
             } */
           }
           // ignore: invalid_return_type_for_catch_error
