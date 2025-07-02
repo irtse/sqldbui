@@ -196,7 +196,7 @@ class DropDownState extends State<DropDownWidget> {
                         labelText: label.toLowerCase(),
                       ) ));
     }
-    print("${widget.mainUrl} ${widget.url}");
+    
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
@@ -204,6 +204,7 @@ class DropDownState extends State<DropDownWidget> {
            return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", true, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+              print("${widget.name} ${val} ${snap.data?.data}");
               if (snap.data?.data != null) {
                 return SubDropDownWidget(
                   label: label,
@@ -215,7 +216,7 @@ class DropDownState extends State<DropDownWidget> {
                   name: widget.name,
                   readOnly: widget.readOnly,
                   require: widget.require,
-                  value: val,
+                  value: val?.toString(),
                   path: widget.path,
                   url: widget.url,
                   type: widget.type,
@@ -246,7 +247,7 @@ class DropDownState extends State<DropDownWidget> {
               name: widget.name,
               readOnly: widget.readOnly,
               require: widget.require,
-              value: val,
+              value: val?.toString(),
               path: widget.path,
               url: widget.url,
               type: widget.type,
@@ -315,7 +316,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
       v = v.replaceAll("''", "'");
-      var t = items.where((e) => e.value == "${item.id}"); 
+      var t = items.where((e) => e.value.toString() == "${item.id}"); 
       if (!mapped.containsKey(v) && t.isEmpty){
         mapped["${item.id}"]=item;
         if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
