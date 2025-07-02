@@ -56,10 +56,10 @@ class DropDownState extends State<DropDownWidget> {
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
-    }  catch(e) {}
+    }  catch(e) { print("THERE 1.2 ${widget.name} $e"); }
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
-    } catch(e) { }
+    } catch(e) { print("THERE 1.3 ${widget.name} $e"); }
     print("THERE 1 ${widget.name}");
     String? val;
     try {
