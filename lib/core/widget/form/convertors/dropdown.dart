@@ -81,7 +81,8 @@ class DropDownState extends State<DropDownWidget> {
         }
       } catch(e) { print("3 ${widget.name} $e"); }
     }
-    if (widget.type.contains("enum") || widget.mainUrl == null) {
+    print("rddrvd ${widget.mainUrl}");
+    if (widget.type.contains("enum")) {
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, 
           child: TextFormField(
