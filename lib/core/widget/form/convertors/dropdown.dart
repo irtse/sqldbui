@@ -53,18 +53,23 @@ class DropDownState extends State<DropDownWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     print("THERE ${widget.name}");
+    try {
+      var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
+    } catch(e) { print(e); }
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
     }  catch(e) {}
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
-    } catch(e) {}
+    } catch(e) { print("THERE 1 err ${e}"); }
+    print("THERE 1 ${widget.name}");
     var val = currentDropdown[viewID!]?[widget.name] ?? widget.value  ?? widget.autofill;
     val = val?.replaceAll("''", "'");
     if (val != null) {
       widget.form[widget.name]=val;
     }
+    print("THERE 1.5 ${val}");
     if (val == null) {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {
