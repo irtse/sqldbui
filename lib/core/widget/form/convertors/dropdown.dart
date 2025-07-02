@@ -53,7 +53,9 @@ class DropDownState extends State<DropDownWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     String? val;
+    print("dqdqsdqsd ${widget.name}");
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
+    print("segvr ${widget.name}");
     try {
     try {
       label = await getOnFlow(label);
