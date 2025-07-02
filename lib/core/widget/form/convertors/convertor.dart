@@ -380,7 +380,6 @@ class Convertor {
     dynamic autofill, bool translatable,
     GlobalKey<SubFormularyWidgetState>? wrappers,
   ) async {
-    print("${type} ${name}");
     type = type.toLowerCase();
     if (type.contains("text") || type.contains("url") || type.contains("varchar") || ((type.contains("time") || type.contains("date")) && readOnly)) { 
       return TextWidget(

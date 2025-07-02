@@ -233,7 +233,6 @@ class APIService {
                 alertBannerLocation:  AlertBannerLocation.bottom,);
             }
             if (method == "get") {  
-              print("${cache[url]?.data?.length} ${url}");
               return cache[url] as APIResponse<T>;  
             }
             return resp; 

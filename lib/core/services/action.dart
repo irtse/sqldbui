@@ -139,7 +139,6 @@ class ActionService {
       }
       if (form.view!.actions.contains(method.toLowerCase())) {    
         // ignore: use_build_context_synchronously
-        print(body);
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
@@ -169,6 +168,7 @@ class ActionService {
               }
             }
             (form.key as GlobalKey<FormWidgetState>).currentState?.setState((){});
+            print(views.last.innerRedirection);
             if (views.last.innerRedirection != "") { 
               redirection = true;
               Future.delayed(Duration(seconds: 3), () {
