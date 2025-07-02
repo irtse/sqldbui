@@ -56,6 +56,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
         child: Center(child: Text(TranslateConstants.noWorkflow, 
           style: const TextStyle(color: Colors.white)),)));
     }
+    print("${widget.workflow.id} ${widget.workflow.steps.length}");
     return Container(  margin: const EdgeInsets.only(top: 25), width: max,
       height: 40, color: widget.workflow.steps.isEmpty ? Colors.grey : Colors.white,
       child: Row(children: items,),);
