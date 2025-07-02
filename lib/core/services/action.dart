@@ -172,7 +172,7 @@ class ActionService {
                       viewID = "@${splitted[0].split("/").last}";
                       subViewID = splitted[1];
                     }
-                    
+                    navigate = true;   
                     globalActionBar.currentState?.setState(() {});
                     globalMainViewKey.currentState?.refreshUrl("$baseURL${views.last.innerRedirection}", subViewID, true); 
                   }
@@ -180,6 +180,7 @@ class ActionService {
             } else if (!form.subForm) {
               if (!redirection) {
                 Future.delayed(Duration(seconds: 3), () {
+                  navigate = true;  
                   globalMainViewKey.currentState?.setState(() { firstAPI = true; });
                   globalMenuKey.currentState?.setState(() { navigate = true; });
                   showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 

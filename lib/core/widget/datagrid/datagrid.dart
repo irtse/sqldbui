@@ -245,8 +245,10 @@ class DatagridWidgetState extends State<DatagridWidget> {
                 showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete element(s) <${ids.join(',')}>", validate: () {
                   globalMainViewKey.currentState?.setState(() { 
                     APIService().delete("${APIConstants.genericEndpost}$schemaID?rows=${ids.join(",")}", context).then( (e) {
-                      globalMainViewKey.currentState?.setState(() {
-                        navigate = true;
+                      Future.delayed(Duration(seconds: 3), () {
+                        globalMainViewKey.currentState?.setState(() {
+                          navigate = true;
+                        });
                       });
                     }); });
                 }));                
