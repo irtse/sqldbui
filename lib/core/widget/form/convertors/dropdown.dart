@@ -190,6 +190,7 @@ class DropDownState extends State<DropDownWidget> {
                         labelText: label.toLowerCase(),
                       ) ));
     }
+    print("${widget.mainUrl} ${widget.url}");
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
