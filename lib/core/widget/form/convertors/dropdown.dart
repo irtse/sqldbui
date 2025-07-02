@@ -448,7 +448,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                                 }
                                 currentDropdown[viewID!]?[widget.name] = values[0];
                               }
-                              mainForm.currentState?.setState( () { 
+                              widget.wrappers?.currentState?.setState( () { 
                                 widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                               }); 
                             }
@@ -462,7 +462,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
     }
   }
 
-  Future<void> load(int start, int interval, String filter, String value, List<DropdownItem<String>> items) async {
+  Future<void> load(int start, int interval, String filter, String? value, List<DropdownItem<String>> items) async {
     if (filter == "") { return; }
     var found = false;
       var e = await APIService().get<model.Shallowed>("${widget.mainUrl}$filter&offset=$start&limit=$interval", filter != "", null);

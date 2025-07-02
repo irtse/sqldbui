@@ -36,8 +36,9 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
     List<Widget> additionnal = [];
     for (var url in wrappersURL.values) {
           Widget w = FutureBuilder<APIResponse<model.View>>(
-              future: APIService().get<model.View>(url, firstAPI, null), 
+              future: APIService().get<model.View>(url, true, null), 
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
+                print("wf ${snap.data}");
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
                     if (data.workflow != null && widget.component.reloadWorkflow && !widget.component.subForm ) { 
