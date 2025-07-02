@@ -134,6 +134,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       title.add(Container(margin: EdgeInsets.only(bottom: 20)));
     }
     List<Widget> actions = [];
+    print("subform ${widget.subForm}");
     if (!widget.subForm) {
       if (!widget.view.readOnly) {
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
