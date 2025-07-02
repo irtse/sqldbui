@@ -38,16 +38,23 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
           Widget w = FutureBuilder<APIResponse<model.View>>(
               future: APIService().get<model.View>(url, true, null), 
               builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
-                print("wf ${snap.data}");
                 if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) {
                   for (var data in snap.data!.data!) {
-                    if (data.workflow != null && widget.component.reloadWorkflow && !widget.component.subForm ) { 
-                      widget.component.reloadWorkflow = false;
-                      Future.delayed(const Duration(seconds: 1), () { 
-                        widget.component.headerKey.currentState?.setState(() { 
-                          widget.component.headerKey.currentState?.widget.workflow = data.workflow; 
-                        }); 
-                      } ); 
+                    if (data.workflow != null && widget.component.reloadWorkflow) { 
+                      if (!widget.component.subForm) {
+                        widget.component.reloadWorkflow = false;
+                        Future.delayed(const Duration(seconds: 1), () { 
+                          widget.component.headerKey.currentState?.setState(() { 
+                            widget.component.headerKey.currentState?.widget.workflow = data.workflow; 
+                          }); 
+                        } ); 
+                      } else {
+                        Future.delayed(const Duration(seconds: 1), () { 
+                          mainForm.currentState?.widget.headerKey.currentState?.setState(() {
+                            mainForm.currentState?.widget.headerKey.currentState?.widget.workflow = data.workflow;
+                          });
+                        } );
+                      }
                     }
                     var newView = model.View(
                       name: TranslateConstants.dataFormulary,
