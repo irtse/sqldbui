@@ -53,21 +53,19 @@ class DropDownState extends State<DropDownWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     String? val;
-    print("dqdqsdqsd ${widget.name}");
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     print("segvr ${widget.name}");
-    try {
     try {
       label = await getOnFlow(label);
     }  catch(e) {}
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) {}
-    try {
     if ((currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill) != null) {
+      print("resf ${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}");
       val = "${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }
-    
+    print("esfcgf ${val}");
     if (val != null) {
       widget.form[widget.name]=val;
     }
@@ -83,7 +81,6 @@ class DropDownState extends State<DropDownWidget> {
         }
       } catch(e) { print("3 ${widget.name} $e"); }
     }
-    } catch(e,s) { print("4 ${widget.name} $e $s");  }
     print("rddrvd ${widget.mainUrl}");
     if (widget.type.contains("enum")) {
       if (widget.readOnly) {
@@ -198,9 +195,6 @@ class DropDownState extends State<DropDownWidget> {
                         hintText: TranslateConstants.selectValue.toLowerCase(),
                         labelText: label.toLowerCase(),
                       ) ));
-    }
-    } catch(e, s) {
-      print("${widget.name} $e $s");
     }
     print("${widget.mainUrl} ${widget.url}");
     if ((val ?? "") != "") {
