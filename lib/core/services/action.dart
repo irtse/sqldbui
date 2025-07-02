@@ -197,9 +197,9 @@ class ActionService {
                 });
               }
               redirection = false;
-            } else {
+            } /* else {
               (form.key as GlobalKey<FormWidgetState>).currentState?.setState((){});
-            }
+            } */
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
