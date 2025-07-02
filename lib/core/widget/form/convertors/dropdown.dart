@@ -62,10 +62,10 @@ class DropDownState extends State<DropDownWidget> {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) {}
     if ((currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill) != null) {
-      print("resf ${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}");
+      print("resf ${widget.name} ${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}");
       val = "${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }
-    print("esfcgf ${val}");
+    print("esfcgf ${widget.name} ${val}");
     if (val != null) {
       widget.form[widget.name]=val;
     }
@@ -81,7 +81,7 @@ class DropDownState extends State<DropDownWidget> {
         }
       } catch(e) { print("3 ${widget.name} $e"); }
     }
-    print("rddrvd ${widget.mainUrl}");
+    print("rddrvd ${widget.name} ${widget.mainUrl}");
     if (widget.type.contains("enum")) {
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, 
