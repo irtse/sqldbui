@@ -41,7 +41,6 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
   String description = "no description";
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      print("FormularyHeaderWidgetState ${a.data}");
       if (a.data != null) {
         return a.data!;
       }
@@ -135,7 +134,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       title.add(Container(margin: EdgeInsets.only(bottom: 20)));
     }
     List<Widget> actions = [];
-    print("subform ${widget.subForm}");
+    print("subform ${widget.subForm} ${widget.workflow?.serialize()}");
     if (!widget.subForm) {
       if (!widget.view.readOnly) {
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
