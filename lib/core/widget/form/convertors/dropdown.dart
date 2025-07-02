@@ -52,27 +52,19 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    print("THERE ${widget.name}");
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
-    }  catch(e) { print("THERE 1.2 ${widget.name} $e"); }
+    }  catch(e) {}
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
-    } catch(e) { print("THERE 1.3 ${widget.name} $e"); }
-    print("THERE 1 ${widget.name}");
+    } catch(e) {}
     String? val;
-    try {
-      val = currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill;
-      val = val?.replaceAll("''", "'");
-      if (val != null) {
-        widget.form[widget.name]=val;
-      }
-    } catch(e) {
-      print("${widget.name} $e");
+    val = (currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)?.toString().replaceAll("''", "'");
+    if (val != null) {
+      widget.form[widget.name]=val;
     }
     
-    print("THERE 1.5 ${widget.name} ${val}");
     if (val == null) {
       val = widget.readOnly ? TranslateConstants.empty : null;
     } else if (widget.translatable) {
@@ -85,7 +77,7 @@ class DropDownState extends State<DropDownWidget> {
         }
       } catch(e) {}
     }
-    print("THERE 2 ${widget.name} ${val}");
+    
     if (widget.type.contains("enum") || widget.mainUrl == null) {
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, 
