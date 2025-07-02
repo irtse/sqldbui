@@ -94,16 +94,6 @@ class ActionService {
         }
       return views;
     }
-    
-    if (errors.isNotEmpty) {
-      var errorStr = "";
-        for (var error in errors) { errorStr += "${error.replaceAll("Exception: ", "")} \n"; }
-        if (errorStr != "") {
-          // ignore: use_build_context_synchronously
-          showAlertBanner(context, durationOfStayingOnScreen: Duration(minutes: 1), () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
-        }
-      return views;
-    }
     for (var v in form.oneToManiesForm.values) {
       for (var vv in v) {
         if (vv.detectChange) {
