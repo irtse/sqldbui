@@ -52,6 +52,7 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    print("THERE ${widget.name}");
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
@@ -76,6 +77,7 @@ class DropDownState extends State<DropDownWidget> {
         }
       } catch(e) {}
     }
+    print("THERE 2 ${widget.name} ${val}");
     if (widget.type.contains("enum") || widget.mainUrl == null) {
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, 

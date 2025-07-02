@@ -158,7 +158,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           Padding(padding: const EdgeInsets.only(left: 10), 
             child: FutureBuilder(future: getLabels(toggles), builder: (a,s) {
               if (s.data != null) {
-                return ToggleSwitch( labels: s.data, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
+                return ToggleSwitch( labels: s.data, minHeight: 27.5, minWidth: 90, fontSize: 12, cornerRadius: 5,
                   initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == globalNew[viewID]?.toLowerCase()),
                   dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
                   totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
@@ -173,7 +173,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                   },
                 );
               } else {
-                return ToggleSwitch( labels: toggles, minHeight: 27.5, minWidth: 60, fontSize: 12, cornerRadius: 5,
+                return ToggleSwitch( labels: toggles, minHeight: 27.5, minWidth: 90, fontSize: 12, cornerRadius: 5,
                   initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == globalNew[viewID]?.toLowerCase()),
                   dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
                   totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
