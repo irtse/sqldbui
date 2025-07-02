@@ -27,7 +27,7 @@ class FilterSelectorWidget extends StatefulWidget {
 bool forceFilter = false;
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
   @override Widget build(BuildContext context) {
-    var toggles = ["all", "new", "old"];
+    var toggles = ["all", "new", "old", "draft"];
     return Row( children: [ 
       Padding( 
         padding: const EdgeInsets.only(right: 10), 
