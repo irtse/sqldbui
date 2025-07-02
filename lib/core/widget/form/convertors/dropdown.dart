@@ -227,6 +227,7 @@ class DropDownState extends State<DropDownWidget> {
     return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get(widget.mainUrl!, true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+          print("${widget.mainUrl} ${snap.data?.data}");
           if (snap.data?.data != null) {
             return SubDropDownWidget(
               label: label,
