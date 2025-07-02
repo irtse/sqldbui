@@ -72,7 +72,7 @@ class ActionService {
         return []; 
       } else { form.formKey.currentState!.save(); }
     } 
-    /*if (consentCache[viewID]?[form.key] != null && !avoidConsent) {
+    if (consentCache[viewID]?[form.key] != null && !avoidConsent) {
       for (var consent in consentCache[viewID]![form.key]!.values) {
         if (!consent.consent && !consent.optionnal) {
           consentErrCache[viewID ?? ""]?[consent.name] = true;
@@ -82,7 +82,7 @@ class ActionService {
           });
         }
       } 
-    }*/
+    }
     List<model.View> views = [];
     if (errors.isNotEmpty) {
       var errorStr = "";
@@ -102,10 +102,10 @@ class ActionService {
         }
       }
     }
-    /*if (isDraft && form.view!.id == mainForm.currentState!.widget.view!.id) {
+    if (isDraft && form.view!.id == mainForm.currentState!.widget.view!.id) {
       mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
-    }*/
+    }
 
     var path = url;
     if (form.cacheForm["id"] != null) { 
