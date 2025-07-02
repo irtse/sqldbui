@@ -201,9 +201,12 @@ class APIService {
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
         url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter";
-        if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
-          return cache[url]! as APIResponse<T>;
+        if (method == "get") {
+          if ((!force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
+            return cache[url]! as APIResponse<T>;
+          }
         }
+        
         print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);        
       
@@ -326,6 +329,7 @@ class APIService {
   }
 
   Future<APIResponse<T>> put<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
+    print("PUT $url");
     return main(url, values, "put", "save succeed", true, context, null, null, false, null, null);
   }
 
