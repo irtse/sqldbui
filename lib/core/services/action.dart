@@ -54,6 +54,7 @@ class ActionService {
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, 
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent) async {  
+    redirection = false;
     var body = <String, dynamic>{};
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent);
     if (resp.isNotEmpty  && !overrideDest) {
@@ -188,7 +189,6 @@ class ActionService {
                                             alertBannerLocation:  AlertBannerLocation.bottom);
                 });
               }
-              redirection = false;
             }
           }
           // ignore: invalid_return_type_for_catch_error
