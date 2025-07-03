@@ -160,7 +160,7 @@ class ActionService {
                 isNew = value.data![0].items[0].values["id"]; 
               }
             }
-            
+            print("REDIRECT ${views.last.innerRedirection}");
             if (views.last.innerRedirection != "") { 
               redirection = true;
               Future.delayed(Duration(seconds: 3), () {
