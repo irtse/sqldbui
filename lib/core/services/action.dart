@@ -57,17 +57,15 @@ class ActionService {
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
     redirection = false;
     var body = <String, dynamic>{};
-    if (!ignore) {
-      var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
-      if (resp.isNotEmpty  && !overrideDest) {
-        if (resp.first.items.isNotEmpty) { 
-          body["dbdest_table_id"]=resp.first.items[0].values["id"]; 
-        }
-        body["dbschema_id"]=resp.first.schemaID;
+    var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
+    if (resp.isNotEmpty  && !overrideDest) {
+      if (resp.first.items.isNotEmpty) { 
+        body["dbdest_table_id"]=resp.first.items[0].values["id"]; 
       }
+      body["dbschema_id"]=resp.first.schemaID;
     }
     
-    if (method != "delete" && errors.isEmpty) {
+    if (method != "delete" && errors.isEmpty && !ignore) {
       if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) { 
         if (form.formKey.currentState != null && form.subForm) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
