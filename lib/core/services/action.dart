@@ -57,7 +57,7 @@ class ActionService {
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
     redirection = false;
     var body = <String, dynamic>{};
-    if (ignore) {
+    if (!ignore) {
       var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
       if (resp.isNotEmpty  && !overrideDest) {
         if (resp.first.items.isNotEmpty) { 
