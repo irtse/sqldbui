@@ -26,19 +26,20 @@ List<String> errors = [];
 class ActionService {
   static void Function() pressed(ButtonWidgetState? widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, 
-                                 String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, bool overrideDest, bool explicitDraft, bool avoidConsent) {
+                                 String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, 
+                                 bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) {
       errors = [];
-      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent);
+      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent, ignore);
     }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
   static void Function() pressedForm(ButtonWidgetState? widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context, bool isDraft, bool overrideDest, 
-                                Map<String,dynamic> overrideMap, bool explicitDraft, bool avoidConsent) { 
+                                Map<String,dynamic> overrideMap, bool explicitDraft, bool avoidConsent, bool ignore) { 
       return () async {
         widget?.loading();
         if (mainForm.currentState != null) {
-          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent);
+          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
         }
         widget?.loaded();
         
@@ -53,16 +54,19 @@ class ActionService {
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form, String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, 
-                                                    bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent) async {  
+                                                    bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
     redirection = false;
     var body = <String, dynamic>{};
-    var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent);
-    if (resp.isNotEmpty  && !overrideDest) {
-      if (resp.first.items.isNotEmpty) { 
-        body["dbdest_table_id"]=resp.first.items[0].values["id"]; 
+    if (ignore) {
+      var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
+      if (resp.isNotEmpty  && !overrideDest) {
+        if (resp.first.items.isNotEmpty) { 
+          body["dbdest_table_id"]=resp.first.items[0].values["id"]; 
+        }
+        body["dbschema_id"]=resp.first.schemaID;
       }
-      body["dbschema_id"]=resp.first.schemaID;
     }
+    
     if (method != "delete" && errors.isEmpty) {
       if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) { 
         if (form.formKey.currentState != null && form.subForm) {
@@ -162,8 +166,9 @@ class ActionService {
             }
             print("REDIRECT ${views.last.innerRedirection}");
             if (views.last.innerRedirection != "") { 
+              print("REDIRECTION !!!");
               redirection = true;
-              Future.delayed(Duration(seconds: 3), () {
+              Future.delayed(Duration(seconds: 4), () {
                   var splitted = views.last.innerRedirection.split("?rows=");
                   if (splitted.length >= 2) {
                     if (method == "delete") {
@@ -180,7 +185,8 @@ class ActionService {
               });
             } else if (!form.subForm) {
               if (!redirection) {
-                Future.delayed(Duration(seconds: 3), () {
+                print("THERE !!!");
+                Future.delayed(Duration(seconds: 4), () {
                   navigate = true;  
                   globalMainViewKey.currentState?.setState(() { firstAPI = true; });
                   globalMenuKey.currentState?.setState(() { navigate = true; });
@@ -299,7 +305,7 @@ class ActionService {
     return body;
   }
   static Future<List<model.View>> formSubForms(List<DataFormWidget> widgets, Map<String, dynamic> values, String method, 
-                                                 String schemaName, BuildContext context, bool add, bool delete, bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent) async {
+                                                 String schemaName, BuildContext context, bool add, bool delete, bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {
     List<model.View> views = [];
     for (var many in widgets) { 
       if (delete && many.view != null && many.view!.actions.contains("delete") && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
@@ -309,10 +315,10 @@ class ActionService {
         if (add) { 
           views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
-                                                        context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent));
+                                                        context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore));
         } else { 
           await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
-                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent);
+                                  many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
         } 
       }
     }
