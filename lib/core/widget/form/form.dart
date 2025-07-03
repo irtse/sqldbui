@@ -296,9 +296,17 @@ class FormWidgetState extends State<DataFormWidget> {
                   future: APIService().get<model.View>(synthesisPath, true, context), 
                   builder: (a,s) {
                     if (s.data?.data != null && s.data!.data!.isNotEmpty) {
-                      return MainGridWidget(view: s.data!.data![0], viewKey: null, subTable: true, 
-                            forceOrder: s.data!.data?[0].order ?? [],
-                            links: {}, subSize: 0, subWidthSize: 100);
+                      var data = s.data!.data![0];
+                      if (s.data!.data!.length > 1) {
+                        for (var d in s.data!.data!.sublist(1)) {
+                          data.items.addAll(d.items);
+                        }
+                      }
+                      return MainGridWidget(view: data, 
+                        viewKey: null, subTable: true, 
+                        forceOrder: data.order,
+                        links: {}, subSize: 0, 
+                        subWidthSize: 100);
                     }
                     return Container( 
                       height: height - 80,
