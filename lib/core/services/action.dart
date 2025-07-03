@@ -162,7 +162,7 @@ class ActionService {
             
             if (views.last.innerRedirection != "") { 
               redirection = true;
-              Future.delayed(Duration(seconds: 2), () {
+              Future.delayed(Duration(seconds: 3), () {
                   var splitted = views.last.innerRedirection.split("?rows=");
                   if (splitted.length >= 2) {
                     if (method == "delete") {
@@ -179,7 +179,7 @@ class ActionService {
               });
             } else if (!form.subForm) {
               if (!redirection) {
-                Future.delayed(Duration(seconds: 2), () {
+                Future.delayed(Duration(seconds: 3), () {
                   navigate = true;  
                   globalMainViewKey.currentState?.setState(() { firstAPI = true; });
                   globalMenuKey.currentState?.setState(() { navigate = true; });
