@@ -60,8 +60,9 @@ class FormularyWidgetState extends State<FormularyWidget> {
       for (var consent in widget.view.consents) {
         fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
       }
-      if (widget.view.consents.isEmpty) {
-        fields.add(const Divider(height: 0.5, thickness: 0.5, color: Colors.grey));
+      if (widget.view.consents.isNotEmpty) {
+        fields.add(Padding( padding: EdgeInsets.symmetric(vertical: 10),
+          child : const Divider(height: 0.5, thickness: 0.5, color: Colors.grey)));
       }
 
       for (var fieldName in widget.view.order) {
