@@ -134,7 +134,11 @@ Map<String,String> realOrderMap(model.View? view, bool subtable) {
     List<String> seen = [];
     if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
     && filterOrderView[viewID] == null) {
-      var newOrder = view.schema.keys.where( (e) => view.schema[e]?.inResume != null).toList();
+      var newOrder = view.schema.keys.where( (e) {
+        print(view.schema[e]?.inResume);
+        return view.schema[e]?.inResume != null; 
+      }).toList();
+      print("$newOrder");
       newOrder.sort( (e1, e2) => (view.schema[e1]?.inResume ?? 1000).compareTo((view.schema[e2]?.inResume ?? 1000))  );
       if (newOrder.length < 5 ) {
         for (var o in view.order) {
@@ -145,6 +149,9 @@ Map<String,String> realOrderMap(model.View? view, bool subtable) {
             newOrder.add(o);
           }
         }
+      }
+      if (view.order.contains("type") && !newOrder.contains("type")) {
+        newOrder = ["type", ...newOrder];
       }
       filterTempOrderView[viewID] = newOrder;
     }
@@ -174,7 +181,31 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     List<String> seen = [];
     if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
     && filterOrderView[viewID] == null) {
-      filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < max ? (forceOrder ?? view.order).length : max);
+      var newOrder = view.schema.keys.where( (e) {
+        print(view.schema[e]?.inResume);
+        return view.schema[e]?.inResume != null; 
+      }).toList();
+      print("$newOrder");
+      newOrder.sort( (e1, e2) => (view.schema[e1]?.inResume ?? 1000).compareTo((view.schema[e2]?.inResume ?? 1000))  );
+      if (newOrder.length < 5 ) {
+        for (var o in view.order) {
+          if (newOrder.length == 5 ) {
+            break;
+          }
+          if (!newOrder.contains(o)) {
+            newOrder.add(o);
+          }
+        }
+      }
+      if (newOrder.isEmpty) {
+        filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < max ? (forceOrder ?? view.order).length : max);
+
+      } else {
+        if (view.order.contains("type") && !newOrder.contains("type")) {
+          newOrder = ["type", ...newOrder];
+        }
+        filterTempOrderView[viewID] = forceOrder ?? newOrder;
+      }
     }
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {

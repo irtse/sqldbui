@@ -51,7 +51,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     return SchemaField(
     hidden: json.containsKey("hidden") && json["hidden"] != null ? bool.parse("${json["hidden"]}") : false,
     linkID: json.containsKey("link_id") && json["link_id"] != null ? "${json["link_id"]}" : null,
-    inResume: json.containsKey("in_resume") && json["in_resume"] != null ? int.parse(json["in_resume"]) : null,
+    inResume: json.containsKey("in_resume") && json["in_resume"] != null && json["in_resume"] != ""  ? int.parse(json["in_resume"]) : null,
     translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : false,
     autoFill: json.containsKey("autofill") && json["autofill"] != null ? json["autofill"] : null,
     active: json.containsKey("active") && json["active"] != null ? json["active"] : true,
