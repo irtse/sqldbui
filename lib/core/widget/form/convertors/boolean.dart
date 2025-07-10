@@ -51,13 +51,16 @@ class _BooleanState extends State<BooleanWidget> {
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
             )
           ),
-          Container( width: 48, height: 48, 
+          widget.readOnly ? Container( width: 48, height: 48, 
+            padding: EdgeInsets.only(right: 20), 
+            child: Text(await getOnFlow(widget.value == true ? "yes" : "no") )) :  Container( width: 48, height: 48, 
             padding: EdgeInsets.only(right: 20), 
             child: CheckboxListTile(
               value: widget.value,
               onChanged: (value) { 
                 widget.value = value;
                 widget.form[widget.name] = value; 
+                setState(() { });
               }
             ))
           ])
