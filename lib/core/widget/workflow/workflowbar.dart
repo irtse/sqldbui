@@ -30,9 +30,17 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
         active: active));
     }
     for (var i = 0; i < widget.workflow.steps.length; i++) {
+      var name = "${TranslateConstants.step.toLowerCase()} ${ i + 1 }";
+      if ((widget.workflow.steps["${ i + 1 }"]?.length ?? 0) == 1) {
+        name = widget.workflow.steps["${ i + 1 }"]!.first.name;
+      }
       items.add(StepWidget( 
-        content: Text("${TranslateConstants.step.toLowerCase()} ${ i + 1 }", 
-        style: const TextStyle(color: Colors.white)),
+        content: FutureBuilder(future: getOnFlow(name), builder: (a,s) {
+          if (s.data != null) {
+            return Text(s.data!, style: const TextStyle(color: Colors.white));
+          }
+          return Text(name, style: const TextStyle(color: Colors.white));
+        }),
         width: itemWidth, gotBefore: true, 
         steps: widget.workflow.steps.containsKey("${ i + 1 }") ? widget.workflow.steps["${ i + 1 }"] : null,
         beforeDoing: widget.workflow.position != "" && pos > ( i - 1 ),

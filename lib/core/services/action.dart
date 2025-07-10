@@ -197,8 +197,10 @@ class ActionService {
                     subViewID = splitted[1];
                   }
                   navigate = true;   
-                  globalActionBar.currentState?.setState(() {});
-                  globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
+                  Future.delayed(Duration(seconds: 1), () {
+                    globalActionBar.currentState?.setState(() {});
+                    globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
+                  });
                 }
               } else {
                 navigate = true;  
