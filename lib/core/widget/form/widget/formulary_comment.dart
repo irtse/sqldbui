@@ -8,6 +8,7 @@ import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class FormularyCommentsWidget extends StatefulWidget {
   model.View view;
+  model.Item refItem;
   double width;
   double height;
 
@@ -17,7 +18,8 @@ class FormularyCommentsWidget extends StatefulWidget {
     super.key, 
     required this.width,
     required this.height,
-    required this.view,    
+    required this.refItem,    
+    required this.view,
   });
   @override FormularyCommentsWidgetState createState() => FormularyCommentsWidgetState();
 }
@@ -25,22 +27,20 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
     @override Widget build(BuildContext context) {
       List<Widget> widgets = [];
       var path = "";
-      for (var i in widget.view.items) {
-        if ((i.commentsPath ?? "") == "") {
-          continue;
-        }
-        widgets.add(FutureBuilder(future: APIService().get<model.View>(i.commentsPath!, true, context), 
+      if ((widget.refItem.commentsPath ?? "") != "") {
+        widgets.add(FutureBuilder(future: APIService().get<model.View>(widget.refItem.commentsPath!, true, context), 
           builder: (a,snap) {
           List<Widget> w = [];
           for (var s in (snap.data?.data ?? [])) {
             path = s.actionPath;
             for (var item in s.items) {
-              w.add(FormularyCommentWidget(comp: this, item: item, width: widget.width, commentPath: i.commentsPath!));
+              w.add(FormularyCommentWidget(comp: this, item: item, width: widget.width, commentPath: widget.refItem.commentsPath!));
             }
           }
           return Column( children: w.reversed.toList() );
         }));
       }
+        
       
       if (widgets.isEmpty) {
         return EmptyFormularyWidget();

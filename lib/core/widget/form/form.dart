@@ -17,7 +17,7 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
-Map<String, List<Map<String, dynamic>>> flashedForm = <String, List<Map<String, dynamic>>>{};
+Map<String, Map<String, dynamic>> flashedForm = <String, Map<String, dynamic>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
   bool reloadWorkflow = true;
@@ -30,9 +30,10 @@ class DataFormWidget extends StatefulWidget {
   bool scroll, subForm, subSubForm, isSplitted, noTitle;
   List<DataFormWidget> wrappers = <DataFormWidget>[];
   Map<String, List<DataFormWidget>> oneToManiesForm = {};
+  List<OneToManyState> oneToManiesStateForm = [];
+  bool isOneToMany = false;
   GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   GlobalKey<FormularyHeaderWidgetState> headerKey = GlobalKey<FormularyHeaderWidgetState>();
-  Map<DataFormWidget, OneToManyState> oneToManiesStateForm = <DataFormWidget, OneToManyState>{};
   List<GlobalKey<FormWidgetState>>wrappersGlobalKey = <GlobalKey<FormWidgetState>>[];
   
   int subMenuIndex = 0;
@@ -44,6 +45,7 @@ class DataFormWidget extends StatefulWidget {
     this.subForm = false, 
     this.subSubForm = false,
     this.isSplitted = false,
+    this.isOneToMany = false,
     this.superFormSchemaName = "" });
   @override FormWidgetState createState() => FormWidgetState();
 }
@@ -53,7 +55,7 @@ class FormWidgetState extends State<DataFormWidget> {
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
     try{
-      newDropDownValue = {};
+      widget.oneToManiesStateForm = [];
       searchCtrl = {};
 
       widget.detectChange = false;
@@ -82,7 +84,15 @@ class FormWidgetState extends State<DataFormWidget> {
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         
         widget.cacheForm = newCacheEntry;
-
+        if (!widget.isOneToMany && widget.view!.isEmpty) {
+          if (flashedForm["${widget.view?.name}"] != null) {
+            widget.cacheForm = flashedForm["${widget.view?.name}"]!;
+          } else {
+            flashedForm["${widget.view?.name}"] = widget.cacheForm;
+          }
+        }
+        
+        
         switch (widget.subMenuIndex) {
           case 0: 
           GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
@@ -108,6 +118,7 @@ class FormWidgetState extends State<DataFormWidget> {
           case 1: content = FormularyCommentsWidget(
             height: mainHeight,
             width: widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40),
+            refItem: refItem,
             view: widget.view!);
           case 2:
             content = getSynthesis(refItem.synthesisPath ?? "", mainHeight);
@@ -254,6 +265,7 @@ class FormWidgetState extends State<DataFormWidget> {
                 canUpdate: widget.view!.actions.contains("put") && widget.view!.actions.contains("delete"),
               ), 
           FormularyActionBarWidget(
+            workflow: workflow,
             isFirst: int.parse(workflow?.current ?? "0") <= 1,
             cacheForm: widget.cacheForm,
             show: show, 

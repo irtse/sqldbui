@@ -81,8 +81,8 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
     }
     try {
     return AlertWidget(
-      widget: Column(
-        mainAxisSize: MainAxisSize.min, 
+      widget: SingleChildScrollView( child: Column(
+      mainAxisSize: MainAxisSize.min, 
       children: [
       Padding(padding: EdgeInsets.only(top:20, left: 20, right:20), 
         child :  Text(widget.triggers[widget.index].name == null ? "" : (await getOnFlow(widget.triggers[widget.index].name ?? "")).toUpperCase(), overflow: TextOverflow.ellipsis,
@@ -124,9 +124,10 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
                 body[bb] =  widget.triggers[widget.index].body[bb];
               }
             }
+            print("BODY $body");
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
-                  ActionService.onSuccessMethod("POST", e.data!.first, {...b }, trigger.schema, files, context);
+                  ActionService.onSuccessMethod("POST", e.data!.first, body, trigger.schema, files, context);
                 }
               }).catchError( (e) {});
             if (widget.isCached) {
@@ -167,7 +168,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
-    ],));
+    ])));
     } catch(e,s) {
       print(e);
       print(s);

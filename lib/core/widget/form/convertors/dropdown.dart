@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 
 Map<String,Map<String,String>> currentDropdown = {};
-Map<String, Map<String,String>> newDropDownValue = {};
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
   final FormWidgetState? component;
@@ -343,6 +342,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
         }
       }
     }
+    print(widget.type);
     return MultiDropdown<String>(
         max: max,
         changeFunction: (dynamic value) async {
@@ -361,10 +361,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
             ctrls.closeDropdown();
             ctrls.openDropdown(null, widget.label);
-            if (newDropDownValue[widget.url] == null) {
-              newDropDownValue[widget.url ?? ""] = {};
-            }
-            newDropDownValue[widget.url ?? ""]?[widget.name] = value;
         } : null,
                         controller: ctrls,
                         singleSelect: true,
@@ -441,16 +437,10 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         onSelectionChange: (values) {
                           if (values.isEmpty) { return; }
                           widget.component?.widget.detectChange = true;
-                          widget.form[widget.name]=mapped[values[0]]?.id;
+                          widget.form[widget.name]=mapped[values[0]]?.id ?? values[0]; // PB FOR LINK ADD 
                           try {
                             var item = mapped[values[0]];
                             if (widget.url != null && item != null) {
-                              if (currentView?.isEmpty ?? false) {
-                                if (currentDropdown[viewID] == null) {
-                                  currentDropdown[viewID!] = {};
-                                }
-                                currentDropdown[viewID!]?[widget.name] = values[0];
-                              }
                               widget.wrappers?.currentState?.setState( () { 
                                 widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                               }); 

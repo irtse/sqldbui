@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -31,7 +32,13 @@ class OneToManyWidget extends StatefulWidget {
   OneToManyState createState() => OneToManyState();
 }
 class OneToManyState extends State<OneToManyWidget> {
+  bool first = true;
   @override Widget build(BuildContext context) {
+    if (first) {
+      widget.component?.widget.oneToManiesStateForm.add(this);
+      first = false;
+    }
+    
     var schema =  widget.component?.widget.view!.schema;
     var scheme = schema?[widget.name];
 
@@ -39,6 +46,7 @@ class OneToManyState extends State<OneToManyWidget> {
     widget.filtered = (widget.component?.widget.oneToManiesForm[widget.name] ?? []).where((e) {
       return (e.view?.id ?? - 1) < 0;
     }).toList();
+    
     if (widget.value != null) { // TEST => nvnv
       return FutureBuilder<APIResponse<model.View>>(
         future: APIService().get(widget.value, true, null), 
@@ -74,7 +82,8 @@ class OneToManyState extends State<OneToManyWidget> {
     }
     List<Widget> rows = [Padding( 
       padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10), 
-      child: Text("$val ${widget.require ? '*' : ''}:"))]; 
+      child: Text("$val ${widget.require ? '*' : ''}:", style: TextStyle( color: widget.require 
+      && (widget.component?.widget.oneToManiesForm[widget.name] ?? []).isEmpty && errorFormKey.currentState?.widget.error != null ? Colors.red : null )))]; 
     if (!readOnly && (canPost || widget.component?.widget.view != null) || (widget.component?.widget.view?.isEmpty ?? false)) {
         var filtered = widget.component?.widget.oneToManiesForm[widget.name] ?? [];
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
@@ -97,7 +106,7 @@ class OneToManyState extends State<OneToManyWidget> {
               widget.component?.widget.oneToManiesForm[widget.name] = [];
             }
             widget.component?.widget.oneToManiesForm[widget.name]!.add( 
-              DataFormWidget(key: k, noTitle: true, view: newView, scroll: false, subForm: true, 
+              DataFormWidget(key: k, noTitle: true, view: newView, scroll: false, subForm: true, isOneToMany: true,
               superFormSchemaName: widget.schemaName)); 
           });
         }));
@@ -168,7 +177,8 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
             items: <model.Item>[item]
           );
           var k = GlobalKey<FormWidgetState>();
-          var dataForm = DataFormWidget(key: k, noTitle: true, view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
+          var dataForm = DataFormWidget(key: k, isOneToMany: true,
+            noTitle: true, view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
 
           if (!widget.readOnly && data.actions.contains("delete")) {
             var w = Stack( children: [ 
@@ -203,16 +213,17 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
         }      
       }
     }
+    
     try {
-    return Column(children: [ 
-      FutureBuilder(future: widget.state.controlButtons(widget.readOnly, widget.canPost, widget.scheme), builder: (a,s) {
-        if (s.data != null) {
-          return Row(children: s.data! );
-        }
-        return Row(children: [] );
-      }),
-      ...items, ...widget.filtered
-    ]);
+      return Column(children: [ 
+        FutureBuilder(future: widget.state.controlButtons(widget.readOnly, widget.canPost, widget.scheme), builder: (a,s) {
+          if (s.data != null) {
+            return Row(children: s.data! );
+          }
+          return Row(children: [] );
+        }),
+        ...items, ...widget.filtered
+      ]);
     } catch(e, s) {
       print(e);
       print(s);

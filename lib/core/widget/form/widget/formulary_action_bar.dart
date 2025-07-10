@@ -13,12 +13,14 @@ class FormularyActionBarWidget extends StatefulWidget {
   model.Item refItem;
   bool isFirst = false;
   FormWidgetState component;
+  model.Workflow? workflow;
   Map<String, dynamic> cacheForm;
   Map<String, model.SchemaField> schema;
   
   final formKey = GlobalKey<FormState>();
   FormularyActionBarWidget ({ 
     super.key, 
+    required this.workflow,
     required this.cacheForm,
     required this.show,
     required this.view, 
@@ -47,7 +49,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
         for (var state in { "completed" : { "purpose": "validate task", "color": Colors.green, "icon": Icons.check },
                             "dismiss" :  { "purpose": "dismiss task", "color": Colors.orange, "icon": Icons.back_hand_outlined }, 
                             "refused":  { "purpose": "refused task", "color": Colors.red, "icon": Icons.close}, }.entries) {
-          if (widget.isFirst && state.key == "dismiss") {
+          if ((widget.isFirst || !(widget.workflow?.isDismissable ?? true)) && state.key == "dismiss") {
             continue;
           }
           var purpose = await getOnFlow("${widget.refItem.values["override_state_${state.key}"] ?? state.value["purpose"]}");

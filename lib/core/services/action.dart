@@ -6,10 +6,8 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
-import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
-import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -28,9 +26,10 @@ class ActionService {
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, 
                                  String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, 
                                  bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) {
+      redirection = null;
       errors = [];
       return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent, ignore);
-    }
+  }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
   static void Function() pressedForm(ButtonWidgetState? widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
@@ -50,12 +49,12 @@ class ActionService {
         }
       };
   }
-  static bool redirection = false;
+  static String? redirection;
   static Future<List<model.View>> pressedFormFuture(DataFormWidget form, String schemaName, String url, 
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, 
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
-    redirection = false;
+    flashedForm = {};
     var body = <String, dynamic>{};
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
     if (resp.isNotEmpty  && !overrideDest) {
@@ -64,12 +63,40 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    
+    for (var v in form.oneToManiesForm.entries) {
+      for (var vv in v.value) {
+        if (!vv.formKey.currentState!.validate()) {
+          errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
+          errorFormKey.currentState?.setState((){});
+          print("juuyjujj");
+          errors = ["form is not valid !"]; 
+          break;
+        }
+        if (vv.detectChange) {
+          form.detectChange = true; 
+          break;
+        }
+      }
+    }
+    for (var v in schema.keys) {
+      if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
+      && schema[v]!.require && (form.oneToManiesForm[v] ?? []).isEmpty) {
+        errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
+        errorFormKey.currentState?.setState((){});
+        print("tynty");
+        errors = ["form is not valid !"]; 
+        for ( var o in form.oneToManiesStateForm ) {
+          o.setState((){});
+        }
+        break;
+      }
+    }
     if (method != "delete" && errors.isEmpty && !ignore) {
       if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) { 
         if (form.formKey.currentState != null && form.subForm) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
+          print("sddssdff");
           errors = ["form is not valid !"]; 
         }
         return []; 
@@ -97,14 +124,7 @@ class ActionService {
         }
       return views;
     }
-    for (var v in form.oneToManiesForm.values) {
-      for (var vv in v) {
-        if (vv.detectChange) {
-          form.detectChange = true; 
-          break;
-        }
-      }
-    }
+    
     if (isDraft && form.view!.id == mainForm.currentState!.widget.view!.id) {
       mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
@@ -116,7 +136,6 @@ class ActionService {
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
     body = await getBody(method, { ...form.cacheForm}, body, schema, form.oneToManiesForm, context);
-    print("1 BODY $path $body");
     var files = await getFiles(method, { ...form.cacheForm}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
@@ -133,7 +152,7 @@ class ActionService {
       }
       if (form.view!.actions.contains(method.toLowerCase())) {    
         // ignore: use_build_context_synchronously
-        print("2 BODY $path $method $body");
+        print(body);
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
@@ -162,36 +181,33 @@ class ActionService {
                 isNew = value.data![0].items[0].values["id"]; 
               }
             }
-            print("REDIRECT ${views.last.innerRedirection}");
-            if (views.last.innerRedirection != "") { 
-              print("REDIRECTION !!!");
-              redirection = true;
-              Future.delayed(Duration(seconds: 4), () {
-                  var splitted = views.last.innerRedirection.split("?rows=");
-                  if (splitted.length >= 2) {
-                    if (method == "delete") {
-                      viewID = "#${splitted[1].split("/").last}";
-                      subViewID = null;
-                    } else {
-                      viewID = "@${splitted[0].split("/").last}";
-                      subViewID = splitted[1];
-                    }
-                    navigate = true;   
-                    globalActionBar.currentState?.setState(() {});
-                    globalMainViewKey.currentState?.refreshUrl("$baseURL${views.last.innerRedirection}", subViewID, true); 
+            if (views.last.innerRedirection != "") {
+              redirection = views.last.innerRedirection;
+            }
+            if (!form.subForm) {
+              if (redirection != "") { 
+                print("REDIRECTION !!! $path -> $redirection");
+                var splitted = redirection!.split("?rows=");
+                if (splitted.length >= 2) {
+                  if (method == "delete") {
+                    viewID = "#${splitted[1].split("/").last}";
+                    subViewID = null;
+                  } else {
+                    viewID = "@${splitted[0].split("/").last}";
+                    subViewID = splitted[1];
                   }
-              });
-            } else if (!form.subForm) {
-              if (!redirection) {
-                print("THERE !!!");
-                Future.delayed(Duration(seconds: 4), () {
-                  navigate = true;  
-                  globalMainViewKey.currentState?.setState(() { firstAPI = true; });
-                  globalMenuKey.currentState?.setState(() { navigate = true; });
-                  showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                        InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
+                  navigate = true;   
+                  globalActionBar.currentState?.setState(() {});
+                  globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
+                }
+              } else {
+                navigate = true;  
+                firstAPI = true; 
+                globalMainViewKey.currentState?.setState(() { });
+                globalMenuKey.currentState?.setState(() { });
+                showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
+                      InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
                                             alertBannerLocation:  AlertBannerLocation.bottom);
-                });
               }
             }
           }
@@ -254,24 +270,6 @@ class ActionService {
   }
   static Future<Map<String, dynamic>> getBody(String method, Map<String, dynamic> values, Map<String, dynamic> body, 
     Map<String, model.SchemaField> schema, Map<String, List<DataFormWidget>> oneToManies, BuildContext context) async {
-    if (newDropDownValue.isNotEmpty && (method == "post" || method == "put")) {
-      for(var url in newDropDownValue.keys) {
-          for (var name in newDropDownValue[url]!.keys) {
-            if (values[name]?.contains(newDropDownValue[url]![name]) ?? true) {
-              continue;
-            }
-            var resp = await APIService().post<model.Shallowed>("$url&shallow=enable", {
-              "name" : newDropDownValue[url]![name],
-            // ignore: invalid_return_type_for_catch_error
-            }, context);
-            if ( resp.data?.isNotEmpty ?? false) {
-              body[name] = resp.data?.first.id;
-            }
-          }
-      }
-      searchCtrl = {};
-      newDropDownValue = {};
-    }
     if (values["id"] != null) { 
       body["id"]=int.parse(values["id"]); 
     }
@@ -280,6 +278,7 @@ class ActionService {
           if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }          
           if (!["dbdest_table_id"].contains(fieldName) && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)) { 
+            print("$fieldName ${values[fieldName]}");
             if (values[fieldName] is Map<String, List<PlatformFile>>){
               for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
                 for (var file in values[fieldName][fileStr] as List<PlatformFile>) {
@@ -290,10 +289,13 @@ class ActionService {
                   }
                 }
               }
-            } else if ( (oneToManies[fieldName] ?? []).isNotEmpty) {
-              body[fieldName] = (oneToManies[fieldName]?.map( (e) {
-                return e.cacheForm;
-            }) ?? []).toList();
+            } else if ((oneToManies[fieldName] ?? []).isNotEmpty) {
+              body[fieldName] = [];
+              for (var o in (oneToManies[fieldName] ?? [])) {
+                var b = await getBody(method, o.cacheForm, {}, schema[fieldName]!.schema, o.oneToManiesForm, context);
+                print("ONE $b ${o.cacheForm}");
+                body[fieldName].add(b);
+              }
             } else {
               body[fieldName]=values[fieldName]; 
             }

@@ -46,8 +46,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
     var actions = widget.component?.widget.view?.actions ?? currentView?.actions ?? [];
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
-    var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) 
-    || (mainForm.currentState?.widget.view?.readOnly ?? false);
+    var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || (mainForm.currentState?.widget.view?.readOnly ?? false);
     if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
@@ -144,8 +143,6 @@ class SubManyToManyWidget extends StatefulWidget {
   // ignore: library_private_types_in_public_api
   _SubManyToManyState createState() => _SubManyToManyState();
 }
-Map<String, Map<String,String>> newManyToManyValue = {};
-
 class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
@@ -163,7 +160,10 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
     ctrls = MultiSelectController<Map<String, dynamic>>();
     widget.form[widget.name] = <dynamic>[];
-    var l = await getOnFlow(widget.label);
+    var l = widget.label;
+    try {
+      l = await getOnFlow(widget.label);
+    } catch(e) {}
     int max = 0;
     if (widget.datas != null) {
       for (var item in widget.datas!) {
@@ -183,6 +183,39 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 break;
               }
             }
+            if (widget.readOnly) {
+              if (widget.value == null) {
+                return Container();
+              }
+              return SizedBox(width: 400, height: 30, 
+                child: TextFormField(
+                  readOnly: true,
+                  initialValue: widget.value,
+                  style: TextStyle(fontSize: 14, color: Colors.black),
+                  decoration: InputDecoration(
+                    focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                    disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                    border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                    isDense: true,
+                    suffixIconColor: Theme.of(context).primaryColor,
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    filled: true,
+                    fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
+                    contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
+                      top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
+                      bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
+                    suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
+                    hintText: TranslateConstants.writeValue.toLowerCase(),
+                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+                    labelText: l.toLowerCase(),
+                    errorStyle: const TextStyle(fontSize: 0,),
+                  ),
+                )
+              );
+            }
           } else {
             widget.form[widget.name] = [];
             for (var val in widget.value ?? []) {
@@ -197,6 +230,39 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 widget.form[widget.name].add(val.serialize());
                 break;
               }
+            }
+            if (widget.readOnly) {
+              if (widget.value == null) {
+                return Container();
+              }
+              return SizedBox(width: 400, height: 30, 
+                child: TextFormField(
+                  readOnly: true,
+                  initialValue: widget.value.map( (e) => e.name).join(","),
+                  style: TextStyle(fontSize: 14, color: Colors.black),
+                  decoration: InputDecoration(
+                    focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                    disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                    border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                    isDense: true,
+                    suffixIconColor: Theme.of(context).primaryColor,
+                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    filled: true,
+                    fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
+                    contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
+                      top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
+                      bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
+                    suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
+                    hintText: TranslateConstants.writeValue.toLowerCase(),
+                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+                    labelText: l.toLowerCase(),
+                    errorStyle: const TextStyle(fontSize: 0,),
+                  )
+                )
+              );
             }
           }
         } catch(e) {}
@@ -219,15 +285,8 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                             ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
                               "name": value,
                             }, label: value, selected: true));
-                            widget.form[widget.name].add( {
-                              "name": value,
-                            });
                             ctrls.closeDropdown();
                             ctrls.openDropdown(null, widget.label);
-                            if (newManyToManyValue[widget.mainURL] == null) {
-                              newManyToManyValue[widget.mainURL ?? ""] = {};
-                            }
-                            newManyToManyValue[widget.mainURL ?? ""]?[widget.name] = value;
                         } : null,
                         controller: ctrls,
                         items: items,
@@ -309,14 +368,8 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           return null;
                         },
                         onSelectionChange: (values) {
-                          if (values.isEmpty) {
-                            return;
-                          }
                           widget.component?.widget.detectChange = true;
-                          if (widget.form[widget.name] == null) {
-                            widget.form[widget.name] = [];
-                          }
-                          widget.form[widget.name].add(values[0]);
+                          widget.form[widget.name] = values;
                         },
                       );
   }

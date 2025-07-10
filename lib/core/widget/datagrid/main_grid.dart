@@ -52,15 +52,17 @@ class MainGridWidgetState extends State<MainGridWidget> {
           dataRef: item.dataRef,
           schemaID: item.schemaID,
           schema: schema,
+          valuesMany: item.valuesMany,
           isNew: item.news,
           isDraft: item.isDraft,
           cellID: item.values["id"],
           values: item.values, 
           sharing: item.sharing,
-          isLink: item.linkPath != "", readOnly: currentView!.readOnly || item.readonly)); 
+          isLink: item.linkPath != "", 
+          readOnly: currentView!.readOnly || item.readonly)); 
       }
       var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, widget.max);
-      
+      print(widget.view?.schema.keys);
       for (var fieldName in order) {
           columns = getColumn(columns, widget.schemeItems, schema, fieldName, datas, order);
       }
@@ -98,7 +100,7 @@ class MainGridWidgetState extends State<MainGridWidget> {
     String? lab = (schema[fieldName]?.label ?? "") != "" ? schema[fieldName]!.label : fieldName;
     String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]!.type);
     String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase())).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-    if (!isNotValidCol && !(filterTempOrderView[viewID]?.contains(fieldName) ?? true) && !type.contains("many")) { 
+    if (!isNotValidCol && !(filterTempOrderView[viewID]?.contains(fieldName) ?? true)) { 
       filterTempOrderView[viewID]?.add(fieldName); 
     }
 
@@ -137,7 +139,7 @@ Map<String,String> realOrderMap(model.View? view, bool subtable) {
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
-      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description"  && !type.contains("many") && schema[f] != null
+      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
       return ok;
@@ -165,7 +167,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
-      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description"  && !type.contains("many") && schema[f] != null
+      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
       return !(schema[f]?.hidden ?? false) && (ok);

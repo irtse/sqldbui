@@ -81,8 +81,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
           }
           
           String? mainUrl, url;
-          if (!readOnly && field.actionPath != "") { mainUrl = field.actionPath; }
-          if (!readOnly && field.valuesPath != "") { url = field.valuesPath; }
+          if (field.actionPath != "") { mainUrl = field.actionPath; }
+          if (field.valuesPath != "") { url = field.valuesPath; }
           value = value == "" ? null : value;
           if (readOnly && value == null) {
             continue;
@@ -99,13 +99,13 @@ class FormularyWidgetState extends State<FormularyWidget> {
               field.description, 
               field.require, 
               readOnly || (value != null && widget.view.isEmpty) || fieldName == "state", 
-              value == "" ? null : value, 
+              (value == "" ? null : value), 
               mainUrl,
               url, 
               path, 
               widget.component, 
               widget.view.isEmpty,
-              field.autoFill,
+              flashedForm[widget.view.name]?[fieldName] ?? field.autoFill,
               field.translatable,
               widget.wrappers,
             ), builder: (a,b) {
@@ -115,15 +115,11 @@ class FormularyWidgetState extends State<FormularyWidget> {
               return Container();
             });
             if (!field.type.contains("onetomany") && widget.show) {
-              if (field.type.contains("manytomany") && readOnly) {
-                fields.add(f);
-              } else {
                 var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
                   width: field.type.contains("bool") ? 200 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : 40, child: f));
                 fields.add(w);
-              }
             }
             if ((field.type.contains("onetomany") && widget.show) 
             && !(widget.view.isEmpty && !widget.view.actions.contains("post"))) { 

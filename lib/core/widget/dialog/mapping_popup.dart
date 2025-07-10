@@ -153,7 +153,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                     ), child: Padding(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10), child: f,))));
       }
     }
-    Widget w = Padding( padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30), child: Column( children : [
+    Widget w = Padding( padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 30), child:  SingleChildScrollView( child: Column( mainAxisSize: MainAxisSize.min, children : [
           Padding( padding: const EdgeInsets.only(left: 20, right: 20, top: 10), 
           child: Row(children: [
             Padding( 
@@ -191,21 +191,20 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 onPressed: () async { 
                   if (widget.isExport && formKey.currentState!.validate()) {
                     formKey.currentState!.save();
-                    var path = currentView!.actionPath;
+                    var path = currentView!.exportPath;
                     if (!globalGridKey.currentState!.widget.isSelected && selectedGrid.isNotEmpty) {
                       try {
-                        var ids = selectedGrid.where( (e) => e.cells.isNotEmpty ).map( (e) => "${e.cells.first.value}" ).join(",");
+                        var ids = selectedGrid.join(",");
                         path = path.replaceAll("rows=all", "rows=$ids");
                       } catch (e) { /* */ } 
                     } else if (globalGridKey.currentState!.widget.isSelected && unselectedGrid.isNotEmpty) {
-                      path = "&filter_line=";
+                      path += "&filter_line=";
                       var params = "";
+                      List<String> ids = [];
                       for (var row in unselectedGrid) {
-                        if (row.cells.isNotEmpty) { 
-                          if (params.isNotEmpty) { path += "|"; }
-                          params += "id%3C%3E${row.cells.first.value},";
-                        }
+                        ids.add("id%3C%3E$row");
                       }
+                      params += ids.join("+");
                       path += params;
                     }
                     if (globalGridKey.currentState!.widget.isSelected || selectedGrid.isNotEmpty) {
@@ -215,6 +214,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                           if (!widget.forcedSchema!.containsKey(key)) { newCacheEntry.remove(key); }
                         }
                       }
+                      print("URL $path ${ cache["format"]} ${newCacheEntry}");
                       widget.isExport ? 
                         await APIService().getWithDownload(path, cache["format"], newCacheEntry, 
                                 "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
@@ -231,7 +231,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                       Navigator.of(context).pop();
                     }
                   }
-                }))] )) ]));
+                }))] )) ])));
     if (!isWeb) {
       (Platform.isIOS ? getApplicationDocumentsDirectory() : (Platform.isAndroid ? (getExternalStorageDirectory()) : (getDownloadsDirectory()))).then((value) {
         Future.delayed(const Duration(milliseconds: 500), () {

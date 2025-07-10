@@ -55,7 +55,7 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
                   child: w)
               );
     return AlertWidget(
-      widget: Column(
+      widget:  SingleChildScrollView( child:  Column(
         mainAxisSize: MainAxisSize.min, 
       children: [
       Padding(padding: EdgeInsets.only(top:20, left: 20, right:20), 
@@ -97,6 +97,6 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
           child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
-    ],));
+    ])));
   }
 }

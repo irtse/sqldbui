@@ -87,7 +87,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 navigate = true;
                 var id = filterRestr[viewID];
                 filterRestr[viewID] = ""; 
-                APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=${id}"), context).then((value) {
+                APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=$id"), context).then((value) {
                   forceFilter = true; 
                   setState(() {});
                   globalMainViewKey.currentState?.setState(() { }); });
@@ -113,6 +113,19 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length)); 
             globalMainViewKey.currentState?.setState(() { });
           })),
+        if (filterRowsWidget.length > 1)
+          Padding(padding: const EdgeInsets.only(left: 5), 
+          child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterRM.toLowerCase(), 
+          style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
+            return Theme.of(context).primaryColor; }), ),
+            icon: Icon( Icons.remove, size: 17, color: Theme.of(context).highlightColor, ),
+            onPressed: () { 
+              show = true;
+              navigate = true;
+              filterRestr.remove(viewID);
+              filterRowsWidget.removeLast(); 
+              globalMainViewKey.currentState?.setState(() { });
+            })),
         if (filterRowsWidget.isNotEmpty)
           Padding(padding: const EdgeInsets.only(left: 5), 
           child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterApplyT.toLowerCase(), 

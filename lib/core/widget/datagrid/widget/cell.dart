@@ -1,7 +1,10 @@
 
 // ignore: must_be_immutable
+import 'package:flutter/foundation.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -54,7 +57,8 @@ class GridCell {
 // ignore: must_be_immutable
 class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   bool readOnly; bool isLink = true;
-  String cellID; String schemaID;
+  String cellID; 
+  String schemaID;
   double maxheight;
   bool translatable = true;
   bool isNew = false;
@@ -109,7 +113,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
             // ignore: use_build_context_synchronously
-            color: Theme.of(context).primaryColorLight)
+            color: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? Theme.of(context).primaryColor : Theme.of(context).primaryColorLight)
           );
     if (widget.translatable) {
       wid = FutureBuilder(future: getOnFlow("$v"), builder: (a,b) {
@@ -126,7 +130,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
             // ignore: use_build_context_synchronously
-            color: Theme.of(context).primaryColorLight)
+            color:(widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..." ? Theme.of(context).primaryColor : Theme.of(context).primaryColorLight)
           );
         }
         return Text( "$v", 
@@ -134,7 +138,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
             // ignore: use_build_context_synchronously
-            color: Theme.of(context).primaryColorLight)
+            color: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? Theme.of(context).primaryColor : Theme.of(context).primaryColorLight)
           );
       });      
     }
@@ -170,6 +174,11 @@ class GridCellWidgetState extends State<GridCellWidget> {
           } 
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
-        child: Center(child: wid )))]);
+        child: Center(child: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? InkWell( 
+            onTap: () async {
+              String? newDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: await getOnFlow("select a folder where to download file"));
+              await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 
+                    "$newDirectory/${widget.value.toString().split("/").last}", kIsWeb, null);
+            },  child: wid) : wid )))]);
   }
 }

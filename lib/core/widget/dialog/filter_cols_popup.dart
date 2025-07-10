@@ -231,7 +231,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
       filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; 
     }
     filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( 
-      (fieldName) => !(widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many"))).toList();
+      (fieldName) => !(widget.schema[fieldName] == null)).toList();
     items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), child:  Row( children : [ 
           Container( width: 44),
           Padding( padding: const EdgeInsets.only(right: 10), 
@@ -250,7 +250,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
         ]))));
     
     for (var (index,fieldName) in (filterIndexOrderView[viewID] ?? []).where( (el) => widget.schema[el] != null).indexed) {
-        if (widget.schema[fieldName] == null || widget.schema[fieldName]!.type.contains("many")) { continue; }
+        if (widget.schema[fieldName] == null) { continue; }
         var scheme =  widget.schema[fieldName]!; 
         var label = await getOnFlow(scheme.label);
         items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), child:  Row( children : [ 

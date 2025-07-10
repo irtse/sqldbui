@@ -6,7 +6,6 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:uuid/uuid.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
@@ -66,7 +65,7 @@ class GridWidgetState extends State<GridWidget> {
     List<GridRowWidget> rows = buildRows(widget.columns, widget.source);
     if (widget.isSelected && selectedGrid.isEmpty) { 
       for (var row in rows) { 
-        selectedGrid.add(row); 
+        selectedGrid.add(row.cellID); 
         row.isSelected = true;
       }
     }
@@ -193,7 +192,7 @@ class GridWidgetState extends State<GridWidget> {
 
   List<GridRowWidget> buildRows(List<GridColumnWidget> columns, List<Value> datas) {
     return datas.map<GridRowWidget>((mapped) {
-      bool found = selectedGrid.where((element) => element.cellID == mapped.values["id"]).isNotEmpty;
+      bool found = selectedGrid.where((cellID) => cellID == mapped.values["id"]).isNotEmpty;
       return GridRowWidget( 
         news: mapped.isNew,
         cellID: "${mapped.values["id"]}",
@@ -222,7 +221,9 @@ class GridWidgetState extends State<GridWidget> {
           isLink: mapped.isLink,
           columnName: column.columnName, 
           wasValue: Map.from(mapped.values)[column.columnName],
-          value: mapped.values[column.columnName], 
+          value: mapped.valuesMany[column.columnName]?.map( (e) {
+            return (e as model.Shallowed).name;
+          }).toList().join(",") ?? mapped.values[column.columnName], 
         );
       }, ).toList(), 
       showCheckboxColumn: widget.showCheckboxColumn, 

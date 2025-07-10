@@ -228,9 +228,11 @@ class Workflow extends SerializerDeserializer<Workflow> {
     this.steps=emptyMapList,
     this.currentDismiss = false,
     this.isDismiss = false,
+    this.isDismissable = true,
   });
   String id = "";
   bool isClose = false;
+  bool isDismissable = true;
   bool isDismiss = false;
   String current = "";
   String position = "";
@@ -250,6 +252,8 @@ class Workflow extends SerializerDeserializer<Workflow> {
       currentDismiss: json.containsKey("current_dismiss") && json["current_dismiss"] != null ? bool.parse("${json["current_dismiss"]}") : false, 
       currentClose: json.containsKey("current_close") && json["current_close"] != null ? bool.parse("${json["current_close"]}") : false, 
       isClose: json.containsKey("is_close") && json["is_close"] != null ? bool.parse("${json["is_close"]}") : false, 
+      isDismissable: json.containsKey("is_dismissable") && json["is_dismissable"] != null ? bool.parse("${json["is_dismissable"]}") : true, 
+
       isDismiss: json.containsKey("is_dismiss") && json["is_dismiss"] != null ? bool.parse("${json["is_dismiss"]}") : false, 
       currentHub: json.containsKey("current_hub") && json["current_hub"] != null ? bool.parse("${json["current_hub"]}") : false, 
       steps: json.containsKey("steps") && json["steps"] != null ? fromMapListJson<Step>(json["steps"], Step()) : <String, List<Step>>{}, 
@@ -269,6 +273,7 @@ class View extends SerializerDeserializer<View> {
     this.schemaName = "",
     this.linkPath = "",
     this.id = -1,
+    this.exportPath = "",
     this.readOnly = false,
     this.wrapperSchema,
     this.wrapper,
@@ -298,6 +303,7 @@ class View extends SerializerDeserializer<View> {
   List<Trigger> triggers;
   bool isEnum;
   List<Consent> consents;
+  String exportPath;
   String actionPath;
   List<dynamic> actions;
   List<Item> items;
@@ -330,6 +336,7 @@ class View extends SerializerDeserializer<View> {
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    exportPath: json.containsKey("export_path") && json["export_path"] != null ? json["export_path"] : "",
     innerRedirection: json.containsKey("inner_redirection") && json["inner_redirection"] != null ? json["inner_redirection"] : "",
     isEnum:  json.containsKey("is_enum") && json["is_enum"] != null ? bool.parse("${json["is_enum"]}") : false,
     commentBody: json.containsKey("comment_body") && json["comment_body"] != null ? json["comment_body"] : {},

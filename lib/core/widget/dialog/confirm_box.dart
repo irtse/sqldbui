@@ -47,7 +47,7 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
     }
    
     return AlertWidget(
-        widget: Column(mainAxisSize: MainAxisSize.min, children: [
+        widget:  SingleChildScrollView( child:  Column(mainAxisSize: MainAxisSize.min, children: [
       Center(child: Padding( padding: EdgeInsets.only(bottom: 10), 
         child: Icon(Icons.help_outline_outlined, size: 80, color: Colors.grey))),
       Center(child: Text((await getOnFlow(TranslateConstants.sure)).toUpperCase(), 
@@ -72,6 +72,6 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(
           (await getOnFlow(TranslateConstants.no)).toUpperCase(), 
           style: TextStyle(color: Colors.white, fontSize: 15),)))]))
-    ]));
+    ])));
   }
 }

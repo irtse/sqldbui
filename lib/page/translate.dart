@@ -44,7 +44,8 @@ class TranslateConstants {
 
   static String filterMenu = "search in menu...";
 
-  static String filterNew = "new filter";
+  static String filterNew = "new filter line";
+  static String filterRM = "remove filter line";
   static String filterApplyT = "apply filter";
   static String filterResetT = "reset filter";
   static String filterSaveT = "save filter";
@@ -208,7 +209,8 @@ Future<void> setUpTranslate() async {
   translator.translate(TranslateConstants.filterSave, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterSave = e.text.toLowerCase());
 
   translator.translate(TranslateConstants.filterViewPlaceholder, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterViewPlaceholder = e.text.toLowerCase());
-
+  
+  translator.translate(TranslateConstants.filterRM, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterRM = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterNew, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterNew = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterApplyT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterApplyT = e.text.toLowerCase());
   translator.translate(TranslateConstants.filterResetT, to: TranslateConstants.lang).then( (e) => TranslateConstants.filterResetT = e.text.toLowerCase());

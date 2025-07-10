@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -52,8 +53,13 @@ class _UploadState extends State<UploadWidget> {
         style: TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
           filled: true,
-          suffixIcon:  widget.type.contains("enum") ? Icon(Icons.format_list_numbered, color: Theme.of(context).secondaryHeaderColor) 
-                      : Icon(Icons.calendar_month, color: Theme.of(context).primaryColor,),
+          suffixIcon: InkWell( 
+            onTap: () async {
+              String? newDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: await getOnFlow("select a folder where to download file"));
+              await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 
+                    "$newDirectory/${widget.value.toString().split("/").last}", kIsWeb, null);
+            },
+            child: Icon(Icons.attach_file, size: 20, color: Theme.of(context).primaryColor)),
           errorStyle: const TextStyle(height: -2),
           floatingLabelBehavior: FloatingLabelBehavior.always,
           fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
@@ -107,9 +113,7 @@ class _UploadState extends State<UploadWidget> {
                 contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
                   top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
                   bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
-                suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
-                  : ( widget.type.contains("link") ? InkWell( 
-                child: Icon(Icons.attach_file, size: 20)) : Icon(Icons.attach_file, color: Theme.of(context).secondaryHeaderColor)),
+                suffixIcon: Icon(Icons.attach_file, size: 20, color: Theme.of(context).secondaryHeaderColor),
                 hintText: TranslateConstants.writePath.toLowerCase(),
                 labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                 labelText: label,
@@ -144,6 +148,9 @@ class _UploadState extends State<UploadWidget> {
                         return;
                       }
                       widget.value = "${widget.value}".replaceAll(e, "").replaceAll(",,", ","); 
+                      if (widget.form[widget.name] == null) {
+                        return;
+                      }
                       var m = widget.form[widget.name] as Map<String,List<PlatformFile>>;
                       var newM = <String,List<PlatformFile>>{};
                       for (var f in m.keys) {

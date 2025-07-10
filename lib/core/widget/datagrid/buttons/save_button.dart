@@ -1,18 +1,18 @@
 
-import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 
 // ignore: must_be_immutable
 class SaveDatagridButtonWidget extends StatefulWidget {
-  List<GridRowWidget> selectedGrid;
+  List<String> selectedGrid;
+  Map<String, model.SchemaField> schema;
   SaveDatagridButtonWidget ({ 
     super.key,
+    required this.schema,
     required this.selectedGrid,
   });
   @override
@@ -25,21 +25,20 @@ class SaveDatagridButtonWidgetState extends State<SaveDatagridButtonWidget> {
       child: SpinKitCircle(color: Colors.white, size: 30.0,)) : IconButton(onPressed: () async {
         setState(() { change = true; });
         for (var i in widget.selectedGrid) {
-          if (i.cells.isNotEmpty) {
             Map<String, dynamic> body = {};
-            for (var j in i.widgetCells) {
-              if (j.cell.columnName != "id" 
-              && detectChanges["${i.cellID}:${j.cell.columnName}"] != null 
-              && detectChanges["${i.cellID}:${j.cell.columnName}"]!.currentState != null
-              && detectChanges["${i.cellID}:${j.cell.columnName}"]!.currentState!.validate()) {
-                body[j.cell.columnName] = cacheChanges["${i.cellID}:${j.cell.columnName}"];
+            for (var j in widget.schema.keys) {
+              if (j != "id" 
+              && detectChanges["$i:$j"] != null 
+              && detectChanges["$i:$j"]!.currentState != null
+              && detectChanges["$i:$j"]!.currentState!.validate()) {
+                body[j] = cacheChanges["$i:$j"];
               }
             }
-            if (body.isNotEmpty && i.cells.isNotEmpty) {
+            if (body.isNotEmpty) {
               await APIService().put<model.View>(
-                currentView!.actionPath.replaceAll("rows=all", "rows=${i.cellID}"), body, null);
+                currentView!.actionPath.replaceAll("rows=all", "rows=$i"), body, null);
             }
-          }
+          
         }
         setState(() { change = false; });
       }, 

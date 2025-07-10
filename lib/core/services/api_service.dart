@@ -26,6 +26,7 @@ var firstAPI = false;
 var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
 class APIConstants {
   static String filterLine = "";
+  static String downloadEndpost = '/main/download';
   static String mainEndpost = '/main';
   static String genericEndpost = '/generic/';
 }
@@ -69,7 +70,7 @@ class APIService {
     }
   }
   static ValueNotifier downloadProgressNotifier = ValueNotifier(0);
-  Future mainDownload(String url, String format, String method, bool isFilter, String? extend, String savePath, bool isWeb, BuildContext context) async {
+  Future mainDownload(String url, String format, String method, bool isFilter, String? extend, String savePath, bool isWeb, BuildContext? context) async {
     try {
       downloadProgressNotifier.value = 0;
       dio.options.headers["authorization"] = auth;
@@ -84,13 +85,22 @@ class APIService {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
-          Future.delayed(const Duration(seconds: 1), () { Navigator.of(context).pop(); });
+          Future.delayed(const Duration(seconds: 1), () { 
+            if (context != null) {
+              Navigator.of(context).pop(); 
+            }  
+          });
         });
       } else {
+        print("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter");
         dio.download("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter", savePath, onReceiveProgress: (actualBytes, int totalBytes) {
           Future.delayed(const Duration(seconds: 1), () {
             downloadProgressNotifier.value = (actualBytes / totalBytes * 100).floor();
-            if (downloadProgressNotifier.value == 100) { Navigator.of(context).pop(); }
+            if (downloadProgressNotifier.value == 100) { 
+              if (context != null) {
+                Navigator.of(context).pop(); 
+              }
+            }
           });   
         });
       }
@@ -241,6 +251,7 @@ class APIService {
             return resp; 
           }
           err = resp.error ?? "internal error";
+          print(err);
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
@@ -306,13 +317,13 @@ class APIService {
             null, Options(contentType: 'multipart/form-data'));
   }
 
-  Future getWithDownload<T extends SerializerDeserializer>(String url, String format, Map<String,dynamic> cache, String savePath, bool isWeb, BuildContext context) async {
+  Future getWithDownload<T extends SerializerDeserializer>(String url, String format, Map<String,dynamic> cache, String savePath, bool isWeb, BuildContext? context) async {
     String asLabel = "";
     for (var key in cache.keys) {
       if (!asLabel.contains(key)) { asLabel += "&${key}_aslabel=${cache[key]!}"; }
     }
     try { mainDownload(url, format, "get", true, 
-      "${"&export=$format"}$asLabel", savePath, isWeb, context);
+      "${ format != "" ? "&export=$format" : ""}$asLabel", savePath, isWeb, context);
     } catch (e) { developer.log('LOG ERR PATH $e', name: 'my.app.category'); }
   }
 

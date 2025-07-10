@@ -41,12 +41,14 @@ class Value {
   String schemaID;
   model.Sharing? sharing;
   
+  Map<String, dynamic> valuesMany = {};
   Map<String, dynamic> values = {};
   Value({ 
     required this.dataRef,
     required this.cellID, 
     required this.isDraft, 
     required this.schemaID,
+    this.valuesMany = const {},
     this.values = const {}, 
     this.isLink = true, 
     this.readOnly = false, 
@@ -59,8 +61,8 @@ bool tempRemoval = false;
 bool noFilterRetrieval = false;
 int globalLimit = 10;
 int globalOffset = 0;
-List<GridRowWidget> unselectedGrid = [];
-List<GridRowWidget> selectedGrid = []; 
+List<String> unselectedGrid = [];
+List<String> selectedGrid = []; 
 Map<String?, int> filterIDName = <String, int>{};
 Map<String?, String> filterRestr = <String, String>{};
 GlobalKey<GridWidgetState> globalGridKey = GlobalKey<GridWidgetState>();
@@ -93,7 +95,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    newDropDownValue = {};
     searchCtrl = {};
 
     await fillSchemeItem();
@@ -228,7 +229,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     ];
     if (widget.isSelected || selectedGrid.isNotEmpty) {
       if (isEditMode[viewID] ?? false) {
-        buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid));
+        buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {},));
       } else {
         if (widget.view?.actions.contains("delete") ?? false) {
           buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
@@ -238,9 +239,9 @@ class DatagridWidgetState extends State<DatagridWidget> {
               onTap: () { 
                 if (selectedGrid.isEmpty) { return; }
                 List<String> ids = [];
-                String schemaID = selectedGrid[0].schemaID;
+                String schemaID = "${widget.view?.schemaID}";
                 for (var item in selectedGrid) { 
-                  ids.add(item.cells[0].cellID.toString()); 
+                  ids.add(item.toString()); 
                 }
                 showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete element(s) <${ids.join(',')}>", validate: () {
                   globalMainViewKey.currentState?.setState(() { 

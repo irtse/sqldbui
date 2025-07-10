@@ -91,16 +91,17 @@ class GridRowWidgetState extends State<GridRowWidget> {
           child: CheckboxListTile(value: widget.isSelected, onChanged: (value) {
             widget.isSelected=value ?? false;
             if (widget.isSelected) { 
-              selectedGrid.add(widget);
+              selectedGrid.add(cellID);
               if (globalGridWidgetKey.currentState!.widget.isSelected) { 
-                unselectedGrid.removeWhere((e) => e.cells.isNotEmpty && e.cells.first.value == cellID);
+                unselectedGrid.removeWhere((e) => e == cellID);
               } else { unselectedGrid = []; }
             } else {  
-              selectedGrid.removeWhere( (e) => e.cells.isNotEmpty && e.cells.first.value == cellID); 
-              if (globalGridWidgetKey.currentState!.widget.isSelected) { unselectedGrid.add(widget); 
+              selectedGrid.removeWhere( (e) => e == cellID); 
+              if (globalGridWidgetKey.currentState!.widget.isSelected) { unselectedGrid.add(cellID); 
               } else { unselectedGrid = []; }
             }
-            globalGridWidgetKey.currentState!.setState(() {});
+            setState(() {});
+            globalGridWidgetKey.currentState?.setState(() {});
           },)
         ))); 
     }

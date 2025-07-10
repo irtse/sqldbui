@@ -52,7 +52,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     List<Widget> widgets = [];
     List<Widget> states = [];
     List<Widget> title = [];    
-    name = widget.view.name.toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
+    name = (widget.view.label ?? widget.view.name).toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
     var scheme = widget.schema["name"];
     if (scheme?.translatable ?? true) {
       try {
@@ -134,7 +134,6 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       title.add(Container(margin: EdgeInsets.only(bottom: 20)));
     }
     List<Widget> actions = [];
-    print("subform ${widget.subForm} ${widget.workflow?.serialize()}");
     if (!widget.subForm) {
       if (!widget.view.readOnly) {
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
