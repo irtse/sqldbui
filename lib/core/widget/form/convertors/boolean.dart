@@ -39,7 +39,7 @@ class _BooleanState extends State<BooleanWidget> {
       label = await getOnFlow(label);
     } catch(e,s) { }
     if (label.length > 10) {
-      Padding( 
+      return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
       child: Wrap( 
         spacing: 10,
