@@ -1,3 +1,4 @@
+import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
@@ -133,7 +134,19 @@ Map<String,String> realOrderMap(model.View? view, bool subtable) {
     List<String> seen = [];
     if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
     && filterOrderView[viewID] == null) {
-      filterTempOrderView[viewID] = view.order.sublist(0, view.order.length < 5 ? view.order.length : 5);
+      var newOrder = view.schema.keys.where( (e) => view.schema[e]?.inResume != null).toList();
+      newOrder.sort( (e1, e2) => (view.schema[e1]?.inResume ?? 1000).compareTo((view.schema[e2]?.inResume ?? 1000))  );
+      if (newOrder.length < 5 ) {
+        for (var o in view.order) {
+          if (newOrder.length == 5 ) {
+            break;
+          }
+          if (!newOrder.contains(o)) {
+            newOrder.add(o);
+          }
+        }
+      }
+      filterTempOrderView[viewID] = newOrder;
     }
     var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {

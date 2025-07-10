@@ -25,6 +25,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     this.translatable = false,
     this.linkID,
     this.hidden = false,
+    this.inResume,
   });
   bool translatable;
   dynamic autoFill;
@@ -43,13 +44,14 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
   String? linkID;
   bool hidden;
   Map<String, SchemaField> schema;
-
+  int? inResume;
   @override Map<String, dynamic> serialize() => { };
 
   @override SchemaField deserialize(Map<String, dynamic> json) {
     return SchemaField(
     hidden: json.containsKey("hidden") && json["hidden"] != null ? bool.parse("${json["hidden"]}") : false,
     linkID: json.containsKey("link_id") && json["link_id"] != null ? "${json["link_id"]}" : null,
+    inResume: json.containsKey("in_resume") && json["in_resume"] != null ? int.parse(json["in_resume"]) : null,
     translatable: json.containsKey("translatable") && json["translatable"] != null ? json["translatable"] : false,
     autoFill: json.containsKey("autofill") && json["autofill"] != null ? json["autofill"] : null,
     active: json.containsKey("active") && json["active"] != null ? json["active"] : true,

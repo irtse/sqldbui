@@ -126,7 +126,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
             if (!field.type.contains("onetomany") && widget.show) {
                 var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
-                  width: field.type.contains("bool") && field.label.length > 10 ? 200 : (widget.subForm ? max - 50 : max), 
+                  width: field.type.contains("bool") && field.label.length <= 10 ? 200 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : 40, child: f));
                 fields.add(w);
             }
