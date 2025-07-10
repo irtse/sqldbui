@@ -61,7 +61,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
         fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
       }
       if (widget.view.consents.isNotEmpty) {
-        fields.add(Padding( padding: EdgeInsets.symmetric(vertical: 10),
+        fields.add(Padding( padding: EdgeInsets.only(top: 10, bottom: 20),
           child : const Divider(height: 0.5, thickness: 0.5, color: Colors.grey)));
       }
 
@@ -126,7 +126,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
             if (!field.type.contains("onetomany") && widget.show) {
                 var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10, bottom: 10),
                 child: SizedBox( 
-                  width: field.type.contains("bool") ? 200 : (widget.subForm ? max - 50 : max), 
+                  width: field.type.contains("bool") && field.label.length > 10 ? 200 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : 40, child: f));
                 fields.add(w);
             }
