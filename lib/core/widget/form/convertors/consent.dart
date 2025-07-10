@@ -48,31 +48,37 @@ class ConsentState extends State<ConsentWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    return Padding( padding: EdgeInsets.only(left: 30, right: 30), 
-            child: Wrap( 
-              spacing: 10,
-              runAlignment: WrapAlignment.center,
-              alignment: WrapAlignment.center,
-              children: [
-                Padding( padding: EdgeInsets.only(top: 13),
-                  child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}",
-                style: TextStyle( color: error ? Colors.red : Colors.black))),
-              Container( width: 48, height: 48, padding: EdgeInsets.only(right: 20), child: CheckboxListTile(
-                value: widget.value,
-                onChanged: (value) { 
-                    setState(() {
-                        widget.value = value ?? false;
-                        consentErrCache[viewID ?? ""]?.remove(widget.consent.name);
-                        consentCache[viewID ?? ""]![widget.state]![widget.consent.name] = model.Consent(
-                          consent: value ?? false, 
-                          body: widget.consent.body,
-                          optionnal: widget.consent.optionnal, 
-                          actionPath: widget.consent.actionPath,
-                          key: widget.key as GlobalKey<ConsentState>);
-                         widget.value ?? false;
-                    });  
-                  }
-                ))
-            ]));
+    return Padding( 
+      padding: EdgeInsets.only(left: 30, right: 30), 
+      child: Wrap( 
+        spacing: 10,
+        runAlignment: WrapAlignment.center,
+        alignment: WrapAlignment.center,
+        children: [
+          Padding( padding: EdgeInsets.only(top: 13),
+            child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}",
+              style: TextStyle( color: error ? Colors.red : Colors.black)
+            )
+          ),
+          Container( width: 48, height: 48, 
+            padding: EdgeInsets.only(right: 20), 
+            child: CheckboxListTile(
+              value: widget.value,
+              onChanged: (value) { 
+                setState(() {
+                  widget.value = value ?? false;
+                  consentErrCache[viewID ?? ""]?.remove(widget.consent.name);
+                  consentCache[viewID ?? ""]![widget.state]![widget.consent.name] = model.Consent(
+                    consent: value ?? false, 
+                    body: widget.consent.body,
+                    optionnal: widget.consent.optionnal, 
+                    actionPath: widget.consent.actionPath,
+                    key: widget.key as GlobalKey<ConsentState>);
+                    widget.value ?? false;
+                });  
+              }
+            ))
+          ])
+        );
   }
 }

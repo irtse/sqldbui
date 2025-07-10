@@ -1,5 +1,6 @@
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
+import 'package:sqldbui2/core/widget/form/convertors/boolean.dart';
 import 'package:sqldbui2/core/widget/form/convertors/html.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
@@ -413,26 +414,18 @@ class Convertor {
       );
     } else if (type.contains("bool")) {
       if (form[name] != null) { value = form[name]; }
-      try {
-        ValueNotifier<bool> ctrl = ValueNotifier(value ?? ("$autofill" == "true"));
-        return AdvancedSwitch( width : 200,
-          enabled: !readOnly,
-          controller: ctrl,
-          activeColor: Colors.green, inactiveColor: Colors.grey,
-          activeChild: Text((await getOnFlow("${label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${require ? '*' : ''}")).toLowerCase()), 
-          inactiveChild: Text((await getOnFlow("${label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${require ? '*' : ''}")).toLowerCase()), 
-          borderRadius:  const BorderRadius.all(Radius.circular(15)),
-          height: 30.0, disabledOpacity: 0.5,
-          onChanged: (value) {
-            comp?.widget.detectChange = true;
-            form[name]=value;
-            ctrl.value = value;
-          }
-        );
-      } catch(e,s) {
-        print(e);
-        print(s);
-      }
+      return BooleanWidget(
+        form: form, 
+        type: type, 
+        schemaName: schemaName, 
+        require: require, 
+        name: name,
+        readOnly: readOnly, 
+        value: value, 
+        label: label, 
+        component: comp,
+        autofill: autofill,
+      );
     } else if (type.contains("time") || type.contains("date")) { 
         return DateWidget(
           form: form, 

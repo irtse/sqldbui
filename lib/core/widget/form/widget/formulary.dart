@@ -56,6 +56,14 @@ class FormularyWidgetState extends State<FormularyWidget> {
       widget.component.widget.oneToManiesForm = {};
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
+
+      for (var consent in widget.view.consents) {
+        fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
+      }
+      if (widget.view.consents.isEmpty) {
+        fields.add(const Divider(height: 0.5, thickness: 0.5, color: Colors.grey));
+      }
+
       for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
           if (widget.schema[fieldName] == null || ["id", "description"].contains(fieldName) ||
@@ -137,9 +145,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
               ); 
             }
       }
-      for (var consent in widget.view.consents) {
-        fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
-      }
+      
       if (widget.key != null) {
         formularyRef[widget.key!] = fields.length == widget.hideField.length;
       }

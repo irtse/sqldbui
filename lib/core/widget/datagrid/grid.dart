@@ -229,7 +229,7 @@ class GridWidgetState extends State<GridWidget> {
       showCheckboxColumn: widget.showCheckboxColumn, 
       contentShallowed: widget.contentShallowed, 
       schemaID: widget.schemaID, 
-      viewKey: widget.viewKey,);
+      viewKey: widget.viewKey);
     }).toList();
   }
 }
