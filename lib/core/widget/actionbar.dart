@@ -223,6 +223,7 @@ class ActionBarState extends State<ActionBarWidget> {
                 currentView!.items.isNotEmpty ? await getOnFlow(currentView!.items.first.values["name"] ?? "data") : ""}".toLowerCase()));
         }
         var dp = MultiDropdown<String>(
+        controller: navigatorCtrls,
         enabled: true,
         singleSelect: true,
         items: items,
@@ -298,7 +299,7 @@ class ActionBarState extends State<ActionBarWidget> {
                         },
         );
         rows = [ 
-          Flexible(child: Row( children: row,)),
+          Flexible(child: Row( children: row)),
           Flexible( 
             flex: 1, 
             child: Row( 
@@ -306,7 +307,7 @@ class ActionBarState extends State<ActionBarWidget> {
                 Expanded(
                   child: Padding(
                       padding: const EdgeInsets.only(right: 10.0, top: 5, bottom: 5),
-                      child: TextFormField(
+                      child: dp, /* TextFormField(
                         cursorHeight: 15,
                         // ignore: use_build_context_synchronously
                         style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
@@ -328,8 +329,8 @@ class ActionBarState extends State<ActionBarWidget> {
                             // ignore: use_build_context_synchronously
                             borderSide: BorderSide(color: Theme.of(context).primaryColor))
                         )
-                      ) 
-                    ),
+                      ) */
+                    ), 
                   ),
                   getIconOffset( await getOnFlow(TranslateConstants.goto.toLowerCase()), 
                   Icons.send, 20, () { AppRouter.navigateTo(controller.text); }, true),

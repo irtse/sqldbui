@@ -1,8 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -90,6 +92,29 @@ class AppRouter {
     subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
     routerKey.currentState?.setState(() { });
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+    Future.delayed(Duration(seconds: 1), () async {
+      bool ok = false;
+      var key = "$viewID";
+      if ((subViewID ?? "") != "") {
+        subViewID = "@${viewID?.replaceAll("#", "")}:$subViewID";
+      }
+      print("$key $viewID $subViewID");
+      for (var e in navigatorCtrls.items) {
+        e.selected = e.value == key;
+        if (e.selected) {
+          ok = true;
+        }
+      }
+      if (!ok) {
+        navigatorCtrls.items.add(DropdownItem<String>( 
+          selected: true,
+          value: key, 
+          label: "${await getOnFlow(currentView!.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", ""))} -> ${ 
+            await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
+      }
+      navigatorCtrls.openDropdown("", "");
+      navigatorCtrls.closeDropdown();
+    });
   }
   static bool canForward() {
     try {
@@ -112,8 +137,31 @@ class AppRouter {
       viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
       subViewID = splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
       prefs.setString("history", realHistory.join(","));
+      
       routerKey.currentState?.setState(() { });
       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+
+      Future.delayed(Duration(seconds: 1), () async {
+        bool ok = false;
+        var key = "$viewID";
+        if ((subViewID ?? "") != "") {
+          subViewID = "@${viewID?.replaceAll("#", "")}:$subViewID";
+        }
+        for (var e in navigatorCtrls.items) {
+          e.selected = e.value == key;
+          if (e.selected) {
+            ok = true;
+          }
+        }
+        if (!ok) {
+          navigatorCtrls.items.add(DropdownItem<String>( selected: true,
+            value: key, 
+            label: "${(await getOnFlow(currentView!.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", "")))} -> ${ 
+                      await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
+          }
+      });
+      navigatorCtrls.openDropdown("", "");
+      navigatorCtrls.closeDropdown();
     }
   }
 

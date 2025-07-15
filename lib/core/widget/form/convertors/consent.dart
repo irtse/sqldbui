@@ -60,7 +60,7 @@ class ConsentState extends State<ConsentWidget> {
               style: TextStyle( color: error ? Colors.red : Colors.black)
             )
           ),
-          Container( width: 48, height: 48, 
+          Padding( // width: 48, height: 48, 
             padding: EdgeInsets.only(right: 20), 
             child: CheckboxListTile(
               value: widget.value,

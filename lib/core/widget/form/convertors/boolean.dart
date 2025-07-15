@@ -46,14 +46,14 @@ class _BooleanState extends State<BooleanWidget> {
         runAlignment: WrapAlignment.center,
         alignment: WrapAlignment.center,
         children: [
-          Padding( padding: EdgeInsets.only(top: 13),
+          Padding( padding:  EdgeInsets.only(top: 13, bottom: 13), 
             child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}",
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
-            )
-          ),
+          )),
           widget.readOnly ? Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 20, top: 10, bottom: 10), 
-            child: Text(await getOnFlow(widget.value == true ? "yes" : "no"), style: TextStyle( fontWeight: FontWeight.bold) )) :  Container( width: 48, height: 48, 
+            padding: EdgeInsets.only(right: 20, top: 13), 
+            child: Text(await getOnFlow(widget.value == true ? "yes" : "no"), style: TextStyle( fontWeight: FontWeight.bold) )) 
+          :  Container( width: 48, height: 48, 
             padding: EdgeInsets.only(right: 20), 
             child: CheckboxListTile(
               value: widget.value,

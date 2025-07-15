@@ -26,8 +26,12 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     this.linkID,
     this.hidden = false,
     this.inResume,
+    this.subsection,
+    this.forceNotReadOnly = false,
   });
   bool translatable;
+  bool forceNotReadOnly = false;
+  String? subsection;
   dynamic autoFill;
   String label;
   String type;
@@ -49,6 +53,8 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
 
   @override SchemaField deserialize(Map<String, dynamic> json) {
     return SchemaField(
+    subsection: json.containsKey("subsection") && json["subsection"] != null ? json["subsection"] : null,
+    forceNotReadOnly: json.containsKey("force_not_readonly") && json["force_not_readonly"] != null ? bool.parse("${json["force_not_readonly"]}") : false,
     hidden: json.containsKey("hidden") && json["hidden"] != null ? bool.parse("${json["hidden"]}") : false,
     linkID: json.containsKey("link_id") && json["link_id"] != null ? "${json["link_id"]}" : null,
     inResume: json.containsKey("in_resume") && json["in_resume"] != null && json["in_resume"] != ""  ? int.parse(json["in_resume"]) : null,

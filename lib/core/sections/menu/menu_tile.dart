@@ -4,6 +4,7 @@ import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -47,6 +48,9 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                     }
                     widget.isSelected = true;
                     flashedForm = {};
+                    for (var e in navigatorCtrls.items) {
+                      e.selected = "#${widget.text ?? widget.view?.id}" == e.value;
+                    }
                     widget.refreshView("#${widget.text ?? widget.view?.id}", widget.category, true, false, false); 
                   }); 
                 },

@@ -2,6 +2,8 @@
 // ignore: must_be_immutable
 import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -166,11 +168,46 @@ class GridCellWidgetState extends State<GridCellWidget> {
             if (!notNew.containsKey(viewID)) { notNew[viewID] = [widget.cellID]; } else { notNew[viewID]!.add(widget.cellID); }
             if (v.isNotEmpty && widget.isNew) { v.first.news -= 1; }
           } catch (e) { /* */ }
+
           globalMenuKey.currentState!.setState(() {});
           if (widget.dataRef != null) {
             AppRouter.navigateTo(widget.dataRef!);
+            Future.delayed(Duration(seconds: 1), () async {
+              bool ok = false;
+              for (var e in navigatorCtrls.items) {
+                e.selected = e.value == "@${widget.schemaID}:${widget.cellID}";
+                if (e.selected) {
+                  ok = true;
+                }
+              }
+              if (!ok) {
+                navigatorCtrls.items.add(DropdownItem<String>( selected: true,
+                value: "@${currentView!.id}${ currentView!.items.isNotEmpty ? ":${currentView!.items.first.values["id"]}" : "" }", 
+                label: "${await getOnFlow(currentView!.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", ""))} -> ${
+                  await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
+              }
+              navigatorCtrls.openDropdown("", "");
+              navigatorCtrls.closeDropdown();
+            });
           } else {
             AppRouter.navigateTo("@${widget.schemaID}:${widget.cellID}");
+            Future.delayed(Duration(seconds: 1), () {
+              bool ok = false;
+              for (var e in navigatorCtrls.items) {
+                e.selected = e.value == "@${widget.schemaID}:${widget.cellID}";
+                if (e.selected) {
+                  ok = true;
+                }
+              }
+              if (!ok) {
+                navigatorCtrls.items.add(DropdownItem<String>( selected: true,
+                  value: "@${widget.schemaID}${widget.cellID}", 
+                  label: "${(currentView!.label ?? currentView!.name).replaceAll("_", "").replaceAll("db", "")} -> ${ 
+                    currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : ""}".toLowerCase()));
+                navigatorCtrls.openDropdown("", "");
+                navigatorCtrls.closeDropdown();
+              }
+            });
           } 
         }, 
         title: SizedBox(height: widget.maxheight - 20, 
