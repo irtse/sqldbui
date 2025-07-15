@@ -76,10 +76,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
         return a.toLowerCase().compareTo(b.toLowerCase());
       });
       categories.add("");
-      
+      print(categories);
       for (var c in categories) {
-        print(widget.view.order.where( (e) => widget.schema[e] != null && !widget.schema[e]!.hidden && (widget.schema[e]?.subsection ?? "") == c && !["id", "description"].contains(e) &&
-          !(widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))));
         if ( widget.view.order.where( (e) => widget.schema[e] != null && !widget.schema[e]!.hidden && (widget.schema[e]?.subsection ?? "") == c && !["id", "description"].contains(e) &&
           !(widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))).isEmpty ) {
             continue;
@@ -95,7 +93,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           ])
          ));
         }
-        
+         print(widget.view.order.length);
         for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
 
