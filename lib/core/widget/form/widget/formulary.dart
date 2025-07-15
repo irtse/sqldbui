@@ -78,7 +78,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
       categories.add("");
       
       for (var c in categories) {
-        if (widget.view.order.where( (e) => widget.schema[e] == null || (widget.schema[e]?.subsection ?? "") != c || ["id", "description"].contains(e) ||
+        if (widget.view.order.where( (e) => widget.schema[e] == null || widget.schema[e]!.hidden || (widget.schema[e]?.subsection ?? "") != c || ["id", "description"].contains(e) ||
           (widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))).isEmpty ) {
             continue;
         }
@@ -97,7 +97,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
         for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
 
-          if (widget.schema[fieldName] == null || (widget.schema[fieldName]?.subsection ?? "") != c || ["id", "description"].contains(fieldName) ||
+          if (widget.schema[fieldName] == null || widget.schema[fieldName]!.hidden 
+          || (widget.schema[fieldName]?.subsection ?? "") != c || ["id", "description"].contains(fieldName) ||
           (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { 
             continue; 
           }
