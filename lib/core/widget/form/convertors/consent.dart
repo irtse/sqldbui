@@ -50,6 +50,8 @@ class ConsentState extends State<ConsentWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
+      child: ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 1000),
       child: Wrap( 
         spacing: 10,
         runAlignment: WrapAlignment.center,
@@ -79,6 +81,7 @@ class ConsentState extends State<ConsentWidget> {
               }
             ))
           ])
-        );
+        )
+      );
   }
 }

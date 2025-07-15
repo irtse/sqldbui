@@ -192,15 +192,22 @@ class ActionService {
                   if (method == "delete") {
                     viewID = "#${splitted[1]}";
                     subViewID = null;
+
+                    navigate = true;   
+                    Future.delayed(Duration(seconds: 2), () {
+                      globalActionBar.currentState?.setState(() {});
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+                    });
                   } else {
                     viewID = "@${splitted[0].split("/").last}";
                     subViewID = splitted[1];
+
+                    navigate = true;   
+                    Future.delayed(Duration(seconds: 2), () {
+                      globalActionBar.currentState?.setState(() {});
+                      globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
+                    });
                   }
-                  navigate = true;   
-                  Future.delayed(Duration(seconds: 2), () {
-                    globalActionBar.currentState?.setState(() {});
-                    globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
-                  });
                 }
               } else {
                 navigate = true;  

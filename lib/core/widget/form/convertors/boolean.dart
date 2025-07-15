@@ -41,19 +41,22 @@ class _BooleanState extends State<BooleanWidget> {
     if (label.length > 10) {
       return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
-      child: Row( 
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 1000),
+      child: Wrap( 
+        spacing: 10,
+        runAlignment: WrapAlignment.center,
+        alignment: WrapAlignment.center,
         children: [
           Padding( padding:  EdgeInsets.only(top: 13, bottom: 13), 
-            child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}", overflow: TextOverflow.ellipsis,
+            child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}",
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
           )),
           widget.readOnly ? Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 30, top: 13), 
+            padding: EdgeInsets.only(right: 20, top: 13), 
             child: Text(await getOnFlow(widget.value == true ? "yes" : "no"), style: TextStyle( fontWeight: FontWeight.bold) )) 
           :  Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 30), 
+            padding: EdgeInsets.only(right: 20), 
             child: CheckboxListTile(
               value: widget.value,
               onChanged: (value) { 
@@ -63,7 +66,8 @@ class _BooleanState extends State<BooleanWidget> {
               }
             ))
           ])
-        );
+        )
+      );
     }
     ValueNotifier<bool> ctrl = ValueNotifier(widget.value ?? ("${widget.autofill}" == "true"));
     return AdvancedSwitch( width : 200,
