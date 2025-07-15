@@ -23,7 +23,7 @@ import 'package:sqldbui2/model/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 var firstAPI = false;
-var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/v1';
+var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
 class APIConstants {
   static String filterLine = "";
   static String downloadEndpost = '/main/download';
@@ -260,7 +260,7 @@ class APIService {
         if (e.toString().contains("connection error")) {
           err = "server unreachable";
         } else {
-          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}"; }
+          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
         }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
@@ -298,7 +298,7 @@ class APIService {
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
         print(e); print(s);
-        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}"; }
+        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     throw Exception(err);
