@@ -189,10 +189,15 @@ class ActionService {
                 print("REDIRECTION !!! $path -> $redirection");
                 var splitted = redirection!.split("?rows=");
                 if (splitted.length >= 2) {
-                  viewID = "@${splitted[0].split("/").last}";
-                  subViewID = splitted[1];
+                  if (method == "delete") {
+                    viewID = "#${splitted[1]}";
+                    subViewID = null;
+                  } else {
+                    viewID = "@${splitted[0].split("/").last}";
+                    subViewID = splitted[1];
+                  }
                   navigate = true;   
-                  Future.delayed(Duration(seconds: 1), () {
+                  Future.delayed(Duration(seconds: 2), () {
                     globalActionBar.currentState?.setState(() {});
                     globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
                   });

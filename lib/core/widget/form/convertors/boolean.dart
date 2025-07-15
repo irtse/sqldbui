@@ -41,20 +41,19 @@ class _BooleanState extends State<BooleanWidget> {
     if (label.length > 10) {
       return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
-      child: Wrap( 
-        spacing: 10,
-        runAlignment: WrapAlignment.center,
-        alignment: WrapAlignment.center,
+      child: Row( 
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding( padding:  EdgeInsets.only(top: 13, bottom: 13), 
-            child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}",
+            child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}", overflow: TextOverflow.ellipsis,
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
           )),
           widget.readOnly ? Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 20, top: 13), 
+            padding: EdgeInsets.only(right: 30, top: 13), 
             child: Text(await getOnFlow(widget.value == true ? "yes" : "no"), style: TextStyle( fontWeight: FontWeight.bold) )) 
           :  Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 20), 
+            padding: EdgeInsets.only(right: 30), 
             child: CheckboxListTile(
               value: widget.value,
               onChanged: (value) { 
