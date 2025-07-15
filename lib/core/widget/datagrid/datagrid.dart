@@ -232,7 +232,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {},));
       } else {
         if (widget.view?.actions.contains("delete") ?? false) {
-          buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
+          /*buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
           child: Tooltip( 
             message: (currentView!.isList ? TranslateConstants.rowsListDelete : TranslateConstants.rowsDelete).toLowerCase(),
             child: InkWell( 
@@ -255,7 +255,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
                 }));                
               }, 
               child: Icon(Icons.delete, color: Theme.of(context).highlightColor, size: 20)
-          ))));
+          ))));*/
         }
         buttons.addAll([
           PopupButtonWidget(

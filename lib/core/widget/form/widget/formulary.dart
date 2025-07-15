@@ -124,6 +124,9 @@ class FormularyWidgetState extends State<FormularyWidget> {
           if (field.actionPath != "") { mainUrl = field.actionPath; }
           if (field.valuesPath != "") { url = field.valuesPath; }
           value = value == "" ? null : value;
+          if (fieldName == "state") {
+            value = "$value".replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "");
+          }
           if (readOnly && value == null) {
             continue;
           }

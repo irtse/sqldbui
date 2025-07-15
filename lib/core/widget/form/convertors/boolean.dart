@@ -35,14 +35,12 @@ class _BooleanState extends State<BooleanWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     widget.value = "${(widget.form[widget.name]) ?? false}" == "true"; 
     var label = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-    try {
-      label = await getOnFlow(label);
+    try { label = await getOnFlow(label);
     } catch(e,s) { }
     if (label.length > 10) {
       return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
-      child: ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: 1000),
+      child: Expanded(
       child: Wrap( 
         spacing: 10,
         runAlignment: WrapAlignment.center,

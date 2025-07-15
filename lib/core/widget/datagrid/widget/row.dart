@@ -105,31 +105,70 @@ class GridRowWidgetState extends State<GridRowWidget> {
           },)
         ))); 
     }
+    String? state;
+    for (var e in widget.cells) {
+      if (e.columnName == "state") {
+        state = e.value;
+      }
+    }
     for (var e in widget.cells) {
       bool readOnly = currentView?.schema[e.columnName] != null && (currentView?.schema[e.columnName]?.readonly ?? false);
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
       List<Widget> bs = [];
-      if (widget.news && first) {
-        bs.add(Container(
-          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
-          child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-            child: Text(TranslateConstants.newT.toLowerCase(), 
-              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+      
+      
+      if (first) {
+        if (widget.news) {
+          bs.add(Container(
+            decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
+            child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
+              child: Text(TranslateConstants.newT.toLowerCase(), 
+                style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+              )
             )
-          )
-        ));
-      }
-      if (e.isDraft && first) {
-        bs.add(Container(
-          margin: EdgeInsets.only(left: 10),
-          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
-          child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-            child: Text(TranslateConstants.draftT.toLowerCase(), 
-              style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+          ));
+        }
+        if (e.isDraft) {
+          bs.add(Container(
+            margin: EdgeInsets.only(left: 10),
+            decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
+            child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
+              child: Text(TranslateConstants.draftT.toLowerCase(), 
+                style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+              )
             )
-          )
-        ));
+          ));
+        }
+        if (state != null) {
+          bs.add(
+            FutureBuilder(future: getOnFlow(state.replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "")), 
+            builder: (a, s) {
+              if (s.data != null) {
+                return Container(
+                  margin: EdgeInsets.only(left: 10),
+                  decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), 
+                  color: state!.contains("pending") || state.contains("progressing") ? Colors.orange : (state.contains("completed") ? Colors.green : (state.contains("refused") || state.contains("dismiss") ? Colors.red : Colors.grey)) ),
+                  child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
+                    child: Text(s.data!.toLowerCase(), 
+                      style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+                    )
+                  )
+                );
+              }
+              return Container(
+                margin: EdgeInsets.only(left: 10),
+                decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
+                child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
+                  child: Text(TranslateConstants.draftT.toLowerCase(), 
+                    style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
+                  )
+                )
+              );
+            }
+          ));
+        }
       }
+      
       if (first) {
         first = false;
       }
