@@ -181,7 +181,7 @@ class ActionService {
                 isNew = value.data![0].items[0].values["id"]; 
               }
             }
-            if (views.last.innerRedirection != "" && (redirection ?? "") != "") {
+            if (views.last.innerRedirection != "" && ((redirection ?? "") == "")) {
               redirection = views.last.innerRedirection;
             }
             if (!form.subForm) {

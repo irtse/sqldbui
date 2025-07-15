@@ -192935,7 +192935,7 @@ l=q.d
 A.age(o.a,B.b.gL(p),A.fW(m.x,t.N,t.z),B.b.gL(p).fy,q.e,l)
 if(B.b.gL(p).x.length!==0)if(m.f.ch)$.chV=J.I(g[0].x[0].f,"id")
 if(B.b.gL(p).a!==""){g=$.Vu
-g=(g==null?"":g)!==""}else g=!1
+g=(g==null?"":g)===""}else g=!1
 if(g)$.Vu=B.b.gL(p).a
 if(!m.z){g=$.Vu
 if(g!==""){A.eK("REDIRECTION !!! "+o.b+" -> "+A.h(g))
