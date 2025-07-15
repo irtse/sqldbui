@@ -78,10 +78,10 @@ class FormularyWidgetState extends State<FormularyWidget> {
       categories.add("");
       
       for (var c in categories) {
-        print(widget.view.order.where( (e) => widget.schema[e] == null || widget.schema[e]!.hidden || (widget.schema[e]?.subsection ?? "") != c || ["id", "description"].contains(e) ||
-          (widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))));
-        if ( widget.view.order.where( (e) => widget.schema[e] == null || widget.schema[e]!.hidden || (widget.schema[e]?.subsection ?? "") != c || ["id", "description"].contains(e) ||
-          (widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))).isEmpty ) {
+        print(widget.view.order.where( (e) => widget.schema[e] != null && !widget.schema[e]!.hidden && (widget.schema[e]?.subsection ?? "") == c && !["id", "description"].contains(e) &&
+          !(widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))));
+        if ( widget.view.order.where( (e) => widget.schema[e] != null && !widget.schema[e]!.hidden && (widget.schema[e]?.subsection ?? "") == c && !["id", "description"].contains(e) &&
+          !(widget.superFormSchemaName != "" && e.contains(widget.superFormSchemaName))).isEmpty ) {
             continue;
         }
         if (categories.length > 1) {
