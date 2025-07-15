@@ -52,7 +52,12 @@ class _BooleanState extends State<BooleanWidget> {
           )),
           widget.readOnly ? Container( width: 48, height: 48, 
             padding: EdgeInsets.only(right: 20, top: 13), 
-            child: Text(await getOnFlow(widget.value == true ? "yes" : "no"), style: TextStyle( fontWeight: FontWeight.bold) )) 
+            child: FutureBuilder(future: getOnFlow(widget.value == true ? "yes" : "no"), builder: (a, s) {
+              if (s.data != null) {
+                return Text(s.data!, style: TextStyle( fontWeight: FontWeight.bold) );
+              }
+              return Text(widget.value == true ? "yes" : "no", style: TextStyle( fontWeight: FontWeight.bold) );
+            })) 
           :  Container( width: 48, height: 48, 
             padding: EdgeInsets.only(right: 20), 
             child: CheckboxListTile(

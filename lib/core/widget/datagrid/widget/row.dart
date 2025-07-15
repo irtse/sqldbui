@@ -108,7 +108,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
     String? state;
     for (var e in widget.cells) {
       if (e.columnName == "state") {
-        state = e.value;
+        state = widget.contentShallowed["${e.columnName}:$cellID"]?.label ?? widget.contentShallowed["${e.columnName}:$cellID"]?.name ??  e.value;
         break;
       }
     }
@@ -140,10 +140,10 @@ class GridRowWidgetState extends State<GridRowWidget> {
             )
           ));
         }
-        if (state != null) {
+        if ((state ?? "") != "") {
           try {
             bs.add(
-              FutureBuilder(future: getOnFlow(state.replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "")), 
+              FutureBuilder(future: getOnFlow(state!.replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "")), 
               builder: (a, s) {
                 if (s.data != null) {
                   return Container(

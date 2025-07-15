@@ -58,7 +58,8 @@ class GridCell {
 }
 // ignore: must_be_immutable
 class GridCellWidget extends StatefulWidget implements ConvertorWidget {
-  bool readOnly; bool isLink = true;
+  bool readOnly; 
+  bool isLink = true;
   String cellID; 
   String schemaID;
   double maxheight;
@@ -110,7 +111,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
     if (widget.shal?.name != null) {
       widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
     }
-    Widget wid = Text( "$v", 
+    Widget wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
