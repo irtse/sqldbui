@@ -50,19 +50,12 @@ class ConsentState extends State<ConsentWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
-      child: Stack( 
-        children: [  Wrap( 
-        spacing: 10,
-        alignment: WrapAlignment.center,
-        children: [
-          Padding( padding: EdgeInsets.only(top: 13),
-            child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}",
-              style: TextStyle( color: error ? Colors.red : Colors.black)
-            )
-          ),
-          Padding( // width: 48, height: 48, 
+      child: 
+      Stack(
+        children: [ 
+          Container( width: 48,
             padding: EdgeInsets.only(right: 20), 
-            child: CheckboxListTile(
+            child: Checkbox(
               value: widget.value,
               onChanged: (value) { 
                 setState(() {
@@ -76,9 +69,14 @@ class ConsentState extends State<ConsentWidget> {
                     key: widget.key as GlobalKey<ConsentState>);
                     widget.value ?? false;
                 });  
-              }
-            ))
-          ]) ])
-        );
+              },
+            ),
+          ),
+          Container( padding: EdgeInsets.only(left: 40), child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}", 
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle( color: Colors.black)
+          )),
+      ]) 
+    );
   }
 }

@@ -182,6 +182,7 @@ class ActionService {
             }
             if (!form.subForm) {
               if (redirection != "") { 
+                print(redirection);
                 var splitted = redirection!.split("?rows=");
                 if (splitted.length >= 2) {
                   if (method == "delete") {
@@ -189,18 +190,18 @@ class ActionService {
                     subViewID = null;
 
                     navigate = true;   
-                    Future.delayed(Duration(seconds: 2), () {
+                    Future.delayed(Duration(seconds: 3), () {
                       globalActionBar.currentState?.setState(() {});
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                     });
                   } else {
                     viewID = "@${splitted[0].split("/").last}";
                     subViewID = splitted[1];
-
+                    print("$viewID $subViewID ");
                     navigate = true;   
-                    Future.delayed(Duration(seconds: 2), () {
+                    Future.delayed(Duration(seconds: 3), () {
                       globalActionBar.currentState?.setState(() {});
-                      globalMainViewKey.currentState?.refreshUrl("$baseURL$redirection", subViewID, true); 
+                      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                     });
                   }
                 }

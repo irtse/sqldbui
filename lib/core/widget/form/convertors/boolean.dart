@@ -40,35 +40,34 @@ class _BooleanState extends State<BooleanWidget> {
     } catch(e,s) { }
     if (label.length > 10) {
       return Padding( 
-      padding: EdgeInsets.only(left: 30, right: 30), 
+      padding: EdgeInsets.only(left: 30, right: 30, top: 10), 
       child: Stack(
-        children: [ Wrap( 
-        spacing: 10,
-        runAlignment: WrapAlignment.center,
-        alignment: WrapAlignment.center,
-        children: [
-          Text( "${label.toLowerCase()}${widget.require ? "" : "*"}", overflow: TextOverflow.ellipsis,
-              style: TextStyle( color: widget.error ? Colors.red : Colors.black)
-          ),
-          widget.readOnly ? Container( width: 60, height: 30, 
+        children: [ 
+          widget.readOnly ? Container() 
+          : Container( width: 48,
             padding: EdgeInsets.only(right: 20), 
-            child: FutureBuilder(future: getOnFlow(widget.value == true ? "yes" : "no"), builder: (a, s) {
-              if (s.data != null) {
-                return Text(s.data!, style: TextStyle( fontWeight: FontWeight.bold) );
-              }
-              return Text(widget.value == true ? "yes" : "no", style: TextStyle( fontWeight: FontWeight.bold) );
-            })) 
-          :  Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 20), 
-            child: CheckboxListTile(
+            child: Checkbox(
               value: widget.value,
               onChanged: (value) { 
                 widget.value = value;
                 widget.form[widget.name] = value; 
                 setState(() { });
+              },
+            ),
+          ),
+          Container( padding: EdgeInsets.only(left: 40), child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}", overflow: TextOverflow.ellipsis,
+              style: TextStyle( color: widget.error ? Colors.red : Colors.black)
+          )),
+          widget.readOnly ? Container( width: 60, height: 30, 
+            padding: EdgeInsets.only(right: 20), 
+            child: FutureBuilder(future: getOnFlow(widget.value == true ? "yes" : "no"), builder: (a, s) {
+              if (s.data != null) {
+                return Text("${s.data!} :", style: TextStyle( fontWeight: FontWeight.bold) );
               }
-            ))
-          ]) ])
+              return Text("${widget.value == true ? "yes" : "no"} :", style: TextStyle( fontWeight: FontWeight.bold) );
+            })) 
+          : Container()
+         ]) 
       );
     }
     ValueNotifier<bool> ctrl = ValueNotifier(widget.value ?? ("${widget.autofill}" == "true"));
