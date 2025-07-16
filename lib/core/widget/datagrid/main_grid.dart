@@ -63,7 +63,6 @@ class MainGridWidgetState extends State<MainGridWidget> {
           readOnly: currentView!.readOnly || item.readonly)); 
       }
       var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, widget.max);
-      print(widget.view?.schema.keys);
       for (var fieldName in order) {
           columns = getColumn(columns, widget.schemeItems, schema, fieldName, datas, order);
       }
@@ -127,21 +126,18 @@ class MainGridWidgetState extends State<MainGridWidget> {
   }
 }
 
-Map<String,String> realOrderMap(model.View? view, bool subtable) {
-    if (view == null) { return {}; }
-    var schema = view.schema;
+Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaField>? schema,  bool subtable) {
+    if (schema == null) { return {}; }
     bool isMath = isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase();
     List<String> seen = [];
     if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
     && filterOrderView[viewID] == null) {
-      var newOrder = view.schema.keys.where( (e) {
-        print(view.schema[e]?.inResume);
-        return view.schema[e]?.inResume != null; 
+      var newOrder = schema.keys.where( (e) {
+        return schema[e]?.inResume != null; 
       }).toList();
-      print("$newOrder");
-      newOrder.sort( (e1, e2) => (view.schema[e1]?.inResume ?? 1000).compareTo((view.schema[e2]?.inResume ?? 1000))  );
+      newOrder.sort( (e1, e2) => (schema[e1]?.inResume ?? 1000).compareTo((schema[e2]?.inResume ?? 1000))  );
       if (newOrder.length < 5 ) {
-        for (var o in view.order) {
+        for (var o in (ord ?? [])) {
           if (newOrder.length == 5 ) {
             break;
           }
@@ -150,12 +146,12 @@ Map<String,String> realOrderMap(model.View? view, bool subtable) {
           }
         }
       }
-      if (view.order.contains("type") && !newOrder.contains("type")) {
+      if ((ord ?? []).contains("type") && !newOrder.contains("type")) {
         newOrder = ["type", ...newOrder];
       }
       filterTempOrderView[viewID] = newOrder;
     }
-    var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
+    var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? ord ?? [];
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
@@ -169,7 +165,7 @@ Map<String,String> realOrderMap(model.View? view, bool subtable) {
     }
     Map<String,String> newOrder = {};
     for (var oo in o) {
-      newOrder[oo] = view.schema[oo]?.label ?? oo;
+      newOrder[oo] = schema[oo]?.label ?? oo;
     }
     return newOrder;
   }
@@ -182,10 +178,8 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
     && filterOrderView[viewID] == null) {
       var newOrder = view.schema.keys.where( (e) {
-        print(view.schema[e]?.inResume);
         return view.schema[e]?.inResume != null; 
       }).toList();
-      print("$newOrder");
       newOrder.sort( (e1, e2) => (view.schema[e1]?.inResume ?? 1000).compareTo((view.schema[e2]?.inResume ?? 1000))  );
       if (newOrder.length < 5 ) {
         for (var o in view.order) {

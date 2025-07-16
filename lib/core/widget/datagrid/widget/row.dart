@@ -53,11 +53,11 @@ class GridRowWidget extends StatefulWidget {
 class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
     var edit = (isEditMode[viewID] ?? false);
-    return edit ? Row(children: getCellsContent(context)) : MouseRegion(
+    return edit ? Row(children: [ getCellsContent(context) ]) : MouseRegion(
       onEnter: (b) { setState(() { widget.isHovered = true; }); },
       onExit: (b) { setState(() { widget.isHovered = false; }); },
       child: Stack( alignment: Alignment.center, children: [ 
-        Row(children: getCellsContent(context)),
+        Row(children: [getCellsContent(context)]),
         /*widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
           path: "@${widget.schemaID}:${widget.cellID}",
           sharing: widget.sharing,
@@ -66,8 +66,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
     );
   }
 
-  List<Widget> getCellsContent(BuildContext context) {
-    if (widget.cells.isEmpty) { return []; }
+  Widget getCellsContent(BuildContext context) {
+    if (widget.cells.isEmpty) { return Stack(); }
     String cellID = '${widget.cells[0].columnName != "id" ? widget.cells[0].cellID : widget.cells[0].value}';
     List<Widget> widgets = [];
     double maxheight = 48;
@@ -112,10 +112,10 @@ class GridRowWidgetState extends State<GridRowWidget> {
         break;
       }
     }
+    List<Widget> bs = [];
     for (var e in widget.cells) {
       bool readOnly = currentView?.schema[e.columnName] != null && (currentView?.schema[e.columnName]?.readonly ?? false);
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
-      List<Widget> bs = [];
       
       
       if (first) {
@@ -178,7 +178,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
       if (first) {
         first = false;
       }
-      List<Widget> badges = [Positioned(left: 10, top: 5, child: Row( children: bs ))];
 
       var v = e.value;
       if (commands[viewID] != null) { 
@@ -204,7 +203,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
         )
       );
       widgets.add(
-        Stack( children: [
           Container( 
             height: maxheight,
             alignment: Alignment.center, 
@@ -215,10 +213,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
             width: currentView != null && rects.containsKey(viewID) && rects[viewID]!.containsKey(e.columnName) ? rects[viewID]![e.columnName]!.width : 200, 
             child: widget.widgetCells.last
           ), 
-          ...badges
-        ])
       );
     }  
-    return widgets;
+    List<Widget> badges = [Positioned(left: 90, top: 5, child: Row( children: bs ))];
+    return Stack( children: [ Row(children: widgets), ...badges ]);
   }
 }

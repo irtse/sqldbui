@@ -50,10 +50,9 @@ class ConsentState extends State<ConsentWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
-      child: Expanded(
-      child: Wrap( 
+      child: Stack( 
+        children: [  Wrap( 
         spacing: 10,
-        runAlignment: WrapAlignment.center,
         alignment: WrapAlignment.center,
         children: [
           Padding( padding: EdgeInsets.only(top: 13),
@@ -79,8 +78,7 @@ class ConsentState extends State<ConsentWidget> {
                 });  
               }
             ))
-          ])
-        )
-      );
+          ]) ])
+        );
   }
 }

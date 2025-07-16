@@ -62,7 +62,7 @@ class GridColumnWidget extends StatefulWidget {
   double getWidth(bool avoid) {
     double width = (getTotal() /  maxLength); 
     if (width < minimal) { 
-      width = (label.value.length * 8); 
+      width = (label.value.length * 6); 
       if (width < minimal) { width = minimal; }
     }
     return width;

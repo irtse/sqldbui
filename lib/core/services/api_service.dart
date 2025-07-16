@@ -23,7 +23,7 @@ import 'package:sqldbui2/model/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 var firstAPI = false;
-var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}/v1';
+var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/v1';
 class APIConstants {
   static String filterLine = "";
   static String downloadEndpost = '/main/download';
@@ -168,14 +168,14 @@ class APIService {
       if (filters != null && filters.sort().isNotEmpty) {
         filter = "&filter_line=";
         for (var f in filters.sort()) {  
-          if (f.column == "") { continue; } 
-          if (f.comparator == "=") { filter += "${f.column}%3A${f.value}"; 
-          } else if (f.comparator == "!=") { filter += "${f.column}%3C%3E${f.value}"; 
-          } else if (f.comparator == "like") { filter += "${f.column}~%25${f.value}%25"; 
-          } else if (f.comparator == "not like") { filter += "${f.column}%3C%3E~%25${f.value}%25"; 
-          } else if (f.comparator == "<=") { filter += "${f.column}%3C%3A${f.value}";
-          } else if (f.comparator == ">=") { filter += "${f.column}%3E%3A${f.value}";
-          } else { filter += "${f.column}${f.comparator == "<" ? "%3C" : "%3E"}${f.value}"; }
+          if (f.realName == "") { continue; } 
+          if (f.comparator == "=") { filter += "${f.realName}%3A${f.value}"; 
+          } else if (f.comparator == "!=") { filter += "${f.realName}%3C%3E${f.value}"; 
+          } else if (f.comparator == "like") { filter += "${f.realName}~%25${f.value}%25"; 
+          } else if (f.comparator == "not like") { filter += "${f.realName}%3C%3E~%25${f.value}%25"; 
+          } else if (f.comparator == "<=") { filter += "${f.realName}%3C%3A${f.value}";
+          } else if (f.comparator == ">=") { filter += "${f.realName}%3E%3A${f.value}";
+          } else { filter += "${f.realName}${f.comparator == "<" ? "%3C" : "%3E"}${f.value}"; }
           filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "");
         }
       }
@@ -217,7 +217,7 @@ class APIService {
           }
         }
         
-        print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy$filter");
+        print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy");
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);        
       
         if (response.statusCode == 302) {
@@ -260,7 +260,7 @@ class APIService {
         if (e.toString().contains("connection error")) {
           err = "server unreachable";
         } else {
-          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
+          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}"; }
         }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
@@ -298,7 +298,7 @@ class APIService {
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
         print(e); print(s);
-        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://localhost:8080')}"; }
+        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}"; }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     throw Exception(err);
@@ -340,7 +340,6 @@ class APIService {
   }
 
   Future<APIResponse<T>> put<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
-    print("PUT $url");
     return main(url, values, "put", "save succeed", true, context, null, null, false, null, null);
   }
 

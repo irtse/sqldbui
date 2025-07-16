@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:pdfx/pdfx.dart';
 
 var slide1 = (BuildContext context) => Container( decoration: BoxDecoration(color: Theme.of(context).secondaryHeaderColor,
               boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ]), child: Stack(children: [ 
@@ -155,8 +156,17 @@ class TutorialPopUpWidget extends StatefulWidget {
   TutorialPopUpState createState() => TutorialPopUpState();
 }
 class TutorialPopUpState extends State<TutorialPopUpWidget> {
+    
+  PdfControllerPinch pdfController = PdfControllerPinch(
+    document: PdfDocument.openAsset('assets/sample.pdf'),
+  );
+  
   @override Widget build(BuildContext context) {
-    List<Widget> list = [slide1(context), slide2(context), slide3(context), slide4(context), slide5(context), slide6(context)];
+    List<Widget> list = [
+      PdfViewPinch(
+        controller: pdfController,
+      )
+    ];
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
         title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
@@ -173,3 +183,4 @@ class TutorialPopUpState extends State<TutorialPopUpWidget> {
     );
   }
 }
+

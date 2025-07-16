@@ -35,23 +35,23 @@ class _BooleanState extends State<BooleanWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     widget.value = "${(widget.form[widget.name]) ?? false}" == "true"; 
     var label = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-    try { label = await getOnFlow(label);
+    try { 
+      label = await getOnFlow(label);
     } catch(e,s) { }
     if (label.length > 10) {
       return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30), 
-      child: Expanded(
-      child: Wrap( 
+      child: Stack(
+        children: [ Wrap( 
         spacing: 10,
         runAlignment: WrapAlignment.center,
         alignment: WrapAlignment.center,
         children: [
-          Padding( padding:  EdgeInsets.only(top: 13, bottom: 13), 
-            child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}",
+          Text( "${label.toLowerCase()}${widget.require ? "" : "*"}", overflow: TextOverflow.ellipsis,
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
-          )),
-          widget.readOnly ? Container( width: 48, height: 48, 
-            padding: EdgeInsets.only(right: 20, top: 13), 
+          ),
+          widget.readOnly ? Container( width: 60, height: 30, 
+            padding: EdgeInsets.only(right: 20), 
             child: FutureBuilder(future: getOnFlow(widget.value == true ? "yes" : "no"), builder: (a, s) {
               if (s.data != null) {
                 return Text(s.data!, style: TextStyle( fontWeight: FontWeight.bold) );
@@ -68,8 +68,7 @@ class _BooleanState extends State<BooleanWidget> {
                 setState(() { });
               }
             ))
-          ])
-        )
+          ]) ])
       );
     }
     ValueNotifier<bool> ctrl = ValueNotifier(widget.value ?? ("${widget.autofill}" == "true"));

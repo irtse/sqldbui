@@ -129,6 +129,5 @@ class HTMLState extends State<HTMLWidget> {
     var html = DeltaToHTML.encodeJson(deltaJson);
     widget.component?.widget.detectChange = true;
     widget.form[widget.name] = html;
-    print(widget.form);
   }
 }

@@ -62,7 +62,10 @@ class Filters {
   List<FilterRowWidget> toRow(Map<String, SchemaField> schema) {
     List<FilterRowWidget> rows = [];
     for (var filter in sort()) {
-      rows.add(FilterRowWidget(schema: schema, columnName: filter.column, label: filter.label ?? filter.column, index: filter.index, 
+      print("qdqsd ${filter.column} ${filter.realName}");
+      rows.add(FilterRowWidget(
+        schema: schema, columnName: filter.column, beforeColumn: filter.realName.split("."), 
+        label: filter.label ?? filter.column, index: filter.index, 
         type: filter.type, comparator: filter.comparator, connector: filter.connector, dir: filter.dir, value: filter.value));
     }
     return rows;
@@ -130,7 +133,9 @@ class Filter extends SerializerDeserializer<Filter> {
     this.column,
     this.label,
     this.width,
+    this.realName = "",
   });
+  String realName;
   dynamic value;
   int index;
   String comparator;
@@ -157,7 +162,7 @@ class Filter extends SerializerDeserializer<Filter> {
   }
   @override Map<String, dynamic> serialize() => {
     "id" : id,
-    "name" : column,
+    "name" : realName.split("."),
     "index" : index,
     "value" : value,
     "operator": comparator,

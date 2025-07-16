@@ -1,18 +1,18 @@
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
-import 'package:sqldbui2/core/widget/form/convertors/boolean.dart';
-import 'package:sqldbui2/core/widget/form/convertors/html.dart';
-import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
+import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
+import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
+import 'package:sqldbui2/core/widget/form/convertors/boolean.dart';
 import 'package:sqldbui2/core/widget/form/convertors/number.dart';
+import 'package:sqldbui2/core/widget/form/convertors/html.dart';
 import 'package:sqldbui2/core/widget/form/convertors/text.dart';
 import 'package:sqldbui2/core/widget/form/convertors/date.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/upload.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
-import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -27,11 +27,25 @@ abstract class ConvertorWidget {
   abstract dynamic value;
 }
 class Convertor {
-  static Future<Widget> filterFieldByType(BuildContext context, ConvertorWidget widget, String type, 
-    String label, State<StatefulWidget> state, bool isDark, bool isGrid, String url, String id) async {
+  static Future<Widget> filterFieldByType(
+    BuildContext context, 
+    ConvertorWidget widget, 
+    String type, 
+    String name, 
+    String label, 
+    State<StatefulWidget> state, 
+    bool isDark, 
+    bool isGrid, 
+    String url, 
+    String subUrl,
+    String id
+  ) async {
     if (widget.value == "no info...") { widget.value = null; }
+    print("$name $type $subUrl");
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
-    var dec = InputDecoration( errorStyle: const TextStyle(fontSize: 0), isDense: true, 
+    var dec = InputDecoration( 
+                errorStyle: const TextStyle(fontSize: 0), 
+                isDense: true, 
                 suffixStyle: TextStyle(color: Theme.of(context).splashColor),
                 hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
@@ -39,7 +53,23 @@ class Convertor {
     bool isText = type.contains("text") || type.contains("varchar") || type.contains("upload") || (type.contains("link") && url == "");
     bool isInt = type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int");
     Widget w = Container();
-    if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
+    if (type.contains("manytomany")) {
+        print("$type $subUrl");
+        w = FutureBuilder<APIResponse<model.Shallowed>>(
+          future: APIService().get(subUrl, true, null), 
+          builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+            return FutureBuilder<Widget>(
+            future: getLink(subUrl, context, widget, id, dec,  formKey, name, label, 
+              type, snap.data?.data, isGrid, isDark, isText), 
+            builder: (BuildContext c, AsyncSnapshot<Widget> q) {
+              if (q.data != null) {
+                return q.data!;
+              }
+              return Container();
+            });
+          }
+        );
+    } else if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
         w = TextFormField( key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,
           initialValue: cacheChanges[id]?.toString() ?? widget.value?.toString(),
@@ -148,6 +178,9 @@ class Convertor {
     } else if (type.contains("enum") ) { // TODO THERE
       var items = <DropdownMenuItem<String>>[];
       for (var item in type.replaceAll("enum__", "").split("_")) { 
+        if (name == "state") {
+          item = item.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+        }
         if (items.where((element) => element.value == item).isEmpty) {
           items.add(DropdownMenuItem<String>(value: item, alignment: isGrid ? Alignment.center : Alignment.centerLeft, 
             child: Text((await getOnFlow(item)).toLowerCase(), overflow: TextOverflow.ellipsis)));
@@ -197,7 +230,7 @@ class Convertor {
                   future: APIService().get(url, true, null), 
                   builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
                     return FutureBuilder<Widget>(
-                    future: getLink(url, context, widget, id, dec,  formKey, label, 
+                    future: getLink(url, context, widget, id, dec,  formKey, name, label, 
                     type, (snap.data?.data ?? [])..addAll(s.data?.data ?? []), isGrid, isDark, isText), 
                     builder: (BuildContext c, AsyncSnapshot<Widget> q) {
                       if (q.data != null) {
@@ -216,21 +249,22 @@ class Convertor {
           future: APIService().get(url, true, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
             return FutureBuilder<Widget>(
-            future: getLink(url, context, widget, id, dec,  formKey, label, 
-            type, snap.data?.data, isGrid, isDark, isText), 
+            future: getLink(url, context, widget, id, dec,  formKey, name, label, 
+              type, snap.data?.data, isGrid, isDark, isText), 
             builder: (BuildContext c, AsyncSnapshot<Widget> q) {
               if (q.data != null) {
                 return q.data!;
               }
               return Container();
             });
-        });
+          }
+        );
       }
     }
     return w;
   }
   static Future<Widget> getLink(String url, BuildContext context, ConvertorWidget widget, String id, 
-    InputDecoration? dec, GlobalKey<FormFieldState<dynamic>> formKey,
+    InputDecoration? dec, GlobalKey<FormFieldState<dynamic>> formKey, String name,
     String label, String type, List<model.Shallowed>? datas,
     bool isGrid, bool isDark, bool isText) async {
     MultiSelectController<String> ctrls = MultiSelectController<String>();
@@ -245,6 +279,9 @@ class Convertor {
       for (var item in datas) {
         max = item.max;
         var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+        if (name == "state") {
+            v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+          }
         var t = items.where((e) => e.value == "${item.id}"); 
         if (!mapped.containsKey(v) && t.isEmpty){
           mapped[v]=item;

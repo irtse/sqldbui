@@ -52,8 +52,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             globalFilter[viewID] = Filters(); // empty filter to refill with new
             for (var filter in filterRowsWidget) {
               if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
-              globalFilter[viewID]?.add(filter.columnName ?? "", Filter(
-                column: filter.columnName, label: filter.label ?? filter.columnName,
+              globalFilter[viewID]?.add(filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName ?? "", Filter(
+                column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, label: filter.label ?? filter.columnName, realName: filter.beforeColumn.join("."),
                 type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
             }
             noFilterRetrieval = true;
@@ -130,14 +130,24 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           Padding(padding: const EdgeInsets.only(left: 5), 
           child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterApplyT.toLowerCase(), 
             style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
-            icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor, ),
+            icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor ),
             onPressed: () {
               if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
               globalFilter[viewID] = Filters(); // empty filter to refill with new
               for (var filter in filterRowsWidget) {
-                if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
-                globalFilter[viewID]?.add(filter.columnName ?? "", Filter(column: filter.columnName, label: filter.label ?? filter.columnName,
-                  type: filter.type, value: filter.value, index: filter.index, connector: filter.connector, comparator: filter.comparator));
+                if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
+                  print("UPTHERE ${filter.formKey.currentState?.validate()}");
+                  return; 
+                }
+                globalFilter[viewID]?.add("${filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName}", Filter(
+                  column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, 
+                  realName: filter.beforeColumn.join("."),
+                  label: filter.label ?? filter.columnName,
+                  type: filter.type, 
+                  value: filter.value, 
+                  index: filter.index, 
+                  connector: filter.connector, 
+                  comparator: filter.comparator));
               }
               noFilterRetrieval = true;
               navigate = true;

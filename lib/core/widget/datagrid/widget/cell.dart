@@ -118,7 +118,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
             // ignore: use_build_context_synchronously
             color: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? Theme.of(context).primaryColor : Theme.of(context).primaryColorLight)
           );
-    if (widget.translatable) {
+    if (widget.translatable || widget.cell.type.contains("bool") || v.contains("no info")) {
       wid = FutureBuilder(future: getOnFlow("$v"), builder: (a,b) {
         String t = "";
         if (b.data != null) {
@@ -149,9 +149,9 @@ class GridCellWidgetState extends State<GridCellWidget> {
       edit ? SizedBox(height: widget.maxheight - 20, 
         child: FutureBuilder( future: Convertor.filterFieldByType(
         // ignore: use_build_context_synchronously
-        context, widget, widget.cell.type, "", 
-        this, false, true, url, 
-        "${widget.cellID}:${widget.cell.columnName}"), builder: (a,b) {
+        context, widget, widget.cell.type, widget.cell.columnName,  "", 
+        this, false, true, url, url, "${widget.cellID}:${widget.cell.columnName}"
+      ), builder: (a,b) {
           if (b.data != null) {
             return Center( child: b.data! );
           }
@@ -166,7 +166,9 @@ class GridCellWidgetState extends State<GridCellWidget> {
             List<model.View> v = [];
             for (var cat in categories.values) { v = cat.where( (v) => "${v.id}" == viewID?.substring(1)).toList(); }
             if (isNew == widget.cellID) { isNew = null; }
-            if (!notNew.containsKey(viewID)) { notNew[viewID] = [widget.cellID]; } else { notNew[viewID]!.add(widget.cellID); }
+            if (!notNew.containsKey(viewID)) { notNew[viewID] = [widget.cellID]; } else { 
+              notNew[viewID]!.add(widget.cellID); 
+            }
             if (v.isNotEmpty && widget.isNew) { v.first.news -= 1; }
           } catch (e) { /* */ }
 
@@ -214,9 +216,11 @@ class GridCellWidgetState extends State<GridCellWidget> {
         title: SizedBox(height: widget.maxheight - 20, 
         child: Center(child: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? InkWell( 
             onTap: () async {
-              String? newDirectory = await FilePicker.platform.getDirectoryPath(dialogTitle: await getOnFlow("select a folder where to download file"));
+              String? newDirectory = await FilePicker.platform.saveFile(
+                fileName: widget.value.toString().split("/").last,
+                dialogTitle: await getOnFlow("select a folder where to download file"));
               await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 
-                    "$newDirectory/${widget.value.toString().split("/").last}", kIsWeb, null);
+                    "$newDirectory", kIsWeb, null);
             },  child: wid) : wid )))]);
   }
 }

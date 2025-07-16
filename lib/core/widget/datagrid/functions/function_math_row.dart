@@ -80,7 +80,7 @@ class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
           height: 25,
           margin: const EdgeInsets.only(left: 10, right: 10), 
           width: (currentWidth - menuSize) / 2, 
-          child: await Convertor.filterFieldByType(context, widget, "varchar", "enter math operation", this, true, false, "", "")
+          child: await Convertor.filterFieldByType(context, widget, "", "varchar", "enter math operation", this, true, false, "", "", "")
         ),
         InkWell(onTap: () {
             commands[viewID] = widget.value;

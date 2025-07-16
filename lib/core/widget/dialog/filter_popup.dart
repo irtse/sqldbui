@@ -118,13 +118,17 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                         if (search.globalKey.currentState!.validate() && search.value != null && search.value != "") {
                           if (filterRowsWidget.length > 1 && filterRowsWidget.last.connector == "") { filterRowsWidget.last.connector = "and"; }
                           if (founded.isEmpty) { 
-                            filterRowsWidget.add(FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
+                            filterRowsWidget.add(FilterRowWidget(
+                              schema: currentView!.schema, 
+                              columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: filterRowsWidget.length));
+                            print(search.type);
                             globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = globalFilter[viewID]!.size();
                           } else {
+                            print(search.type);
                             filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);
@@ -236,8 +240,9 @@ class FilterSearchState extends State<FilterSearchWidget> {
     String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
     
     Widget w = await Convertor.filterFieldByType(
-      context, widget as ConvertorWidget, widget.type, TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
-        this, false, false, url, "");
+      context, widget as ConvertorWidget, widget.type, "", TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
+      this, false, false, url, url, ""
+    );
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
     if (!isText) { togglesMode.add("MATH"); }
     var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));

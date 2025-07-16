@@ -68,7 +68,6 @@ class ActionService {
         if (!vv.formKey.currentState!.validate()) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
-          print("juuyjujj");
           errors = ["form is not valid !"]; 
           break;
         }
@@ -83,7 +82,6 @@ class ActionService {
       && schema[v]!.require && (form.oneToManiesForm[v] ?? []).isEmpty) {
         errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey.currentState?.setState((){});
-        print("tynty");
         errors = ["form is not valid !"]; 
         for ( var o in form.oneToManiesStateForm ) {
           o.setState((){});
@@ -96,7 +94,6 @@ class ActionService {
         if (form.formKey.currentState != null && form.subForm) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
-          print("sddssdff");
           errors = ["form is not valid !"]; 
         }
         return []; 
@@ -152,7 +149,6 @@ class ActionService {
       }
       if (form.view!.actions.contains(method.toLowerCase())) {    
         // ignore: use_build_context_synchronously
-        print(body);
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && value.data!.isNotEmpty) {
             views.add(value.data!.first);
@@ -186,7 +182,6 @@ class ActionService {
             }
             if (!form.subForm) {
               if (redirection != "") { 
-                print("REDIRECTION !!! $path -> $redirection");
                 var splitted = redirection!.split("?rows=");
                 if (splitted.length >= 2) {
                   if (method == "delete") {
@@ -287,7 +282,6 @@ class ActionService {
           if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }          
           if (!["dbdest_table_id"].contains(fieldName) && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
           && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)) { 
-            print("$fieldName ${values[fieldName]}");
             if (values[fieldName] is Map<String, List<PlatformFile>>){
               for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
                 for (var file in values[fieldName][fileStr] as List<PlatformFile>) {
@@ -302,7 +296,6 @@ class ActionService {
               body[fieldName] = [];
               for (var o in (oneToManies[fieldName] ?? [])) {
                 var b = await getBody(method, o.cacheForm, {}, schema[fieldName]!.schema, o.oneToManiesForm, context);
-                print("ONE $b ${o.cacheForm}");
                 body[fieldName].add(b);
               }
             } else {

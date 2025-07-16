@@ -98,7 +98,6 @@ class AppRouter {
       if ((subViewID ?? "") != "") {
         subViewID = "@${viewID?.replaceAll("#", "")}:$subViewID";
       }
-      print("$key $viewID $subViewID");
       for (var e in navigatorCtrls.items) {
         e.selected = e.value == key;
         if (e.selected) {
