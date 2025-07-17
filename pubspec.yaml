@@ -75,6 +75,7 @@ dependencies:
   flutter_input_chips: ^1.1.0
   encrypt: ^5.0.3
   pdfx: ^2.9.2
+  flutter_pdfview: ^1.4.1+1
 
 dev_dependencies:
   flutter_test:
