@@ -3,6 +3,7 @@ import 'package:sqldbui2/core/sections/head_menu.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
 import 'package:sqldbui2/core/widget/utils/dialog_button.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -81,15 +82,15 @@ class PageWidgetState extends State<PageWidget> {
              })),
              NotificationWidget(key: appBarKey),
           ]),
-          Padding(padding: EdgeInsets.only(left: 0, right: 0), 
+          /*Padding(padding: EdgeInsets.only(left: 0, right: 0), 
             child: IconButton(
               icon: Icon( Icons.info_outline, color: Colors.white ), 
                 tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(),
                 onPressed: () => kIsWeb ? html.window.open("${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/assets/pdf/tutorial.pdf", '_blank')
                 : launchUrl(Uri( path: "${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/assets/pdf/tutorial.pdf"), mode: LaunchMode.externalApplication) // Opens in new tab), 
             )
-          ),
-          //DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
+          ),*/
+          DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
           DialogButtonWidget( left: 12.5, right: 50,
             icon: Icons.logout_outlined,
             widget: ConfirmBoxWidget(purpose: "disconnect your account", validate: () { _authProvider.logOut(context); }), 

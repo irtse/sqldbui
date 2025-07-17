@@ -158,27 +158,17 @@ class TutorialPopUpWidget extends StatefulWidget {
 class TutorialPopUpState extends State<TutorialPopUpWidget> {
     
   PdfControllerPinch pdfController = PdfControllerPinch(
-    document: PdfDocument.openAsset('assets/sample.pdf'),
+    document: PdfDocument.openAsset('assets/pdf/tutorial.pdf'),
   );
   
   @override Widget build(BuildContext context) {
-    List<Widget> list = [
-      PdfViewPinch(
-        controller: pdfController,
-      )
-    ];
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
         title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
       body: Container( width: currentWidth,
         height: currentHeigth, color: Theme.of(context).primaryColorLight,
-          child: Center( child: CarouselSlider(
-        options: CarouselOptions(
-          aspectRatio: 2.0,
-          enlargeCenterPage: true,
-          scrollDirection: Axis.horizontal,
-        ),
-        items: list,
+          child: Center( child: PdfViewPinch(
+        controller: pdfController,
       ))),
     );
   }
