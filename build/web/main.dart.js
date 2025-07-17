@@ -199577,7 +199577,7 @@ $S:0}
 A.a7r.prototype={
 Z(){var s,r,q
 A.c58()
-s=$.cI5().xW("assets/sample.pdf",null)
+s=$.cI5().xW("assets/pdf/tutorial.pdf",null)
 r=$.aN()
 q=new A.bs(new Float64Array(16))
 q.eM()
