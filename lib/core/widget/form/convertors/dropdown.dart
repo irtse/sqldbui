@@ -351,7 +351,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
         }
       }
     }
-    print(widget.type);
     return MultiDropdown<String>(
         max: max,
         changeFunction: (dynamic value) async {

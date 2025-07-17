@@ -136,7 +136,6 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               globalFilter[viewID] = Filters(); // empty filter to refill with new
               for (var filter in filterRowsWidget) {
                 if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
-                  print("UPTHERE ${filter.formKey.currentState?.validate()}");
                   return; 
                 }
                 globalFilter[viewID]?.add("${filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName}", Filter(

@@ -197,7 +197,6 @@ class ActionService {
                   } else {
                     viewID = "@${splitted[0].split("/").last}";
                     subViewID = splitted[1];
-                    print("$viewID $subViewID ");
                     navigate = true;   
                     Future.delayed(Duration(seconds: 3), () {
                       globalActionBar.currentState?.setState(() {});

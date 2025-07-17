@@ -124,7 +124,6 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
                 body[bb] =  widget.triggers[widget.index].body[bb];
               }
             }
-            print("BODY $body");
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
                   ActionService.onSuccessMethod("POST", e.data!.first, body, trigger.schema, files, context);

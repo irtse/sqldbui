@@ -162,7 +162,7 @@ class Filter extends SerializerDeserializer<Filter> {
   }
   @override Map<String, dynamic> serialize() => {
     "id" : id,
-    "name" : realName.split("."),
+    "name" : realName,
     "index" : index,
     "value" : value,
     "operator": comparator,

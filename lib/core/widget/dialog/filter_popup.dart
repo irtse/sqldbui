@@ -123,12 +123,10 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                               columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: filterRowsWidget.length));
-                            print(search.type);
                             globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = globalFilter[viewID]!.size();
                           } else {
-                            print(search.type);
                             filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);

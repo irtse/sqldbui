@@ -141,7 +141,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     if (widget.schema[widget.columnName] != null && widget.schema[widget.columnName]!.type.contains("onetomany")) {
       String? column;
       if (widget.widget.widget.beforeColumn.length > widget.depth + 1) {
-        column = widget.widget.widget.beforeColumn[widget.depth];
+        column = widget.widget.widget.beforeColumn[ widget.depth + 1];
       }
       w2 = Padding( padding: EdgeInsets.only(left: 10), child: FilterSubRowWidget(
         widget: widget.widget,
@@ -160,13 +160,15 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     }
     List<DropdownMenuItem<String>> items = [];
     for (var o in widget.schema.entries.where((e) => order.contains(e.key))) {
-      items.add(DropdownMenuItem<String>(value: o.key, child: FutureBuilder(future: getOnFlow(o.value.label), builder: (a,s) {
-        if (s.data != null) {
-          return Text(s.data!.toLowerCase(), overflow: TextOverflow.ellipsis);
-        }
-        return Text(o.value.label.toLowerCase(), overflow: TextOverflow.ellipsis);
-      })
-      ));
+      if (items.where( (e) => e.value == o.key).isEmpty) {
+          items.add(DropdownMenuItem<String>(value: o.key, child: FutureBuilder(future: getOnFlow(o.value.label), builder: (a,s) {
+            if (s.data != null) {
+              return Text(s.data!.toLowerCase(), overflow: TextOverflow.ellipsis);
+            }
+            return Text(o.value.label.toLowerCase(), overflow: TextOverflow.ellipsis);
+            })
+        ));
+      }
     }
     List<DropdownMenuItem<String>> conn = [];
     var indications = widget.type.contains("enum") || widget.type.contains("link") || widget.type.contains("many") ? ["=", "!="] : (  
@@ -180,7 +182,6 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     if (!["=", "!="].contains(widget.comparator)) {
       widget.comparator = widget.type.contains("enum") || widget.type == "link"  ? "=" : widget.comparator;
     }
-
     return Row( children : [
       SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 7, 
                 child: DropdownButtonFormField<String>( 

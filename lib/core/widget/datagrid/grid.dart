@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -57,7 +59,48 @@ class GridWidget extends StatefulWidget {
 }
 class GridWidgetState extends State<GridWidget> {
   final min = 160;
+  double scroll = 0;
+  Timer? _scrollTimer;
+  bool _isMouseDown = false;
+  Offset _mousePosition = Offset.zero;
   final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
+
+  void _startAutoScroll() {
+    const scrollSpeed = 10.0;
+    const edgeThreshold = 50.0;
+
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
+      if (!_isMouseDown) return;
+      var bef = widget.columns.last.width;
+      final box = context.findRenderObject() as RenderBox?;
+      if (box == null) return;
+
+      final localPos = box.globalToLocal(_mousePosition);
+      final width = box.size.width;
+      
+      if (localPos.dx >= width - edgeThreshold) {
+        // Scroll right
+        _horizontal.jumpTo(
+          ((_horizontal.offset)  + scrollSpeed).clamp(
+            0.0, _horizontal.position.maxScrollExtent),
+          
+        );
+        var n = widget.columns.last.width;
+        if (n > bef) {
+          setState( () {
+            widget.columns.last.width += scrollSpeed;
+            scroll += n + bef;
+          });
+        } else if (n < bef) {
+          setState( () {
+            scroll -= bef - n;
+            widget.columns.last.width -= scrollSpeed;
+          });
+        }
+      }
+    });
+  }
   @override Widget build(BuildContext context) { 
     if (viewID == null) { return Container(); }
     List<Widget> additionnalContent = [];
@@ -119,7 +162,24 @@ class GridWidgetState extends State<GridWidget> {
     if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
       bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
     }
-    return ScrollConfiguration(
+    return Listener(
+        onPointerDown: (event) {
+          _isMouseDown = true;
+          _mousePosition = event.position;
+          _startAutoScroll();
+        },
+        onPointerMove: (event) {
+          _mousePosition = event.position;
+        },
+        onPointerUp: (_) {
+          _isMouseDown = false;
+          _scrollTimer?.cancel();
+        },
+        child: MouseRegion(
+          onHover: (event) {
+            _mousePosition = event.position;
+          },
+          child:  ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: Scrollbar(
       controller: _horizontal,
@@ -145,7 +205,7 @@ class GridWidgetState extends State<GridWidget> {
                       Container(
                         height: currentHeigth - (178 + t) > 0 ? currentHeigth - (178 + t) : 0,
                         decoration: BoxDecoration( color: Theme.of(context).splashColor), 
-                        width: maxWidth + 81.5,
+                        width: maxWidth + scroll + 86.5,
                         child: Center(
                           child: Text(TranslateConstants.emptyData, 
                             style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
@@ -187,7 +247,7 @@ class GridWidgetState extends State<GridWidget> {
         ),
         child: Row(children:additionnalContent..addAll(widget.columns))),
       ...bottom,
-    ],))));
+    ],))))));
   }
 
   List<GridRowWidget> buildRows(List<GridColumnWidget> columns, List<Value> datas) {
