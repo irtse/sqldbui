@@ -170,15 +170,13 @@ class TutorialPopUpState extends State<TutorialPopUpWidget> {
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
         title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
-      body: SingleChildScrollView(
-        child: Container( width: currentWidth,
+      body: Container( width: currentWidth,
           color: Theme.of(context).primaryColorLight,
           child:  PdfViewPinch(
               controller: pdfController,
             )
           )
-      ),
-    );
+      );
   }
 }
 
