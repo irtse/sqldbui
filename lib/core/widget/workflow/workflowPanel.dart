@@ -47,6 +47,6 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
                 child: Text(TranslateConstants.nextOpt.toLowerCase(), style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
       } catch(e) { /* empty */ } 
     }
-    return Container(width: 0,);
+    return Container(width: 0);
   }
 }

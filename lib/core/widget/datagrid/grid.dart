@@ -59,6 +59,7 @@ class GridWidget extends StatefulWidget {
 }
 class GridWidgetState extends State<GridWidget> {
   final min = 160;
+  double lastOffset = 0;
   double scroll = 0;
   Timer? _scrollTimer;
   bool _isMouseDown = false;
@@ -72,30 +73,32 @@ class GridWidgetState extends State<GridWidget> {
     _scrollTimer?.cancel();
     _scrollTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
       if (!_isMouseDown) return;
-      var bef = widget.columns.last.width;
       final box = context.findRenderObject() as RenderBox?;
       if (box == null) return;
-
+      var bef = widget.columns.last.width;
       final localPos = box.globalToLocal(_mousePosition);
       final width = box.size.width;
       
       if (localPos.dx >= width - edgeThreshold) {
+        var off = _horizontal.offset;
         // Scroll right
+        if (lastOffset == _horizontal.offset) {
+          off += 10;
+          lastOffset += 10;
+        } 
         _horizontal.jumpTo(
-          ((_horizontal.offset)  + scrollSpeed).clamp(
+          ((off)  + scrollSpeed).clamp(
             0.0, _horizontal.position.maxScrollExtent),
-          
         );
-        var n = widget.columns.last.width;
-        if (n > bef) {
+        var a = widget.columns.last.width;
+        if ((a - bef) > 0) {
           setState( () {
+            scroll += scrollSpeed;
             widget.columns.last.width += scrollSpeed;
-            scroll += n + bef;
           });
-        } else if (n < bef) {
+        } else if ((bef - a) > 0  && scroll > 0) {
           setState( () {
-            scroll -= bef - n;
-            widget.columns.last.width -= scrollSpeed;
+            scroll -= scrollSpeed;
           });
         }
       }
