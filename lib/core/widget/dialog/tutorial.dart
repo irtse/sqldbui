@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:pdfx/pdfx.dart';
@@ -167,9 +166,9 @@ class TutorialPopUpState extends State<TutorialPopUpWidget> {
         title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
       body: Container( width: currentWidth,
         height: currentHeigth, color: Theme.of(context).primaryColorLight,
-          child: Center( child: PdfViewPinch(
+          child: Center( child: SingleChildScrollView( child: PdfViewPinch(
         controller: pdfController,
-      ))),
+      )))),
     );
   }
 }

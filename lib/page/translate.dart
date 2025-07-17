@@ -159,7 +159,7 @@ class TranslateConstants {
   static String savedFolder = "saved to folder";
   static String allowedFormat = "allowed format";
   static String howToAccess = "How to access a datas ?";
-  static String howToTutorial = "TUTORIAL - HOW TO START";
+  static String howToTutorial = "TUTORIAL";
   static String howToOrder = "datas are ordered in thematized views accessible in the side menu. menu give access to datas list views.";
   static String howToWorkflow = "workflows are attached to a request. some request does not have a workflow to integrate data.";
   static String select = "select : ";
