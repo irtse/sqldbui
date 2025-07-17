@@ -151,24 +151,34 @@ var slide4 = (BuildContext context) => Container( decoration: BoxDecoration(colo
     ]));
 
 class TutorialPopUpWidget extends StatefulWidget {
-  const TutorialPopUpWidget ({ super.key,});
+  const TutorialPopUpWidget ({ Key? key,}): super(key: key);
   @override
   TutorialPopUpState createState() => TutorialPopUpState();
 }
 class TutorialPopUpState extends State<TutorialPopUpWidget> {
     
   PdfControllerPinch pdfController = PdfControllerPinch(
-    document: PdfDocument.openAsset('assets/pdf/tutorial.pdf'),
+    document: PdfDocument.openAsset('assets/sample.pdf'),
   );
   
   @override Widget build(BuildContext context) {
+    List<Widget> list = [
+      PdfViewPinch(
+        controller: pdfController,
+      )
+    ];
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
-        title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white))),
+        title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
       body: Container( width: currentWidth,
         height: currentHeigth, color: Theme.of(context).primaryColorLight,
-          child: Center( child: PdfViewPinch(
-        controller: pdfController,
+          child: Center( child: CarouselSlider(
+        options: CarouselOptions(
+          aspectRatio: 2.0,
+          enlargeCenterPage: true,
+          scrollDirection: Axis.horizontal,
+        ),
+        items: list,
       ))),
     );
   }
