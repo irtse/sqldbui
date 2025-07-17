@@ -151,7 +151,7 @@ var slide4 = (BuildContext context) => Container( decoration: BoxDecoration(colo
     ]));
 
 class TutorialPopUpWidget extends StatefulWidget {
-  const TutorialPopUpWidget ({ Key? key,}): super(key: key);
+  const TutorialPopUpWidget ({ super.key,});
   @override
   TutorialPopUpState createState() => TutorialPopUpState();
 }
