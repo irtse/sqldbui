@@ -157,7 +157,7 @@ class Filter extends SerializerDeserializer<Filter> {
     value: json.containsKey("value") ? json["value"] : null,
     index: json.containsKey("index") ? json["index"] : 0,
     comparator: json.containsKey("operator") && json["operator"] != null ? json["operator"] : "like",
-    connector: json.containsKey("comparator") && json["comparator"] != null ? json["comparator"] : "",
+    connector: json.containsKey("separator") && json["separator"] != null ? json["separator"] : "",
     dir: json.containsKey("dir") && json["dir"] != null ? json["dir"] : "" );
   }
   @override Map<String, dynamic> serialize() => {
@@ -166,7 +166,7 @@ class Filter extends SerializerDeserializer<Filter> {
     "index" : index,
     "value" : value,
     "operator": comparator,
-    "comparator" : connector,
+    "separator" : connector,
     "dir" : dir,
   };
 }

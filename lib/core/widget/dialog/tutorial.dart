@@ -155,28 +155,83 @@ class TutorialPopUpWidget extends StatefulWidget {
   TutorialPopUpState createState() => TutorialPopUpState();
 }
 class TutorialPopUpState extends State<TutorialPopUpWidget> {
-    
-  PdfControllerPinch pdfController = PdfControllerPinch(
-    document: PdfDocument.openAsset('assets/pdf/tutorial.pdf'),
-  );
-  
+  late final PdfControllerPinch _pdfController;
+  int _pages = 0;
+  int _currentPage = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    _pdfController = PdfControllerPinch(
+      document: PdfDocument.openAsset('assets/pdf/tutorial.pdf'),
+    );
+
+    _pdfController.pageListenable.addListener(() {
+      setState(() {
+        _currentPage = _pdfController.pageListenable.value;
+      });
+    });
+
+    _loadPageCount();
+  }
+
+  Future<void> _loadPageCount() async {
+    final doc = await PdfDocument.openAsset('assets/pdf/tutorial.pdf');
+    setState(() {
+      _pages = doc.pagesCount;
+    });
+  }
+
   @override
   void dispose() {
-    pdfController.dispose();
+    _pdfController.dispose();
     super.dispose();
+  }
+
+  void _goToPage(int page) {
+    _pdfController.jumpToPage(page);
   }
 
   @override Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(backgroundColor: Theme.of(context).secondaryHeaderColor, iconTheme: IconThemeData(color: Theme.of(context).splashColor),
-        title: Text(TranslateConstants.howToTutorial.toUpperCase(), style: TextStyle(color: Colors.white),)),
-      body: Container( width: currentWidth,
-          color: Theme.of(context).primaryColorLight,
-          child:  PdfViewPinch(
-              controller: pdfController,
-            )
-          )
-      );
+        title: Text("${TranslateConstants.howToTutorial.toUpperCase()} ($_currentPage/$_pages)", style: TextStyle(color: Colors.white),)),
+      body: Row(
+        children: [
+          // Navigation panel
+          Container(
+            width: 80,
+            color: Colors.grey[200],
+            child: ListView.builder(
+              itemCount: _pages,
+              itemBuilder: (context, index) {
+                final pageNum = index + 1;
+                return ListTile(
+                  dense: true,
+                  title: Text('$pageNum',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight:
+                            _currentPage == pageNum ? FontWeight.bold : null,
+                        color: _currentPage == pageNum
+                            ? Colors.blue
+                            : Colors.black,
+                      )),
+                  onTap: () => _goToPage(pageNum),
+                );
+              },
+            ),
+          ),
+          // PDF view
+          Expanded(
+            child: PdfViewPinch(
+              controller: _pdfController,
+              scrollDirection: Axis.vertical,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
