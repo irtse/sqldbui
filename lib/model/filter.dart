@@ -64,7 +64,7 @@ class Filters {
     for (var filter in sort()) {
       print("qdqsd ${filter.column} ${filter.realName}");
       rows.add(FilterRowWidget(
-        schema: schema, columnName: filter.column, beforeColumn: filter.realName.split("."), 
+        schema: schema, columnName: filter.column, beforeColumn: (filter.realName ?? filter.column ?? "").split("."), 
         label: filter.label ?? filter.column, index: filter.index, 
         type: filter.type, comparator: filter.comparator, connector: filter.connector, dir: filter.dir, value: filter.value));
     }
@@ -133,9 +133,9 @@ class Filter extends SerializerDeserializer<Filter> {
     this.column,
     this.label,
     this.width,
-    this.realName = "",
+    this.realName,
   });
-  String realName;
+  String? realName;
   dynamic value;
   int index;
   String comparator;

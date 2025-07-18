@@ -39,7 +39,8 @@ class GridWidget extends StatefulWidget {
   String schemaID;
   int maxLength;
   bool isEnum;
-   
+  double scroll = 0;
+
   GridWidget({ super.key,
     required this.columns, 
     required this.source, 
@@ -60,8 +61,8 @@ class GridWidget extends StatefulWidget {
 class GridWidgetState extends State<GridWidget> {
   final min = 160;
   double lastOffset = 0;
-  double scroll = 0;
   Timer? _scrollTimer;
+  double lastWidth = 0;
   bool _isMouseDown = false;
   Offset _mousePosition = Offset.zero;
   final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
@@ -75,30 +76,30 @@ class GridWidgetState extends State<GridWidget> {
       if (!_isMouseDown) return;
       final box = context.findRenderObject() as RenderBox?;
       if (box == null) return;
-      var bef = widget.columns.last.width;
       final localPos = box.globalToLocal(_mousePosition);
       final width = box.size.width;
       
       if (localPos.dx >= width - edgeThreshold) {
-        var off = _horizontal.offset;
-        // Scroll right
-        if (lastOffset == _horizontal.offset) {
-          off += 10;
-          lastOffset += 10;
-        } 
         _horizontal.jumpTo(
-          ((off)  + scrollSpeed).clamp(
+          (_horizontal.offset + scrollSpeed).clamp(
             0.0, _horizontal.position.maxScrollExtent),
         );
-        var a = widget.columns.last.width;
-        if ((a - bef) > 0) {
+        print("${ rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width} $lastWidth");
+        if ((rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width) > lastWidth) {
           setState( () {
-            scroll += scrollSpeed;
-            widget.columns.last.width += scrollSpeed;
+            widget.scroll += scrollSpeed;
+            if (rects[viewID]?[widget.columns.last.columnName] != null) {
+              rects[viewID]![widget.columns.last.columnName] =  Rect.fromCenter(center: MediaQuery.of(context).size.center(Offset.zero),
+                width: rects[viewID]![widget.columns.last.columnName]!.width + scrollSpeed, 
+                height: rects[viewID]![widget.columns.last.columnName]!.height
+              );
+            } else {
+              widget.columns.last.width += scrollSpeed;
+            }
           });
-        } else if ((bef - a) > 0  && scroll > 0) {
+        } else if ((rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width) < lastWidth && widget.scroll > 0) {
           setState( () {
-            scroll -= scrollSpeed;
+             widget.scroll -= scrollSpeed;
           });
         }
       }
@@ -106,6 +107,7 @@ class GridWidgetState extends State<GridWidget> {
   }
   @override Widget build(BuildContext context) { 
     if (viewID == null) { return Container(); }
+    lastWidth = rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width;
     List<Widget> additionnalContent = [];
     if (currentView != null && viewID != null) { notNew[viewID] = []; }
     List<GridRowWidget> rows = buildRows(widget.columns, widget.source);
@@ -165,6 +167,7 @@ class GridWidgetState extends State<GridWidget> {
     if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
       bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
     }
+    print( widget.scroll);
     return Listener(
         onPointerDown: (event) {
           _isMouseDown = true;
@@ -208,7 +211,7 @@ class GridWidgetState extends State<GridWidget> {
                       Container(
                         height: currentHeigth - (178 + t) > 0 ? currentHeigth - (178 + t) : 0,
                         decoration: BoxDecoration( color: Theme.of(context).splashColor), 
-                        width: maxWidth + scroll + 86.5,
+                        width: maxWidth +  widget.scroll + 86.5,
                         child: Center(
                           child: Text(TranslateConstants.emptyData, 
                             style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
