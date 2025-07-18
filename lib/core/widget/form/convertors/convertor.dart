@@ -330,7 +330,7 @@ class Convertor {
             return;
           }
           var filters = Filters();
-          filters.add("name", Filter(value: value, column: "name"));
+          filters.add("name", Filter(value: value, column: "name", realName: "name"));
           load(url, 0, 10, APIService().getFilter(url, true, filters), value, items, ctrls, mapped, label);
         },
         controller: ctrls,

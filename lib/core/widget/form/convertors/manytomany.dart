@@ -298,7 +298,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                               return;
                             }
                             var filters = Filters();
-                            filters.add("name", Filter(value: value, column: "name"));
+                            filters.add("name", Filter(value: value, column: "name", realName: "name"));
                             load(0, 10, APIService().getFilter(widget.url ?? "", true, filters), value, items);
                           
                         },

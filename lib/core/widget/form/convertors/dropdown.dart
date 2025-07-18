@@ -358,7 +358,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
             return;
           }
           var filters = Filters();
-          filters.add("name", Filter(value: value, column: "name"));
+          filters.add("name", Filter(value: value, column: "name", realName: "name"));
           load(0, 10, APIService().getFilter(widget.mainUrl, true, filters), value, items);
         },
         enabled:!widget.readOnly,
