@@ -161,10 +161,10 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           icon: Icon( Icons.filter_alt_off, size: 18, color: Theme.of(context).highlightColor ),
           onPressed: () async { 
             setState(() { });
-            removeFilter();
-            filterRestr[viewID] = ""; 
             Future.delayed(const Duration(seconds: 1), 
               () {
+                removeFilter();
+                filterRestr[viewID] = ""; 
                 navigate = true; 
                 globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
               }); 

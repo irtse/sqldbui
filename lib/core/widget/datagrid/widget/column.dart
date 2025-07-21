@@ -257,7 +257,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20,), 
               child: Stack( children: [ 
-                ...(size <= 0 ? [] : [ SizedBox( width: size, child: Center(child: widget.label))] ), 
+                ...(size <= 0 ? [] : [ SizedBox( width: size, child: Tooltip( message: widget.label.value, child: Center(child: widget.label)))] ), 
                 Positioned( right: 0, top: 10, 
                   child: Row( 
                     mainAxisAlignment: MainAxisAlignment.end, 
