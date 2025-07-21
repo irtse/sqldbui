@@ -118,7 +118,7 @@ class Filters {
     filterRowsWidget = [];
     noFilterRetrieval = true;
     navigate = true;
-    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+    globalMainViewKey.currentState?.setState(() {});
   }
 
 class Filter extends SerializerDeserializer<Filter> {

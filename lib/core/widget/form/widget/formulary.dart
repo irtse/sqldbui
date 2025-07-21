@@ -94,12 +94,13 @@ class FormularyWidgetState extends State<FormularyWidget> {
         }
         for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
-
+          print("fieldName $fieldName");
           if (widget.schema[fieldName] == null || widget.schema[fieldName]!.hidden 
           || (widget.schema[fieldName]?.subsection ?? "") != c || ["id", "description"].contains(fieldName) ||
           (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { 
             continue; 
           }
+          print("fieldName2 $fieldName");
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
           var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;

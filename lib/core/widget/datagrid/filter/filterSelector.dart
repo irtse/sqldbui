@@ -66,6 +66,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               Future.delayed(Duration(seconds: 1), () {
                 setState(() { 
                   try {
+                    print("kjnkjndks ${filterRestr[viewID]} ${value.data?.first.id}");
                     filterRestr[viewID] = "${value.data?.first.id}";
                   } catch(e) {}
                   forceFilter = true;
@@ -161,22 +162,15 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           onPressed: () async { 
             setState(() { });
             removeFilter();
-            if ((filterRestr[viewID] ?? "") == "") { 
-              filterRestr[viewID] = ""; 
-              return Future.delayed(const Duration(seconds: 1), 
-                () {
-                  navigate = true; 
-                  globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
-                }); 
-            }
             filterRestr[viewID] = ""; 
+            Future.delayed(const Duration(seconds: 1), 
+              () {
+                navigate = true; 
+                globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+              }); 
+            
             APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
-              <String, dynamic> { "is_selected" : false }, null).then((value) {
-              Future.delayed(const Duration(seconds: 1), () => setState(() {
-                forceFilter = true;
-                refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []);
-              })); 
-            }); })) : Container(),
+              <String, dynamic> { "is_selected" : false }, null); })) : Container(),
           Padding(padding: const EdgeInsets.only(left: 10), 
             child: FutureBuilder(future: getLabels(toggles), builder: (a,s) {
               if (s.data != null) {

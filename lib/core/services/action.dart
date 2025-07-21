@@ -190,7 +190,7 @@ class ActionService {
                     subViewID = null;
 
                     navigate = true;   
-                    Future.delayed(Duration(seconds: 3), () {
+                    Future.delayed(Duration(seconds: 1), () {
                       globalActionBar.currentState?.setState(() {});
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                     });
@@ -198,7 +198,7 @@ class ActionService {
                     viewID = "@${splitted[0].split("/").last}";
                     subViewID = splitted[1];
                     navigate = true;   
-                    Future.delayed(Duration(seconds: 3), () {
+                    Future.delayed(Duration(seconds: 1), () {
                       globalActionBar.currentState?.setState(() {});
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                     });
