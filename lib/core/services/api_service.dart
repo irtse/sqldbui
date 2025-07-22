@@ -83,12 +83,12 @@ class APIService {
       var command = "";
       if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
-        dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter").then((value) async {
+        dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter", options: Options(responseType: ResponseType.bytes)).then((value) async {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
           print(value.data);
-          await FilePicker.platform.saveFile(fileName: savePath.split("/").last, bytes: convertToBytes(value.data));
+          await FilePicker.platform.saveFile(fileName: savePath.split("/").last, bytes: Uint8List.fromList(value.data));
           Future.delayed(const Duration(seconds: 1), () { 
             if (context != null) {
               Navigator.of(context).pop(); 
