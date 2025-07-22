@@ -1,4 +1,5 @@
 import 'package:sqldbui2/core/sections/menu/menu_expansion_tile.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/sections/menu/menu_header.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
@@ -167,6 +168,7 @@ class MenuWidgetState extends State<MenuWidget> {
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 
       || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
     navigate = true;
+    confirm = null;
     globalMainViewKey.currentState?.refresh(viewID, null, currentView, true);
   }
 }

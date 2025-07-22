@@ -162,7 +162,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                 : TranslateConstants.update).toUpperCase(), 
                 // ignore: use_build_context_synchronously
             color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
-            avoidConsent: true));
+            avoidConsent: true, noRedirection: !widget.view.isEmpty));
         }
         if (widget.view.actions.contains("delete") && !widget.view.isEmpty) {
           try {

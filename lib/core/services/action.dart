@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -25,29 +26,27 @@ class ActionService {
   static void Function() pressed(ButtonWidgetState? widget, bool isList, String schemaName, String url, 
                                  List<dynamic>? parameters, Map<String,model.SchemaField> schema, 
                                  String method, bool isDraft, BuildContext context, Map<String,dynamic> overrideMap, 
-                                 bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) {
+                                 bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore, bool noRedirection) {
       redirection = null;
       errors = [];
-      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent, ignore);
+      return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent, ignore, noRedirection);
   }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
                                      Map<String,model.SchemaField> schema, String method, BuildContext context) { return () async {}; }
   static void Function() pressedForm(ButtonWidgetState? widget, GlobalKey<FormWidgetState> form, String schemaName, String url, 
                                 Map<String,model.SchemaField> schema, String method, BuildContext context, bool isDraft, bool overrideDest, 
-                                Map<String,dynamic> overrideMap, bool explicitDraft, bool avoidConsent, bool ignore) { 
+                                Map<String,dynamic> overrideMap, bool explicitDraft, bool avoidConsent, bool ignore, bool noRedirection) { 
       return () async {
         widget?.loading();
-        if (mainForm.currentState != null) {
+        if (mainForm.currentState != null ) {
           var v = await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
-          print(v);
-          if (v.isNotEmpty) {
-            if ((redirection ?? "") != "")  { 
+          if ((redirection ?? "") != "" && !noRedirection)  { 
               var splitted = redirection?.split("?rows=");
               if ((splitted?.length ?? 0) >= 2) {
                 if (method == "delete") {
                   viewID = "#${splitted![1]}";
                   subViewID = null;
-
+                  confirm = null;
                   navigate = true;   
                   Future.delayed(Duration(seconds: 2), () {
                     Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
@@ -56,25 +55,22 @@ class ActionService {
                 } else if (splitted != null) {
                   viewID = "@${splitted[0].split("/").last}";
                   subViewID = splitted[1];
-                  navigate = true;   
+                  navigate = true;  
+                  confirm = null; 
                   Future.delayed(Duration(seconds: 2), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                   });
                 }
               }
-            } else {
-              navigate = true;  
-              firstAPI = true; 
-              globalMainViewKey.currentState?.setState(() { });
-              globalMenuKey.currentState?.setState(() { });
+            }   
+            if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                    InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
-                                                alertBannerLocation:  AlertBannerLocation.bottom);
-            }
-          }
-          
+                          InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? "registration" : method)} is done"), // <-- Put any widget here you want!
+                                                      alertBannerLocation:  AlertBannerLocation.bottom);
+            } 
         }
+        
         widget?.loaded();
         
         
@@ -99,9 +95,11 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
+    print(form.oneToManiesForm);
     for (var v in form.oneToManiesForm.entries) {
       for (var vv in v.value) {
-        if (!(vv.formKey.currentState?.validate() ?? false)) {
+        print("${form.oneToManiesForm} ${vv.formKey.currentState} ${vv.formKey.currentState?.validate()}");
+        if (!(vv.formKey.currentState?.validate() ?? true)) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
           errors = ["form is not valid !"]; 
@@ -116,6 +114,7 @@ class ActionService {
     for (var v in schema.keys) {
       if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
       && (schema[v]?.require ?? false) && (form.oneToManiesForm[v] ?? []).isEmpty) {
+        print("THERE");
         errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey.currentState?.setState((){});
         errors = ["form is not valid !"]; 
@@ -135,6 +134,7 @@ class ActionService {
           errorFormKey.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }
+        print("THERE");
         return []; 
       } else { form.formKey.currentState?.save(); }
     } 
@@ -158,11 +158,13 @@ class ActionService {
           showAlertBanner(context, durationOfStayingOnScreen: Duration(minutes: 1), 
           () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
         }
+        print("THERE2");
       return views;
     }
     
     if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id) {
       mainForm.currentState?.setState(() { firstAPI = true; });
+      print("THERE3");
       return views;
     }
 
@@ -188,6 +190,7 @@ class ActionService {
       }
       if (form.view?.actions.contains(method.toLowerCase()) ?? false) {    
         // ignore: use_build_context_synchronously
+        print("$path $body");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
             views.add(value.data!.first);

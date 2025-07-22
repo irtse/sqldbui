@@ -1,4 +1,5 @@
 import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -112,6 +113,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
               globalOffset = 0;
               globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "asc"  ? "desc" : "asc";
               navigate = true;
+              confirm = null;
               globalMainViewKey.currentState?.refresh(viewID, subViewID, currentView, false);
             }
           }, 
@@ -131,6 +133,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         onPressed: () async { 
           resetFilter(widget.columnName);
           navigate = true;
+          confirm = null;
           globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
         }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 15,)))));
       } 

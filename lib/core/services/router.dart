@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -199,7 +200,9 @@ class AppRouter {
     detectChanges = {};
     currentView = null;
     globalLoading = true;
-    selectedGrid = []; unselectedGrid = [];
+    selectedGrid = []; 
+    unselectedGrid = [];
+    confirm = null;
     navigate = true;
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }

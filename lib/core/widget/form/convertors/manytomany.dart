@@ -50,6 +50,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
     if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
+        print(widget.value);
         for (var v in widget.value) {
           try {
             if (v is model.Shallowed && v.id != null) {
@@ -166,6 +167,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     } catch(e) {}
     int max = 0;
     if (widget.datas != null) {
+      widget.form[widget.name] = [];
       for (var item in widget.datas!) {
         if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
           continue;
@@ -217,7 +219,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               );
             }
           } else {
-            widget.form[widget.name] = [];
             for (var val in widget.value ?? []) {
               val = val as model.Shallowed;
               if (val.id == null) {

@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/text_button.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -141,6 +142,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     }
                     noFilterRetrieval = true;  
                     navigate = true;
+                    confirm = null;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                   style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
@@ -148,6 +150,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
                     navigate = true;
+                    confirm = null;
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                     stateSort!(() { widget.ascOrder=null; });
                     stateFilter!(() { advancedSearch = []; });

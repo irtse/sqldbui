@@ -2,6 +2,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/abstract.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -118,6 +119,7 @@ class Filters {
     filterRowsWidget = [];
     noFilterRetrieval = true;
     navigate = true;
+    confirm = null;
     globalMainViewKey.currentState?.setState(() {});
   }
 

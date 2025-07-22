@@ -1,4 +1,5 @@
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/link_box.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -65,6 +66,7 @@ class ActionBarState extends State<ActionBarWidget> {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
             translation = !translation;
+            confirm = null;
             navigate = true;
             globalMainViewKey.currentState?.setState(() { });
           }, false));

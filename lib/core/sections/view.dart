@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
@@ -98,6 +99,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     subViewID = id;
     firstAPI = true;
     globalLoading = load;
+    confirm = null;
     navigate = true;
     setState(() { widget.url = path;});
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);

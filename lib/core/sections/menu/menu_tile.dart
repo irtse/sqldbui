@@ -5,6 +5,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -40,6 +41,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 selected: widget.isSelected,
                 onTap: () async { 
                   setState(() { 
+                    confirm = null;
                     navigate = true;
                     for (var t in tiles) {
                       t.currentState?.setState(() {
@@ -68,6 +70,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                   padding: EdgeInsets.only(right: (widget.view?.news ?? 0) > 0 ? (("${widget.view?.news ?? ""}".length + 1) * 10) : 0), 
                   child: InkWell( 
                     onTap: () {
+                      confirm = null;
                       navigate = true;
                       widget.view!.isFavorize = !widget.view!.isFavorize;
                       var urlPath = widget.view!.favorizePath;

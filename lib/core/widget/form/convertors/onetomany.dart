@@ -46,7 +46,7 @@ class OneToManyState extends State<OneToManyWidget> {
     widget.filtered = (widget.component?.widget.oneToManiesForm[widget.name] ?? []).where((e) {
       return (e.view?.id ?? - 1) < 0;
     }).toList();
-    
+    print("ONETOMANY ${widget.value}");
     if (widget.value != null) { // TEST => nvnv
       return FutureBuilder<APIResponse<model.View>>(
         future: APIService().get(widget.value, true, null), 
@@ -72,7 +72,7 @@ class OneToManyState extends State<OneToManyWidget> {
           return Row(children: s.data! );
         }
         return Row(children: [] );
-      }), ...widget.filtered],);
+      }), ...widget.filtered]);
   }
 
   Future<List<Widget>> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme) async {

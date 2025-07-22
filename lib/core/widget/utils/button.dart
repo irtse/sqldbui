@@ -11,9 +11,12 @@ class ButtonWidget extends StatefulWidget {
   bool explicitDraft = false; 
   bool isDraft;
   bool avoidConsent = false;
+  bool noRedirection = false;
   void Function()? overrideFunc;
   IconData? icon;
-  ButtonWidget ({ super.key, required this.text, this.icon, this.overrideFunc, this.explicitDraft =false,
+  ButtonWidget ({ super.key,
+    this.noRedirection = false,
+    required this.text, this.icon, this.overrideFunc, this.explicitDraft =false,
     required this.method, required this.color, this.avoidConsent = false, this.isDraft = false});
   @override ButtonWidgetState createState() => ButtonWidgetState();
 }
@@ -58,7 +61,7 @@ class ButtonWidgetState extends State<ButtonWidget> {
               })),
             onPressed: widget.overrideFunc ?? ActionService.pressed(
               this, false, currentView!.schemaName,  currentView!.actionPath, 
-              <String>["id"], currentView!.schema, widget.method, widget.isDraft, context, {}, false, widget.explicitDraft, widget.avoidConsent, false), 
+              <String>["id"], currentView!.schema, widget.method, widget.isDraft, context, {}, false, widget.explicitDraft, widget.avoidConsent, false, widget.noRedirection), 
             child: widget.icon != null ? Tooltip( message: widget.text.toLowerCase(),
               child: Icon( widget.icon, color: Colors.white)) : Text(widget.text.toUpperCase(), 
               style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],

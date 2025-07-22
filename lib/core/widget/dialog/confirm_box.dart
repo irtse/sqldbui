@@ -7,6 +7,7 @@ import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+String? confirm;
 // ignore: must_be_immutable
 class ConfirmBoxWidget extends StatefulWidget {
   String? name;
@@ -35,7 +36,7 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
         widget.cache!, context, "", widget.schema!, 
         widget.field!.type, widget.name!, widget.field!.label, 
         widget.field!.description, widget.field!.require, widget.field!.readonly, 
-        null, widget.field!.actionPath, widget.field!.valuesPath, 
+        confirm, widget.field!.actionPath, widget.field!.valuesPath, 
         "", null, currentView?.isEmpty ?? false, widget.field!.autoFill,  widget.field!.translatable, null);
       widgets.add(
         Container( 

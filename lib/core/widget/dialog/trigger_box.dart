@@ -4,6 +4,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/action.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/utils/alert.dart';
 import 'package:sqldbui2/main.dart';
@@ -140,8 +141,8 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             if (widget.triggers.isEmpty) {
               isTriggerOpen = false;
               context.pop();
-              navigate = true;
-              globalMainViewKey.currentState?.setState(() { });
+              //navigate = true;
+              //globalMainViewKey.currentState?.setState(() { });
             } else {
               setState(() {});
             }
@@ -161,6 +162,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             isTriggerOpen = false;
             context.pop();
             navigate = true;
+            confirm = null;
             globalMainViewKey.currentState?.setState(() { });
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 

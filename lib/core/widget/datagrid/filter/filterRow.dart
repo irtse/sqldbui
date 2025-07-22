@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/core/sections/view.dart';
@@ -292,6 +293,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   widget.connector = widget.connector == "and" ? "" : "and"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
+                  confirm = null;
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
@@ -306,6 +308,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   widget.connector = widget.connector == "or" ? "" : "or"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
+                  confirm = null;
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {

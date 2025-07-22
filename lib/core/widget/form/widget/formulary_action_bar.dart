@@ -70,7 +70,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
                   mainForm.currentState!.widget.cacheForm["state"] = state.key;
                   ActionService.pressed(null, false, widget.view.schemaName, widget.view.actionPath, <String>["id"], 
                     widget.view.schema, "put", false, context, cache, true, true, state.key == "dismiss" || state.key == "refused", 
-                    state.key == "dismiss" || state.key == "refused")();
+                    state.key == "dismiss" || state.key == "refused", false)();
               }));
             }, 
             backgroundColor: state.value["color"] as Color, 
