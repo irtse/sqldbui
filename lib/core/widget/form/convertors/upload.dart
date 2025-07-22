@@ -55,7 +55,7 @@ class _UploadState extends State<UploadWidget> {
           filled: true,
           suffixIcon: InkWell( 
             onTap: () async {
-              String? newDirectory = await (kIsWeb ? FilePicker.platform.getDirectoryPath() :  FilePicker.platform.saveFile(
+              String? newDirectory = (kIsWeb ? "/${widget.value.toString().split("/").last}" : await FilePicker.platform.saveFile(
                 fileName: widget.value.toString().split("/").last,
                 dialogTitle: await getOnFlow("select a folder where to download file")));
               await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 

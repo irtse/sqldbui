@@ -1,7 +1,9 @@
 
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
  import 'package:http_parser/http_parser.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 
@@ -81,10 +83,11 @@ class APIService {
       var command = "";
       if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
-        dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter").then((value) {
+        dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter").then((value) async {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
+          await FilePicker.platform.saveFile(fileName: savePath.split("/").last, bytes: convertToBytes(value.data));
           Future.delayed(const Duration(seconds: 1), () { 
             if (context != null) {
               Navigator.of(context).pop(); 
@@ -106,6 +109,17 @@ class APIService {
       }
       
     } catch (e, s) { developer.log('LOG ERRDOWNLOAD $e $s', name: 'my.app.category'); }
+  }
+
+  Uint8List? convertToBytes(dynamic data) {
+    if (data is Uint8List) {
+      return data;
+    } else if (data is List<int>) {
+      return Uint8List.fromList(data);
+    } else if (data is String) {
+      return Uint8List.fromList(utf8.encode(data));
+    }
+    return null; // Unsupported type
   }
 
   String getOrderDir(String url) {

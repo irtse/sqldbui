@@ -172,8 +172,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             widget.isExport && !isWeb ? Padding( padding: const EdgeInsets.only(left: 5, top: 5), 
             child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20), 
               onPressed: () async {
-                String? newDirectory = await (kIsWeb ? FilePicker.platform.getDirectoryPath() : FilePicker.platform.saveFile(
-                dialogTitle: await getOnFlow("select a folder where to download file")));
+                String? newDirectory = (kIsWeb ? "/" : await FilePicker.platform.saveFile(
+                  dialogTitle: await getOnFlow("select a folder where to download file")
+                ));
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),
           ])),
