@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -172,6 +173,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20,), 
               onPressed: () async {
                 String? newDirectory = await FilePicker.platform.saveFile(
+                bytes: Uint8List(0),
                 dialogTitle: await getOnFlow("select a folder where to download file"));
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),
