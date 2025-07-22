@@ -38,15 +38,51 @@ class ActionService {
       return () async {
         widget?.loading();
         if (mainForm.currentState != null) {
-          await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
+          var v = await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
+          print(v);
+          if (v.isNotEmpty) {
+            if ((redirection ?? "") != "")  { 
+              var splitted = redirection?.split("?rows=");
+              if ((splitted?.length ?? 0) >= 2) {
+                if (method == "delete") {
+                  viewID = "#${splitted![1]}";
+                  subViewID = null;
+
+                  navigate = true;   
+                  Future.delayed(Duration(seconds: 2), () {
+                    Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+                  });
+                } else if (splitted != null) {
+                  viewID = "@${splitted[0].split("/").last}";
+                  subViewID = splitted[1];
+                  navigate = true;   
+                  Future.delayed(Duration(seconds: 2), () {
+                    Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
+                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+                  });
+                }
+              }
+            } else {
+              navigate = true;  
+              firstAPI = true; 
+              globalMainViewKey.currentState?.setState(() { });
+              globalMenuKey.currentState?.setState(() { });
+              showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
+                    InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
+                                                alertBannerLocation:  AlertBannerLocation.bottom);
+            }
+          }
+          
         }
         widget?.loaded();
         
-        if ((widget == null || (!isDraft && !(currentView?.isEmpty ?? true))) && errors.isEmpty) { 
+        
+        /*if ((widget == null || (!isDraft && !(currentView?.isEmpty ?? true))) && errors.isEmpty) { 
           Future.delayed(Duration(seconds: 1), () {
-            globalMainViewKey.currentState!.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
+            globalMainViewKey.currentState?.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
           });
-        }
+        }*/
       };
   }
   static String? redirection;
@@ -65,7 +101,7 @@ class ActionService {
     }
     for (var v in form.oneToManiesForm.entries) {
       for (var vv in v.value) {
-        if (!vv.formKey.currentState!.validate()) {
+        if (!(vv.formKey.currentState?.validate() ?? false)) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
           errors = ["form is not valid !"]; 
@@ -79,28 +115,31 @@ class ActionService {
     }
     for (var v in schema.keys) {
       if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
-      && schema[v]!.require && (form.oneToManiesForm[v] ?? []).isEmpty) {
+      && (schema[v]?.require ?? false) && (form.oneToManiesForm[v] ?? []).isEmpty) {
         errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey.currentState?.setState((){});
         errors = ["form is not valid !"]; 
         for ( var o in form.oneToManiesStateForm ) {
-          o.setState((){});
+          Future.delayed(Duration(seconds: 1), () { 
+            o.setState((){});
+          });
+         
         }
         break;
       }
     }
     if (method != "delete" && errors.isEmpty && !ignore) {
-      if (form.formKey.currentState == null || !form.formKey.currentState!.validate()) { 
+      if (form.formKey.currentState == null || !(form.formKey.currentState?.validate() ?? true)) { 
         if (form.formKey.currentState != null && form.subForm) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }
         return []; 
-      } else { form.formKey.currentState!.save(); }
+      } else { form.formKey.currentState?.save(); }
     } 
-    if (consentCache[viewID]?[form.key] != null && !avoidConsent) {
-      for (var consent in consentCache[viewID]![form.key]!.values) {
+    if (consentCache[viewID]?[form.view?.name] != null && !avoidConsent) {
+      for (var consent in (consentCache[viewID]?[form.view?.name]?.values.toList() ?? [])) {
         if (!consent.consent && !consent.optionnal) {
           consentErrCache[viewID ?? ""]?[consent.name] = true;
           errors = ["we need your consent"]; 
@@ -122,7 +161,7 @@ class ActionService {
       return views;
     }
     
-    if (isDraft && form.view!.id == mainForm.currentState!.widget.view!.id) {
+    if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id) {
       mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
     }
@@ -136,10 +175,10 @@ class ActionService {
     var files = await getFiles(method, { ...form.cacheForm}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
-        if (globalWorkflowPanelWidgetKey.currentState != null && form.view!.id == mainForm.currentState!.widget.view!.id) {
+        if (globalWorkflowPanelWidgetKey.currentState != null && form.view?.id == mainForm.currentState?.widget.view?.id) {
             List<String> nexts = [];
             for (var hub in (globalWorkflowPanelWidgetKey.currentState?.hubs.keys ?? [] as List<String>)) {
-              if (globalWorkflowPanelWidgetKey.currentState!.hubs[hub]!.value) { nexts.add(hub); }
+              if (globalWorkflowPanelWidgetKey.currentState?.hubs[hub]?.value ?? false) { nexts.add(hub); }
             }
             body["nexts"]=nexts.join(",");
         }
@@ -147,22 +186,22 @@ class ActionService {
       if (explicitDraft) {
         body["is_draft"]=isDraft;
       }
-      if (form.view!.actions.contains(method.toLowerCase())) {    
+      if (form.view?.actions.contains(method.toLowerCase()) ?? false) {    
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
-          if(value.data != null && value.data!.isNotEmpty) {
+          if(value.data != null && (value.data ?? []).isNotEmpty) {
             views.add(value.data!.first);
             bool killConsent = false;
-            if ((consentCache[viewID]?[form.key]?.length ?? 0) > 0) {
-              for (var consent in consentCache[viewID]![form.key]!.values) {
-                if (consent.body == null || consent.body!["dbschema_id"] != value.data!.first.schemaID) {
+            if ((consentCache[viewID]?[form.view?.name]?.length ?? 0) > 0 && !avoidConsent) {
+              for (var consent in (consentCache[viewID]![form.view?.name]?.values.toList() ?? [])) {
+                if (consent.body == null || consent.body!["dbschema_id"] != value.data?.first.schemaID) {
                   continue;
                 }
                 killConsent = true;
                 if (value.data!.first.items.isNotEmpty) { 
-                  consent.body!["dbdest_table_id"]=value.data!.first.items[0].values["id"]; 
+                  consent.body!["dbdest_table_id"]=value.data?.first.items[0].values["id"]; 
                 }
-                consent.body!["dbschema_id"]=value.data!.first.schemaID;
+                consent.body!["dbschema_id"]=value.data?.first.schemaID;
                 consent.body!["is_consenting"]=consent.consent;
                 await APIService().post(consent.actionPath!, consent.body!, context);
               } 
@@ -173,55 +212,23 @@ class ActionService {
              
             onSuccessMethod(method, views.last, { ...form.cacheForm}, views.last.schema, files, context);
             if (views.last.items.isNotEmpty) {
-              if (form.view!.isEmpty) { 
+              if (form.view?.isEmpty ?? false) { 
                 isNew = value.data![0].items[0].values["id"]; 
               }
             }
+
             if (views.last.innerRedirection != "" && ((redirection ?? "") == "")) {
               redirection = views.last.innerRedirection;
-            }
-            if (!form.subForm) {
-              if (redirection != "") { 
-                print(redirection);
-                var splitted = redirection!.split("?rows=");
-                if (splitted.length >= 2) {
-                  if (method == "delete") {
-                    viewID = "#${splitted[1]}";
-                    subViewID = null;
-
-                    navigate = true;   
-                    Future.delayed(Duration(seconds: 1), () {
-                      globalActionBar.currentState?.setState(() {});
-                      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
-                    });
-                  } else {
-                    viewID = "@${splitted[0].split("/").last}";
-                    subViewID = splitted[1];
-                    navigate = true;   
-                    Future.delayed(Duration(seconds: 1), () {
-                      globalActionBar.currentState?.setState(() {});
-                      globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
-                    });
-                  }
-                }
-              } else {
-                navigate = true;  
-                firstAPI = true; 
-                globalMainViewKey.currentState?.setState(() { });
-                globalMenuKey.currentState?.setState(() { });
-                showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                      InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? TranslateConstants.filterSave.toUpperCase() : method)} data suceed"), // <-- Put any widget here you want!
-                                            alertBannerLocation:  AlertBannerLocation.bottom);
-              }
             }
           }
           // ignore: invalid_return_type_for_catch_error
         }).catchError( (e) {
           errors = [ "${schemaName.replaceAll("_", " ").replaceAll("db", "")} : ${e.toString()}" ];
           APIResponse<model.View>(data: null);
-        });                
+        });
+                       
       }
-    if (form.view!.id == mainForm.currentState!.widget.view!.id) {
+    if (form.view?.id == mainForm.currentState?.widget.view?.id) {
         var errorStr = "";
         for (var error in errors) { errorStr += "- ${error.replaceAll("Exception: ", "")} \n"; }
         if (errorStr != "") {
@@ -229,7 +236,7 @@ class ActionService {
           showAlertBanner(context, durationOfStayingOnScreen: Duration(minutes: 1), () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
-        if (form.view != null && form.view!.isEmpty && errorStr == "") { globalMenuKey.currentState?.refresh(true); }
+        if (form.view != null && (form.view?.isEmpty ?? false) && errorStr == "") { globalMenuKey.currentState?.refresh(true); }
     }
     return views;
   }
@@ -254,11 +261,11 @@ class ActionService {
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var fieldName in schema.keys) {
           if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }
-          if (schema[fieldName] != null && schema[fieldName]!.type.toLowerCase().contains("many")) { continue; }
+          if (schema[fieldName] != null && (schema[fieldName]?.type.toLowerCase().contains("many") ?? false)) { continue; }
           
           if (!["dbdest_table_id"].contains(fieldName) 
           && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
-          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)
+          && !(method.toUpperCase() == "PUT" && (schema[fieldName]?.readonly ?? false))
           && values[fieldName] is! List) { 
             if (values[fieldName] is Map<String, List<PlatformFile>>) {
               for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
@@ -281,7 +288,7 @@ class ActionService {
         for (var fieldName in schema.keys) {
           if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }          
           if (!["dbdest_table_id"].contains(fieldName) && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
-          && !(method.toUpperCase() == "PUT" && schema[fieldName]!.readonly)) { 
+          && !(method.toUpperCase() == "PUT" && (schema[fieldName]?.readonly ?? false))) { 
             if (values[fieldName] is Map<String, List<PlatformFile>>){
               for (var fileStr in (values[fieldName] as Map<String, List<PlatformFile>>).keys) {
                 for (var file in values[fieldName][fileStr] as List<PlatformFile>) {
@@ -310,16 +317,16 @@ class ActionService {
                                                  String schemaName, BuildContext context, bool add, bool delete, bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {
     List<model.View> views = [];
     for (var many in widgets) { 
-      if (delete && many.view != null && many.view!.actions.contains("delete") && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
-        await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view!.items[0].values["id"]}"), null
+      if (delete && many.view != null && (many.view?.actions.contains("delete") ?? false) && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
+        await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view?.items[0].values["id"]}"), null
                                  );
-      } else if (many.view != null && many.view!.actions.contains(method)) {
+      } else if (many.view != null && (many.view?.actions.contains(method) ?? false)) {
         if (add) { 
-          views.addAll(await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
+          views.addAll(await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
                                                         context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore));
         } else { 
-          await pressedFormFuture(many, many.view!.schemaName, many.view!.actionPath != "" ? many.view!.actionPath: many.view!.linkPath, 
+          await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                   many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
         } 
       }

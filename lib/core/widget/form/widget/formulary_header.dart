@@ -143,7 +143,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
           } catch (e) {}
             actions.add(ButtonWidget( method: "post", 
-                  text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true, avoidConsent: true,));
+              text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true, avoidConsent: true));
           }
           try {
             TranslateConstants.publish = await getOnFlow(TranslateConstants.publish);

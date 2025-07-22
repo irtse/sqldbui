@@ -43,7 +43,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> positionnedBar = [];
-    if (widget.refItem.values["state"] != null) {
+    if (widget.view.schemaName.contains("task")) {
       var value = widget.refItem.values["state"];
       if (widget.view.actions.contains("put") && !widget.view.isEmpty && value != "completed" && value != "dismiss" && value != "refused") {
         for (var state in { "completed" : { "purpose": "validate task", "color": Colors.green, "icon": Icons.check },

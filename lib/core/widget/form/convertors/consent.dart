@@ -4,7 +4,7 @@ import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 Map<String, Map<String,bool>> consentErrCache = {};
-Map<String, Map<GlobalKey<FormWidgetState>, Map<String,model.Consent>>> consentCache = {};
+Map<String, Map<String, Map<String,model.Consent>>> consentCache = {};
 
 // ignore: must_be_immutable
 class ConsentWidget extends StatefulWidget {
@@ -21,7 +21,7 @@ class ConsentWidget extends StatefulWidget {
   ConsentState createState() => ConsentState();
 }
 class ConsentState extends State<ConsentWidget> {
-  bool error = true;
+  bool error = false;
 
   @override Widget build(BuildContext context) {
     if (consentCache[viewID ?? ""] == null) {
@@ -30,10 +30,10 @@ class ConsentState extends State<ConsentWidget> {
     if (consentErrCache[viewID ?? ""] == null) {
       consentErrCache[viewID ?? ""] = {};
     }
-    if (consentCache[viewID ?? ""]?[widget.state] == null) {
-      consentCache[viewID ?? ""]![widget.state] = {};
+    if (consentCache[viewID ?? ""]?[widget.state.currentState?.widget.view?.name] == null) {
+      consentCache[viewID ?? ""]![widget.state.currentState?.widget.view?.name ?? ""] = {};
     }
-    consentCache[viewID ?? ""]![widget.state]![widget.consent.name] = model.Consent(
+    consentCache[viewID ?? ""]![widget.state.currentState?.widget.view?.name]![widget.consent.name] = model.Consent(
       consent: widget.value ?? false, 
       body: widget.consent.body,
       optionnal: widget.consent.optionnal, 
@@ -52,6 +52,7 @@ class ConsentState extends State<ConsentWidget> {
       padding: EdgeInsets.only(left: 30, right: 30), 
       child: 
       Stack(
+        alignment: Alignment.centerLeft,
         children: [ 
           Container( width: 48,
             padding: EdgeInsets.only(right: 20), 
@@ -61,7 +62,7 @@ class ConsentState extends State<ConsentWidget> {
                 setState(() {
                   widget.value = value ?? false;
                   consentErrCache[viewID ?? ""]?.remove(widget.consent.name);
-                  consentCache[viewID ?? ""]![widget.state]![widget.consent.name] = model.Consent(
+                  consentCache[viewID ?? ""]![widget.state.currentState?.widget.view?.name]![widget.consent.name] = model.Consent(
                     consent: value ?? false, 
                     body: widget.consent.body,
                     optionnal: widget.consent.optionnal, 
@@ -72,9 +73,10 @@ class ConsentState extends State<ConsentWidget> {
               },
             ),
           ),
-          Container( padding: EdgeInsets.only(left: 40), child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}", 
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle( color: Colors.black)
+          Container( padding: EdgeInsets.only(left: 40), 
+            child: Tooltip( message: (await getOnFlow(widget.consent.name)).toLowerCase(),
+              child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}", 
+              style: TextStyle( color:  error ? Colors.red : Colors.black))
           )),
       ]) 
     );

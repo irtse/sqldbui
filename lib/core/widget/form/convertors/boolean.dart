@@ -42,6 +42,7 @@ class _BooleanState extends State<BooleanWidget> {
       return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30, top: 10), 
       child: Stack(
+        alignment: Alignment.centerLeft,
         children: [ 
           widget.readOnly ? Container() 
           : Container( width: 48,

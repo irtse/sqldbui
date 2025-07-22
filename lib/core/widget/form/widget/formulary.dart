@@ -1,6 +1,8 @@
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
@@ -58,14 +60,15 @@ class FormularyWidgetState extends State<FormularyWidget> {
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
 
-      for (var consent in widget.view.consents) {
-        fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
+      if (!(currentView?.isEmpty ?? true)) {
+        for (var consent in (consentCache[viewID]?[widget.formKey]?.values ?? widget.view.consents) as List<model.Consent>) {
+          fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
+        }
+        if (widget.view.consents.isNotEmpty) {
+          fields.add(Padding( padding: EdgeInsets.only(top: 20, bottom: 20),
+            child : const Divider(height: 0.5, thickness: 0.5, color: Colors.grey)));
+        }
       }
-      if (widget.view.consents.isNotEmpty) {
-        fields.add(Padding( padding: EdgeInsets.only(top: 10, bottom: 20),
-          child : const Divider(height: 0.5, thickness: 0.5, color: Colors.grey)));
-      }
-
       List<String> categories = [];
       for (var v in widget.view.schema.values) {
         if ((v.subsection ?? "") != "" && !categories.contains(v.subsection)) {
@@ -94,13 +97,11 @@ class FormularyWidgetState extends State<FormularyWidget> {
         }
         for (var fieldName in widget.view.order) {
           fieldName = "$fieldName";
-          print("fieldName $fieldName");
           if (widget.schema[fieldName] == null || widget.schema[fieldName]!.hidden 
           || (widget.schema[fieldName]?.subsection ?? "") != c || ["id", "description"].contains(fieldName) ||
           (widget.superFormSchemaName != "" && fieldName.contains(widget.superFormSchemaName))) { 
             continue; 
           }
-          print("fieldName2 $fieldName");
           var field = widget.schema[fieldName]!; 
           var value = widget.refItem.values.containsKey(fieldName) ? widget.refItem.values[fieldName] : null;
           var readOnly = (field.readonly || widget.view.readOnly || widget.refItem.readonly) && !widget.view.isEmpty;
