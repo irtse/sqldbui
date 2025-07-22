@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart' as p;
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
@@ -161,7 +161,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               padding: const EdgeInsets.only(right: 10, top: 5), 
               child: Icon(widget.isExport ? Icons.download : Icons.upload, 
                 color: Theme.of(context).splashColor, 
-                size: 30,)),
+                size: 30)),
             Text((await getOnFlow("${widget.isExport ? "Export" : "Import" } data with custom mapping")).toLowerCase(),
               style: TextStyle(color: Theme.of(context).highlightColor, 
               fontSize: 20, 
@@ -170,11 +170,10 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             child: Text( widget.isExport && !isWeb ? "${TranslateConstants.savedFolder.toLowerCase()} : $directory" : "${TranslateConstants.allowedFormat.toLowerCase()} : ${widget.importFormat.join(",")}",
               style: TextStyle(color: Theme.of(context).splashColor, fontSize: 12))), 
             widget.isExport && !isWeb ? Padding( padding: const EdgeInsets.only(left: 5, top: 5), 
-            child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20,), 
+            child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20), 
               onPressed: () async {
-                String? newDirectory = await FilePicker.platform.saveFile(
-                bytes: Uint8List.fromList([0x41]),
-                dialogTitle: await getOnFlow("select a folder where to download file"));
+                String? newDirectory = await (kIsWeb ? FilePicker.platform.getDirectoryPath() : FilePicker.platform.saveFile(
+                dialogTitle: await getOnFlow("select a folder where to download file")));
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),
           ])),
@@ -217,7 +216,6 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                           if (!widget.forcedSchema!.containsKey(key)) { newCacheEntry.remove(key); }
                         }
                       }
-                      print("URL $path ${ cache["format"]} ${newCacheEntry}");
                       widget.isExport ? 
                         await APIService().getWithDownload(path, cache["format"], newCacheEntry, 
                                 "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
@@ -236,12 +234,14 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                   }
                 }))] )) ])));
     if (!isWeb) {
-      (Platform.isIOS ? getApplicationDocumentsDirectory() : (Platform.isAndroid ? (getExternalStorageDirectory()) : (getDownloadsDirectory()))).then((value) {
+      (Platform.isIOS ? p.getApplicationDocumentsDirectory() : (Platform.isAndroid ? (p.getExternalStorageDirectory()) : (p.getDownloadsDirectory()))).then((value) {
         Future.delayed(const Duration(milliseconds: 500), () {
           var val = value != null && directory == "/" ? value.path : directory;
           if (directory != val) { setState(() { directory = val; });  }
         });
       });
+    } else {
+      
     }
     return w;
   }

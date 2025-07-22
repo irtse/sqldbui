@@ -216,10 +216,10 @@ class GridCellWidgetState extends State<GridCellWidget> {
         title: SizedBox(height: widget.maxheight - 20, 
         child: Center(child: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? InkWell( 
             onTap: () async {
-              String? newDirectory = await FilePicker.platform.saveFile(
+              String? newDirectory = await (kIsWeb ? FilePicker.platform.getDirectoryPath() : FilePicker.platform.saveFile(
                 fileName: widget.value.toString().split("/").last,
-                bytes: Uint8List.fromList([0x41]),
-                dialogTitle: await getOnFlow("select a folder where to download file"));
+                dialogTitle: await getOnFlow("select a folder where to download file")));
+              print(newDirectory);
               await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 
                     "$newDirectory", kIsWeb, null);
             },  child: wid) : wid )))]);
