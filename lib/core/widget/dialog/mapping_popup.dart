@@ -173,7 +173,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20,), 
               onPressed: () async {
                 String? newDirectory = await FilePicker.platform.saveFile(
-                bytes: Uint8List(0),
+                bytes: Uint8List.fromList([0x41]),
                 dialogTitle: await getOnFlow("select a folder where to download file"));
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),

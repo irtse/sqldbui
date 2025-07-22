@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_window
+  file_saver
   file_selector_windows
   gal
   irondash_engine_context
