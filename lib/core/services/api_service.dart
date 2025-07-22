@@ -87,6 +87,7 @@ class APIService {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
+          print(value.data);
           await FilePicker.platform.saveFile(fileName: savePath.split("/").last, bytes: convertToBytes(value.data));
           Future.delayed(const Duration(seconds: 1), () { 
             if (context != null) {
