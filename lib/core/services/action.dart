@@ -152,9 +152,8 @@ class ActionService {
       return views;
     }
 
-    if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id && (form.view?.isEmpty ?? false)) {
+    if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id && explicitDraft) {
       mainForm.currentState?.setState(() { firstAPI = true; });
-      print("THERE3");
       return views;
     }
 
