@@ -19,6 +19,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
     try { curr = int.parse(widget.workflow.current);  } catch(e) { /* */ }
     var pos = 0;
     try { pos = int.parse(widget.workflow.position);  } catch(e) { /* */ }
+    print("IS CLOSE ? ${widget.workflow.isClose} ${widget.workflow.current}");
     if (widget.workflow.steps.isNotEmpty) {
       var active = true;
       items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), 

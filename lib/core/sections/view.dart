@@ -85,12 +85,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             unselectedGrid = [];
             return ViewWidget( view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, views: widget.views);
         });
-    if (currentView == null) {   
-      viewID=null;
-      subViewID=null;
-      AppRouter.setRouteCookie("", context);
-    }
-    return ViewWidget(view: null, views: widget.views); 
   }
   void refreshUrl(String? path, String? id, bool load) {
     subViewID = id;

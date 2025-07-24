@@ -64,7 +64,8 @@ class ButtonWidgetState extends State<ButtonWidget> {
               <String>["id"], currentView!.schema, widget.method, widget.isDraft, context, {}, false, widget.explicitDraft, widget.avoidConsent, false, widget.noRedirection), 
             child: widget.icon != null ? Tooltip( message: widget.text.toLowerCase(),
               child: Icon( widget.icon, color: Colors.white)) : Text(widget.text.toUpperCase(), 
-              style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor)))),],
+              style: TextStyle( fontSize: 12, color: Theme.of(context).highlightColor))))
+            ],
     );
   }
 }

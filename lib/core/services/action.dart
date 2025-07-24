@@ -73,7 +73,6 @@ class ActionService {
                                                       alertBannerLocation:  AlertBannerLocation.bottom);
             } 
         }
-        
         widget?.loaded();
       };
   }
@@ -91,7 +90,8 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    for (var v in form.oneToManiesForm.entries) {
+    print("qsqsdd ${oneToManiesForm[form.view?.name]} ${form.view?.name} ${oneToManiesStateForm[form.view?.name]}");
+    for (var v in (oneToManiesForm[form.view?.name] ?? {}).entries) {
       for (var vv in v.value) {
         if (!(vv.formKey.currentState?.validate() ?? true)) {
           errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
@@ -107,11 +107,12 @@ class ActionService {
     }
     for (var v in schema.keys) {
       if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
-      && (schema[v]?.require ?? false) && (form.oneToManiesForm[v] ?? []).isEmpty) {
+      && (schema[v]?.require ?? false) && (oneToManiesForm[form.view?.name]?[v] ?? []).isEmpty) {
         errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey[form.formKey]?.currentState?.setState((){});
+        print("${oneToManiesForm[form.view?.name]} $v ${form.view?.name} ${oneToManiesStateForm[form.view?.name]}");
         errors = ["form is not valid !"]; 
-        for ( var o in form.oneToManiesStateForm ) {
+        for ( var o in oneToManiesStateForm[form.view?.name] ?? [] ) {
           Future.delayed(Duration(seconds: 1), () { 
             o.setState((){});
           });
@@ -153,7 +154,7 @@ class ActionService {
     }
 
     if (isDraft && ((form.view?.schemaName.contains("request") ?? false ) || (form.view?.schemaName.contains("task") ?? false))) {
-      mainForm.currentState?.setState(() { firstAPI = true; });
+      // mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
     }
 
@@ -162,7 +163,7 @@ class ActionService {
       body["id"]=int.parse(form.cacheForm["id"]); 
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
-    body = await getBody(method, { ...form.cacheForm}, body, schema, form.oneToManiesForm, context);
+    body = await getBody(method, { ...form.cacheForm}, body, schema, oneToManiesForm[form.view?.name] ?? {}, context);
     var files = await getFiles(method, { ...form.cacheForm}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
@@ -177,7 +178,7 @@ class ActionService {
       if (explicitDraft) {
         body["is_draft"]=isDraft;
       }
-      if (form.view?.actions.contains(method.toLowerCase()) ?? false) {    
+      if (form.view?.actions.contains(method.toLowerCase()) ?? false) {
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
@@ -292,8 +293,8 @@ class ActionService {
               }
             } else if ((oneToManies[fieldName] ?? []).isNotEmpty) {
               body[fieldName] = [];
-              for (var o in (oneToManies[fieldName] ?? [])) {
-                var b = await getBody(method, o.cacheForm, {}, schema[fieldName]!.schema, o.oneToManiesForm, context);
+              for (var o in (oneToManies[fieldName] ?? []).toList()) {
+                var b = await getBody(method, o.cacheForm, {}, schema[fieldName]!.schema, oneToManiesForm[o.view?.name] ?? {}, context);
                 body[fieldName].add(b);
               }
             } else {

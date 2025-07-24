@@ -56,12 +56,11 @@ var count = 0;
 class FormularyWidgetState extends State<FormularyWidget> {
     @override Widget build(BuildContext context) {
     try {
-      widget.component.widget.oneToManiesForm = {};
       List<Widget> fields = <Widget>[];
       List<Widget> bottomFields = <Widget>[];
 
       if (!(currentView?.isEmpty ?? true)) {
-        for (var consent in (consentCache[viewID]?[widget.formKey]?.values ?? widget.view.consents) as List<model.Consent>) {
+        for (var consent in (consentCache[viewID]?[widget.view.name]?.values ?? widget.view.consents) as List<model.Consent>) {
           fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
         }
         if (widget.view.consents.isNotEmpty) {

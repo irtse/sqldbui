@@ -1,6 +1,5 @@
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
-import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/form/widget/empty_formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary_action_bar.dart';
@@ -16,6 +15,9 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 
+Map<String, Map<String, List<DataFormWidget>>> oneToManiesForm = {};
+Map<String, List<OneToManyState>> oneToManiesStateForm = {};
+
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, Map<String, dynamic>> flashedForm = <String, Map<String, dynamic>>{};
 // ignore: must_be_immutable
@@ -29,8 +31,7 @@ class DataFormWidget extends StatefulWidget {
   Map<String, dynamic> cacheForm = {};
   bool scroll, subForm, subSubForm, isSplitted, noTitle;
   List<DataFormWidget> wrappers = <DataFormWidget>[];
-  Map<String, List<DataFormWidget>> oneToManiesForm = {};
-  List<OneToManyState> oneToManiesStateForm = [];
+  
   bool isOneToMany = false;
   GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
   GlobalKey<FormularyHeaderWidgetState> headerKey = GlobalKey<FormularyHeaderWidgetState>();
@@ -55,7 +56,8 @@ class FormWidgetState extends State<DataFormWidget> {
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
     try{
-      widget.oneToManiesStateForm = [];
+      oneToManiesForm[widget.view?.name ?? ""] = {};
+      oneToManiesStateForm[widget.view?.name ?? ""] = [];
       searchCtrl = {};
 
       widget.detectChange = false;

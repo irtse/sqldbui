@@ -165,7 +165,6 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
             avoidConsent: true, noRedirection: !widget.view.isEmpty));
         }
-        print(widget.view.actions);
         if ((widget.view.actions.contains("delete") || widget.view.actions.contains("put") && (currentView?.schemaName ?? "" ).contains("task")) && !widget.view.isEmpty) {
           try {
             TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
