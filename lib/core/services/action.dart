@@ -152,6 +152,12 @@ class ActionService {
       return views;
     }
 
+    if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id && (form.view?.isEmpty ?? false)) {
+      mainForm.currentState?.setState(() { firstAPI = true; });
+      print("THERE3");
+      return views;
+    }
+
     var path = url;
     if (form.cacheForm["id"] != null) { 
       body["id"]=int.parse(form.cacheForm["id"]); 
