@@ -66,7 +66,7 @@ class ActionBarState extends State<ActionBarWidget> {
           actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
           !translation ? Icons.translate : Icons.g_translate, null, () {
             translation = !translation;
-            confirm = null;
+            confirmCache = {};
             navigate = true;
             globalMainViewKey.currentState?.setState(() { });
           }, false));

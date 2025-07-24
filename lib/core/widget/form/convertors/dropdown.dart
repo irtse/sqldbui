@@ -43,7 +43,6 @@ class DropDownWidget extends StatefulWidget {
 }
 class DropDownState extends State<DropDownWidget> {
   @override Widget build(BuildContext context) {
-    print(widget.name);
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -52,7 +51,6 @@ class DropDownState extends State<DropDownWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    print(widget.name);
     String? val;
     var label ="${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
     try {
@@ -466,7 +464,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
   }
 
   Future<void> load(int start, int interval, String filter, String? value, List<DropdownItem<String>> items) async {
-    print(filter);
     if (filter == "") { return; }
     var found = false;
       var e = await APIService().get<model.Shallowed>("${widget.mainUrl}$filter&offset=$start&limit=$interval", filter != "", null);

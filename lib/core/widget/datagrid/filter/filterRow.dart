@@ -293,7 +293,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   widget.connector = widget.connector == "and" ? "" : "and"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
-                  confirm = null;
+                  confirmCache = {};
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
@@ -308,7 +308,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   widget.connector = widget.connector == "or" ? "" : "or"; 
                   noFilterRetrieval = true;
                   tempRemoval = true;
-                  confirm = null;
+                  confirmCache = {};
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {

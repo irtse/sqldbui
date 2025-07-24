@@ -57,7 +57,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
             tooltip: purpose.toLowerCase(),
             mini: true,
             onPressed: () {
-              Map<String, dynamic> cache = { "state": state.key, };
+              Map<String, dynamic> cache = { "state": state.key, "closing_comment": confirmCache?["closing_comment"] };
               showDialog(context: context, builder: (builder) => ConfirmBoxWidget(
                 name: "closing_comment",
                 schema: widget.schema,

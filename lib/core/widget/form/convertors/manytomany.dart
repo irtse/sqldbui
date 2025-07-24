@@ -50,7 +50,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
     if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
-        print(widget.value);
         for (var v in widget.value) {
           try {
             if (v is model.Shallowed && v.id != null) {

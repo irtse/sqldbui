@@ -202,7 +202,7 @@ class AppRouter {
     globalLoading = true;
     selectedGrid = []; 
     unselectedGrid = [];
-    confirm = null;
+    confirmCache = {};
     navigate = true;
     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
   }

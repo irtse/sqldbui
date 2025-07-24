@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
@@ -46,39 +47,34 @@ class ActionService {
                 if (method == "delete") {
                   viewID = "#${splitted![1]}";
                   subViewID = null;
-                  confirm = null;
+                  confirmCache = {};
                   navigate = true;   
-                  Future.delayed(Duration(seconds: 2), () {
+                  Future.delayed(Duration(seconds: 3), () {
                     Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
-                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+                    AppRouter.navigateTo("$viewID");
+                    // globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                   });
                 } else if (splitted != null) {
                   viewID = "@${splitted[0].split("/").last}";
                   subViewID = splitted[1];
                   navigate = true;  
-                  confirm = null; 
-                  Future.delayed(Duration(seconds: 2), () {
+                  confirmCache = {}; 
+                  Future.delayed(Duration(seconds: 3), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
-                    globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
+                    AppRouter.navigateTo("$viewID:$subViewID");
+                    //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                   });
                 }
               }
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                          InfoAlertBannerChild(text: "${method == "post" ? "create" : ( method == "put" ? "registration" : method)} is done"), // <-- Put any widget here you want!
+                          InfoAlertBannerChild(text: "${method == "post" ? "created" : ( method == "put" ? "saved" : method)} successfully"), // <-- Put any widget here you want!
                                                       alertBannerLocation:  AlertBannerLocation.bottom);
             } 
         }
         
         widget?.loaded();
-        
-        
-        /*if ((widget == null || (!isDraft && !(currentView?.isEmpty ?? true))) && errors.isEmpty) { 
-          Future.delayed(Duration(seconds: 1), () {
-            globalMainViewKey.currentState?.refreshUrl("$baseURL${APIConstants.genericEndpost}$schemaName?rows=$subViewID", subViewID, true); 
-          });
-        }*/
       };
   }
   static String? redirection;
@@ -95,10 +91,8 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    print(form.oneToManiesForm);
     for (var v in form.oneToManiesForm.entries) {
       for (var vv in v.value) {
-        print("${form.oneToManiesForm} ${vv.formKey.currentState} ${vv.formKey.currentState?.validate()}");
         if (!(vv.formKey.currentState?.validate() ?? true)) {
           errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey.currentState?.setState((){});
@@ -114,7 +108,6 @@ class ActionService {
     for (var v in schema.keys) {
       if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
       && (schema[v]?.require ?? false) && (form.oneToManiesForm[v] ?? []).isEmpty) {
-        print("THERE");
         errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey.currentState?.setState((){});
         errors = ["form is not valid !"]; 
@@ -134,8 +127,6 @@ class ActionService {
           errorFormKey.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }
-        print("THERE");
-        return []; 
       } else { form.formKey.currentState?.save(); }
     } 
     if (consentCache[viewID]?[form.view?.name] != null && !avoidConsent) {
@@ -158,13 +149,6 @@ class ActionService {
           showAlertBanner(context, durationOfStayingOnScreen: Duration(minutes: 1), 
           () {}, AlertAlertBannerChild(text: errorStr), alertBannerLocation:  AlertBannerLocation.top,);
         }
-        print("THERE2");
-      return views;
-    }
-    
-    if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id) {
-      mainForm.currentState?.setState(() { firstAPI = true; });
-      print("THERE3");
       return views;
     }
 
@@ -190,7 +174,6 @@ class ActionService {
       }
       if (form.view?.actions.contains(method.toLowerCase()) ?? false) {    
         // ignore: use_build_context_synchronously
-        print("$path $body");
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
             views.add(value.data!.first);
@@ -309,7 +292,18 @@ class ActionService {
                 body[fieldName].add(b);
               }
             } else {
-              body[fieldName]=values[fieldName]; 
+              if (values[fieldName] is List) {
+                body[fieldName]= [];
+                for (var v in values[fieldName]) {
+                  if (v is model.Shallowed) {
+                    body[fieldName].add(v.serialize());
+                  } else {
+                    body[fieldName].add(v);
+                  }
+                } 
+              } else {
+                body[fieldName]=values[fieldName]; 
+              }
             }
           }
         }

@@ -168,7 +168,7 @@ class MenuWidgetState extends State<MenuWidget> {
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 
       || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
     navigate = true;
-    confirm = null;
+    confirmCache = {};
     globalMainViewKey.currentState?.refresh(viewID, null, currentView, true);
   }
 }

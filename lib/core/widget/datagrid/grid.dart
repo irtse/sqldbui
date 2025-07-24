@@ -84,7 +84,6 @@ class GridWidgetState extends State<GridWidget> {
           (_horizontal.offset + scrollSpeed).clamp(
             0.0, _horizontal.position.maxScrollExtent),
         );
-        print("${ rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width} $lastWidth");
         if ((rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width) > lastWidth) {
           setState( () {
             widget.scroll += scrollSpeed;
@@ -167,7 +166,6 @@ class GridWidgetState extends State<GridWidget> {
     if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
       bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
     }
-    print( widget.scroll);
     return Listener(
         onPointerDown: (event) {
           _isMouseDown = true;

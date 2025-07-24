@@ -79,8 +79,13 @@ class FormWidgetState extends State<DataFormWidget> {
         additionnal = [];
         widget.wrappersGlobalKey = [];
         
-        additionnal.add(SubFormularyWidget( key: widget.subKey, item: refItem,
-          component: widget, isEmpty: widget.view?.isEmpty ?? false, relatedDatas: refItem.dataPath)); 
+        additionnal.add(SubFormularyWidget( 
+          key: widget.subKey, 
+          item: refItem,
+          component: widget, 
+          isEmpty: widget.view?.isEmpty ?? false, 
+          relatedDatas: refItem.dataPath
+        )); 
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         
         widget.cacheForm = newCacheEntry;

@@ -219,7 +219,6 @@ class GridCellWidgetState extends State<GridCellWidget> {
               String? newDirectory =  (kIsWeb ? "/${widget.value.toString().split("/").last}" : await FilePicker.platform.saveFile(
                 fileName: widget.value.toString().split("/").last,
                 dialogTitle: await getOnFlow("select a folder where to download file")));
-              print(newDirectory);
               await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 
                     "$newDirectory", kIsWeb, null);
             },  child: wid) : wid )))]);

@@ -37,7 +37,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
               color: show ? Colors.white : Theme.of(context).splashColor, size: 20), 
             onTap: () { 
-              confirm = null;
+              confirmCache = {};
               navigate = true;
               globalMainViewKey.currentState?.setState(() { show = !show; }); }
           )),
@@ -67,13 +67,12 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               Future.delayed(Duration(seconds: 1), () {
                 setState(() { 
                   try {
-                    print("kjnkjndks ${filterRestr[viewID]} ${value.data?.first.id}");
                     filterRestr[viewID] = "${value.data?.first.id}";
                   } catch(e) {}
                   forceFilter = true;
                   refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []); 
                   navigate = true;
-                  confirm = null;
+                  confirmCache = {};
                   globalMainViewKey.currentState?.setState(() { });
                 }); 
               });
@@ -88,7 +87,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
                 removeFilter(); 
                 navigate = true;
-                confirm = null;
+                confirmCache = {};
                 var id = filterRestr[viewID];
                 filterRestr[viewID] = ""; 
                 APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=$id"), context).then((value) {
@@ -113,7 +112,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           onPressed: () { 
             show = true;
             navigate = true;
-            confirm = null;
+            confirmCache = {};
             filterRestr.remove(viewID);
             filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length)); 
             globalMainViewKey.currentState?.setState(() { });
@@ -127,7 +126,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             onPressed: () { 
               show = true;
               navigate = true;
-              confirm = null;
+              confirmCache = {};
               filterRestr.remove(viewID);
               filterRowsWidget.removeLast(); 
               globalMainViewKey.currentState?.setState(() { });
@@ -156,7 +155,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               }
               noFilterRetrieval = true;
               navigate = true;
-              confirm = null;
+              confirmCache = {};
               globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
             })),
         filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
@@ -172,7 +171,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 removeFilter();
                 filterRestr[viewID] = ""; 
                 navigate = true; 
-                confirm = null;
+                confirmCache = {};
                 globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
               }); 
             
@@ -192,7 +191,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       globalNew[viewID] = toggles[index]; 
                     }
                     navigate = true;
-                    confirm = null;
+                    confirmCache = {};
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                 );
@@ -208,7 +207,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       globalNew[viewID] = toggles[index]; 
                     }
                     navigate = true;
-                    confirm = null;
+                    confirmCache = {};
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                 );
@@ -285,7 +284,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
                             forceFilter = true;
                             refreshFilter(value.data != null && value.data!.isNotEmpty ? value.data![0].fields : []);
                             navigate = true;
-                            confirm = null;
+                            confirmCache = {};
                             globalMainViewKey.currentState?.setState(() { });
                           }));
                     }, dropdownColor: Theme.of(context).secondaryHeaderColor,

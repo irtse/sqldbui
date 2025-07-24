@@ -119,7 +119,7 @@ class Filters {
     filterRowsWidget = [];
     noFilterRetrieval = true;
     navigate = true;
-    confirm = null;
+    confirmCache = {};
     globalMainViewKey.currentState?.setState(() {});
   }
 

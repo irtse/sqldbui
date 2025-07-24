@@ -162,7 +162,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             isTriggerOpen = false;
             context.pop();
             navigate = true;
-            confirm = null;
+            confirmCache = {};
             globalMainViewKey.currentState?.setState(() { });
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 

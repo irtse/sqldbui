@@ -41,7 +41,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 selected: widget.isSelected,
                 onTap: () async { 
                   setState(() { 
-                    confirm = null;
+                    confirmCache = {};
                     navigate = true;
                     for (var t in tiles) {
                       t.currentState?.setState(() {
@@ -70,7 +70,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                   padding: EdgeInsets.only(right: (widget.view?.news ?? 0) > 0 ? (("${widget.view?.news ?? ""}".length + 1) * 10) : 0), 
                   child: InkWell( 
                     onTap: () {
-                      confirm = null;
+                      confirmCache = {};
                       navigate = true;
                       widget.view!.isFavorize = !widget.view!.isFavorize;
                       var urlPath = widget.view!.favorizePath;

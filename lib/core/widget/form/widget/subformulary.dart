@@ -31,7 +31,9 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
     if (wrappersURL.isEmpty && widget.isEmpty && !widget.component.subForm) {
       return EmptyFormularyWidget();
     }
-    if (widget.relatedDatas != "") { wrappersURL["relatedDatas"] = widget.relatedDatas; }
+    if (widget.relatedDatas != "") { 
+      wrappersURL["relatedDatas"] = widget.relatedDatas; 
+    }
 
     List<Widget> additionnal = [];
     for (var url in wrappersURL.values) {

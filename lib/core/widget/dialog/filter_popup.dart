@@ -142,7 +142,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     }
                     noFilterRetrieval = true;  
                     navigate = true;
-                    confirm = null;
+                    confirmCache = {};
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                   style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
@@ -150,7 +150,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
                     navigate = true;
-                    confirm = null;
+                    confirmCache = {};
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                     stateSort!(() { widget.ascOrder=null; });
                     stateFilter!(() { advancedSearch = []; });

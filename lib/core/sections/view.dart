@@ -48,14 +48,12 @@ class MainViewWidgetState extends State<MainViewWidget> {
     
 
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
-    bool reForge = view != null || widget.url != null || (viewID != null && viewID!.contains("@") || subViewID != null);
-    if (isList || reForge) {
-        var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
-        return FutureBuilder<APIResponse<model.View>>(
-          future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), navigate, context) : 
-            APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
-          builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
-            navigate = false;
+    var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
+    return FutureBuilder<APIResponse<model.View>>(
+      future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath), navigate, context) : 
+        APIService().get<model.View>(widget.url ?? (view != null ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
+      builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
+            Future.delayed(Duration(seconds: 1), () => navigate = false);
             currentView = null;
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0]; 
@@ -87,7 +85,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             unselectedGrid = [];
             return ViewWidget( view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, views: widget.views);
         });
-    } 
     if (currentView == null) {   
       viewID=null;
       subViewID=null;
@@ -99,7 +96,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
     subViewID = id;
     firstAPI = true;
     globalLoading = load;
-    confirm = null;
+    confirmCache = {};
     navigate = true;
     setState(() { widget.url = path;});
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);

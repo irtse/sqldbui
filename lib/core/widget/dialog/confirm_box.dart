@@ -7,13 +7,13 @@ import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart';
 import 'package:sqldbui2/page/translate.dart';
 
-String? confirm;
+Map<String, dynamic>? confirmCache;
 // ignore: must_be_immutable
 class ConfirmBoxWidget extends StatefulWidget {
   String? name;
-  Map<String, dynamic>? cache;
   SchemaField? field;
   Map<String, SchemaField>? schema;
+  Map<String, dynamic>? cache;
 
   String purpose = ""; 
   Function validate = () {};
@@ -31,12 +31,13 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> widgets = [];
+    confirmCache = widget.cache ?? confirmCache;
     if (widget.field != null && widget.schema != null && widget.cache != null && widget.name != null) {
       var w = await Convertor.formFieldByType(
         widget.cache!, context, "", widget.schema!, 
         widget.field!.type, widget.name!, widget.field!.label, 
         widget.field!.description, widget.field!.require, widget.field!.readonly, 
-        confirm, widget.field!.actionPath, widget.field!.valuesPath, 
+        confirmCache?[widget.name], widget.field!.actionPath, widget.field!.valuesPath, 
         "", null, currentView?.isEmpty ?? false, widget.field!.autoFill,  widget.field!.translatable, null);
       widgets.add(
         Container( 

@@ -87,7 +87,6 @@ class APIService {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
           http.AnchorElement(href: url)..setAttribute('download', savePath.split("/").last)..click();
           downloadProgressNotifier.value = 100;
-          print(value.data);
           await FilePicker.platform.saveFile(fileName: savePath.split("/").last, bytes: Uint8List.fromList(value.data));
           Future.delayed(const Duration(seconds: 1), () { 
             if (context != null) {
@@ -96,7 +95,6 @@ class APIService {
           });
         });
       } else {
-        print("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter");
         dio.download("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter", savePath, onReceiveProgress: (actualBytes, int totalBytes) {
           Future.delayed(const Duration(seconds: 1), () {
             downloadProgressNotifier.value = (actualBytes / totalBytes * 100).floor();
@@ -234,7 +232,7 @@ class APIService {
         
         print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy");
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);        
-      
+        
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
