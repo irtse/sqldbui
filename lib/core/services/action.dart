@@ -152,7 +152,7 @@ class ActionService {
       return views;
     }
 
-    if (isDraft && form.view?.id == mainForm.currentState?.widget.view?.id && explicitDraft) {
+    if (isDraft && ((form.view?.schemaName.contains("request") ?? false ) || (form.view?.schemaName.contains("task") ?? false))) {
       mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
     }
