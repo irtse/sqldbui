@@ -49,7 +49,7 @@ class ActionService {
                   subViewID = null;
                   confirmCache = {};
                   navigate = true;   
-                  Future.delayed(Duration(seconds: 3), () {
+                  Future.delayed(Duration(seconds: 1), () {
                     Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID");
                     // globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -59,7 +59,7 @@ class ActionService {
                   subViewID = splitted[1];
                   navigate = true;  
                   confirmCache = {}; 
-                  Future.delayed(Duration(seconds: 3), () {
+                  Future.delayed(Duration(seconds: 1), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID:$subViewID");
                     //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -69,7 +69,7 @@ class ActionService {
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                          InfoAlertBannerChild(text: "${method == "post" ? "created" : ( method == "put" ? "saved" : method)} successfully"), // <-- Put any widget here you want!
+                          InfoAlertBannerChild(text: "${method == "post" ? "created" : ( method == "put" ? "saved" : method + "d")} successfully"), // <-- Put any widget here you want!
                                                       alertBannerLocation:  AlertBannerLocation.bottom);
             } 
         }
@@ -94,8 +94,8 @@ class ActionService {
     for (var v in form.oneToManiesForm.entries) {
       for (var vv in v.value) {
         if (!(vv.formKey.currentState?.validate() ?? true)) {
-          errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
-          errorFormKey.currentState?.setState((){});
+          errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
+          errorFormKey[form.formKey]?.currentState?.setState((){});
           errors = ["form is not valid !"]; 
           break;
         }
@@ -108,8 +108,8 @@ class ActionService {
     for (var v in schema.keys) {
       if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
       && (schema[v]?.require ?? false) && (form.oneToManiesForm[v] ?? []).isEmpty) {
-        errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
-        errorFormKey.currentState?.setState((){});
+        errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
+        errorFormKey[form.formKey]?.currentState?.setState((){});
         errors = ["form is not valid !"]; 
         for ( var o in form.oneToManiesStateForm ) {
           Future.delayed(Duration(seconds: 1), () { 
@@ -123,8 +123,8 @@ class ActionService {
     if (method != "delete" && errors.isEmpty && !ignore) {
       if (form.formKey.currentState == null || !(form.formKey.currentState?.validate() ?? true)) { 
         if (form.formKey.currentState != null && form.subForm) {
-          errorFormKey.currentState?.widget.error = TranslateConstants.errorRequire;
-          errorFormKey.currentState?.setState((){});
+          errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
+          errorFormKey[form.formKey]?.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }
       } else { form.formKey.currentState?.save(); }

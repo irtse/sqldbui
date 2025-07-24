@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -164,7 +165,8 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
             avoidConsent: true, noRedirection: !widget.view.isEmpty));
         }
-        if (widget.view.actions.contains("delete") && !widget.view.isEmpty) {
+        print(widget.view.actions);
+        if ((widget.view.actions.contains("delete") || widget.view.actions.contains("put") && (currentView?.schemaName ?? "" ).contains("task")) && !widget.view.isEmpty) {
           try {
             TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
           } catch (e) {}

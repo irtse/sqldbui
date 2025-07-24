@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-GlobalKey<ErrorFormularyWidgetState> errorFormKey = GlobalKey<ErrorFormularyWidgetState>();
+Map<GlobalKey<FormState>, GlobalKey<ErrorFormularyWidgetState>> errorFormKey = {};
 // ignore: must_be_immutable
 class ErrorFormularyWidget extends StatefulWidget {  
   String? error;
   ErrorFormularyWidget ({ 
+    super.key,
     this.error,
-  }): super(key: errorFormKey);
+  });
   @override ErrorFormularyWidgetState createState() => ErrorFormularyWidgetState();
 }
 class ErrorFormularyWidgetState extends State<ErrorFormularyWidget> {

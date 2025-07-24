@@ -191,8 +191,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
         return Container();
       }
       if (fields.isNotEmpty) {
-        errorFormKey = GlobalKey<ErrorFormularyWidgetState>();
-        fields = [ ErrorFormularyWidget(), ...fields];
+        errorFormKey[widget.formKey] = GlobalKey<ErrorFormularyWidgetState>();
+        fields = [ ErrorFormularyWidget(key: errorFormKey[widget.formKey]), ...fields];
       }
       return Form( key: widget.formKey, 
         autovalidateMode: AutovalidateMode.always, 

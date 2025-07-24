@@ -82,7 +82,7 @@ class OneToManyState extends State<OneToManyWidget> {
     List<Widget> rows = [Padding( 
       padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10), 
       child: Text("$val ${widget.require ? '*' : ''}:", style: TextStyle( color: widget.require 
-      && (widget.component?.widget.oneToManiesForm[widget.name] ?? []).isEmpty && errorFormKey.currentState?.widget.error != null ? Colors.red : null )))]; 
+      && (widget.component?.widget.oneToManiesForm[widget.name] ?? []).isEmpty && errorFormKey[widget.component?.widget.formKey]?.currentState?.widget.error != null ? Colors.red : null )))]; 
     if (!readOnly && (canPost || widget.component?.widget.view != null) || (widget.component?.widget.view?.isEmpty ?? false)) {
         var filtered = widget.component?.widget.oneToManiesForm[widget.name] ?? [];
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
