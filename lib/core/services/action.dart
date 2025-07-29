@@ -49,7 +49,7 @@ class ActionService {
                   subViewID = null;
                   confirmCache = {};
                   navigate = true;   
-                  Future.delayed(Duration(seconds: 2), () {
+                  Future.delayed(Duration(seconds: 3), () {
                     Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID");
                     // globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -59,7 +59,7 @@ class ActionService {
                   subViewID = splitted[1];
                   navigate = true;  
                   confirmCache = {}; 
-                  Future.delayed(Duration(seconds: 2), () {
+                  Future.delayed(Duration(seconds: 3), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID:$subViewID");
                     //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 

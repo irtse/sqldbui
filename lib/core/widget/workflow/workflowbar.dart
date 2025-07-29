@@ -129,7 +129,7 @@ class StepWidgetState extends State<StepWidget> {
       for ( var step in widget.steps!.where( (step) => step.name.length > maxLength) ) { 
         maxLength = step.name.length.toDouble();
       }
-      if (widget.steps?.length == 1) {
+      if (widget.steps?.length == 1 && !(currentView?.isEmpty ?? true)) {
         widget.isDismissible = (widget.steps?[0].isDismiss ?? false) || widget.isDismissible;
       }
       if (!(currentView?.isEmpty ?? true)) {
