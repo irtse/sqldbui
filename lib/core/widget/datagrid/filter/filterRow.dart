@@ -124,7 +124,6 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     }
     widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
     String url = widget.schema[widget.columnName] != null && widget.schema[widget.columnName]?.actionPath != ""  ? "${widget.schema[widget.columnName]!.actionPath}&shallow=enable" : "";
-    print("TYPEEEE ${widget.type} ${widget.columnName ?? ""} $url ${widget.widget.widget.value}");
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(
       context, 
       widget.widget.widget as ConvertorWidget, 
@@ -137,7 +136,8 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
           return b.data!;
         }
         return Container();
-    }) ;
+    });
+
     Widget? w2;
     List<String> order = (widget.isSub ? widget.schema : realOrderMap(widget.schema.keys.toList(), widget.schema, false)).keys.where(
       (e) => !(widget.schema[e]?.hidden ?? false) ).toList();
@@ -242,7 +242,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                       border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
                     ), validator: (String? value) { return null; }))),
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), 
-                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / ( widget.type == "boolean" ? 6 : 5) , child: 
+                child: SizedBox( height: 25,  width: widget.type == "boolean" ? 100 : ((MediaQuery.of(context).size.width - menuSize) / 5) , child: 
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
                       DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                       DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,))], 
@@ -276,8 +276,8 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                 Padding(padding: const EdgeInsets.only(right: 20), child: Text("null mode", style: TextStyle(fontSize: 12, color: Theme.of(context).splashColor))),
               ]),
               widget.columnName == null || widget.columnName == "" ? Container() : SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 10, child: DropdownButtonFormField<String>( 
-                    items: const [ DropdownMenuItem<String>(value: "asc", child: Text("asc", overflow: TextOverflow.ellipsis,)),
-                      DropdownMenuItem<String>(value: "desc", child: Text("desc", overflow: TextOverflow.ellipsis,)) ], 
+                    items: const [ DropdownMenuItem<String>(value: "asc", child: Text("asc", overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem<String>(value: "desc", child: Text("desc", overflow: TextOverflow.ellipsis)) ], 
                     value: widget.dir, hint: Text(TranslateConstants.colDirFilter.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                     onChanged: (value) { 

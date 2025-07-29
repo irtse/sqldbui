@@ -131,7 +131,7 @@ class Convertor {
         var def = (cacheChanges[id]?.toString() ?? widget.value.toString()) == "true" 
           || (cacheChanges[id]?.toString() ?? widget.value.toString()) == "yes";
         ValueNotifier<bool> ctrl = ValueNotifier(def);
-        w = AdvancedSwitch( key: formKey,
+        w = SizedBox( width: 100, child: AdvancedSwitch( key: formKey,
           width: 100, 
           initialValue: def, 
           controller: ctrl,
@@ -146,7 +146,7 @@ class Convertor {
               detectChanges[id] = formKey;
               cacheChanges[id] = widget.value;
             }
-          },);
+          }));
     } else if (type.contains("time") || type.contains("date")) { 
       var def = cacheChanges[id] ?? widget.value;
       DateTime? d;
