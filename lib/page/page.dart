@@ -99,7 +99,9 @@ class PageWidgetState extends State<PageWidget> {
       ),
       body: Stack( 
         alignment: Alignment.topCenter,
-        children: [  buildView(), buildMenu() ],
+        children: [  
+          buildView(), //buildMenu() 
+        ],
       ),
       backgroundColor: Theme.of(context).secondaryHeaderColor);
   }

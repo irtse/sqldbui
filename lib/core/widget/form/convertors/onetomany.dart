@@ -102,12 +102,9 @@ class OneToManyState extends State<OneToManyWidget> {
             if (oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] == null) {
               oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] = [];
             }
-            print("BAM ${oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]} ");
-
             oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.add( 
               DataFormWidget(key: k, noTitle: true, view: newView, scroll: false, subForm: true, isOneToMany: true,
               superFormSchemaName: widget.schemaName)); 
-            print("BAM2 ${widget.component?.widget.view?.name} ${oneToManiesForm[widget.component?.widget.view?.name]} ");
           });
         }));
         if (filtered.isNotEmpty && filtered.length > datasLen) {

@@ -49,7 +49,7 @@ class ActionService {
                   subViewID = null;
                   confirmCache = {};
                   navigate = true;   
-                  Future.delayed(Duration(seconds: 1), () {
+                  Future.delayed(Duration(seconds: 2), () {
                     Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID");
                     // globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -59,7 +59,7 @@ class ActionService {
                   subViewID = splitted[1];
                   navigate = true;  
                   confirmCache = {}; 
-                  Future.delayed(Duration(seconds: 1), () {
+                  Future.delayed(Duration(seconds: 2), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID:$subViewID");
                     //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -90,7 +90,6 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
-    print("qsqsdd ${oneToManiesForm[form.view?.name]} ${form.view?.name} ${oneToManiesStateForm[form.view?.name]}");
     for (var v in (oneToManiesForm[form.view?.name] ?? {}).entries) {
       for (var vv in v.value) {
         if (!(vv.formKey.currentState?.validate() ?? true)) {
@@ -178,7 +177,7 @@ class ActionService {
       if (explicitDraft) {
         body["is_draft"]=isDraft;
       }
-      if (form.view?.actions.contains(method.toLowerCase()) ?? false) {
+      if ((form.view?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {

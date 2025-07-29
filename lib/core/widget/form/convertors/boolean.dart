@@ -56,19 +56,14 @@ class _BooleanState extends State<BooleanWidget> {
               },
             ),
           ),
-          Container( padding: EdgeInsets.only(left: 40), child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"}", overflow: TextOverflow.ellipsis,
+          Wrap( children: [
+          Container( padding: EdgeInsets.only(left: widget.readOnly ? 0 : 40), child: 
+              Tooltip( message: label.toLowerCase(),
+                child:Text( "${label.toLowerCase()}${widget.require ? "" : "*"} ${ !widget.readOnly ? "" : (await getOnFlow(widget.value == true ? "yes" : "no")).toUpperCase()}", softWrap: true,
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
-          )),
-          widget.readOnly ? Container( width: 60, height: 30, 
-            padding: EdgeInsets.only(right: 20), 
-            child: FutureBuilder(future: getOnFlow(widget.value == true ? "yes" : "no"), builder: (a, s) {
-              if (s.data != null) {
-                return Text("${s.data!} :", style: TextStyle( fontWeight: FontWeight.bold) );
-              }
-              return Text("${widget.value == true ? "yes" : "no"} :", style: TextStyle( fontWeight: FontWeight.bold) );
-            })) 
-          : Container()
-         ]) 
+            ))),
+          ])
+        ]),
       );
     }
     ValueNotifier<bool> ctrl = ValueNotifier(widget.value ?? ("${widget.autofill}" == "true"));

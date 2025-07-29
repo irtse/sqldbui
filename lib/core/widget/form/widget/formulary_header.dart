@@ -109,13 +109,13 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         children: [ 
           Text( name.toLowerCase(), overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19)), 
-          widget.canUpdate ? Padding(
+          /*widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),
             child: InkWell( onTap: () => setState(() {
               widget.edit = !widget.edit;
             }),
               child: Icon(widget.edit ? Icons.edit_off : Icons.edit, color: Theme.of(context).primaryColor ))
-          ) : Container(),
+          ) : Container(),*/
           ...states 
         ])
       )
@@ -166,15 +166,17 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             avoidConsent: true, noRedirection: !widget.view.isEmpty));
         }
         if ((widget.view.actions.contains("delete") || widget.view.actions.contains("put") && (currentView?.schemaName ?? "" ).contains("task")) && !widget.view.isEmpty) {
-          try {
-            TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
-          } catch (e) {}
-          actions.add(ButtonWidget(
-            method: "delete", 
-            text: (TranslateConstants.delete).toUpperCase(), 
-            color: Colors.red, 
-            avoidConsent: true));
-        }
+          if (!((currentView?.workflow?.isClose ?? false) || (currentView?.items.first.workflow?.isClose ?? false))) {
+            try {
+              TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
+            } catch (e) {}
+            actions.add(ButtonWidget(
+              method: "delete", 
+              text: (TranslateConstants.delete).toUpperCase(), 
+              color: Colors.red, 
+              avoidConsent: true));
+          }
+        } 
       }   
       widgets.add( 
           Container( 

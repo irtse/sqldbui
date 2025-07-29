@@ -80,6 +80,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
   }
 }
 
+// ignore: must_be_immutable
 class FilterSubRowWidget extends StatefulWidget implements ConvertorWidget {
   FilterRowWidgetState widget;
   String comparator = "like";  
@@ -123,6 +124,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     }
     widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
     String url = widget.schema[widget.columnName] != null && widget.schema[widget.columnName]?.actionPath != ""  ? "${widget.schema[widget.columnName]!.actionPath}&shallow=enable" : "";
+    print("TYPEEEE ${widget.type} ${widget.columnName ?? ""} $url ${widget.widget.widget.value}");
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(
       context, 
       widget.widget.widget as ConvertorWidget, 
@@ -291,21 +293,21 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                     ), validator: (String? value) { return null; })),
               widget.columnName == null || widget.columnName == "" ? Container() : Padding(padding: const EdgeInsets.only(left: 10), child: TextButton( onPressed: () { setState(() { 
                   widget.connector = widget.connector == "and" ? "" : "and"; 
+                  widget.widget.widget.connector = widget.connector;
                   noFilterRetrieval = true;
                   tempRemoval = true;
                   confirmCache = {};
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
-                    if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
-                    } else if (filterRowsWidget.length - 1 == widget.index) {
-                       filterRowsWidget.add(FilterRowWidget(schema: widget.schema,  index: filterRowsWidget.length));  }
+                    if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); }
                   });
                 }); 
               },
               style: ButtonStyle( backgroundColor: WidgetStateProperty.all(widget.connector == "and" ? Theme.of(context).primaryColor : Colors.transparent)), child: Padding( padding: const EdgeInsets.all(10), 
-                child: Text(TranslateConstants.and.toUpperCase(), style: TextStyle(color: widget.connector == "and"  ? Colors.white :Colors.grey, fontSize: 11))),)),
+                child: Text(TranslateConstants.and.toUpperCase(), style: TextStyle(color: widget.connector == "and"  ? Colors.white :Colors.grey, fontSize: 11))))),
               widget.columnName == null || widget.columnName == "" ? Container() : TextButton( onPressed: () { setState(() {  
                   widget.connector = widget.connector == "or" ? "" : "or"; 
+                  widget.widget.widget.connector = widget.connector;
                   noFilterRetrieval = true;
                   tempRemoval = true;
                   confirmCache = {};
@@ -313,8 +315,6 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {
                       filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
-                    } else if (filterRowsWidget.length - 1 == widget.index) {
-                        filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length));
                     }
                   });
                 }); 

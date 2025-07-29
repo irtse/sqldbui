@@ -60,13 +60,15 @@ class FormularyWidgetState extends State<FormularyWidget> {
       List<Widget> bottomFields = <Widget>[];
 
       if (!(currentView?.isEmpty ?? true)) {
-        for (var consent in (consentCache[viewID]?[widget.view.name]?.values ?? widget.view.consents) as List<model.Consent>) {
-          fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
-        }
-        if (widget.view.consents.isNotEmpty) {
-          fields.add(Padding( padding: EdgeInsets.only(top: 20, bottom: 20),
-            child : const Divider(height: 0.5, thickness: 0.5, color: Colors.grey)));
-        }
+        try {
+          for (var consent in (widget.view.consents)) {
+            fields.add(ConsentWidget(state: widget.state, consent: consent, value: false));
+          }
+          if ((widget.view.consents).isNotEmpty) {
+            fields.add(Padding( padding: EdgeInsets.only(top: 20, bottom: 20),
+              child : const Divider(height: 0.5, thickness: 0.5, color: Colors.grey)));
+          }
+        } catch(e) { print("ERR $e"); }
       }
       List<String> categories = [];
       for (var v in widget.view.schema.values) {

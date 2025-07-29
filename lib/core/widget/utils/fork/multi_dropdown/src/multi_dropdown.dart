@@ -93,6 +93,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     required this.items,
     this.addFunction,
     this.overrideKey,
+    this.textAlignVertical,
     this.fieldDecoration = const FieldDecoration(),
     this.dropdownDecoration = const DropdownDecoration(),
     this.searchDecoration = const SearchFieldDecoration(),
@@ -114,6 +115,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.changeFunction,
     this.max = 0,
     this.label,
+    this.forceVerticalAlignment = false,
     this.style,
     this.closeOnBackButton = false,
     Key? key,
@@ -149,6 +151,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   MultiDropdown.future({
     required this.future,
     required this.overrideKey,
+    this.textAlignVertical,
     this.fieldDecoration = const FieldDecoration(),
     this.dropdownDecoration = const DropdownDecoration(),
     this.searchDecoration = const SearchFieldDecoration(),
@@ -173,6 +176,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.label,
     this.max = 0,
     this.style,
+    this.forceVerticalAlignment = false,
     Key? key,
   })  : items = const [],
         super(key: key);
@@ -182,10 +186,10 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   final void Function(String)? addFunction;
   /// The list of dropdown items.
   final List<DropdownItem<T>> items;
-
+  final TextAlignVertical? textAlignVertical;
   /// The selection type of the dropdown.
   final bool singleSelect;
-
+  bool forceVerticalAlignment = false;
   /// The configuration for the chips.
   final ChipDecoration chipDecoration;
   final TextStyle? style;
@@ -352,7 +356,7 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
       _portalController.show();
     } else {
       _dropdownController._clearSearchQuery();
-      Future.delayed(Duration(milliseconds: 100), () =>  _portalController.hide());
+        Future.delayed(Duration(milliseconds: 100), () =>  _portalController.hide());
     }
   }
 
@@ -488,7 +492,7 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
                     isFocused: _dropdownController.isOpen,
                     decoration: _buildDecoration(),
                     textAlign: TextAlign.start,
-                    textAlignVertical: TextAlignVertical.center,
+                    textAlignVertical: (widget.controller?.selectedItems ?? []).isNotEmpty || widget.forceVerticalAlignment ? widget.textAlignVertical ?? TextAlignVertical.center : TextAlignVertical.center,
                     child: _buildField(),
                   ),
                 );

@@ -170,7 +170,7 @@ class FilterSearchWidget extends StatefulWidget implements ConvertorWidget {
   String label;
   String type;
   String connector = "";
-  String comparator = "like";
+  String comparator = "=";
   String? url;
   FilterPopUpState filter;
   int innerIndex;
@@ -189,7 +189,7 @@ class FilterSearchWidget extends StatefulWidget implements ConvertorWidget {
     required this.innerIndex, 
     required this.columnName, 
     
-    this.comparator = "like",
+    this.comparator = "=",
     this.connector = "", 
   });
   @override

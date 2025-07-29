@@ -75,7 +75,7 @@ class ConsentState extends State<ConsentWidget> {
           ),
           Container( padding: EdgeInsets.only(left: 40), 
             child: Tooltip( message: (await getOnFlow(widget.consent.name)).toLowerCase(),
-              child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}", 
+              child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}", softWrap: true,
               style: TextStyle( color:  error ? Colors.red : Colors.black))
           )),
       ]) 

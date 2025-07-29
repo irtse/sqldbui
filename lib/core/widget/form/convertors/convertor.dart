@@ -41,7 +41,7 @@ class Convertor {
     String id
   ) async {
     if (widget.value == "no info...") { widget.value = null; }
-    print("$name $type $subUrl");
+    print("$name $type $subUrl ${widget.value}");
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     var dec = InputDecoration( 
                 errorStyle: const TextStyle(fontSize: 0), 
@@ -54,7 +54,26 @@ class Convertor {
     bool isInt = type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int");
     Widget w = Container();
     if (type.contains("manytomany")) {
-        print("$type $subUrl");
+      if ((widget.value ?? "") != "") {
+        w = FutureBuilder<APIResponse<model.Shallowed>>(
+        future: APIService().get<model.Shallowed>("${(subUrl).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
+        builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
+          return FutureBuilder<APIResponse<model.Shallowed>>(
+            future: APIService().get(subUrl, true, null), 
+            builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+              return FutureBuilder<Widget>(
+              future: getLink(subUrl, context, widget, id, dec,  formKey, name, label, 
+                type, snap.data?.data?..addAll(s.data?.data ?? []), isGrid, isDark, isText), 
+              builder: (BuildContext c, AsyncSnapshot<Widget> q) {
+                if (q.data != null) {
+                  return q.data!;
+                }
+                return Container();
+              });
+            }
+          );   
+        });
+      } else {
         w = FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(subUrl, true, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
@@ -69,6 +88,7 @@ class Convertor {
             });
           }
         );
+      }
     } else if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
         w = TextFormField( key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,
@@ -218,47 +238,49 @@ class Convertor {
         ),
       );    
     } else if (type.contains("link") && url != "") {
+      print("BAM ${widget.value}");
       if ((widget.value ?? "") != "") {
         w = FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(url).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
-           return FutureBuilder<APIResponse<model.Shallowed>>(
+          print(s.data?.data ?? []);
+          return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get<model.Shallowed>("${(url)}&shallow=enable", firstAPI, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-              if (snap.data?.data != null) {
-                return FutureBuilder<APIResponse<model.Shallowed>>(
-                  future: APIService().get(url, true, null), 
-                  builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-                    return FutureBuilder<Widget>(
-                    future: getLink(url, context, widget, id, dec,  formKey, name, label, 
-                    type, (snap.data?.data ?? [])..addAll(s.data?.data ?? []), isGrid, isDark, isText), 
-                    builder: (BuildContext c, AsyncSnapshot<Widget> q) {
-                      if (q.data != null) {
-                        return q.data!;
-                      }
-                      return Container();
-                    });
-                });
-              } else {
-                return Container();
-              }
-            });   
+            if (snap.data?.data != null) {
+              return FutureBuilder<APIResponse<model.Shallowed>>(
+                future: APIService().get(url, true, null), 
+                builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+                  return FutureBuilder<Widget>(
+                  future: getLink(url, context, widget, id, dec,  formKey, name, label, 
+                  type, (snap.data?.data ?? [])..addAll(s.data?.data ?? []), isGrid, isDark, isText), 
+                  builder: (BuildContext c, AsyncSnapshot<Widget> q) {
+                    if (q.data != null) {
+                      return q.data!;
+                    }
+                    return Container();
+                  });
+              });
+            } else {
+              return Container();
+            }
+          });   
         });
       } else {
-        w = FutureBuilder<APIResponse<model.Shallowed>>(
-          future: APIService().get(url, true, null), 
-          builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
-            return FutureBuilder<Widget>(
-            future: getLink(url, context, widget, id, dec,  formKey, name, label, 
-              type, snap.data?.data, isGrid, isDark, isText), 
-            builder: (BuildContext c, AsyncSnapshot<Widget> q) {
-              if (q.data != null) {
-                return q.data!;
-              }
-              return Container();
-            });
-          }
-        );
+          w = FutureBuilder<APIResponse<model.Shallowed>>(
+            future: APIService().get(url, true, null), 
+            builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
+              return FutureBuilder<Widget>(
+              future: getLink(url, context, widget, id, dec,  formKey, name, label, 
+                type, snap.data?.data, isGrid, isDark, isText), 
+              builder: (BuildContext c, AsyncSnapshot<Widget> q) {
+                if (q.data != null) {
+                  return q.data!;
+                }
+                return Container();
+              });
+            }
+          );
       }
     }
     return w;
@@ -275,44 +297,42 @@ class Convertor {
       return Container();
     }
     bool found = false;
-    if (datas != null) {
-      for (var item in datas) {
-        max = item.max;
-        var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-        if (name == "state") {
-            v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+    for (var item in datas) {
+      max = item.max;
+      var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+      if (name == "state") {
+        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+      }
+      var t = items.where((e) => e.value == "${item.id}"); 
+      if (!mapped.containsKey(v) && t.isEmpty){
+        mapped[v]=item;
+        if(items.where((element) => element.value == v).isEmpty) {
+          if ( v.toString() == widget.value.toString() ) { 
+            widget.value = item.id.toString();
           }
-        var t = items.where((e) => e.value == "${item.id}"); 
-        if (!mapped.containsKey(v) && t.isEmpty){
-          mapped[v]=item;
-          if(items.where((element) => element.value == v,).isEmpty) {
-            if ( v.toString() == widget.value.toString() ) { 
-              widget.value = item.id.toString();
-            }
-            bool select = false;
-            if ( item.id.toString() == widget.value.toString() ) { 
-              found = true;
-              select = true; 
-            }
-            try {
-              if (item.translatable) {
-                v = (await getOnFlow(v));
-                if (v.toUpperCase() == v) {
-                  v = v.toUpperCase();
-                } else {
-                  v = v.toLowerCase();
-                }
+          bool select = false;
+          if ( item.id.toString() == widget.value.toString() ) { 
+            found = true;
+            select = true; 
+          }
+          try {
+            if (item.translatable) {
+              v = (await getOnFlow(v));
+              if (v.toUpperCase() == v) {
+                v = v.toUpperCase();
+              } else {
+                v = v.toLowerCase();
               }
-            } catch(e) {}
-            try {
-              items.add(DropdownItem<String>(value: "${item.id}", label: v, selected: select));
-              ctrls.addItem(items.last);
-            }catch(e) {}
-          }
+            }
+          } catch(e) {}
+          try {
+            items.add(DropdownItem<String>(value: "${item.id}", label: v.trim(), selected: select));
+            ctrls.addItem(items.last);
+          }catch(e) {}
         }
       }
     }
-    if (datas == null || datas.isEmpty || (widget.value ?? "") != "" && !found) {
+      if (datas.isEmpty || (widget.value ?? "") != "" && !found) {
       return Container();
     }
     GlobalKey<MultiDropdownState> formFieldKey = GlobalKey();
@@ -320,10 +340,10 @@ class Convertor {
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
+    print("THERE $isGrid $datas");
     return MultiDropdown<String>(
         overrideKey: formFieldKey,
         max: max,
-        enabled: true,
         label: label,
         changeFunction: (dynamic value) async {
           if (value == "") {
@@ -336,6 +356,8 @@ class Convertor {
         controller: ctrls,
         singleSelect: true,
         items: items,
+        forceVerticalAlignment: isDark,
+        textAlignVertical: TextAlignVertical.bottom,
         searchEnabled: max > 10,
         style: TextStyle(color: isDark ?  Colors.white : Theme.of(context).secondaryHeaderColor ),
         chipDecoration: ChipDecoration(
@@ -348,7 +370,6 @@ class Convertor {
         fieldDecoration: isGrid ? decF : FieldDecoration(
                           errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
                           backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
                           labelStyle: TextStyle(fontSize: 0),
                           hintText: TranslateConstants.placeHolderValue.toLowerCase(),

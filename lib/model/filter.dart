@@ -63,11 +63,12 @@ class Filters {
   List<FilterRowWidget> toRow(Map<String, SchemaField> schema) {
     List<FilterRowWidget> rows = [];
     for (var filter in sort()) {
-      print("qdqsd ${filter.column} ${filter.realName}");
+      print("qdqsd ${filter.column} ${filter.realName} ${filter.connector}");
       rows.add(FilterRowWidget(
         schema: schema, columnName: filter.column, beforeColumn: (filter.realName ?? filter.column ?? "").split("."), 
         label: filter.label ?? filter.column, index: filter.index, 
-        type: filter.type, comparator: filter.comparator, connector: filter.connector, dir: filter.dir, value: filter.value));
+        type: filter.type, comparator: filter.comparator, 
+        connector: filter.connector, dir: filter.dir, value: filter.value));
     }
     return rows;
   }
