@@ -19,13 +19,12 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
     try { curr = int.parse(widget.workflow.current);  } catch(e) { /* */ }
     var pos = 0;
     try { pos = int.parse(widget.workflow.position);  } catch(e) { /* */ }
-    print("IS CLOSE ? ${widget.workflow.isClose} ${widget.workflow.current}");
     if (widget.workflow.steps.isNotEmpty) {
       var active = true;
       items.add(StepWidget(content : const Icon(Icons.adjust, color: Colors.white,), 
         width: 100, gotBefore: false,
-        current: widget.workflow.current != "" && curr == 0,
-        doing: widget.workflow.position != "" && pos == 0,
+        current: widget.workflow.current != "" && curr == 0 && !widget.workflow.isClose,
+        doing: widget.workflow.position != "" && pos == 0 && !widget.workflow.isClose,
         isDismissible: widget.workflow.isDismiss, 
         beforeDismissible: widget.workflow.isDismiss, 
         active: active));
@@ -130,6 +129,9 @@ class StepWidgetState extends State<StepWidget> {
       for ( var step in widget.steps!.where( (step) => step.name.length > maxLength) ) { 
         maxLength = step.name.length.toDouble();
       }
+      if (widget.steps?.length == 1) {
+        widget.isDismissible = (widget.steps?[0].isDismiss ?? false) || widget.isDismissible;
+      }
       if (!(currentView?.isEmpty ?? true)) {
         for ( var step in widget.steps! ) {
           if (step.isCurrent) {
@@ -137,7 +139,6 @@ class StepWidgetState extends State<StepWidget> {
           }
         }
       }
-      
       icons.add(Positioned(
         left: widget.width - 50,
         child: PopupMenuButton(
@@ -148,7 +149,9 @@ class StepWidgetState extends State<StepWidget> {
               onSelected: (value) { },
               itemBuilder: (BuildContext bc) {
                 List<PopupMenuItem> rows = [];
+                print(widget.steps);
                 for ( var step in widget.steps! ) {
+
                   List<Widget> additionnal = [];
                   if (step.isClose) {
                     additionnal.add(Padding(padding: const EdgeInsets.only(left: 20), 
@@ -158,6 +161,7 @@ class StepWidgetState extends State<StepWidget> {
                   } else if (step.isCurrent) {
                     additionnal.add(const Padding(padding: EdgeInsets.only(left: 20), child: Icon(Icons.refresh)));
                   }
+                  
                   rows.add(PopupMenuItem(enabled: false, 
                   child: StatefulBuilder( builder: (BuildContext context, StateSetter s) {
                     return FutureBuilder<Widget>(future: getState(step, maxLength, additionnal), builder: (s, b) {
@@ -204,10 +208,9 @@ class StepWidgetState extends State<StepWidget> {
           decoration: BoxDecoration(
             border: const Border(right: BorderSide(width: 2, color: Colors.white) ),
             color: widget.current ? Theme.of(context).primaryColor : (
-              widget.isDismissible ? Colors.red : (
-                 widget.active ?  Colors.green : (widget.doing ? Colors.orange : Colors.grey))),
+              widget.isDismissible ? Colors.red : (widget.active ?  Colors.green : (widget.doing ? Colors.orange : Colors.grey))),
           ),
-          child: Center(child: widget.content), ),
+          child: Center(child: widget.content) ),
       ...icons,
     ]);
   }

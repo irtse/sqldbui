@@ -205585,11 +205585,9 @@ p=(a3-200)/q.gt(q)
 o=A.a([],t.p)
 s=0
 try{s=A.c6(a1.a.c.e,a2)}catch(n){}r=0
-try{r=A.c6(a1.a.c.f,a2)}catch(n){}q=a1.a.c
-A.fe("IS CLOSE ? "+q.b+" "+q.e)
-q=a1.a.c.y
-if(q.gco(q)){q=a1.a.c.e!==""&&J.i(s,0)
-m=a1.a.c.f!==""&&J.i(r,0)
+try{r=A.c6(a1.a.c.f,a2)}catch(n){}q=a1.a.c.y
+if(q.gco(q)){q=a1.a.c.e!==""&&J.i(s,0)&&!a1.a.c.b
+m=a1.a.c.f!==""&&J.i(r,0)&&!a1.a.c.b
 l=a1.a.c.d
 o.push(A.csd(!0,!1,!1,l,!1,B.aN8,q,m,!1,l,a2,100))}for(q=t.jz,k=0;m=a1.a.c.y,k<m.gt(m);k=j){m={}
 j=k+1
@@ -205659,37 +205657,41 @@ case 1:return A.w(q,r)}})
 return A.x($async$Qc,r)},
 A(a){return A.cI(new A.bBp(),this.ah(a),t.l)},
 ah(a){return this.brZ(a)},
-brZ(a){var s=0,r=A.y(t.l),q,p=this,o,n,m,l,k,j
+brZ(a){var s=0,r=A.y(t.l),q,p=this,o,n,m,l,k,j,i
 var $async$ah=A.u(function(b,c){if(b===1)return A.v(c,r)
-while(true)switch(s){case 0:m={}
-l=t.p
-k=A.a([],l)
-j=p.a.at
-if(j!=null&&j.length!==0){m.a=0
-j.toString
-o=B.b.gal(j)
-j=new A.fX(o,new A.bBs(m),A.a1(j).i("fX<1>"))
-for(;j.q();)m.a=o.gJ(0).b.length
-j=$.bH
-j=j==null?null:j.ch
-if(j===!1)for(j=p.a.at,o=j.length,n=0;n<o;++n)if(j[n].r)p.a.y=!0
-j=p.a.d
+while(true)switch(s){case 0:l={}
+k=t.p
+j=A.a([],k)
+i=p.a.at
+if(i!=null&&i.length!==0){l.a=0
+i.toString
+o=B.b.gal(i)
+i=new A.fX(o,new A.bBs(l),A.a1(i).i("fX<1>"))
+for(;i.q();)l.a=o.gJ(0).b.length
+i=p.a
+o=i.at
+n=o==null
+if((n?null:o.length)===1){n=n?null:o[0].f
+i.Q=n===!0||i.Q}i=$.bH
+i=i==null?null:i.ch
+if(i===!1)for(i=o.length,m=0;m<i;++m)if(o[m].r)p.a.y=!0
+i=p.a.d
 o=$.cgt
-k.push(A.hT(null,A.awl(B.k,new A.aJ(0,m.a*15,0,1/0),B.aMU,null,new A.bBt(m,p),new A.bBu(),B.eI,null,null,o.toLowerCase(),t.z),null,null,j-50,null,null,null))}j=p.a
-if(j.e){o=A.hT(null,new A.QW(3,A.Xi(A.P(null,null,B.h,B.k,null,null,null,20,null,null,null,null,null,40),B.ch,new A.a7o(null)),null),null,null,null,null,null,null)
-if(j.x)j=A.n(a).fr
-else if(j.z)j=B.an
-else if(j.r)j=B.cm
-else j=j.f?B.fj:B.T
-B.b.N(k,A.a([o,A.hT(null,new A.QW(3,A.Xi(A.P(null,null,B.h,j,null,null,null,14,null,null,null,null,null,30),B.ch,new A.a7o(null)),null),null,null,1,null,5,null)],l))}j=p.a
-o=j.d
-if(j.y)j=A.n(a).fr
-else if(j.Q)j=B.an
-else if(j.w)j=B.cm
-else j=j.as?B.fj:B.T
-l=A.a([A.P(null,A.dS(p.a.c,null,null,null),B.h,null,null,new A.bm(j,null,B.afl,null,null,null,null,B.E),null,40,null,null,null,null,null,o)],l)
-B.b.N(l,k)
-q=A.dF(B.ai,l,B.H,B.a8,null)
+j.push(A.hT(null,A.awl(B.k,new A.aJ(0,l.a*15,0,1/0),B.aMU,null,new A.bBt(l,p),new A.bBu(),B.eI,null,null,o.toLowerCase(),t.z),null,null,i-50,null,null,null))}i=p.a
+if(i.e){o=A.hT(null,new A.QW(3,A.Xi(A.P(null,null,B.h,B.k,null,null,null,20,null,null,null,null,null,40),B.ch,new A.a7o(null)),null),null,null,null,null,null,null)
+if(i.x)i=A.n(a).fr
+else if(i.z)i=B.an
+else if(i.r)i=B.cm
+else i=i.f?B.fj:B.T
+B.b.N(j,A.a([o,A.hT(null,new A.QW(3,A.Xi(A.P(null,null,B.h,i,null,null,null,14,null,null,null,null,null,30),B.ch,new A.a7o(null)),null),null,null,1,null,5,null)],k))}i=p.a
+o=i.d
+if(i.y)i=A.n(a).fr
+else if(i.Q)i=B.an
+else if(i.w)i=B.cm
+else i=i.as?B.fj:B.T
+k=A.a([A.P(null,A.dS(p.a.c,null,null,null),B.h,null,null,new A.bm(i,null,B.afl,null,null,null,null,B.E),null,40,null,null,null,null,null,o)],k)
+B.b.N(k,j)
+q=A.dF(B.ai,k,B.H,B.a8,null)
 s=1
 break
 case 1:return A.w(q,r)}})
@@ -205706,15 +205708,16 @@ A.bBu.prototype={
 $1(a){},
 $S:18}
 A.bBt.prototype={
-$1(a){var s,r,q,p,o,n,m,l,k,j,i,h,g=null,f=A.a([],t.nm)
-for(s=this.b,r=s.a.at,q=r.length,p=this.a,o=t.z,n=t.p,m=0;m<r.length;r.length===q||(0,A.G)(r),++m){l=r[m]
-k=A.a([],n)
-if(l.e){j=l.f
-i=j?0.7854:0
-h=j?B.aLg:B.aL9
-h=A.bF(h,j?B.an:B.cm,g,g)
-k.push(new A.a2(B.m4,new A.wK(A.ct_(i),B.B,!0,g,h,g),g))}else if(l.r)k.push(B.bpt)
-f.push(A.Q0(new A.uu(new A.bBr(p,s,l,k),g),!1,g,o))}return f},
+$1(a){var s,r,q,p,o,n,m,l,k,j,i,h=null,g=A.a([],t.nm),f=this.b
+A.fe(f.a.at)
+for(s=f.a.at,r=s.length,q=this.a,p=t.z,o=t.p,n=0;n<s.length;s.length===r||(0,A.G)(s),++n){m=s[n]
+l=A.a([],o)
+if(m.e){k=m.f
+j=k?0.7854:0
+i=k?B.aLg:B.aL9
+i=A.bF(i,k?B.an:B.cm,h,h)
+l.push(new A.a2(B.m4,new A.wK(A.ct_(j),B.B,!0,h,i,h),h))}else if(m.r)l.push(B.bpt)
+g.push(A.Q0(new A.uu(new A.bBr(q,f,m,l),h),!1,h,p))}return g},
 $S:169}
 A.bBr.prototype={
 $2(a,b){var s=this
