@@ -178,6 +178,7 @@ class ActionService {
         body["is_draft"]=isDraft;
       }
       if ((form.view?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
+        print("$method $body $path");
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {

@@ -67,7 +67,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
                 purpose: purpose, 
                 validate: () {
                   widget.component.widget.detectChange = true;
-                  mainForm.currentState!.widget.cacheForm["state"] = state.key;
+                  //mainForm.currentState!.widget.cacheForm["state"] = state.key;
                   ActionService.pressed(null, false, widget.view.schemaName, widget.view.actionPath, <String>["id"], 
                     widget.view.schema, "put", false, context, cache, true, true, state.key == "dismiss" || state.key == "refused", 
                     state.key == "dismiss" || state.key == "refused", false)();
