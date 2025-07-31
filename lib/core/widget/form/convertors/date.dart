@@ -72,7 +72,7 @@ class _DateState extends State<DateWidget> {
             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-            hintText: (await getOnFlow( TranslateConstants.selectDate)).toLowerCase(),
+            hintText: TranslateConstants.selectDate.toLowerCase(),
             labelText: label.toLowerCase(),
           ) ));
       }
@@ -99,7 +99,7 @@ class _DateState extends State<DateWidget> {
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: (await getOnFlow(TranslateConstants.selectDate)).toLowerCase(),
+            hintText: TranslateConstants.selectDate.toLowerCase(),
             labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             labelText: label.toLowerCase().toLowerCase(),
           ),

@@ -101,7 +101,7 @@ class DropDownState extends State<DropDownWidget> {
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
+                hintText: TranslateConstants.selectValue.toLowerCase(),
                 labelText: label.toLowerCase(),
               )
             )
@@ -193,7 +193,7 @@ class DropDownState extends State<DropDownWidget> {
                         hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                         border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
-                        hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
+                        hintText: TranslateConstants.selectValue.toLowerCase(),
                         labelText: label.toLowerCase(),
                       ) ));
     }
@@ -388,7 +388,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-                          hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
+                          hintText: TranslateConstants.selectValue.toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
                           showClearIcon: false,
@@ -404,7 +404,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           ),
                         ),
                         searchDecoration: SearchFieldDecoration(
-                          hintText: (await getOnFlow("       ${TranslateConstants.search}")).toLowerCase(),
+                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),

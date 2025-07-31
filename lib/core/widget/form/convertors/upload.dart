@@ -73,13 +73,14 @@ class _UploadState extends State<UploadWidget> {
           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-          hintText:  (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
+          hintText: TranslateConstants.writePath.toLowerCase(),
           labelText: label.toLowerCase(),
         )
       ));
     }
     String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null));
     text = TextEditingController(text: iv);
+    print("$text ${widget.value}");
     Widget w = InkWell( 
             mouseCursor: SystemMouseCursors.click,
             onTap: () => widget.readOnly ? null : _pickFile(),
@@ -112,7 +113,7 @@ class _UploadState extends State<UploadWidget> {
                   top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
                   bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
                 suffixIcon: Icon(Icons.attach_file, size: 20, color: Theme.of(context).secondaryHeaderColor),
-                hintText:  (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
+                hintText: TranslateConstants.writePath.toLowerCase(),
                 labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                 labelText: label,
                 errorStyle: const TextStyle(fontSize: 0,),

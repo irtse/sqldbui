@@ -74,17 +74,14 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                     );
                     newView.isEmpty = widget.component.view!.isEmpty;
                     GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
-                    return FutureBuilder(future: getOnFlow(TranslateConstants.dataFormulary), builder: (a,s) {
-                      newView.name = s.data ?? newView.name;
-                      var w =  DataFormWidget(key: newViewKey, view: newView, scroll: false, isSplitted: false, 
+                    var w = DataFormWidget(key: newViewKey, view: newView, scroll: false, isSplitted: false, 
                                            subForm: true, subSubForm: widget.component.subForm);
-                      widget.component.wrappersGlobalKey.add(newViewKey);
-                      widget.component.wrappers.add(w);
-                      Future.delayed(Duration(seconds: 1), () {
-                        globalActionBar.currentState?.setState(() {});
-                      });  
-                      return w;                  
+                    widget.component.wrappersGlobalKey.add(newViewKey);
+                    widget.component.wrappers.add(w);
+                    Future.delayed(Duration(seconds: 1), () {
+                      globalActionBar.currentState?.setState(() {});
                     });
+                    return w;
                   }
                 }
                 return Container();

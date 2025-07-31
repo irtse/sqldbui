@@ -111,7 +111,7 @@ class _TextState extends State<TextWidget> {
             }
           })),
         child: Icon(Icons.link, size: 20)) : Icon(Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
-        hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
+        hintText: TranslateConstants.writeValue.toLowerCase(),
         labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
         labelText: label.toLowerCase(),
         errorStyle: const TextStyle(fontSize: 0,),
