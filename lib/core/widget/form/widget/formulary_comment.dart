@@ -28,6 +28,7 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
       List<Widget> widgets = [];
       var path = "";
       if ((widget.refItem.commentsPath ?? "") != "") {
+        print(widget.refItem.commentsPath);
         widgets.add(FutureBuilder(future: APIService().get<model.View>(widget.refItem.commentsPath!, true, context), 
           builder: (a,snap) {
           List<Widget> w = [];
