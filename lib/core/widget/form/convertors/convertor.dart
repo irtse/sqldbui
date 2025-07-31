@@ -372,7 +372,7 @@ class Convertor {
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                           backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
                           labelStyle: TextStyle(fontSize: 0),
-                          hintText: TranslateConstants.placeHolderValue.toLowerCase(),
+                          hintText: (await getOnFlow(TranslateConstants.placeHolderValue)).toLowerCase(),
                           hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
                           showClearIcon: false,
@@ -380,7 +380,7 @@ class Convertor {
                           focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          hintText: (await getOnFlow("       ${TranslateConstants.search}")).toLowerCase(),
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),

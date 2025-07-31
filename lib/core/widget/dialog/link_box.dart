@@ -23,6 +23,14 @@ class LinkBoxWidget extends StatefulWidget {
 class LinkBoxWidgetState extends State<LinkBoxWidget> {
   bool forceShared = true;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> d = [];
     if (widget.isDelete) {
       d.add(LinkDropWidget(isDelete: true, name: "all",
@@ -90,7 +98,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                   borderSide: BorderSide(color: Theme.of(context).splashColor),
                 ),
                 labelStyle: TextStyle(color: Colors.grey),
-                hintText: TranslateConstants.selectDate.toLowerCase(),
+                hintText: (await getOnFlow(TranslateConstants.selectDate)).toLowerCase(),
                 hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                 suffixIcon: const Icon(Icons.calendar_month, size: 18,),
                 suffixIconColor: Theme.of(context).splashColor,
@@ -125,11 +133,12 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
       tooltip = widget.isDelete ?  TranslateConstants.undelegate :  TranslateConstants.undelegate;
       title = widget.isDelete ? TranslateConstants.userDelegated : TranslateConstants.delegateToUser;
     }
+    title = await getOnFlow(title);
 
     return PopupMenuButton(
       constraints: const BoxConstraints.tightFor(width: 364),
       color: Colors.white,
-      tooltip: (tooltip).toLowerCase(),
+      tooltip: (await getOnFlow(tooltip)).toLowerCase(),
       icon: Icon(size: 18, (widget.isDelete ? Icons.cancel : Icons.share), color: widget.color ?? Theme.of(context).primaryColor),
       itemBuilder: (BuildContext bc) { 
         return [ 
@@ -222,7 +231,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                       ),
                     ),
                     searchDecoration: SearchFieldDecoration(
-                      hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                      hintText: "       ${TranslateConstants.search}".toLowerCase(),
                       border : const OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                           borderRadius: BorderRadius.all(Radius.circular(5)),

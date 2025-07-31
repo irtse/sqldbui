@@ -244,13 +244,13 @@ class FilterSearchState extends State<FilterSearchWidget> {
       context, widget as ConvertorWidget, widget.type, "", TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
       this, false, false, url, url, ""
     );
-    var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
+    var togglesMode = [(await getOnFlow(TranslateConstants.value)).toUpperCase(), 'NULL'];
     if (!isText) { togglesMode.add("MATH"); }
     var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));
     if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
     return Column(children: [ 
       Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch( minHeight: 25,
-          initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase())),
+          initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : togglesMode[0])),
           fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / togglesMode.length,
           totalSwitches: togglesMode.length, labels: togglesMode, inactiveBgColor: Theme.of(context).splashColor,
           onToggle: (index) { setState(() {
@@ -265,7 +265,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                   DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,)) 
                 ], isExpanded: true,
-                hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...".toLowerCase(), 
+                hint: Text((await getOnFlow("${TranslateConstants.select} ${widget.label.replaceAll("db", "").replaceAll("_", " ")}...")).toLowerCase(), 
                   overflow: TextOverflow.ellipsis, softWrap: true ),
                 value: widget.value == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder.toLowerCase(); } return null; },
@@ -281,7 +281,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                   fillColor:Colors.white, hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                   border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                  labelText: "${TranslateConstants.value.toLowerCase()} ${widget.comparator.toUpperCase()}",
+                  labelText: "${(await getOnFlow(TranslateConstants.value)).toLowerCase()} ${(await getOnFlow(widget.comparator)).toUpperCase()}",
                 )) : w)) 
       ])), 
       isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(

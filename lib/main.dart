@@ -8,6 +8,7 @@ import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
+import 'dart:html' if (kIsWeb) '' as html; 
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -108,6 +109,34 @@ double homeWidth = 0;
 bool firstLoad = true;
 class HomeScreenState extends State<HomeScreen> {
   late Future<void> loadAsync;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      html.window.onPopState.listen((event) {
+        final dynamic state = html.window.history.state;
+        final int newIndex = (state != null && state['index'] != null)
+            ? state['index']
+            : 0;
+
+        if (newIndex < _currentIndex) {
+          print("Back navigation detected");
+          _currentIndex--;
+          AppRouter.back();
+        } else if (newIndex > _currentIndex) {
+          print("Forward navigation detected");
+          _currentIndex++;
+          AppRouter.forward();
+        }
+      });
+
+      // Optional: Prevent immediate back nav
+      html.window.history.pushState(null, '', html.window.location.href);
+    }
+    }
+    
 
   void refresh(String? id, String? subID, bool isHome) {
     viewID = id;

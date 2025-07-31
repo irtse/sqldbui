@@ -68,7 +68,7 @@ class _NumberState extends State<NumberWidget> {
             border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro, color: Colors.black) : Icon(Icons.onetwothree, color: Theme.of(context).secondaryHeaderColor),
-            hintText: TranslateConstants.writeNumber.toLowerCase(),
+            hintText: (await getOnFlow(TranslateConstants.writeNumber)).toLowerCase(),
             labelStyle: TextStyle(color:Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             labelText: label.toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
