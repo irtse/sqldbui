@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/model/filter.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:sqldbui2/page/translate.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 import 'package:flutter_linux_webview/flutter_linux_webview.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -108,6 +108,12 @@ double homeWidth = 0;
 bool firstLoad = true;
 class HomeScreenState extends State<HomeScreen> {
   late Future<void> loadAsync;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+    
 
   void refresh(String? id, String? subID, bool isHome) {
     viewID = id;

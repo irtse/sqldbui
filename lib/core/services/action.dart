@@ -1,18 +1,21 @@
-import 'package:alert_banner/exports.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+
+import 'package:alert_banner/exports.dart';
 import 'package:injectable/injectable.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
-import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
-import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/services/trigger_cache.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
-import 'package:sqldbui2/main.dart';
-import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
+
+
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -41,6 +44,8 @@ class ActionService {
         widget?.loading();
         if (mainForm.currentState != null ) {
           var v = await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
+          cacheForm = {};
+          print("END !");
           if ((redirection ?? "") != "" && !noRedirection)  { 
               var splitted = redirection?.split("?rows=");
               if ((splitted?.length ?? 0) >= 2) {
@@ -81,7 +86,7 @@ class ActionService {
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, 
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
-    flashedForm = {};
+    print("THERE ${form.view?.name ?? ""}");
     var body = <String, dynamic>{};
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
     if (resp.isNotEmpty  && !overrideDest) {
@@ -109,7 +114,6 @@ class ActionService {
       && (schema[v]?.require ?? false) && (oneToManiesForm[form.view?.name]?[v] ?? []).isEmpty) {
         errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey[form.formKey]?.currentState?.setState((){});
-        print("${oneToManiesForm[form.view?.name]} $v ${form.view?.name} ${oneToManiesStateForm[form.view?.name]}");
         errors = ["form is not valid !"]; 
         for ( var o in oneToManiesStateForm[form.view?.name] ?? [] ) {
           Future.delayed(Duration(seconds: 1), () { 
@@ -153,17 +157,17 @@ class ActionService {
     }
 
     if (isDraft && ((form.view?.schemaName.contains("request") ?? false ) || (form.view?.schemaName.contains("task") ?? false))) {
-      // mainForm.currentState?.setState(() { firstAPI = true; });
       return views;
     }
 
     var path = url;
-    if (form.cacheForm["id"] != null) { 
-      body["id"]=int.parse(form.cacheForm["id"]); 
+    print("cacheForm $cacheForm");
+    if (cacheForm[form.view?.name]?["id"] != null) { 
+      body["id"]=int.parse(cacheForm[form.view?.name]?["id"]); 
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
-    body = await getBody(method, { ...form.cacheForm}, body, schema, oneToManiesForm[form.view?.name] ?? {}, context);
-    var files = await getFiles(method, { ...form.cacheForm}, schema, context);
+    body = await getBody(method, { ...(cacheForm[form.view?.name] ?? {})}, body, schema, oneToManiesForm[form.view?.name] ?? {}, context);
+    var files = await getFiles(method, { ...(cacheForm[form.view?.name] ?? {})}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
         if (globalWorkflowPanelWidgetKey.currentState != null && form.view?.id == mainForm.currentState?.widget.view?.id) {
@@ -178,7 +182,7 @@ class ActionService {
         body["is_draft"]=isDraft;
       }
       if ((form.view?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
-        print("$method $body $path");
+        print("CA LA $method $body $path");
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
@@ -202,7 +206,7 @@ class ActionService {
               consentCache.remove(viewID);
             }
              
-            onSuccessMethod(method, views.last, { ...form.cacheForm}, views.last.schema, files, context);
+            onSuccessMethod(method, views.last, { ...(cacheForm[form.view?.name] ?? {})}, views.last.schema, files, context);
             if (views.last.items.isNotEmpty) {
               if (form.view?.isEmpty ?? false) { 
                 isNew = value.data![0].items[0].values["id"]; 
@@ -294,7 +298,7 @@ class ActionService {
             } else if ((oneToManies[fieldName] ?? []).isNotEmpty) {
               body[fieldName] = [];
               for (var o in (oneToManies[fieldName] ?? []).toList()) {
-                var b = await getBody(method, o.cacheForm, {}, schema[fieldName]!.schema, oneToManiesForm[o.view?.name] ?? {}, context);
+                var b = await getBody(method, (cacheForm[o.view?.name] ?? {}), {}, schema[fieldName]!.schema, oneToManiesForm[o.view?.name] ?? {}, context);
                 body[fieldName].add(b);
               }
             } else {
@@ -325,10 +329,12 @@ class ActionService {
                                  );
       } else if (many.view != null && (many.view?.actions.contains(method) ?? false)) {
         if (add) { 
+          print("racac ${many.view?.name} $widgets");
           views.addAll(await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
                                                         context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore));
         } else { 
+          print("racacac ${many.view?.name}");
           await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                   many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
         } 

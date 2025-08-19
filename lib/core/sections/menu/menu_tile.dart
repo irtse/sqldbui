@@ -49,7 +49,6 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                       });
                     }
                     widget.isSelected = true;
-                    flashedForm = {};
                     for (var e in navigatorCtrls.items) {
                       e.selected = "#${widget.text ?? widget.view?.id}" == e.value;
                     }

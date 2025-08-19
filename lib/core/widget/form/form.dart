@@ -19,7 +19,7 @@ Map<String, Map<String, List<DataFormWidget>>> oneToManiesForm = {};
 Map<String, List<OneToManyState>> oneToManiesStateForm = {};
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
-Map<String, Map<String, dynamic>> flashedForm = <String, Map<String, dynamic>>{};
+Map<String, Map<String, dynamic>> cacheForm = <String, Map<String, dynamic>>{};
 // ignore: must_be_immutable
 class DataFormWidget extends StatefulWidget {
   bool reloadWorkflow = true;
@@ -28,7 +28,7 @@ class DataFormWidget extends StatefulWidget {
   final model.View? view;
   bool detectChange = false;
   String superFormSchemaName;
-  Map<String, dynamic> cacheForm = {};
+  //Map<String, dynamic> cacheForm = {};
   bool scroll, subForm, subSubForm, isSplitted, noTitle;
   List<DataFormWidget> wrappers = <DataFormWidget>[];
   
@@ -88,18 +88,9 @@ class FormWidgetState extends State<DataFormWidget> {
           isEmpty: widget.view?.isEmpty ?? false, 
           relatedDatas: refItem.dataPath
         )); 
+        
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
-        
-        widget.cacheForm = newCacheEntry;
-        if (!widget.isOneToMany && widget.view!.isEmpty) {
-          if (flashedForm["${widget.view?.name}"] != null) {
-            widget.cacheForm = flashedForm["${widget.view?.name}"]!;
-          } else {
-            flashedForm["${widget.view?.name}"] = widget.cacheForm;
-          }
-        }
-        
-        
+        cacheForm[widget.view?.name ?? ""] = newCacheEntry;
         switch (widget.subMenuIndex) {
           case 0: 
           GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
@@ -274,7 +265,7 @@ class FormWidgetState extends State<DataFormWidget> {
           FormularyActionBarWidget(
             workflow: workflow,
             isFirst: int.parse(workflow?.current ?? "0") <= 1,
-            cacheForm: widget.cacheForm,
+            cacheForm: cacheForm[widget.view?.name ?? ""] ?? {},
             show: show, 
             schema: schema,
             component: this, 

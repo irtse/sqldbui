@@ -1,14 +1,12 @@
-import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
-import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/page/translate.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
+import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/page/translate.dart';
-Map<Key, bool> formularyRef = {};
+import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 // ignore: must_be_immutable
 class FormularyWidget extends StatefulWidget {
   String error = "";
@@ -22,7 +20,6 @@ class FormularyWidget extends StatefulWidget {
   String superFormSchemaName;
   List<String> hideField = [];
   Map<String,dynamic> newCacheEntry;
-  Map<String, dynamic> cacheForm = {};
   bool formIsEmpty = false;
   Map<String, model.SchemaField> schema;
   List<Widget> additionnalWidgets;
@@ -149,7 +146,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
               path, 
               widget.component, 
               widget.view.isEmpty,
-              flashedForm[widget.view.name]?[fieldName] ?? field.autoFill,
+              cacheForm[widget.view.name]?[fieldName] ?? field.autoFill,
               field.translatable,
               widget.wrappers,
             ), builder: (a,b) {
@@ -183,11 +180,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
             }
         }
       }
-      
-      
-      if (widget.key != null) {
-        formularyRef[widget.key!] = fields.length == widget.hideField.length;
-      }
+
       if (fields.length == widget.hideField.length) {
         return Container();
       }
