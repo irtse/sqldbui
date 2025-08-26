@@ -72,22 +72,21 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                       triggers: data.triggers,
                       items: data.items.isNotEmpty && !widget.component.view!.isEmpty ? data.items : <model.Item>[model.Item()] 
                     );
+                    
                     newView.isEmpty = widget.component.view!.isEmpty;
                     GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
                     return FutureBuilder(future: getOnFlow(TranslateConstants.dataFormulary), builder: (a,s) {
+                      cacheForm.remove(newView.name);
                       newView.name = s.data ?? newView.name;
-                      if (widget.component.wrappers.where( (e) => e.view?.name == newView.name).isEmpty) {
-                        var w =  DataFormWidget(key: newViewKey, view: newView, scroll: false, isSplitted: false, 
-                                           subForm: true, subSubForm: widget.component.subForm);
-                        widget.component.wrappersGlobalKey.add(newViewKey);
-                        widget.component.wrappers.add(w);
-                        Future.delayed(Duration(seconds: 1), () {
-                          globalActionBar.currentState?.setState(() {});
-                        });  
-                        return w;          
-                      } else {
-                        return widget.component.wrappers.where( (e) => e.view?.name == newView.name).first;
-                      }   
+                      widget.component.wrappers.removeWhere( (e) => e.view?.name == newView.name);
+                      var w =  DataFormWidget(key: newViewKey, view: newView, scroll: false, isSplitted: false, 
+                                          subForm: true, subSubForm: widget.component.subForm);
+                      widget.component.wrappersGlobalKey.add(newViewKey);
+                      widget.component.wrappers.add(w);
+                      Future.delayed(Duration(seconds: 1), () {
+                        globalActionBar.currentState?.setState(() {});
+                      });  
+                      return w;             
                     });
                   }
                 }
