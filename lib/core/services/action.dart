@@ -45,7 +45,6 @@ class ActionService {
         if (mainForm.currentState != null ) {
           var v = await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
           cacheForm = {};
-          print("END !");
           if ((redirection ?? "") != "" && !noRedirection)  { 
               var splitted = redirection?.split("?rows=");
               if ((splitted?.length ?? 0) >= 2) {
@@ -54,7 +53,7 @@ class ActionService {
                   subViewID = null;
                   confirmCache = {};
                   navigate = true;   
-                  Future.delayed(Duration(seconds: 3), () {
+                  Future.delayed(Duration(seconds: 1), () {
                     Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID");
                     // globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -64,7 +63,7 @@ class ActionService {
                   subViewID = splitted[1];
                   navigate = true;  
                   confirmCache = {}; 
-                  Future.delayed(Duration(seconds: 3), () {
+                  Future.delayed(Duration(seconds: 1), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID:$subViewID");
                     //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -86,7 +85,6 @@ class ActionService {
                                                     Map<String,model.SchemaField> schema, String method, 
                                                     BuildContext context, Map<String, dynamic> add, 
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
-    print("THERE ${form.view?.name ?? ""}");
     var body = <String, dynamic>{};
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
     if (resp.isNotEmpty  && !overrideDest) {
@@ -161,7 +159,6 @@ class ActionService {
     }
 
     var path = url;
-    print("cacheForm $cacheForm");
     if (cacheForm[form.view?.name]?["id"] != null) { 
       body["id"]=int.parse(cacheForm[form.view?.name]?["id"]); 
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
@@ -182,7 +179,6 @@ class ActionService {
         body["is_draft"]=isDraft;
       }
       if ((form.view?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
-        print("CA LA $method $body $path");
         // ignore: use_build_context_synchronously
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
@@ -329,12 +325,10 @@ class ActionService {
                                  );
       } else if (many.view != null && (many.view?.actions.contains(method) ?? false)) {
         if (add) { 
-          print("racac ${many.view?.name} $widgets");
           views.addAll(await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
                                                         context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore));
         } else { 
-          print("racacac ${many.view?.name}");
           await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                   many.view!.schema, method, context, values["id"] != null ? { "${schemaName}_id" : values["id"] } : {}, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
         } 

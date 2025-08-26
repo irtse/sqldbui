@@ -80,7 +80,6 @@ class _UploadState extends State<UploadWidget> {
     }
     String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null));
     text = TextEditingController(text: iv);
-    print("$text ${widget.value}");
     Widget w = InkWell( 
             mouseCursor: SystemMouseCursors.click,
             onTap: () => widget.readOnly ? null : _pickFile(),
@@ -123,7 +122,6 @@ class _UploadState extends State<UploadWidget> {
                 setState(() {
                   error = ((value ?? "") == "" || (value?.isEmpty ?? false)) && widget.require;
                 });
-                print(value);
                 return t;
               },
             ));

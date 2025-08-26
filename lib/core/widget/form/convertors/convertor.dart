@@ -41,7 +41,6 @@ class Convertor {
     String id
   ) async {
     if (widget.value == "no info...") { widget.value = null; }
-    print("$name $type $subUrl ${widget.value}");
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     var dec = InputDecoration( 
                 errorStyle: const TextStyle(fontSize: 0), 
@@ -238,12 +237,10 @@ class Convertor {
         ),
       );    
     } else if (type.contains("link") && url != "") {
-      print("BAM ${widget.value}");
       if ((widget.value ?? "") != "") {
         w = FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>("${(url).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
-          print(s.data?.data ?? []);
           return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get<model.Shallowed>("${(url)}&shallow=enable", firstAPI, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
@@ -340,7 +337,6 @@ class Convertor {
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
-    print("THERE $isGrid $datas");
     return MultiDropdown<String>(
         overrideKey: formFieldKey,
         max: max,

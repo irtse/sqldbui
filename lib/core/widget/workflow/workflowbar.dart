@@ -149,7 +149,6 @@ class StepWidgetState extends State<StepWidget> {
               onSelected: (value) { },
               itemBuilder: (BuildContext bc) {
                 List<PopupMenuItem> rows = [];
-                print(widget.steps);
                 for ( var step in widget.steps! ) {
 
                   List<Widget> additionnal = [];
