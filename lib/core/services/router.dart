@@ -22,12 +22,20 @@ class RouterWidget extends StatefulWidget {
 
 class RouterWidgetState extends State<RouterWidget> {
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     return Padding( padding: const EdgeInsets.only(right: 20), child: Row(children: [
       Tooltip( 
-        message: TranslateConstants.back.toLowerCase(),
+        message: (await getOnFlow(TranslateConstants.back)).toLowerCase(),
         child: IconButton(onPressed: () async => AppRouter.realHistory.length > 1 ? AppRouter.back() : null, icon: Icon(Icons.arrow_back, color: AppRouter.realHistory.length > 1 ? Colors.white : Theme.of(context).splashColor))),
       Tooltip( 
-        message: TranslateConstants.forward.toLowerCase(),
+        message: (await getOnFlow(TranslateConstants.forward)).toLowerCase(),
         child: IconButton(onPressed: () async => AppRouter.canForward() ? AppRouter.forward() : null, icon: Icon(Icons.arrow_forward, color: AppRouter.canForward() ? Colors.white : Theme.of(context).splashColor))),
     ],));
   } 

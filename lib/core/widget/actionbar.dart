@@ -28,8 +28,8 @@ class ActionBarWidget extends StatefulWidget {
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
-  Widget getDescription(String content, double? size, Color color) {
-    return Flexible( child: Text(content, overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: size, color: color ) ));
+  Future<Widget> getDescription(String content, double? size, Color color) async {
+    return Flexible( child: Text((await getOnFlow(content)), overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: size, color: color ) ));
   }
 
   Widget getIconOffset(String tooltip, IconData icon, double? size, Function() onPressed, bool isTransluscent) {
@@ -168,13 +168,13 @@ class ActionBarState extends State<ActionBarWidget> {
       }
       var row = <Widget>[];
       try {
-        row.add(getDescription(
-          ( await getOnFlow( widget.view == null ? (globalLoading ? TranslateConstants.loading : TranslateConstants.home)
-          : (widget.view!.label ?? widget.view!.name))).toLowerCase(),  
+        row.add(await getDescription(
+          (widget.view == null ? (globalLoading ? TranslateConstants.loading : TranslateConstants.home)
+          : (widget.view!.label ?? widget.view!.name)).toLowerCase(),  
           // ignore: use_build_context_synchronously
           null, Theme.of(context).highlightColor));
       } catch(e) {
-        row.add(getDescription(
+        row.add(await getDescription(
           (widget.view == null ? (  globalLoading ? TranslateConstants.loading : TranslateConstants.home) 
           : (widget.view!.name != "" ? excludeDB(widget.view!.name)  : "")).toLowerCase(),  
           // ignore: use_build_context_synchronously
@@ -193,7 +193,7 @@ class ActionBarState extends State<ActionBarWidget> {
         row.add(
           Padding(
             padding: const EdgeInsets.only(left: 10), 
-            child: Text("${widget.view == null ? "0" : widget.view?.max} ${TranslateConstants.found.toLowerCase()}", 
+            child: Text("${widget.view == null ? "0" : widget.view?.max} ${(await getOnFlow(TranslateConstants.found)).toLowerCase()}", 
             overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
           )
         );
@@ -256,7 +256,7 @@ class ActionBarState extends State<ActionBarWidget> {
                             borderSide: BorderSide(color: Theme.of(context).primaryColor)),
         ),
         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -272,7 +272,7 @@ class ActionBarState extends State<ActionBarWidget> {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "       ${TranslateConstants.selectValue.toLowerCase()}",
+                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,

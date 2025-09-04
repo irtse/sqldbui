@@ -1,4 +1,4 @@
-import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -30,19 +30,31 @@ class DropDownWidget extends StatefulWidget {
   final bool translatable;
   bool isDark = false;
   bool empty = false;
+  Map<String,String> enrichPath = {};
   final dynamic autofill;
   GlobalKey<SubFormularyWidgetState>? wrappers;
 
-  DropDownWidget ({ super.key, required this.form, required this.schemaName, required this.name, 
+  DropDownWidget ({ required this.form, required this.schemaName, required this.name, 
                     required this.path, required this.translatable, required this.schema,
                     required this.mainUrl, required this.readOnly, required this.value, required this.wrappers,
                     required this.label, this.isDark = false, required this.empty, required this.autofill,
-                    required this.require, required this.type, required this.url, required this.component});
+                    required this.require, required this.type, required this.url, required this.component}): super(key: GlobalKey<State<DropDownWidget>>());
   @override
   DropDownState createState() => DropDownState();
 }
 class DropDownState extends State<DropDownWidget> {
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<DropDownWidget>>;
+          widget.enrichPath[r.related]="${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
+          if (widget.enrichPath[r.related] == "") {
+            widget.enrichPath.remove(r.related);
+          }
+        }
+      }
+    }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -63,10 +75,10 @@ class DropDownState extends State<DropDownWidget> {
       val = "${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }
     if (val != null) {
-      widget.form[widget.name]=val;
+      saveChange(widget.component?.widget.view, widget.form, widget.name, val);
     }
     if (val == null) {
-      val = widget.readOnly ? TranslateConstants.empty : null;
+      val = widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null;
     } else if (widget.translatable) {
       try {
         val = (await getOnFlow(val));
@@ -101,7 +113,7 @@ class DropDownState extends State<DropDownWidget> {
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                 contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                hintText: TranslateConstants.selectValue.toLowerCase(),
+                hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                 labelText: label.toLowerCase(),
               )
             )
@@ -134,7 +146,7 @@ class DropDownState extends State<DropDownWidget> {
       return DropdownButtonFormField<String>( 
           items: items, 
           isExpanded: true,
-          hint: Text(TranslateConstants.selectValue.toLowerCase(), style: TextStyle(fontSize: 12, color: Colors.grey),
+          hint: Text((await getOnFlow(TranslateConstants.selectValue)).toLowerCase(), style: TextStyle(fontSize: 12, color: Colors.grey),
             overflow: TextOverflow.ellipsis, softWrap: true),
           value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
           style: TextStyle(fontSize: 14, 
@@ -142,12 +154,12 @@ class DropDownState extends State<DropDownWidget> {
             overflow: TextOverflow.ellipsis),
           onChanged: (value) {
             widget.component?.widget.detectChange = true;
-            if (value == null) { widget.form[widget.name]=null;
-            } else { widget.form[widget.name]=value; }
+            if (value == null) { saveChange(widget.component?.widget.view, widget.form, widget.name, null);
+            } else { saveChange(widget.component?.widget.view, widget.form, widget.name, value); }
           },
           onSaved: (value) {
-            if (value == null) { widget.form[widget.name]=null;
-            } else { widget.form[widget.name]=value; }
+             if (value == null) { saveChange(widget.component?.widget.view, widget.form, widget.name, null);
+            } else { saveChange(widget.component?.widget.view, widget.form, widget.name, value); }
           },
           dropdownColor: widget.isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).highlightColor,
           decoration: InputDecoration( isDense: true,
@@ -193,14 +205,15 @@ class DropDownState extends State<DropDownWidget> {
                         hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                         border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
-                        hintText: TranslateConstants.selectValue.toLowerCase(),
+                        hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                         labelText: label.toLowerCase(),
                       ) ));
     }
     
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable", firstAPI, null), 
+        future: APIService().get<model.Shallowed>(
+          "${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable${widget.enrichPath.keys.map( (e) => "&$e=${widget.enrichPath[e]}").join("")}", firstAPI, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
            return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", true, null), 
@@ -233,7 +246,7 @@ class DropDownState extends State<DropDownWidget> {
         });
     }
     return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.mainUrl!, true, null), 
+        future: APIService().get("${widget.mainUrl!}${widget.enrichPath.keys.map( (e) => "&$e=${widget.enrichPath[e]}").join("")}", true, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           if (snap.data?.data != null) {
             return SubDropDownWidget(
@@ -285,11 +298,11 @@ class SubDropDownWidget extends StatefulWidget {
   final dynamic autofill;
   GlobalKey<SubFormularyWidgetState>? wrappers;
 
-  SubDropDownWidget ({ super.key, required this.form, required this.datas, required this.mainUrl,
+  SubDropDownWidget ({ required this.form, required this.datas, required this.mainUrl,
     required this.schemaName, required this.name, required this.path, required this.wrappers,
     required this.autofill, required this.translatable, required this.schema, required this.dp,
     required this.readOnly, required this.value, required this.label, this.isDark = false,
-    required this.require, required this.type, required this.url, required this.component});
+    required this.require, required this.type, required this.url, required this.component}): super(key: GlobalKey());
   @override
   SubDropDownState createState() => SubDropDownState();
 }
@@ -322,7 +335,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
           var vv = v;
           bool select = false;
           if ("${currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill ?? ""}" == "${item.id}") {
-            widget.form[widget.name]= currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill;
+            saveChange(widget.component?.widget.view, widget.form, widget.name, currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill);
             select = true;
             if (widget.url != null) {
                 Future.delayed(Duration(seconds: 1), () {
@@ -388,7 +401,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-                          hintText: TranslateConstants.selectValue.toLowerCase(),
+                          hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
                           showClearIcon: false,
@@ -404,7 +417,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           ),
                         ),
                         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -420,7 +433,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "       ${TranslateConstants.selectValue.toLowerCase()}",
+                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,
@@ -445,7 +458,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         onSelectionChange: (values) {
                           if (values.isEmpty) { return; }
                           widget.component?.widget.detectChange = true;
-                          widget.form[widget.name]=mapped[values[0]]?.id ?? values[0]; // PB FOR LINK ADD 
+                          saveChange(widget.component?.widget.view, widget.form, widget.name,mapped[values[0]]?.id ?? values[0]); // PB FOR LINK ADD 
                           try {
                             var item = mapped[values[0]];
                             if (widget.url != null && item != null) {

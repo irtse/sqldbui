@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/utils.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,7 +23,6 @@ class TextWidget extends StatefulWidget {
   final dynamic autofill;
   bool isDark = false;
   TextWidget ({ 
-    super.key, 
     required this.form, 
     required this.schemaName, 
     required this.name,
@@ -34,13 +34,23 @@ class TextWidget extends StatefulWidget {
     required this.translatable,
     this.value,
     this.autofill,
-    this.isDark = false});
+    this.isDark = false}): super(key: GlobalKey<State<TextWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   _TextState createState() => _TextState();
 }
 class _TextState extends State<TextWidget> {
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<TextWidget>>;
+          if (r.value != null && r.value != "") {
+            widget.value = "${r.value}";
+          }
+        }
+      }
+    }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -60,10 +70,10 @@ class _TextState extends State<TextWidget> {
     var val = widget.value  ?? widget.autofill;
     val = val?.replaceAll("''", "'");
     if (val != null) {
-      widget.form[widget.name]=val;
+      saveChange(widget.component?.widget.view, widget.form, widget.name, val);
     }
     if (val == null || val == "") {
-      val = widget.readOnly ? TranslateConstants.empty : null;
+      val = widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null;
     } else if (widget.translatable) {
       val = (await getOnFlow(val));
       if (val.toUpperCase() == val) {
@@ -118,9 +128,9 @@ class _TextState extends State<TextWidget> {
       ),
       onChanged: (String? value) {
         widget.component?.widget.detectChange = true;
-        widget.form[widget.name]=value;
+        saveChange(widget.component?.widget.view, widget.form, widget.name, value);
       },
-      onSaved: (String? value) => widget.form[widget.name]=value,
+      onSaved: (String? value) => saveChange(widget.component?.widget.view, widget.form, widget.name, value),
         validator: (String? value) {
           var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
           return t;

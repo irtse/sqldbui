@@ -34,7 +34,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
               padding: const EdgeInsets.only(right: 10), 
               child: Icon(Icons.notifications, color: Theme.of(context).splashColor, size: 20)
             ),
-            Text(TranslateConstants.notifications.toUpperCase(), overflow: TextOverflow.ellipsis,
+            Text((await getOnFlow(TranslateConstants.notifications)).toUpperCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(color: Theme.of(context).highlightColor, fontSize: 15)) 
           ]))
     ];

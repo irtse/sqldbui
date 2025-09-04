@@ -1,9 +1,6 @@
-
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:flutter_quill_delta_from_html/flutter_quill_delta_from_html.dart';
@@ -23,7 +20,6 @@ class HTMLWidget extends StatefulWidget {
   final dynamic autofill;
   bool isDark = false;
   HTMLWidget ({ 
-    super.key, 
     required this.form, 
     required this.schemaName, 
     required this.name,
@@ -35,7 +31,7 @@ class HTMLWidget extends StatefulWidget {
     required this.translatable,
     this.value,
     this.autofill,
-    this.isDark = false});
+    this.isDark = false}): super(key: GlobalKey<State<HTMLWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   HTMLState createState() => HTMLState();
@@ -58,6 +54,16 @@ class HTMLState extends State<HTMLWidget> {
     }
   }
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<HTMLWidget>>;
+          if (r.value != null && r.value != "") {
+            widget.value = "${r.value}";
+          }
+        }
+      }
+    }
     _controller.addListener(_onEditorChanged);
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -74,7 +80,7 @@ class HTMLState extends State<HTMLWidget> {
     var val = widget.value  ?? widget.autofill;
     val = val?.replaceAll("''", "'");
     if (val == null) {
-      val = widget.readOnly ? TranslateConstants.empty : null;
+      val = widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null;
     } else if (widget.translatable) {
       val = await getOnFlow(val);
     }
@@ -128,6 +134,6 @@ class HTMLState extends State<HTMLWidget> {
     List deltaJson = _controller.document.toDelta().toJson();
     var html = DeltaToHTML.encodeJson(deltaJson);
     widget.component?.widget.detectChange = true;
-    widget.form[widget.name] = html;
+    saveChange(widget.component?.widget.view, widget.form, widget.name, html);
   }
 }

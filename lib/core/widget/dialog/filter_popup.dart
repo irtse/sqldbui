@@ -33,10 +33,22 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
   List<FilterSearchWidget> advancedSearch = <FilterSearchWidget>[];
   
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     StateSetter? stateSort;
     StateSetter? stateFilter;
+    var apply = (await getOnFlow(TranslateConstants.filterApply));
+    var filter = await getOnFlow(TranslateConstants.filterCancel);
+    var asc = await getOnFlow(TranslateConstants.sortASC);
+    var desc = await getOnFlow(TranslateConstants.sortDesc);
     return PopupMenuButton(
-      tooltip: TranslateConstants.showFilter.toLowerCase(),
+      tooltip: (await getOnFlow(TranslateConstants.showFilter)).toLowerCase(),
       color: Colors.white,
       padding: const EdgeInsets.all(0.0),
       icon: const Icon(size: 15, Icons.filter_alt, color: Colors.grey),
@@ -55,14 +67,15 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
               var rows1 = [
                       const Icon(Icons.arrow_downward, color: Colors.grey, size: 18,), 
                       Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), 
-                        child: Text(TranslateConstants.sortASC.toUpperCase())),
+                        child: Text(asc.toUpperCase())),
                     ];
               var rows2 = [
                       const Icon(Icons.arrow_upward, color: Colors.grey, size: 18,), 
-                      Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), child: Text(TranslateConstants.sortDesc.toUpperCase())),
+                      Padding(padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10), 
+                      child: Text(desc.toUpperCase())),
                     ];
-              if (widget.ascOrder == true) { rows1.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
-              if (widget.ascOrder == false) { rows2.add(const Icon(Icons.task_alt, color: Colors.green, size: 18,), ); }
+              if (widget.ascOrder == true) { rows1.add(const Icon(Icons.task_alt, color: Colors.green, size: 18) ); }
+              if (widget.ascOrder == false) { rows2.add(const Icon(Icons.task_alt, color: Colors.green, size: 18) ); }
               return Column(children: [
                 TextButtonWidget(
                   onPressed: () { 
@@ -70,12 +83,12 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       widget.ascOrder = widget.ascOrder != null ? !widget.ascOrder! : true; 
                     });
                   }, rows: rows1),
-                TextButtonWidget(
+                Container( margin: EdgeInsets.only(top: 10), child: TextButtonWidget(
                   onPressed: () { 
                     setState(() { 
                       widget.ascOrder =  widget.ascOrder != null ? !widget.ascOrder! : false; 
                     });
-                  }, rows: rows2),
+                  }, rows: rows2)),
                 Padding( 
                   padding: const EdgeInsets.only(top: 10), 
                   child: Divider(color: Theme.of(context).splashColor)
@@ -146,7 +159,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                   style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text(TranslateConstants.filterApply.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),)),
+                    child: Text(apply.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),)),
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
                     navigate = true;
@@ -155,7 +168,8 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     stateSort!(() { widget.ascOrder=null; });
                     stateFilter!(() { advancedSearch = []; });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
-                  child: Padding( padding: EdgeInsets.all(10), child: Text(TranslateConstants.filterCancel.toUpperCase(),  style: TextStyle(color: Colors.white, fontSize: 12
+                  child: Padding( padding: EdgeInsets.all(10), child: Text(filter.toUpperCase(), 
+                    style: TextStyle(color: Colors.white, fontSize: 12
             ))))
           ],)); } )) 
         ];
@@ -235,7 +249,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       }, 
       style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Colors.transparent)), 
       child: Padding( padding: EdgeInsets.all(10), 
-        child: Text(TranslateConstants.delete.toUpperCase(),  style: TextStyle(color: Colors.grey, fontSize: 11)))));
+        child: Text((await getOnFlow(TranslateConstants.delete)).toUpperCase(),  style: TextStyle(color: Colors.grey, fontSize: 11)))));
     }
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
     String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
@@ -245,6 +259,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       this, false, false, url, url, ""
     );
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
+    var togglesLabels = [(await getOnFlow(TranslateConstants.value)).toUpperCase(), 'NULL'];
     if (!isText) { togglesMode.add("MATH"); }
     var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));
     if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
@@ -252,7 +267,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch( minHeight: 25,
           initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase())),
           fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / togglesMode.length,
-          totalSwitches: togglesMode.length, labels: togglesMode, inactiveBgColor: Theme.of(context).splashColor,
+          totalSwitches: togglesMode.length, labels: togglesLabels, inactiveBgColor: Theme.of(context).splashColor,
           onToggle: (index) { setState(() {
             isNull = togglesMode[index ?? 0].toLowerCase().contains("null");
             isMath = togglesMode[index ?? 0].toLowerCase().contains("math");
@@ -265,10 +280,10 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                   DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,)) 
                 ], isExpanded: true,
-                hint: Text("${TranslateConstants.select} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...".toLowerCase(), 
+                hint: Text("${(await getOnFlow(TranslateConstants.select)).toLowerCase()} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...".toLowerCase(), 
                   overflow: TextOverflow.ellipsis, softWrap: true ),
                 value: widget.value == "NULL" ? "NULL" : "NOT NULL",
-                validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder.toLowerCase(); } return null; },
+                validator: (values) { if (values == null) { return ""; } return null; },
                 style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
                 onChanged: (value) { widget.value = value; }, 
                 dropdownColor: Theme.of(context).highlightColor,
@@ -281,7 +296,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
                   fillColor:Colors.white, hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                   border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                  labelText: "${TranslateConstants.value.toLowerCase()} ${widget.comparator.toUpperCase()}",
+                  labelText: "${(await getOnFlow(TranslateConstants.value.toLowerCase())).toLowerCase()} ${widget.comparator.toUpperCase()}",
                 )) : w)) 
       ])), 
       isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(

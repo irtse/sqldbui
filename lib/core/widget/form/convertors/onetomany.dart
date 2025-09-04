@@ -22,10 +22,10 @@ class OneToManyWidget extends StatefulWidget {
   List<DataFormWidget> filtered = [];
   var isFilled = true;
   final FormWidgetState? component;
-  OneToManyWidget ({ super.key, required this.schemaName, required this.name,
+  OneToManyWidget ({  required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label,
                       required this.require, required this.type, required this.url, 
-                      required this.component, required this.translatable});
+                      required this.component, required this.translatable}): super(key: GlobalKey<State<OneToManyWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   OneToManyState createState() => OneToManyState();
@@ -33,6 +33,16 @@ class OneToManyWidget extends StatefulWidget {
 class OneToManyState extends State<OneToManyWidget> {
   bool first = true;
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<OneToManyWidget>>;
+          if (r.value != null && r.value != "") {
+            widget.value = r.value;
+          }
+        }
+      }
+    }
     if (first) {
       oneToManiesStateForm[widget.component?.widget.view?.name]?.add(this);
       first = false;

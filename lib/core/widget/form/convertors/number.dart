@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/translate.dart';
 
@@ -15,15 +16,26 @@ class NumberWidget extends StatefulWidget {
   final String type;
   final String label;
   final dynamic autofill;
-  NumberWidget ({ super.key, required this.form, required this.schemaName, required this.name,
-                      required this.readOnly, required this.value, required this.label,
-                      required this.require, required this.type, required this.component, this.autofill});
+  NumberWidget ({ required this.form, required this.schemaName, required this.name,
+                  required this.readOnly, required this.value, required this.label,
+                  required this.require, required this.type, required this.component, this.autofill}): super(key: GlobalKey<State<NumberWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   _NumberState createState() => _NumberState();
 }
 class _NumberState extends State<NumberWidget> {
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<NumberWidget>>;
+          if (r.value != null && r.value != "") {
+            if (widget.type.contains("int")) { saveChange(widget.component?.widget.view, widget.form, widget.name, int.parse(r.value));
+            } else { saveChange(widget.component?.widget.view, widget.form, widget.name, double.parse(r.value)); }
+          }
+        }
+      }
+    }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -44,16 +56,15 @@ class _NumberState extends State<NumberWidget> {
     }
     func(String? value) {
       try {
-        if (value == null) { widget.form[widget.name]=null;
-        } else if (widget.type.contains("int")) { 
-          widget.form[widget.name]=int.parse(value);
-        } else { widget.form[widget.name]=double.parse(value); }
+        if (value == null) { saveChange(widget.component?.widget.view, widget.form, widget.name, null);
+        } else if (widget.type.contains("int")) { saveChange(widget.component?.widget.view, widget.form, widget.name, int.parse(value));
+        } else { saveChange(widget.component?.widget.view, widget.form, widget.name, double.parse(value)); }
       } catch (e) { /* empty and proud to be */}
     }
     return SizedBox(width: 300, height: 30, child: TextFormField(
           readOnly: widget.readOnly,
           initialValue: widget.value != null ? "${widget.value}"
-            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null)), 
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null)), 
           style:  const TextStyle(fontSize: 14),
           decoration: InputDecoration(
             focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
@@ -68,7 +79,7 @@ class _NumberState extends State<NumberWidget> {
             border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             suffixIcon: widget.type.contains("money") ? const Icon(Icons.euro, color: Colors.black) : Icon(Icons.onetwothree, color: Theme.of(context).secondaryHeaderColor),
-            hintText: TranslateConstants.writeNumber.toLowerCase(),
+            hintText: (await getOnFlow(TranslateConstants.writeNumber)).toLowerCase(),
             labelStyle: TextStyle(color:Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
             labelText: label.toLowerCase(),
             errorStyle: const TextStyle(fontSize: 0,),
@@ -77,10 +88,9 @@ class _NumberState extends State<NumberWidget> {
           onChanged: (String? value) {
             widget.component?.widget.detectChange = true;
             try {
-              if (value == null) { widget.form[widget.name]=null;
-              } else if (widget.type.contains("int")) { 
-                widget.form[widget.name]=int.parse(value);
-              } else { widget.form[widget.name]=double.parse(value); }
+              if (value == null) { saveChange(widget.component?.widget.view, widget.form, widget.name, null);
+              } else if (widget.type.contains("int")) { saveChange(widget.component?.widget.view, widget.form, widget.name, int.parse(value));
+              } else { saveChange(widget.component?.widget.view, widget.form, widget.name, double.parse(value)); }
             } catch (e) { /* empty and proud to be */}
           },
           keyboardType: TextInputType.numberWithOptions(

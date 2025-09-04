@@ -30,7 +30,16 @@ class FunctionsSelectorWidget extends StatefulWidget {
 }
 class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     var toggles = [TranslateConstants.edit.toLowerCase(), TranslateConstants.math.toLowerCase()];
+    var togglesLabels = [(await getOnFlow(TranslateConstants.edit)).toLowerCase(), (await getOnFlow(TranslateConstants.math)).toLowerCase()];
     Map<String, model.SchemaField> fields = {};
     if (mathColName[viewID] == null) { mathColName[viewID] = TranslateConstants.total.toLowerCase(); 
     } else { widget.value = mathColName[viewID] ?? TranslateConstants.total.toLowerCase(); }
@@ -49,6 +58,8 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     if (showFunctions[viewID] == null) { showFunctions[viewID] = false; }
     var o = realOrder(currentView, false, true, null, 5);
+    var mathValue = (await getOnFlow(TranslateConstants.mathValuePlaceholder));
+    var mathError = (await getOnFlow(TranslateConstants.mathError));
     return Row( children: [ 
       o.isNotEmpty && editMode[viewID] == "math" ? Padding( padding: const EdgeInsets.only(top: 2), 
         child: InkWell( mouseCursor: SystemMouseCursors.click,
@@ -60,7 +71,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
         child: MouseRegion( 
           cursor: SystemMouseCursors.click,
           child: ToggleSwitch( 
-            labels: toggles, 
+            labels: togglesLabels, 
             minHeight: 27.5, 
             minWidth: 60, 
             fontSize: 12, 
@@ -96,7 +107,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
             filled: true, fillColor: Theme.of(context).secondaryHeaderColor,
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
             suffixIcon: const Icon(Icons.text_fields), 
-            hintText: TranslateConstants.mathPlaceholder.toLowerCase(),  
+            hintText: (await getOnFlow(TranslateConstants.mathPlaceholder)).toLowerCase(),  
             labelText: "",
             errorStyle: const TextStyle(fontSize: 0,),
           ),
@@ -115,9 +126,9 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
             widget.value = value ?? TranslateConstants.total.toLowerCase(); 
           },
           validator: (String? value) {
-            if (value == null) { return TranslateConstants.mathValuePlaceholder.toLowerCase(); }  
+            if (value == null) { return mathValue.toLowerCase(); }  
             if (currentView!.schema.containsKey(value) || value == "id") {
-              return TranslateConstants.mathError.toLowerCase();
+              return mathError.toLowerCase();
             }
             return null; 
           }))

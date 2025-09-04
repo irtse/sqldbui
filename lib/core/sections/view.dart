@@ -57,7 +57,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             currentView = null;
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0]; 
-              print(currentView?.id);
               currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.isEmpty ) {
                 currentView?.max = currentView?.items.length ?? 0;
@@ -119,8 +118,13 @@ class ViewWidget extends StatefulWidget{
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
-  @override Widget build(BuildContext context) { return Container(child: _build(context));  }
-  Widget _build(BuildContext context) {
+  @override Widget build(BuildContext context) { return FutureBuilder(future: _build(context), builder: (a, s) {
+    if (s.data != null) {
+      return s.data!;
+    }
+    return Container();
+  });  }
+  Future<Widget> _build(BuildContext context) async {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return HomeViewWidget();
     }
@@ -170,7 +174,7 @@ class ViewWidgetState extends State<ViewWidget> {
       childs = [
         Icon(Icons.error, color: Colors.white, size: 100.0,),
         Padding(padding: EdgeInsets.all(10),
-                child: Text(TranslateConstants.lost.toLowerCase(), 
+                child: Text((await getOnFlow(TranslateConstants.lost)).toLowerCase(), 
                 style: TextStyle(color: Colors.white, fontSize: 20.0)),)
       ];
     }

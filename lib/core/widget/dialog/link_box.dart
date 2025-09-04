@@ -23,6 +23,14 @@ class LinkBoxWidget extends StatefulWidget {
 class LinkBoxWidgetState extends State<LinkBoxWidget> {
   bool forceShared = true;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> d = [];
     if (widget.isDelete) {
       d.add(LinkDropWidget(isDelete: true, name: "all",
@@ -90,7 +98,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                   borderSide: BorderSide(color: Theme.of(context).splashColor),
                 ),
                 labelStyle: TextStyle(color: Colors.grey),
-                hintText: TranslateConstants.selectDate.toLowerCase(),
+                hintText: (await getOnFlow(TranslateConstants.selectDate)).toLowerCase(),
                 hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                 suffixIcon: const Icon(Icons.calendar_month, size: 18,),
                 suffixIconColor: Theme.of(context).splashColor,
@@ -119,11 +127,11 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
         d.add(Column(children: additionnal));
       }
     }
-    var title = widget.isDelete ? TranslateConstants.userShared : TranslateConstants.shareToUser;
-    var tooltip =widget.isDelete ?  TranslateConstants.unshare :  TranslateConstants.share;
+    var title = (await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.shareToUser));
+    var tooltip =(await getOnFlow(widget.isDelete ?  TranslateConstants.unshare :  TranslateConstants.share));
     if (widget.sharing != null && widget.sharing!.shallowPath.isNotEmpty && !widget.sharing!.shallowPath.keys.first.contains("share")) {
-      tooltip = widget.isDelete ?  TranslateConstants.undelegate :  TranslateConstants.undelegate;
-      title = widget.isDelete ? TranslateConstants.userDelegated : TranslateConstants.delegateToUser;
+      tooltip = (await getOnFlow(widget.isDelete ?  TranslateConstants.undelegate :  TranslateConstants.undelegate));
+      title = (await getOnFlow(widget.isDelete ? TranslateConstants.userDelegated : TranslateConstants.delegateToUser));
     }
 
     return PopupMenuButton(
@@ -160,8 +168,19 @@ class LinkDropWidget extends StatefulWidget {
 class LinkDropWidgetState extends State<LinkDropWidget> {
   bool forceShared = true;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownItem<String>> dpItems = [];
     MultiSelectController<String> ctrls = MultiSelectController<String>();
+    var shared = await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.filterPlaceholder);
+    var search = await getOnFlow(TranslateConstants.search);
+    var select = await getOnFlow(TranslateConstants.selectValue);
     return FutureBuilder(
         future: APIService().get<model.Shallowed>("${widget.url}&shallow=enable", true, context),
         builder: (a,s) {
@@ -208,7 +227,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                 errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
                   disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                   backgroundColor:Theme.of(context).splashColor,
-                  hintText: (widget.isDelete ? TranslateConstants.userShared : TranslateConstants.filterPlaceholder).toLowerCase(),
+                  hintText: shared.toLowerCase(),
                     hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                       prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
                       showClearIcon: false,
@@ -222,7 +241,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                       ),
                     ),
                     searchDecoration: SearchFieldDecoration(
-                      hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                      hintText: "       ${search.toLowerCase()}",
                       border : const OutlineInputBorder(
                         borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                           borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -237,7 +256,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                         maxHeight: 600,
                         header: Padding(
                           padding: EdgeInsets.all(8),
-                          child: Text("       ${TranslateConstants.selectValue.toLowerCase()}",
+                          child: Text("       ${select.toLowerCase()}",
                             textAlign: TextAlign.start,
                             style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),
                           ),

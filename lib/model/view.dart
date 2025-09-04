@@ -267,6 +267,30 @@ class Workflow extends SerializerDeserializer<Workflow> {
       steps: json.containsKey("steps") && json["steps"] != null ? fromMapListJson<Step>(json["steps"], Step()) : <String, List<Step>>{}, 
     );
 } }
+class Rule extends SerializerDeserializer<Rule> {
+  Rule({
+    this.related = "",
+    this.trigger = "",
+    this.operator = "",
+    this.value,
+  });
+
+  String related = "";
+  String trigger = "";
+  String operator = "";
+  dynamic value;
+  GlobalKey<State<dynamic>>? key;
+
+  @override Map<String, dynamic> serialize() => {};
+
+  @override deserialize(Map<String, dynamic> json) {
+    return  Rule(
+      related :json.containsKey("related") && json["related"] != null ? json["related"] : "", 
+      trigger: json.containsKey("trigger") && json["trigger"] != null ? json["trigger"] : "", 
+      operator: json.containsKey("operator") && json["operator"] != null ? json["operator"] : "", 
+      value: json.containsKey("value") && json["value"] != null ? bool.parse("${json["value"]}") : false, 
+    );
+} }
 const emptyitem = <Item>[];
 class View extends SerializerDeserializer<View> {
   View({
@@ -305,6 +329,7 @@ class View extends SerializerDeserializer<View> {
     this.triggers = const [],
     this.commentBody = const {},
     this.innerRedirection = "",
+    this.rules = const []
   });
   String innerRedirection;
   Map<String, dynamic> commentBody;
@@ -341,9 +366,11 @@ class View extends SerializerDeserializer<View> {
   Workflow? workflow;
   String commentsPath = "";
   Map<String, dynamic> shortcuts= <String, dynamic>{};
+  List<Rule> rules = [];
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    rules: json.containsKey("rules") && json["rules"] != null ? fromListJson(json["rules"], Rule()) : <Rule>[],
     exportPath: json.containsKey("export_path") && json["export_path"] != null ? json["export_path"] : "",
     innerRedirection: json.containsKey("inner_redirection") && json["inner_redirection"] != null ? json["inner_redirection"] : "",
     isEnum:  json.containsKey("is_enum") && json["is_enum"] != null ? bool.parse("${json["is_enum"]}") : false,
@@ -399,7 +426,8 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
     this.elder = "all",
     this.triggers = const [],
     this.max = 0,
-    this.valuesPath
+    this.valuesPath,
+    this.rules = const [],
   });
   String? label;
   String? name;
@@ -419,9 +447,11 @@ class Shallowed extends SerializerDeserializer<Shallowed> {
   List<Filter> fields;
   bool selected;
   List<Trigger> triggers;
+  List<Rule> rules = [];
 
   @override deserialize(Map<String, dynamic> json) {
     return Shallowed(
+      rules: json.containsKey("rules") && json["rules"] != null ? fromListJson(json["rules"], Rule()) : <Rule>[],
       translatable: json.containsKey("translatable") ? json["translatable"] : false,
       triggers: json.containsKey("triggers") ? fromListJson(json["triggers"], Trigger()) : <Trigger>[],
       max: json.containsKey("max") ? int.parse("${json["max"]}") : 0, 

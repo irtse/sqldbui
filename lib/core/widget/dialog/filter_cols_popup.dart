@@ -119,6 +119,18 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
   bool force = false;
   bool noSelection =false;
   @override Widget build(BuildContext context) {
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
+    var title = await getOnFlow(TranslateConstants.filterTitle);
+    var apply = await getOnFlow(TranslateConstants.filterApply);
+    var cancel = await getOnFlow(TranslateConstants.filterCancel);
+    var save = await getOnFlow(TranslateConstants.filterSave);
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 20),
       child: StatefulBuilder(
@@ -127,7 +139,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
             Padding( 
               padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), 
               child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ const Padding( padding: EdgeInsets.only(right: 10), child: Icon(Icons.list)), 
-                    Text(TranslateConstants.filterTitle.toUpperCase(), style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
+                    Text(title.toUpperCase(), style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
                   Divider(color: Theme.of(context).splashColor,),
                   // select all
                   ColsPopUpWidget(schema: widget.schema, items: widget.items, comp: this),
@@ -143,7 +155,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       }
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                     child: Padding( padding: EdgeInsets.all(10), 
-                      child: Text(TranslateConstants.filterApply.toUpperCase(), style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
+                      child: Text(apply.toUpperCase(), style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
                   filterView[viewID] != null && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () async { 
@@ -158,7 +170,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), 
-                  child: Text(TranslateConstants.filterCancel.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),))
+                  child: Text(cancel.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),))
                   : TextButton(onPressed: () {
                     List<Map<String, dynamic>> fields = [];
                     for (var (index, fieldName) in filterTempOrderView[viewID]!.indexed) {
@@ -191,7 +203,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), 
-                  child: Text(TranslateConstants.filterSave.toUpperCase(), 
+                  child: Text(save.toUpperCase(), 
                     style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
       ]); } ) );
   }
@@ -301,7 +313,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
         child: Container( child: DropdownButtonFormField<String>( isExpanded: true,
                     items: widget.items, 
                     value: fView,
-                    hint: Text(TranslateConstants.filterPlaceholder.toLowerCase(), overflow: TextOverflow.ellipsis),
+                    hint: Text((await getOnFlow(TranslateConstants.filterPlaceholder)).toLowerCase(), overflow: TextOverflow.ellipsis),
                     style: const TextStyle(fontSize: 14, color: Colors.black),
                     onChanged: (value) async {
                       await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(

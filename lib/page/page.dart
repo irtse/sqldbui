@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/core/sections/head_menu.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
@@ -16,8 +15,6 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/page/translate.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:url_launcher/url_launcher.dart';
 
 
 bool noMenu = false;
@@ -46,6 +43,7 @@ class PageWidgetState extends State<PageWidget> {
     noMenu = currentWidth - menuSize < 600;
     menuSize = isMenu && !noMenu ? (250 <= currentWidth ? (
               menuSize == 0 ? 250 : (menuSize <= (currentWidth / 2) ? menuSize : (currentWidth / 2))) : currentWidth) : 0;
+    var menu = await getOnFlow(TranslateConstants.menu);
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
@@ -59,7 +57,7 @@ class PageWidgetState extends State<PageWidget> {
         elevation: 3,
         leading: noMenu ? Builder(
           builder: (context) {
-            return Tooltip( message: TranslateConstants.menu.toLowerCase(), child: IconButton(
+            return Tooltip( message: menu.toLowerCase(), child: IconButton(
               icon: const Icon(Icons.menu, color: Colors.white,),
               onPressed: () { Scaffold.of(context).openDrawer(); }));
           },

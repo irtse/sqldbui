@@ -104,7 +104,15 @@ class GridWidgetState extends State<GridWidget> {
       }
     });
   }
-  @override Widget build(BuildContext context) { 
+  @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     if (viewID == null) { return Container(); }
     lastWidth = rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width;
     List<Widget> additionnalContent = [];
@@ -211,7 +219,7 @@ class GridWidgetState extends State<GridWidget> {
                         decoration: BoxDecoration( color: Theme.of(context).splashColor), 
                         width: maxWidth +  widget.scroll + 86.5,
                         child: Center(
-                          child: Text(TranslateConstants.emptyData, 
+                          child: Text((await getOnFlow(TranslateConstants.emptyData)).toLowerCase(), 
                             style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
                         )
                       ) : Column(children: [

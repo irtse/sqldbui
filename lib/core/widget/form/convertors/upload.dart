@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -18,9 +19,9 @@ class UploadWidget extends StatefulWidget {
   final String label;
   final String type;
   final dynamic autofill;
-  UploadWidget ({ super.key, required this.form, required this.schemaName, required this.name, required this.url,
-                      required this.readOnly, required this.type, required this.value, required this.label,
-                      required this.component, this.require = false, required this.autofill });
+  UploadWidget ({ required this.form, required this.schemaName, required this.name, required this.url,
+                  required this.readOnly, required this.type, required this.value, required this.label,
+                  required this.component, this.require = false, required this.autofill }): super(key: GlobalKey<State<UploadWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   _UploadState createState() => _UploadState();
@@ -30,6 +31,13 @@ class _UploadState extends State<UploadWidget> {
   PlatformFile? _selectedFile;
   TextEditingController text = TextEditingController();
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<UploadWidget>>;
+        }
+      }
+    }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -49,7 +57,7 @@ class _UploadState extends State<UploadWidget> {
     if (widget.readOnly) {
       return SizedBox(width: 400, height: 30, child: TextFormField(
         readOnly: true,
-        initialValue: widget.value ?? (widget.readOnly ? TranslateConstants.empty : null),
+        initialValue: widget.value ?? (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null),
         style: TextStyle(fontSize: 14, color: Colors.black),
         decoration: InputDecoration(
           filled: true,
@@ -73,12 +81,13 @@ class _UploadState extends State<UploadWidget> {
           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-          hintText: TranslateConstants.writePath.toLowerCase(),
+          hintText: (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
           labelText: label.toLowerCase(),
         )
       ));
     }
-    String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? TranslateConstants.empty : null));
+    String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (
+      widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null));
     text = TextEditingController(text: iv);
     Widget w = InkWell( 
             mouseCursor: SystemMouseCursors.click,
@@ -112,7 +121,7 @@ class _UploadState extends State<UploadWidget> {
                   top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
                   bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
                 suffixIcon: Icon(Icons.attach_file, size: 20, color: Theme.of(context).secondaryHeaderColor),
-                hintText: TranslateConstants.writePath.toLowerCase(),
+                hintText: (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
                 labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                 labelText: label,
                 errorStyle: const TextStyle(fontSize: 0,),
@@ -160,7 +169,7 @@ class _UploadState extends State<UploadWidget> {
                         }
                         newM[f] = files;
                       } 
-                      widget.form[widget.name] = newM;
+                      saveChange(widget.component?.widget.view, widget.form, widget.name, newM);
                     }),
                     child: Padding(
                       padding: EdgeInsets.only(left: 10), 
@@ -178,13 +187,12 @@ class _UploadState extends State<UploadWidget> {
   Future<void> _pickFile() async {
     List<String> extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf', 
       'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'xls', 'xlsx', 'csv', 'ods'];
-    if (widget.type.contains("upload_str")) {
-      extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf'];
-    } else if (widget.type.contains("upload_img")) {
-      extension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic'];
-    } else if (widget.type.contains("upload_img")) {
-      extension = ['xls', 'xlsx', 'csv', 'ods'];
+    if (widget.type.replaceAll("upload_multiple", "").isNotEmpty) {
+      extension = widget.type.replaceAll("upload_multiple", "").split("_");
+    } else if (widget.type.replaceAll("upload", "").isNotEmpty) {
+      extension = widget.type.replaceAll("upload", "").split("_");
     }
+    print(extension);
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       withData: kIsWeb,
       type: FileType.custom,
@@ -205,14 +213,14 @@ class _UploadState extends State<UploadWidget> {
       
       if (widget.url != null && _selectedFile != null) {
         if (widget.form[widget.name] == null || widget.form[widget.name] is! Map) {
-          widget.form[widget.name]=<String,List<PlatformFile>>{};
+          saveChange(widget.component?.widget.view, widget.form, widget.name, <String,List<PlatformFile>>{});
         }
         var m = widget.form[widget.name] as Map<String,List<PlatformFile>>;
         if (m[widget.url ?? ""] == null) {
           m[widget.url ?? ""] = [];
         }
         m[widget.url ?? ""]?.add(_selectedFile!);
-        widget.form[widget.name] = m;
+        saveChange(widget.component?.widget.view, widget.form, widget.name, m);
       }
       setState(() { });
     }

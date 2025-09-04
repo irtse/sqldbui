@@ -71,8 +71,15 @@ class _Dropdown<T> extends StatelessWidget {
         DirectionalFocusIntent(TraversalDirection.up),
   };
 
-  @override
-  Widget build(BuildContext context) {
+  @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     final theme = Theme.of(context);
 
     final child = Material(
@@ -102,11 +109,11 @@ class _Dropdown<T> extends StatelessWidget {
                 if (max > 20) 
                   Column(children: [
                     Center(child: Padding(padding: EdgeInsets.only(bottom: 5, top: 15, left: 10, right: 10),
-                      child: Text("$max ${TranslateConstants.searchInfo}", 
+                      child: Text("$max ${(await getOnFlow(TranslateConstants.searchInfo)).toLowerCase()}", 
                         style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
                     )),
                     Center(child: Padding(padding: EdgeInsets.only(bottom: 5),
-                      child: Text(TranslateConstants.searchInfoMake, style: TextStyle(color: Colors.grey)),
+                      child: Text((await getOnFlow(TranslateConstants.searchInfoMake)), style: TextStyle(color: Colors.grey)),
                     )),
                   ]),
                 _SearchField(
@@ -229,7 +236,15 @@ class _SearchField extends StatelessWidget {
   final void Function(String)? changeFunction;
 
   @override
-  Widget build(BuildContext context) {
+  @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     if (searchCtrl[label] == null) {
       searchCtrl[label] =TextEditingController();
     }
@@ -282,7 +297,7 @@ class _SearchField extends StatelessWidget {
             color: Theme.of(context).primaryColor,
           ),
           padding: EdgeInsets.all(10), width: (currentWidth - menuSize) / 2, 
-          child: Text(TranslateConstants.addNewEntry.toLowerCase(), 
+          child: Text((await getOnFlow(TranslateConstants.addNewEntry)).toLowerCase(), 
             style: TextStyle(color: Colors.white))))) ])
     );
   }

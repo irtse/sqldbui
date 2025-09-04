@@ -96,7 +96,7 @@ class FunctionMathRowWidgetState extends State<FunctionMathRowWidget> {
           child: DropdownButtonFormField<String>( 
               items: schemeItems[viewID]?.where((element) => element.value != "id").toList(), 
               value: widget.addColumnName, 
-              hint: Text(TranslateConstants.colFilter.toLowerCase(), 
+              hint: Text((await getOnFlow(TranslateConstants.colFilter)).toLowerCase(), 
                 overflow: TextOverflow.ellipsis, 
                 style: TextStyle(color: Theme.of(context).splashColor)),
               isExpanded: true, 

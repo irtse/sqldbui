@@ -1,5 +1,6 @@
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/translate.dart';
 
@@ -16,15 +17,25 @@ class BooleanWidget extends StatefulWidget {
   final String type;
   final dynamic autofill;
   bool error = false;
-  BooleanWidget ({ super.key, required this.form, required this.schemaName, required this.name,
+  BooleanWidget ({ required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.type, required this.value, required this.label,
-                      required this.component, this.require = false, required this.autofill});
+                      required this.component, this.require = false, required this.autofill}): super(key: GlobalKey<State<BooleanWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   _BooleanState createState() => _BooleanState();
 }
 class _BooleanState extends State<BooleanWidget> {
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<BooleanWidget>>;
+          if (r.value != null && r.value != "") {
+            widget.value = "${r.value}" == "true";
+          }
+        }
+      }
+    }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -37,7 +48,7 @@ class _BooleanState extends State<BooleanWidget> {
     var label = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     try { 
       label = await getOnFlow(label);
-    } catch(e,s) { }
+    } catch(e) { }
     if (label.length > 10) {
       return Padding( 
       padding: EdgeInsets.only(left: 30, right: 30, top: 10), 
@@ -51,7 +62,7 @@ class _BooleanState extends State<BooleanWidget> {
               value: widget.value,
               onChanged: (value) { 
                 widget.value = value;
-                widget.form[widget.name] = value; 
+                saveChange(widget.component?.widget.view, widget.form, widget.name, value);
                 setState(() { });
               },
             ),
@@ -77,7 +88,7 @@ class _BooleanState extends State<BooleanWidget> {
           height: 30.0, disabledOpacity: 0.5,
           onChanged: (value) {
             widget.component?.widget.detectChange = true;
-            widget.form[widget.name]=value;
+            saveChange(widget.component?.widget.view, widget.form, widget.name, value);
             ctrl.value = value;
           }
     );

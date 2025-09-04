@@ -98,15 +98,23 @@ class GridColumnWidget extends StatefulWidget {
 class GridColumnWidgetState extends State<GridColumnWidget> {
   double height = 100; bool orderASC = true; bool delayed = false;
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     var width = widget.getWidth(false);
     List<Widget> buttons = [];
     if (widget.allowSorting) { 
       buttons.add(SizedBox( 
         width: 30, 
         height: 30.0, 
-        child: Tooltip( message: currentView != null && globalOrder.containsKey(viewID) && (
+        child: Tooltip( message: (await getOnFlow(currentView != null && globalOrder.containsKey(viewID) && (
         (globalOrder[viewID]![widget.columnName] == "asc" && viewID != null && globalOrder[viewID] != null)
-        || globalOrder[viewID]![widget.columnName] == null) ? TranslateConstants.sortDesc : TranslateConstants.sortDesc, 
+        || globalOrder[viewID]![widget.columnName] == null) ? TranslateConstants.sortDesc : TranslateConstants.sortDesc)).toLowerCase(), 
         child: IconButton(
           onPressed: () async { 
             if (currentView !=  null && viewID != null) {
@@ -129,7 +137,8 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
       if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
       || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName))))) { 
-        buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( message: TranslateConstants.filterResetT.toLowerCase(),  child: IconButton(
+        buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( 
+          message: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(),  child: IconButton(
         onPressed: () async { 
           resetFilter(widget.columnName);
           navigate = true;
@@ -175,7 +184,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             alignment: Alignment.center, items: dpItems, 
             icon: Icon(Icons.functions, color: Theme.of(context).splashColor, size: 14,),
             hint: Opacity( opacity: .5,
-              child: Text(TranslateConstants.funcColErr.toLowerCase(), 
+              child: Text((await getOnFlow(TranslateConstants.funcColErr)).toLowerCase(), 
                 textAlign: TextAlign.center, 
                 overflow: TextOverflow.ellipsis, 
                 style: TextStyle(color: Theme.of(context).highlightColor))),

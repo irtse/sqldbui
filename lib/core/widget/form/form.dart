@@ -119,7 +119,12 @@ class FormWidgetState extends State<DataFormWidget> {
             refItem: refItem,
             view: widget.view!);
           case 2:
-            content = getSynthesis(refItem.synthesisPath ?? "", mainHeight);
+            content = FutureBuilder(future: getSynthesis(refItem.synthesisPath ?? "", mainHeight), builder: (a,s) {
+              if (s.data != null) {
+                return s.data!;
+              }
+              return Container();
+            });
         }
         var menuItems = [TranslateConstants.formulary, TranslateConstants.comments];
         if ((refItem.synthesisPath ?? "") != "") {
@@ -283,16 +288,17 @@ class FormWidgetState extends State<DataFormWidget> {
     }
   }
 
-   Widget? getSynthesis(String synthesisPath, double height) {
+  Future<Widget?> getSynthesis(String synthesisPath, double height) async {
       if (synthesisPath == "") {
         return null;
       } 
+      var empty = (await getOnFlow(TranslateConstants.emptyData));
       return Column( children: [
               Container(
                 height: 40,
                 color: Theme.of(context).primaryColor,
                 width: currentWidth - menuSize - 200 > 0 ? currentWidth - menuSize  - 200 : 0,
-                child: Center( child: Text( TranslateConstants.synthesis.toLowerCase(), 
+                child: Center( child: Text( (await getOnFlow(TranslateConstants.synthesis)).toLowerCase(), 
                   style: TextStyle( color: Colors.white, fontSize: 18 ) ) )
               ),
               Container( 
@@ -323,7 +329,7 @@ class FormWidgetState extends State<DataFormWidget> {
                       decoration: BoxDecoration( color: Theme.of(context).splashColor), 
                         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
                         child: Center(
-                          child: Text(TranslateConstants.emptyData, 
+                          child: Text(empty.toLowerCase(), 
                             style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
                         ));
               })

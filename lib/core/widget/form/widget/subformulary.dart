@@ -70,6 +70,7 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                       schemaName: data.schemaName, 
                       consents: data.consents,
                       triggers: data.triggers,
+                      rules: data.rules,
                       items: data.items.isNotEmpty && !widget.component.view!.isEmpty ? data.items : <model.Item>[model.Item()] 
                     );
                     

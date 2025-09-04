@@ -3,26 +3,39 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
+import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:sqldbui2/core/widget/form/convertors/dropdown.dart';
 import 'package:sqldbui2/core/widget/form/convertors/boolean.dart';
+import 'package:sqldbui2/core/widget/form/convertors/upload.dart';
 import 'package:sqldbui2/core/widget/form/convertors/number.dart';
 import 'package:sqldbui2/core/widget/form/convertors/html.dart';
 import 'package:sqldbui2/core/widget/form/convertors/text.dart';
 import 'package:sqldbui2/core/widget/form/convertors/date.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/core/widget/form/convertors/upload.dart';
-import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
-import 'package:sqldbui2/model/filter.dart';
-import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
+import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/model/filter.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/page/translate.dart';
 
 Map<String, dynamic> cacheChanges = {};
 Map<String, GlobalKey<FormFieldState>> detectChanges = {};
+
+saveChange(model.View? view, Map<String,dynamic> form, String name, dynamic value) {
+  form[name] = value;
+  if (view != null && view.rules.isNotEmpty) {
+    for (var r in view.rules) {
+      if (r.related == name) {
+        firstAPI = true;
+        r.key?.currentState?.setState( () { });
+      }
+    }
+  }
+}
+
 abstract class ConvertorWidget {
   abstract dynamic value;
 }
@@ -135,8 +148,8 @@ class Convertor {
           initialValue: def, 
           controller: ctrl,
           activeColor: Colors.green, inactiveColor: isDark ? Theme.of(context).secondaryHeaderColor : Theme.of(context).splashColor,
-          activeChild: Text(TranslateConstants.yes.toLowerCase()), inactiveChild: Text(
-            TranslateConstants.no.toLowerCase(), 
+          activeChild: Text((await getOnFlow(TranslateConstants.yes)).toLowerCase()), inactiveChild: Text(
+            (await getOnFlow(TranslateConstants.no)).toLowerCase(), 
             style: TextStyle(color: Colors.white)),  
           borderRadius:  const BorderRadius.all(Radius.circular(15)), height: 30.0, disabledOpacity: 0.5,
           onChanged: (value) { 
@@ -208,10 +221,10 @@ class Convertor {
       w = DropdownButtonFormField<String>( key: formKey, items: items, isExpanded: true,
         alignment: isGrid ? Alignment.center : Alignment.centerLeft,
         value: (cacheChanges[id]?.toString() ?? widget.value?.toString()), elevation: 1,
-        validator: (values) { if (values == null) { return TranslateConstants.valuePlaceholder; } return null; },
+        validator: (values) { if (values == null) { return ""; } return null; },
         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300,
          color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
-        hint: Text(TranslateConstants.placeHolderValue.toLowerCase(), 
+        hint: Text((await getOnFlow(TranslateConstants.placeHolderValue)).toLowerCase(), 
               overflow: TextOverflow.ellipsis, softWrap: true, 
               style: TextStyle(fontSize: 13, color: isGrid ? Colors.grey : Theme.of(context).splashColor)),
         onChanged: (value) { 
@@ -368,7 +381,7 @@ class Convertor {
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                           backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
                           labelStyle: TextStyle(fontSize: 0),
-                          hintText: TranslateConstants.placeHolderValue.toLowerCase(),
+                          hintText: (await getOnFlow(TranslateConstants.placeHolderValue)).toLowerCase(),
                           hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
                           showClearIcon: false,
@@ -376,7 +389,7 @@ class Convertor {
                           focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -392,7 +405,7 @@ class Convertor {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "       ${TranslateConstants.selectValue.toLowerCase()}",
+                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,

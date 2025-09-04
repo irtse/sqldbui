@@ -23,6 +23,14 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
  
   Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
      GlobalKey<html.HtmlWidgetState> htmlKey = GlobalKey<html.HtmlWidgetState>();
     List<Widget> comps = [];
     List<Widget> views = [];
@@ -136,6 +144,9 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))
       ],)));
     }
+    var goto = await getOnFlow(TranslateConstants.goto);
+    var dash = await getOnFlow(TranslateConstants.dashboard);
+
     return FutureBuilder<APIResponse<Shallowed>>(future:APIService().get<Shallowed>(
       "${APIConstants.genericEndpost}/dbview?rows=all&shallow=enable&shortcut_on_main=true", false, context), 
     builder: (a,s) {
@@ -173,7 +184,6 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           views.add(RedirectButtonWidget(id: "${d.id}", name: d.label ?? d.name ?? "", category: ""));
         }
       }
-      
       return Stack( children: [
           Container(
             margin: EdgeInsets.only(top: 80),
@@ -193,7 +203,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                 boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Flexible( child: Text(TranslateConstants.dashboard.toUpperCase(), 
+                Flexible( child: Text(dash.toUpperCase(), 
                   overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).highlightColor) ) ),
                   Padding(padding: EdgeInsets.only(left: 10),
                     child: Icon(Icons.home, color: Colors.grey.shade200, size: 18)
@@ -206,7 +216,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                     color: Theme.of(context).primaryColor),
                   child: SingleChildScrollView(scrollDirection: Axis.horizontal,
                     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [ 
-                    Tooltip( message: "${TranslateConstants.goto} ${TranslateConstants.dashboard}", child:  InkWell( 
+                    Tooltip( message: "$goto $dash", child:  InkWell( 
                       onTap: () {
                         globalMainViewKey.currentState?.setState(() { viewID = null; });
                         Future.delayed(Duration(milliseconds: 50), () {

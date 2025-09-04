@@ -25,6 +25,14 @@ class FormularyCommentsWidget extends StatefulWidget {
 }
 class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
     @override Widget build(BuildContext context) {
+      return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
       List<Widget> widgets = [];
       var path = "";
       if ((widget.refItem.commentsPath ?? "") != "") {
@@ -83,7 +91,7 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
                   fillColor:Colors.white,
                   contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, top: 20, bottom: 20),
                   suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
-                  hintText: TranslateConstants.commentary,
+                  hintText: (await getOnFlow(TranslateConstants.commentary)).toLowerCase(),
                   labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
                   errorStyle: const TextStyle(fontSize: 0,),
                 ),

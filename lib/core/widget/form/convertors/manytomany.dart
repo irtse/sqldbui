@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -24,10 +25,10 @@ class ManyToManyWidget extends StatefulWidget {
   final String label;
   final bool translatable;
   var isFilled = true;
-  ManyToManyWidget ({ super.key, required this.form, required this.schemaName, required this.name, required this.schema,
+  ManyToManyWidget ({ required this.form, required this.schemaName, required this.name, required this.schema,
                       required this.readOnly, required this.value, required this.label, required this.translatable,
                       required this.require, required this.type, required this.url, required this.component,
-                      required this.mainURL});
+                      required this.mainURL}): super(key: GlobalKey());
   @override
   // ignore: library_private_types_in_public_api
   ManyToManyState createState() => ManyToManyState();
@@ -135,10 +136,10 @@ class SubManyToManyWidget extends StatefulWidget {
   final String label;
   var isFilled = true;
   List<model.Shallowed>? datas;
-  SubManyToManyWidget ({ super.key, required this.datas, required this.form, required this.schemaName, required this.name,
+  SubManyToManyWidget ({ required this.datas, required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.value, required this.label, required this.translatable,
                       required this.require, required this.type, required this.url, required this.component,
-                      required this.dp, required this.mainURL});
+                      required this.dp, required this.mainURL}): super(key: GlobalKey<State<SubManyToManyWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   _SubManyToManyState createState() => _SubManyToManyState();
@@ -146,6 +147,16 @@ class SubManyToManyWidget extends StatefulWidget {
 class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
+    if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
+      for (var r in widget.component!.widget.view!.rules) {
+        if (r.trigger == widget.name) {
+          r.key = widget.key as GlobalKey<State<SubManyToManyWidget>>;
+          if (r.value != null && r.value != "") {
+            widget.value = "${r.value}".split(",").map( (e) => { "name" : e, });
+          }
+        }
+      }
+    }
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -159,14 +170,14 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
     ctrls = MultiSelectController<Map<String, dynamic>>();
-    widget.form[widget.name] = <dynamic>[];
+    saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[]);
     var l = widget.label;
     try {
       l = await getOnFlow(widget.label);
     } catch(e) {}
     int max = 0;
     if (widget.datas != null) {
-      widget.form[widget.name] = [];
+      saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[]);
       for (var item in widget.datas!) {
         if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
           continue;
@@ -209,7 +220,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                       top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
                       bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
                     suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
-                    hintText: TranslateConstants.writeValue.toLowerCase(),
+                    hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
                     labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                     labelText: l.toLowerCase(),
                     errorStyle: const TextStyle(fontSize: 0,),
@@ -227,7 +238,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 
               } else if (val.id == item.id) {
                 select = true;
-                widget.form[widget.name].add(val.serialize());
+                saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[...( widget.form[widget.name] as List), val.serialize()]);
                 break;
               }
             }
@@ -256,7 +267,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                       top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
                       bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
                     suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
-                    hintText: TranslateConstants.writeValue.toLowerCase(),
+                    hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
                     labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                     labelText: l.toLowerCase(),
                     errorStyle: const TextStyle(fontSize: 0,),
@@ -314,7 +325,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           backgroundColor: Colors.white,
                           labelText: "${l.toLowerCase()}${widget.require ? "*" : ""}",
                           labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-                          hintText: TranslateConstants.selectValue.toLowerCase(),
+                          hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.checklist_rtl, color: Colors.grey.shade200),
                           showClearIcon: false,
@@ -336,7 +347,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "     ${TranslateConstants.selectValue.toLowerCase()}",
+                              "     ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,
@@ -353,7 +364,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           focusedBorder : const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.grey),
                             borderRadius: BorderRadius.all(Radius.circular(5))),
-                          hintText: "       ${TranslateConstants.search.toLowerCase()}",
+                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
                         ),
                         dropdownItemDecoration: DropdownItemDecoration(
                           selectedIcon:
@@ -369,7 +380,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         },
                         onSelectionChange: (values) {
                           widget.component?.widget.detectChange = true;
-                          widget.form[widget.name] = values;
+                          saveChange(widget.component?.widget.view, widget.form, widget.name, values);
                         },
                       );
   }

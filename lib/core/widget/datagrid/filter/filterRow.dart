@@ -119,6 +119,14 @@ class FilterSubRowWidget extends StatefulWidget implements ConvertorWidget {
 
 class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     if ((widget.columnName ?? "") != "") {
       widget.type = widget.schema[widget.columnName]?.type ?? "text";
     }
@@ -190,9 +198,9 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                 child: DropdownButtonFormField<String>( 
                   items: items, 
                     value: widget.columnName, 
-                    hint: Text(TranslateConstants.colFilter.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
+                    hint: Text((await getOnFlow(TranslateConstants.colFilter)).toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
-                    validator: (value) { if (value == null) { return TranslateConstants.colErrFilter.toLowerCase(); } return null; },
+                    validator: (value) { if (value == null) { return ""; } return null; },
                     onChanged: (value) { 
                       setState(() {
                         widget.columnName = value ?? "";
@@ -226,7 +234,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                 child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 10, child: DropdownButtonFormField<String>( 
                     items: conn, 
                     value: widget.comparator, 
-                    hint: Text(TranslateConstants.colCompFilter.toLowerCase(), 
+                    hint: Text((await getOnFlow(TranslateConstants.colCompFilter)).toLowerCase(), 
                     overflow: TextOverflow.ellipsis, 
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
@@ -246,10 +254,10 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
                       DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
                       DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,))], 
-                    value: widget.value, hint: Text(TranslateConstants.colNullFilter.toLowerCase(), overflow: TextOverflow.ellipsis, 
+                    value: widget.value, hint: Text((await getOnFlow(TranslateConstants.colNullFilter)).toLowerCase(), overflow: TextOverflow.ellipsis, 
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
-                    validator: (value) { if (value == null) { return TranslateConstants.colNullErrFilter.toLowerCase(); } return null; },
+                    validator: (value) { if (value == null) { return ""; } return null; },
                     onChanged: (value) { 
                       widget.value = value ?? "NULL"; 
                       widget.widget.widget.value = value ?? "NULL"; 
@@ -278,7 +286,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
               widget.columnName == null || widget.columnName == "" ? Container() : SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 10, child: DropdownButtonFormField<String>( 
                     items: const [ DropdownMenuItem<String>(value: "asc", child: Text("asc", overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem<String>(value: "desc", child: Text("desc", overflow: TextOverflow.ellipsis)) ], 
-                    value: widget.dir, hint: Text(TranslateConstants.colDirFilter.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
+                    value: widget.dir, hint: Text((await getOnFlow(TranslateConstants.colDirFilter)).toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                     onChanged: (value) { 
                       widget.dir = value ?? "asc"; 
@@ -304,7 +312,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                 }); 
               },
               style: ButtonStyle( backgroundColor: WidgetStateProperty.all(widget.connector == "and" ? Theme.of(context).primaryColor : Colors.transparent)), child: Padding( padding: const EdgeInsets.all(10), 
-                child: Text(TranslateConstants.and.toUpperCase(), style: TextStyle(color: widget.connector == "and"  ? Colors.white :Colors.grey, fontSize: 11))))),
+                child: Text((await getOnFlow(TranslateConstants.and)).toUpperCase(), style: TextStyle(color: widget.connector == "and"  ? Colors.white :Colors.grey, fontSize: 11))))),
               widget.columnName == null || widget.columnName == "" ? Container() : TextButton( onPressed: () { setState(() {  
                   widget.connector = widget.connector == "or" ? "" : "or"; 
                   widget.widget.widget.connector = widget.connector;
@@ -320,7 +328,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                 }); 
               },
               style: ButtonStyle(backgroundColor: WidgetStateProperty.all(widget.connector =="or" ? Theme.of(context).primaryColor : Colors.transparent)), child: Padding( padding: const EdgeInsets.all(10), 
-                child: Text(TranslateConstants.or.toUpperCase(), style: TextStyle(color: widget.connector == "or" ? Colors.white :Colors.grey, fontSize: 11))),)
+                child: Text((await getOnFlow(TranslateConstants.or)).toUpperCase(), style: TextStyle(color: widget.connector == "or" ? Colors.white :Colors.grey, fontSize: 11))),)
           ])
     ]);
   }

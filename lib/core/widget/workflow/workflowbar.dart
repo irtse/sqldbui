@@ -12,7 +12,14 @@ class WorkflowBarWidget extends StatefulWidget{
 }
 class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
   @override Widget build(BuildContext context) {
-    double max = currentWidth - menuSize > 0 ? currentWidth - menuSize : 0;
+    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+        if (a.hasData && a.data != null) {
+          return a.data!;
+        }
+        return Container();
+      });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {    double max = currentWidth - menuSize > 0 ? currentWidth - menuSize : 0;
     var itemWidth = (max - 200) / widget.workflow.steps.length;
     List<Widget> items = [];
     var curr = 0;
@@ -30,17 +37,12 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
         active: active));
     }
     for (var i = 0; i < widget.workflow.steps.length; i++) {
-      var name = "${TranslateConstants.step.toLowerCase()} ${ i + 1 }";
+      var name = "${(await getOnFlow(TranslateConstants.step)).toLowerCase()} ${ i + 1 }";
       if ((widget.workflow.steps["${ i + 1 }"]?.length ?? 0) == 1) {
         name = widget.workflow.steps["${ i + 1 }"]!.first.name;
       }
       items.add(StepWidget( 
-        content: FutureBuilder(future: getOnFlow(name), builder: (a,s) {
-          if (s.data != null) {
-            return Text(s.data!, style: const TextStyle(color: Colors.white));
-          }
-          return Text(name, style: const TextStyle(color: Colors.white));
-        }),
+        content: Text(name, style: const TextStyle(color: Colors.white)),
         width: itemWidth, gotBefore: true, 
         steps: widget.workflow.steps.containsKey("${ i + 1 }") ? widget.workflow.steps["${ i + 1 }"] : null,
         beforeDoing: widget.workflow.position != "" && pos > ( i - 1 ),
@@ -64,12 +66,12 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
       ));
     } else {
       items.add(SizedBox( width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
-        child: Center(child: Text(TranslateConstants.noWorkflow, 
+        child: Center(child: Text((await getOnFlow(TranslateConstants.noWorkflow)).toLowerCase(), 
           style: const TextStyle(color: Colors.white)),)));
     }
     return Container(  margin: const EdgeInsets.only(top: 25), width: max,
       height: 40, color: widget.workflow.steps.isEmpty ? Colors.grey : Colors.white,
-      child: Row(children: items,),);
+      child: Row(children: items));
   }
 }
 
@@ -142,7 +144,7 @@ class StepWidgetState extends State<StepWidget> {
       icons.add(Positioned(
         left: widget.width - 50,
         child: PopupMenuButton(
-              tooltip: TranslateConstants.showMenu.toLowerCase(),
+              tooltip: (await getOnFlow(TranslateConstants.showMenu)).toLowerCase(),
               constraints: BoxConstraints(maxWidth: maxLength * 15,),
               color: Colors.white,
               icon: const Icon(Icons.menu, color: Colors.white, size: 20,),

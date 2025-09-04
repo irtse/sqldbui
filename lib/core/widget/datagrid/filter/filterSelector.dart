@@ -27,12 +27,20 @@ class FilterSelectorWidget extends StatefulWidget {
 bool forceFilter = false;
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     var toggles = ["new", "old", "draft"];
     return Row( children: [ 
       Padding( 
         padding: const EdgeInsets.only(right: 10), 
         child : Tooltip( 
-          message: show ? TranslateConstants.filterHide.toLowerCase() : TranslateConstants.filterShow.toLowerCase(),
+          message : (await getOnFlow(show ? TranslateConstants.filterHide.toLowerCase() : TranslateConstants.filterShow)).toLowerCase(),
           child: InkWell( 
             child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
               color: show ? Colors.white : Theme.of(context).splashColor, size: 20), 
@@ -45,7 +53,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
         filterRowsWidget.isNotEmpty ? Container(
           margin: const EdgeInsets.only(right: 5), 
           padding: const EdgeInsets.only(left: 5), 
-          child:  IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterSaveT.toLowerCase(), 
+          child:  IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterSaveT)).toLowerCase(), 
           style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }) ),
           icon: Icon( Icons.save, size: 18, color: Theme.of(context).splashColor, ),
@@ -80,7 +88,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           })) : Container(),
         filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(right: 5), 
         child: IconButton( constraints: const BoxConstraints(), 
-        tooltip: TranslateConstants.filterDeleteT.toLowerCase(), style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
+        tooltip: (await getOnFlow(TranslateConstants.filterDeleteT)).toLowerCase(), style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon(Icons.delete, size: 18, color: Theme.of(context).splashColor, ),
           onPressed: () { 
@@ -105,7 +113,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           return SubFilterSelectorWidget( filterMain: widget.filterMain, schema: widget.schema, datas: []);
         }) : Container(), 
         Padding(padding: const EdgeInsets.only(left: 5), 
-        child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterNew.toLowerCase(), 
+        child: IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterNew)).toLowerCase(), 
         style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.add, size: 17, color: Theme.of(context).highlightColor, ),
@@ -119,7 +127,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           })),
         if (filterRowsWidget.length > 1)
           Padding(padding: const EdgeInsets.only(left: 5), 
-          child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterRM.toLowerCase(), 
+          child: IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterRM)).toLowerCase(), 
           style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
             return Theme.of(context).primaryColor; }), ),
             icon: Icon( Icons.remove, size: 17, color: Theme.of(context).highlightColor, ),
@@ -133,7 +141,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             })),
         if (filterRowsWidget.isNotEmpty)
           Padding(padding: const EdgeInsets.only(left: 5), 
-          child: IconButton( constraints: const BoxConstraints(), tooltip: TranslateConstants.filterApplyT.toLowerCase(), 
+          child: IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterApplyT)).toLowerCase(), 
             style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
             icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor ),
             onPressed: () {
@@ -160,7 +168,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             })),
         filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
         child: IconButton( constraints: const BoxConstraints(), 
-        tooltip: TranslateConstants.filterResetT.toLowerCase(), 
+        tooltip: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(), 
         style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.filter_alt_off, size: 18, color: Theme.of(context).highlightColor ),
@@ -238,7 +246,7 @@ class SubFilterSelectorWidget extends StatefulWidget {
   @override SubFilterSelectorWidgetState createState() => SubFilterSelectorWidgetState();
 }
 class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
-@override Widget build(BuildContext context) {
+  @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -271,7 +279,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
             child: DropdownButtonFormField<String>( 
                     items: dpItems, 
                     value: filterRestr[viewID] == "" ? null : filterRestr[viewID],
-                    hint: Text(TranslateConstants.filterPlaceholder.toLowerCase(), overflow: TextOverflow.ellipsis, 
+                    hint: Text((await getOnFlow(TranslateConstants.filterPlaceholder)).toLowerCase(), overflow: TextOverflow.ellipsis, 
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                     onChanged: (value) async {

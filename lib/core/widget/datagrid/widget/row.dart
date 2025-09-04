@@ -53,11 +53,21 @@ class GridRowWidget extends StatefulWidget {
 class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
     var edit = (isEditMode[viewID] ?? false);
-    return edit ? Row(children: [ getCellsContent(context) ]) : MouseRegion(
+    return edit ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
+      if (s.data != null) {
+        return s.data!;
+      }
+      return Container();
+    }) ]) : MouseRegion(
       onEnter: (b) { setState(() { widget.isHovered = true; }); },
       onExit: (b) { setState(() { widget.isHovered = false; }); },
       child: Stack( alignment: Alignment.center, children: [ 
-        Row(children: [getCellsContent(context)]),
+        Row(children: [FutureBuilder( future: getCellsContent(context), builder: (a, s) {
+          if (s.data != null) {
+            return s.data!;
+          }
+          return Container();
+        })]),
         /*widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
           path: "@${widget.schemaID}:${widget.cellID}",
           sharing: widget.sharing,
@@ -66,7 +76,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
     );
   }
 
-  Widget getCellsContent(BuildContext context) {
+  Future<Widget> getCellsContent(BuildContext context) async {
     if (widget.cells.isEmpty) { return Stack(); }
     String cellID = '${widget.cells[0].columnName != "id" ? widget.cells[0].cellID : widget.cells[0].value}';
     List<Widget> widgets = [];
@@ -123,7 +133,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           bs.add(Container(
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
             child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-              child: Text(TranslateConstants.newT.toLowerCase(), 
+              child: Text((await getOnFlow(TranslateConstants.newT)).toLowerCase(), 
                 style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
               )
             )
@@ -134,7 +144,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
             margin: EdgeInsets.only(left: 10),
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
             child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-              child: Text(TranslateConstants.draftT.toLowerCase(), 
+              child: Text((await getOnFlow(TranslateConstants.draftT)).toLowerCase(), 
                 style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
               )
             )

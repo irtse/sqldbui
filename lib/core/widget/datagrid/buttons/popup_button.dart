@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
+import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class PopupButtonWidget extends StatefulWidget {
@@ -25,11 +26,19 @@ class PopupButtonWidgetState extends State<PopupButtonWidget> {
   bool change = false;
 
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     return PopupMenuButton(
       constraints: BoxConstraints.tightFor( width: widget.width ?? currentWidth / 1.1),
       color: widget.color ?? Theme.of(context).secondaryHeaderColor, 
       padding: const EdgeInsets.all(0),
-      tooltip: widget.tooltip,
+      tooltip: (await getOnFlow(widget.tooltip)).toLowerCase(),
       icon: Icon(widget.icon, 
         size: 20, 
         color: Theme.of(context).highlightColor

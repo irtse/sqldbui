@@ -15,6 +15,14 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
   bool change = false;
   Map<String, ValueNotifier<bool>> hubs = {};
   @override Widget build(BuildContext context) {
+  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+      if (a.hasData && a.data != null) {
+        return a.data!;
+      }
+      return Container();
+    });
+  }
+  Future<Widget> futureBuild(BuildContext context) async {
     List<Widget> items = [];
     if (widget.workflow.currentHub && widget.workflow.steps.containsKey(widget.workflow.current)) {
       try {
@@ -44,7 +52,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
             children: [
               const Padding( padding: EdgeInsets.only(right: 10, top: 5), child: Icon(Icons.account_tree, color: Colors.grey)),
               Padding( padding: EdgeInsets.only(right: 20, top: 5), 
-                child: Text(TranslateConstants.nextOpt.toLowerCase(), style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
+                child: Text((await getOnFlow(TranslateConstants.nextOpt)).toLowerCase(), style: TextStyle(color: Colors.grey, fontSize: 15))), ...items]));
       } catch(e) { /* empty */ } 
     }
     return Container(width: 0);
