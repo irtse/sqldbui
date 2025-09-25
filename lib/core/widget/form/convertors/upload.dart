@@ -187,12 +187,11 @@ class _UploadState extends State<UploadWidget> {
   Future<void> _pickFile() async {
     List<String> extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf', 
       'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'xls', 'xlsx', 'csv', 'ods'];
-    if (widget.type.replaceAll("upload_multiple", "").isNotEmpty) {
+    /*if (widget.type.replaceAll("upload_multiple", "").isNotEmpty) {
       extension = widget.type.replaceAll("upload_multiple", "").split("_");
     } else if (widget.type.replaceAll("upload", "").isNotEmpty) {
       extension = widget.type.replaceAll("upload", "").split("_");
-    }
-    print(extension);
+    }*/
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       withData: kIsWeb,
       type: FileType.custom,
@@ -204,11 +203,7 @@ class _UploadState extends State<UploadWidget> {
       if ("${widget.value ?? ""}" == "" ) {
         widget.value = _selectedFile?.name;
       } else {
-        if (widget.type.contains("multiple")) {
-          widget.value += ",${_selectedFile?.name}";
-        } else {
-          widget.value = _selectedFile?.name;
-        }
+        widget.value += widget.type.contains("multiple") ? ",${_selectedFile?.name}" : _selectedFile?.name;
       }
       
       if (widget.url != null && _selectedFile != null) {

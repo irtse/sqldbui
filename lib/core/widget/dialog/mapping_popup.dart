@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -102,7 +103,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               value: widget.format, 
               label: "format", 
               require: true, 
-              type: "enum__csv_json", 
+              type: "enum__csv_xlsf_pdf_json", 
               component: null, 
               mainUrl: null,
               url: null, 
@@ -141,6 +142,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
       }
       var schema = widget.forcedSchema ?? currentView!.schema;
       for (var scheme in schema.keys) {
+        if (!(filterTempOrderView[viewID]?.contains(scheme) ?? false) ) {
+          continue;
+        }
         var f = TextWidget(form : newCacheEntry, 
           schemaName: currentView!.schemaName, name: scheme, 
           readOnly: false, value: scheme, 
@@ -191,7 +195,8 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                   style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
               Padding( padding: const EdgeInsets.only(right: 20, bottom: 10), 
               child: TextButton( style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge, backgroundColor: Theme.of(context).primaryColor),
-                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text(widget.isExport ? "Export" : "Import", style: TextStyle(color: Theme.of(context).highlightColor))), 
+                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text(widget.isExport ? "Export" : "Import", 
+                style: TextStyle(color: Theme.of(context).highlightColor))), 
                 onPressed: () async { 
                   if (widget.isExport && formKey.currentState!.validate()) {
                     formKey.currentState!.save();
