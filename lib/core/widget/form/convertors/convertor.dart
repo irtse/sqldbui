@@ -377,6 +377,7 @@ class Convertor {
                           spacing: 10,
         ),
         fieldDecoration: isGrid ? decF : FieldDecoration(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                           backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,

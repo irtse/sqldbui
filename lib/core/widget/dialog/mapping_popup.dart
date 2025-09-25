@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +76,8 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
     } else {
       if (widget.isExport) {
         items.addAll([
-        Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
+        Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), 
+          child: Divider(color: Theme.of(context).splashColor)),
         Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), 
           child: Form( key: formKey, 
           autovalidateMode: AutovalidateMode.always,
@@ -183,10 +183,12 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 setState(() { directory = newDirectory ?? directory; });
               })) : Container(),
           ])),
-        SizedBox( child: Wrap(alignment: WrapAlignment.center, children : [...items, Container( 
-          constraints: BoxConstraints(maxHeight: currentHeigth / 3), 
-          child: SingleChildScrollView(scrollDirection: Axis.vertical,
-          child: Wrap(alignment: WrapAlignment.center, children: mapping)))])),
+        SizedBox( child: Wrap(alignment: WrapAlignment.center, children : [
+          ...items, 
+          Container( 
+            constraints: BoxConstraints(maxHeight: currentHeigth / 3), 
+              child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                child: Wrap(alignment: WrapAlignment.center, children: mapping)))])),
         Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : isLoading ? [] : <Widget>[
               Padding( padding: const EdgeInsets.only(bottom: 10), 
               child: TextButton(style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
