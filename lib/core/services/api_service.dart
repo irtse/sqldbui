@@ -25,7 +25,7 @@ import 'package:sqldbui2/model/view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 var firstAPI = false;
-var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/v1';
+var baseURL = '${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}/v1';
 class APIConstants {
   static String filterLine = "";
   static String downloadEndpost = '/main/download';
@@ -226,14 +226,15 @@ class APIService {
         url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter";
         if (method == "get") {
           if (!(force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
-            print("SET UP CACHE : $url");
             return cache[url]! as APIResponse<T>;
           }
         }
         
-        print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy");
+        // print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy");
         var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);        
-        
+        if (url.contains("25")) {
+          print(response);
+        }
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
@@ -274,7 +275,7 @@ class APIService {
         if (e.toString().contains("connection error")) {
           err = "server unreachable";
         } else {
-          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}"; }
+          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; }
         }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
@@ -312,7 +313,7 @@ class APIService {
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
         print(e); print(s);
-        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}"; }
+        err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     throw Exception(err);
