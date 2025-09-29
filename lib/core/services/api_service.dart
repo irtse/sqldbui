@@ -223,6 +223,9 @@ class APIService {
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
         url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter";
+        if (method.toLowerCase() != "get") {
+          cache = {};
+        }
         if (method == "get") {
           if (!(force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
             return cache[url]! as APIResponse<T>;
