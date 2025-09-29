@@ -167,7 +167,6 @@ class MenuWidgetState extends State<MenuWidget> {
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 
       || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;
-    navigate = true;
     confirmCache = {};
     globalMainViewKey.currentState?.refresh(viewID, null, currentView, true);
   }

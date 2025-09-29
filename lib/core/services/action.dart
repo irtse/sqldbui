@@ -44,7 +44,6 @@ class ActionService {
         widget?.loading();
         if (mainForm.currentState != null ) {
           var v = await pressedFormFuture(mainForm.currentState!.widget, schemaName, url, schema, method, context, overrideMap, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
-          cacheForm = {};
           if ((redirection ?? "") != "" && !noRedirection)  { 
               var splitted = redirection?.split("?rows=");
               if ((splitted?.length ?? 0) >= 2) {
@@ -70,6 +69,7 @@ class ActionService {
                   });
                 }
               }
+              cacheForm = {};
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 

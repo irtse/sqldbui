@@ -200,7 +200,6 @@ class APIService {
     }
     return filter;
   }
-
   Future<APIResponse<T>> main<T extends SerializerDeserializer>(String url, dynamic body, 
                                                                 String method, String succeed, bool force, 
                                                                 BuildContext? context, int? limit, int? offset, 
@@ -230,11 +229,10 @@ class APIService {
           }
         }
         
-        // print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}$orderBy");
-        var response = await request("$url${limit != null ? "&limit=$limit" : ""}${offset != null ? "&offset=$offset" : ""}", method, body, options);        
-        if (url.contains("25")) {
-          print(response);
-        }
+        final stopwatch = Stopwatch();
+        stopwatch.start();
+        var response = await request("$url${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}", method, body, options);        
+        print("$force ${stopwatch.elapsed.inSeconds} $method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy");
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
