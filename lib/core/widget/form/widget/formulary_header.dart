@@ -74,8 +74,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     if (widget.refItem.values.containsKey("description") && widget.refItem.values["description"] != null) { 
       description = widget.refItem.values["description"].toLowerCase(); 
       for (var d in description.split(":")) {
-        try {
-          desc.add(await getOnFlow(d));
+        try { desc.add(await getOnFlow(d));
         } catch(e) { print(e); }
       } 
     }
@@ -107,8 +106,10 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     title.add(Padding( padding: const EdgeInsets.only(left: 53), 
       child: Row( 
         children: [ 
-          Text( name.toLowerCase(), overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Theme.of(context).primaryColor, fontSize: widget.subForm ? 30 : 19)), 
+          Text( name.toUpperCase(), overflow: TextOverflow.ellipsis,
+            style: TextStyle(color: Theme.of(context).primaryColor, 
+              fontWeight: FontWeight.bold,
+              fontSize: widget.subForm ? 30 : 19)), 
           /*widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),
             child: InkWell( onTap: () => setState(() {
@@ -116,10 +117,26 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             }),
               child: Icon(widget.edit ? Icons.edit_off : Icons.edit, color: Theme.of(context).primaryColor ))
           ) : Container(),*/
-          ...states 
+          ...states,
+          Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
+            widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
+          children: [ 
+            Text("${await getOnFlow("created ")} ${widget.refItem.metadata!.creationDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.creationUser}".toLowerCase(), 
+                  overflow: TextOverflow.ellipsis,  
+                  style: const TextStyle(color: Colors.grey, fontSize: 9))
+            ] )),
+            widget.refItem.metadata?.updateUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
+            children: [ 
+              Text("${await getOnFlow("last update ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
+                    overflow: TextOverflow.ellipsis,  
+                    style: const TextStyle(color: Colors.grey, fontSize: 9))
+              
+            ] ))
+          ])
         ])
       )
     );
+    
     if (desc.isNotEmpty && !desc.contains("no description")) {
       title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
         children: [ 
@@ -131,17 +148,16 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                 style: const TextStyle(color: Colors.grey, fontSize: 12))
               
         ] )));
-    } else {
+    } /* else {
       title.add(Container(margin: EdgeInsets.only(bottom: 20)));
-    }
+    } */
     List<Widget> actions = [];
     if (!widget.subForm) {
       if (!widget.view.readOnly) {
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
         || widget.view.actions.contains("put")) {
           if (widget.view.actions.contains("post") && widget.view.isEmpty ) {
-            try {
-            TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
+            try {  TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
           } catch (e) {}
             actions.add(ButtonWidget( method: "post", 
               text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true, avoidConsent: true));
@@ -188,7 +204,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             child: Stack(children: [ 
               Padding(
                 padding: EdgeInsets.only(top: 40, bottom: widget.workflow == null && !widget.view.isEmpty ? 25 : 0), 
-                child: Column(children: [
+                child: Column( mainAxisAlignment: MainAxisAlignment.center, children: [
                   ...title, 
                   widget.workflow != null ? WorkflowBarWidget(workflow: widget.workflow!) 
                   : ( widget.view.isEmpty ? WorkflowBarWidget(workflow: Workflow()) : Container()),

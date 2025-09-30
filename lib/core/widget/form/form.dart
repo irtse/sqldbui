@@ -305,7 +305,7 @@ class FormWidgetState extends State<DataFormWidget> {
         return null;
       } 
       var empty = (await getOnFlow(TranslateConstants.emptyData));
-      return SingleChildScrollView( child: Column( children: [
+      return Column( children: [
               Container(
                 height: 40,
                 color: Theme.of(context).primaryColor,
@@ -313,13 +313,13 @@ class FormWidgetState extends State<DataFormWidget> {
                 child: Center( child: Text( (await getOnFlow(TranslateConstants.history)).toLowerCase(), 
                   style: TextStyle( color: Colors.white, fontSize: 18 ) ) )
               ),
-              Container( 
+               Container( 
                 height: height - 110,
                 padding: EdgeInsets.symmetric(vertical: 30),
                 decoration: BoxDecoration( 
                   borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7), bottomRight: Radius.circular(7)),
                 ),
-                child: FutureBuilder(
+                child: SingleChildScrollView( child:  FutureBuilder(
                   future: APIService().get<user.DataAccess>(historyPath, true, context), 
                   builder: (a,s) {
                     if (s.data?.data != null && s.data!.data!.isNotEmpty) {
@@ -345,8 +345,8 @@ class FormWidgetState extends State<DataFormWidget> {
                           child: Text(empty.toLowerCase(), 
                             style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
                         ));
-              })
-    )]));
+              }))
+    )]);
   }
 
   Future<Widget?> getSynthesis(String synthesisPath, double height) async {

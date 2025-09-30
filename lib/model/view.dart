@@ -132,6 +132,29 @@ class Sharing extends SerializerDeserializer<Sharing> {
 }
 }
 
+class Metadata extends SerializerDeserializer<Metadata> {
+  Metadata({
+    this.creationDate = "",
+    this.updateDate = "",
+    this.creationUser = "",
+    this.updateUser= "",
+  });
+  String creationDate;
+  String updateDate;
+  String creationUser;
+  String updateUser;
+
+  @override Map<String, dynamic> serialize() => {};
+
+  @override deserialize(Map<String, dynamic> json) {
+    return  Metadata(
+      creationDate: json.containsKey("created_date") && json["created_date"] != null ? "${json["created_date"]}" : "",
+      updateDate: json.containsKey("updated_date") && json["updated_date"] != null ? "${json["updated_date"]}" : "",
+      creationUser: json.containsKey("created_user") ? "${json["created_user"]}" : "",
+      updateUser: json.containsKey("updated_user") ? "${json["updated_user"]}" : "",
+    );
+} }
+
 const emptyValues = <String, Shallowed>{};
 const emptyDyn = <String, dynamic>{};
 const emptyManyValues = <String, List<Shallowed>>{};
@@ -152,8 +175,10 @@ class Item extends SerializerDeserializer<Item> {
     this.commentsPath,
     this.news = false,
     this.dataRef,
-    this.historyPath = ''
+    this.historyPath = '',
+    this.metadata,
   });
+  Metadata? metadata;
   String schemaID;
   bool news;
   bool isDraft;
@@ -175,6 +200,7 @@ class Item extends SerializerDeserializer<Item> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      metadata: json.containsKey("metadata") && json["metadata"] != null ? Metadata().deserialize(json["metadata"]) : null,
       dataRef: json.containsKey("data_ref") && json["data_ref"] != null ? "${json["data_ref"]}" : null,
       schemaID: json.containsKey("schema_id") && json["schema_id"] != null ? "${json["schema_id"]}" : "",
       news: json.containsKey("new") ? json["new"] : "",
