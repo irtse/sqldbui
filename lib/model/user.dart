@@ -49,3 +49,28 @@ class User extends SerializerDeserializer<User> {
     "password" : password,
   };
 }
+
+class DataAccess extends SerializerDeserializer<DataAccess> {
+  DataAccess({
+    this.user = "",
+    this.write = false,
+    this.update = false, // todo something at least protected
+    this.accessDate,
+  });
+
+  String user;
+  bool write;
+  bool update;
+  DateTime? accessDate;
+
+  @override deserialize(Map<String, dynamic> json) {
+    print(json);
+    return DataAccess(
+    user: json.containsKey("user") ? json["user"] : "unknown user", 
+    update: json.containsKey("update") ? bool.parse("${json["update"]}") : false, 
+    write: json.containsKey("write") ? bool.parse("${json["write"]}") : false,  
+    accessDate: json.containsKey("access_date") ? DateTime.parse("${json["access_date"]}") : null,  );
+  }
+
+  @override Map<String, dynamic> serialize() => { };
+}

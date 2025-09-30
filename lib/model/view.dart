@@ -152,6 +152,7 @@ class Item extends SerializerDeserializer<Item> {
     this.commentsPath,
     this.news = false,
     this.dataRef,
+    this.historyPath = ''
   });
   String schemaID;
   bool news;
@@ -164,6 +165,7 @@ class Item extends SerializerDeserializer<Item> {
   Workflow? workflow;
   bool readonly;
   String? synthesisPath;
+  String? historyPath;
   Map<String,Shallowed> valuesShallow;
   Map<String,List<Shallowed>>valuesMany;
   String? dataRef;
@@ -178,6 +180,7 @@ class Item extends SerializerDeserializer<Item> {
       news: json.containsKey("new") ? json["new"] : "",
       commentsPath: json.containsKey("comments_path") ? json["comments_path"] : "",
       synthesisPath: json.containsKey("synthesis_path") && json["synthesis_path"] != null ? json["synthesis_path"] : null,
+      historyPath: json.containsKey("history_path") && json["history_path"] != null ? json["history_path"] : null,
       isDraft: json.containsKey("is_draft") && json["is_draft"] != null ? bool.parse("${json["is_draft"]}") : false,
       sharing: json.containsKey("sharing") && json["sharing"] != null ? Sharing().deserialize(json["sharing"]) : null, 
       readonly: json.containsKey("readonly") && json["readonly"] != null ? bool.parse("${json["readonly"]}") : false,

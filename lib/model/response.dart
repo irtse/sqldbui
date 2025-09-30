@@ -6,6 +6,7 @@ Map<Type, SerializerDeserializer> refs = <Type, SerializerDeserializer> {
   User : User(),
   Item : Item(),
   View : View(),
+  DataAccess: DataAccess(),
   Shallowed : Shallowed(),
   SchemaField : SchemaField(),
   RawData : RawData(),

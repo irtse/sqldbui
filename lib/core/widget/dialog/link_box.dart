@@ -55,15 +55,15 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                   borderRadius:  const BorderRadius.all(Radius.circular(15)),
                   activeChild: FutureBuilder(future: getOnFlow(add.replaceAll("_", " ")), builder: (a,s) {
                     if (s.data != null) {
-                      return Text(s.data!);
+                      return Text(s.data!.toLowerCase());
                     }
-                    return Text(add);
+                    return Text(add.toLowerCase());
                   }), 
                   inactiveChild: FutureBuilder(future: getOnFlow(add.split("_")[0]), builder: (a,s) {
                     if (s.data != null) {
-                      return Text(s.data!);
+                      return Text(s.data!.toLowerCase());
                     }
-                    return Text(add);
+                    return Text(add.toLowerCase());
                   }), 
                   width: 150.0, height: 25.0, disabledOpacity: 0.5,
                   onChanged: (value) =>  widget.sharing?.body[add] = value)));
@@ -85,9 +85,9 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
                 alignLabelWithHint: false,
                 label: FutureBuilder(future: getOnFlow(add.replaceAll("_", " ")), builder: (a,s) {
                     if (s.data != null) {
-                      return Text(s.data!);
+                      return Text(s.data!.toLowerCase());
                     }
-                    return Text(add);
+                    return Text(add.toLowerCase());
                 }),
                 disabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(5),
@@ -123,7 +123,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
             },
           ))));
         }
-        d.add(LinkDropWidget(url:"${m.value}", name: m.key, sharing: widget.sharing ));
+        d.add(LinkDropWidget(url:"${m.value}", name: m.key.toLowerCase(), sharing: widget.sharing ));
         d.add(Column(children: additionnal));
       }
     }
@@ -138,7 +138,9 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
       constraints: const BoxConstraints.tightFor(width: 364),
       color: Colors.white,
       tooltip: (tooltip).toLowerCase(),
-      icon: Icon(size: 18, (widget.isDelete ? Icons.cancel : Icons.share), color: widget.color ?? Theme.of(context).primaryColor),
+      icon: Icon(
+        size: 18, (widget.isDelete ? Icons.cancel : Icons.share), 
+        color: widget.color ?? Theme.of(context).primaryColor),
       itemBuilder: (BuildContext bc) { 
         return [ 
           PopupMenuItem(enabled: false, 
@@ -191,7 +193,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
               if (dpItems.where( (e) => e.value.toString() == data.id.toString()).isEmpty) {
                 dpItems.add(DropdownItem<String>(
                   value: "${data.id}",
-                  label: data.label ?? data.name ?? "",
+                  label: (data.label ?? data.name ?? "").toLowerCase(),
                 ));
                 ctrls.addItem(dpItems.last);
               }

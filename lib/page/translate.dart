@@ -178,6 +178,7 @@ class TranslateConstants {
 
   static String data = "the data";
   static String comments = "comments";
+  static String history = "historical";
   static String formularyMenu = "submenu";
   static Map<String, String> onFlowTrad = {};
 }
@@ -238,6 +239,7 @@ Future<void> setUpTranslate() async {
   translate(TranslateConstants.home);
   translate(TranslateConstants.searchInfoMake);
   translate(TranslateConstants.searchInfo);
+  translate(TranslateConstants.history);
 
   translate(TranslateConstants.filterTitle);
   translate(TranslateConstants.filterApply);

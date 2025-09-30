@@ -231,11 +231,9 @@ class APIService {
             return cache[url]! as APIResponse<T>;
           }
         }
-        
-        final stopwatch = Stopwatch();
-        stopwatch.start();
+
         var response = await request("$url${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}", method, body, options);        
-        print("$force ${stopwatch.elapsed.inSeconds} $method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy");
+        //print("$force ${stopwatch.elapsed.inSeconds} $method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy");
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {

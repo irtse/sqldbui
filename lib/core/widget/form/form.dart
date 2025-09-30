@@ -2,6 +2,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/form/widget/empty_formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary.dart';
+import 'package:sqldbui2/core/widget/form/widget/formulary_access_history.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary_action_bar.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary_comment.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary_header.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/model/user.dart' as user;
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 
@@ -88,12 +90,18 @@ class FormWidgetState extends State<DataFormWidget> {
           isEmpty: widget.view?.isEmpty ?? false, 
           relatedDatas: refItem.dataPath
         )); 
-        
+        var menuItems = [TranslateConstants.formulary, TranslateConstants.comments];
+        if ((refItem.synthesisPath ?? "") != "") {
+          menuItems.add(TranslateConstants.synthesis);
+        }
+        if ((refItem.historyPath ?? "") != "") {
+          menuItems.add(TranslateConstants.history);
+        }
         var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
         cacheForm[widget.view?.name ?? ""] = newCacheEntry;
-        switch (widget.subMenuIndex) {
-          case 0: 
-          GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
+        
+        if (TranslateConstants.formulary == menuItems[widget.subMenuIndex]) {
+            GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
           content = FormularyWidget(   
               key: key,
               show: show, 
@@ -113,24 +121,28 @@ class FormWidgetState extends State<DataFormWidget> {
               state: widget.key as GlobalKey<FormWidgetState>,
               superFormSchemaName: widget.superFormSchemaName,
             );
-          case 1: content = FormularyCommentsWidget(
-            height: mainHeight,
-            width: widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40),
-            refItem: refItem,
-            view: widget.view!);
-          case 2:
+          } else if (TranslateConstants.comments == menuItems[widget.subMenuIndex]) {
+            content = FormularyCommentsWidget(
+              height: mainHeight,
+              width: widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40),
+              refItem: refItem,
+              view: widget.view!);
+          } else if (TranslateConstants.synthesis == menuItems[widget.subMenuIndex]) {
             content = FutureBuilder(future: getSynthesis(refItem.synthesisPath ?? "", mainHeight), builder: (a,s) {
               if (s.data != null) {
                 return s.data!;
               }
               return Container();
             });
-        }
-        var menuItems = [TranslateConstants.formulary, TranslateConstants.comments];
-        if ((refItem.synthesisPath ?? "") != "") {
-          menuItems.add(TranslateConstants.synthesis);
-        }
-        for (var (i, menu) in menuItems.indexed) {
+          } else if (TranslateConstants.history == menuItems[widget.subMenuIndex]) {
+            content = FutureBuilder(future: getHistory(refItem.historyPath ?? "", mainHeight, mainWidth), builder: (a,s) {
+              if (s.data != null) {
+                return s.data!;
+              }
+              return Container();
+            });
+          }
+      for (var (i, menu) in menuItems.indexed) {
         subMenu.add(InkWell(
           onTap: () => setState(() {
               widget.subMenuIndex = i;
@@ -286,6 +298,55 @@ class FormWidgetState extends State<DataFormWidget> {
       print(e);
       return Container();
     }
+  }
+
+  Future<Widget?> getHistory(String historyPath, double height, double mainWidth) async {
+    if (historyPath == "") {
+        return null;
+      } 
+      var empty = (await getOnFlow(TranslateConstants.emptyData));
+      return SingleChildScrollView( child: Column( children: [
+              Container(
+                height: 40,
+                color: Theme.of(context).primaryColor,
+                width: currentWidth - menuSize - 200 > 0 ? currentWidth - menuSize  - 200 : 0,
+                child: Center( child: Text( (await getOnFlow(TranslateConstants.history)).toLowerCase(), 
+                  style: TextStyle( color: Colors.white, fontSize: 18 ) ) )
+              ),
+              Container( 
+                height: height - 110,
+                padding: EdgeInsets.symmetric(vertical: 30),
+                decoration: BoxDecoration( 
+                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(7), bottomRight: Radius.circular(7)),
+                ),
+                child: FutureBuilder(
+                  future: APIService().get<user.DataAccess>(historyPath, true, context), 
+                  builder: (a,s) {
+                    if (s.data?.data != null && s.data!.data!.isNotEmpty) {
+                      List<FormularyAccessHistory> arr = [];
+                      for (var data in s.data!.data!) {
+                        arr.add(FormularyAccessHistory(
+                          user: data.user,
+                          accessDate: data.accessDate,
+                          kindOfAccess: data.update ? "update" : (data.write ? 'create' : 'read'),
+                        ));
+                      }
+                      return Container( 
+                        width: (widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40)) - 94,
+                        margin: EdgeInsets.only(left: 20),
+                        child: Column( children: arr)
+                      );
+                    }
+                    return Container( 
+                      height: height - 80,
+                      decoration: BoxDecoration( color: Theme.of(context).splashColor), 
+                        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+                        child: Center(
+                          child: Text(empty.toLowerCase(), 
+                            style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
+                        ));
+              })
+    )]));
   }
 
   Future<Widget?> getSynthesis(String synthesisPath, double height) async {
