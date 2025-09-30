@@ -121,15 +121,15 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
           Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
             widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
           children: [ 
-            Text("${await getOnFlow("created ")} ${widget.refItem.metadata!.creationDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.creationUser}".toLowerCase(), 
+            Text("${await getOnFlow("created : ")} ${widget.refItem.metadata!.creationDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.creationUser}".toLowerCase(), 
                   overflow: TextOverflow.ellipsis,  
-                  style: const TextStyle(color: Colors.grey, fontSize: 9))
+                  style: const TextStyle(color: Colors.grey, fontSize: 11))
             ] )),
             widget.refItem.metadata?.updateUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
             children: [ 
-              Text("${await getOnFlow("last update ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
+              Text("${await getOnFlow("last update : ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
                     overflow: TextOverflow.ellipsis,  
-                    style: const TextStyle(color: Colors.grey, fontSize: 9))
+                    style: const TextStyle(color: Colors.grey, fontSize: 11))
               
             ] ))
           ])
@@ -137,7 +137,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       )
     );
     
-    if (desc.isNotEmpty && !desc.contains("no description")) {
+    /*if (desc.isNotEmpty && !desc.contains("no description")) {
       title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
         children: [ 
           Padding( 
@@ -148,7 +148,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                 style: const TextStyle(color: Colors.grey, fontSize: 12))
               
         ] )));
-    } /* else {
+    }  else {
       title.add(Container(margin: EdgeInsets.only(bottom: 20)));
     } */
     List<Widget> actions = [];
