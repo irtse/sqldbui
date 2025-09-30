@@ -279,7 +279,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
         } catch(e) {}
         
         try {
-          if (widget.translatable || item.translatable) {
+          if (widget.translatable) {
             v = await getOnFlow(v);
             if (v.toUpperCase() == v) {
                 v = v.toUpperCase();
@@ -396,7 +396,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
             found = true;
             var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
             try {
-              if (widget.translatable || item.translatable) {
+              if (widget.translatable) {
                 v = await getOnFlow(v);
                 if (v.toUpperCase() == v) {
                   v = v.toUpperCase();

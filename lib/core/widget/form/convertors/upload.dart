@@ -123,7 +123,7 @@ class _UploadState extends State<UploadWidget> {
                 suffixIcon: Icon(Icons.attach_file, size: 20, color: Theme.of(context).secondaryHeaderColor),
                 hintText: (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
                 labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
-                labelText: label,
+                labelText: label.toLowerCase(),
                 errorStyle: const TextStyle(fontSize: 0,),
               ),
               validator: (String? value) {

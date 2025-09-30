@@ -83,7 +83,7 @@ class OneToManyState extends State<OneToManyWidget> {
   }
 
   Future<List<Widget>> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme,  int datasLen) async {
-    var val = widget.label.toLowerCase().toLowerCase().toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
+    var val = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     if (widget.translatable) {
       val = await getOnFlow(val);
     }

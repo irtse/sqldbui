@@ -350,7 +350,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
             vv = vv.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
           }
           try {
-            if (widget.translatable || item.translatable) {
+            if (widget.translatable) {
               vv = (await getOnFlow(vv));
               if (vv.toUpperCase() == vv) {
                 vv = vv.toUpperCase();
@@ -397,7 +397,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         fieldDecoration: FieldDecoration(
                           errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                          labelText: widget.label,
+                          labelText: widget.label.toLowerCase(),
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
@@ -486,7 +486,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
               found = true;
               var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
               try {
-                if (widget.translatable || item.translatable) {
+                if (widget.translatable) {
                   v = await getOnFlow(v);
                 }
               } catch(e) {}

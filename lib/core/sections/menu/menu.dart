@@ -54,6 +54,7 @@ class MenuWidgetState extends State<MenuWidget> {
           views.add(view);
         }
       }
+      print("$categories");
       categories = <String, List<model.View>>{};
       for (var view in views) {
         var cat = view.category == "" ? "general" : view.category;
@@ -66,6 +67,7 @@ class MenuWidgetState extends State<MenuWidget> {
         categories[cat]!.add(view);
       }
     }
+    print("$categories");
     List<Widget> comps = [];
     for (var cat in categories.keys) {
       var count = 0;

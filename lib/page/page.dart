@@ -161,8 +161,7 @@ class PageWidgetState extends State<PageWidget> {
     List<Widget> c = !isMenu || noMenu ? [] : <Widget>[
       fork.TransformableBox(
         rect: rect, constraints: BoxConstraints(
-          maxWidth: 250 <= (currentWidth / 2) ? (currentWidth / 2) 
-            : currentWidth,
+          maxWidth: 250 <= (currentWidth / 2) ? (currentWidth / 2) : currentWidth,
           minWidth: 250 <= currentWidth ? 250 : currentWidth),
         flip: null,
         draggable: false,
