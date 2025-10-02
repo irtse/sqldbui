@@ -205,7 +205,9 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               Padding(
                 padding: EdgeInsets.only(top: 40, bottom: widget.workflow == null && !widget.view.isEmpty ? 25 : 0), 
                 child: Column( mainAxisAlignment: MainAxisAlignment.center, children: [
-                  ...title, 
+                  Container( height: 47, child: Column( mainAxisAlignment: MainAxisAlignment.center,  children: [
+                    ...title,
+                  ])),
                   widget.workflow != null ? WorkflowBarWidget(workflow: widget.workflow!) 
                   : ( widget.view.isEmpty ? WorkflowBarWidget(workflow: Workflow()) : Container()),
                   widget.workflow != null ?  WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, 

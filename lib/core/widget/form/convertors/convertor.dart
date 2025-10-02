@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
@@ -377,7 +378,7 @@ class Convertor {
                           spacing: 10,
         ),
         fieldDecoration: isGrid ? decF : FieldDecoration(
-                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: kIsWeb ? EdgeInsets.only(left: 12, right: 12, top: 12) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                           backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
