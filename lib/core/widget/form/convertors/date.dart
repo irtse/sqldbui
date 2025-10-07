@@ -1,9 +1,10 @@
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
+import 'package:expressions/expressions.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
-import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class DateWidget extends StatefulWidget {
@@ -16,7 +17,7 @@ class DateWidget extends StatefulWidget {
   dynamic value;
   final String label;
   final String type;
-  final dynamic autofill;
+  dynamic autofill;
   DateWidget ({required this.form, required this.schemaName, required this.name,
                       required this.readOnly, required this.type, required this.value, required this.label,
                       required this.component, this.require = false, required this.autofill}): super(key: GlobalKey<State<DateWidget>>());
@@ -27,12 +28,9 @@ class DateWidget extends StatefulWidget {
 class _DateState extends State<DateWidget> {
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<DateWidget>>;
-          if (r.value != null && r.value != "") {
-            widget.value = DateTime.parse("${r.value}");
-          }
         }
       }
     }
@@ -46,8 +44,7 @@ class _DateState extends State<DateWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
       DateTime? dateValue;
       var label = "${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
-      try {
-        label = await getOnFlow(label);
+      try {  label = await getOnFlow(label);
       } catch(e) {}
       if (widget.form[widget.name] != null) { 
         widget.value = widget.form[widget.name]; 
@@ -59,6 +56,45 @@ class _DateState extends State<DateWidget> {
         dateValue = DateTime.parse("${widget.autofill}");
         saveChange(widget.component?.widget.view, widget.form, widget.name, widget.autofill);
       }
+      
+      DateTime dateMin = DateTime(1900);
+      DateTime dateMax = DateTime(2100);
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
+        if (r.trigger == widget.name) {
+          for (var v in r.value.where( (e) => e != null )) {
+            if (v.toString().toLowerCase().contains("now") || v.toString().toLowerCase().contains("current_date")) {
+              var b = DateTime.now();
+              if (r.min) {
+                  if (dateMin.isBefore(b)) {
+                    dateMin = b;
+                  }
+                }
+                if (r.max) {
+                  if (dateMax.isAfter(b)) {
+                    dateMax = b;
+                  }
+                }
+            } else {
+              var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+              var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+              if (DateTime.tryParse(val) != null) {
+                var b = DateTime.parse(val);
+                if (r.min) {
+                  if (dateMin.isBefore(b)) {
+                    dateMin = b;
+                  }
+                }
+                if (r.max) {
+                  if (dateMax.isAfter(b)) {
+                    dateMax = b;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, child: TextFormField(
           readOnly: true,
@@ -114,9 +150,9 @@ class _DateState extends State<DateWidget> {
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(
               context: context,
-              firstDate: DateTime(1900),
+              firstDate: dateMin, // MIN OR MAX
               initialDate: dateValue ?? currentValue,
-              lastDate: DateTime(2100));
+              lastDate: dateMax);
         },
         onChanged: (DateTime? value) { 
           widget.component?.widget.detectChange = true;

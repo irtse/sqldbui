@@ -54,6 +54,7 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
         return EmptyFormularyWidget();
       }
       var ctrl = TextEditingController();
+      var k = GlobalKey<FormFieldState>();
       return Container(
         padding: EdgeInsets.symmetric(vertical: 20),
         child:  Column(children: [
@@ -73,6 +74,7 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
               width: widget.width - 94,
               margin: EdgeInsets.only(left: 20),
               child: TextFormField(
+                key: k,
                 readOnly: false,
                 maxLines: 5,
                 controller: ctrl,
@@ -106,7 +108,11 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
               ),
               InkWell(
                 onTap: () {
+                  if (!(k.currentState?.validate() ?? true) || (widget.view.commentBody["content"] ?? "") == "") {
+                    return;
+                  }
                   APIService().post(path, widget.view.commentBody, context).then( (e) {
+                    widget.view.commentBody["content"] = null;
                     setState(() { });
                   });
                 },

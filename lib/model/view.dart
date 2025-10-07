@@ -301,23 +301,29 @@ class Rule extends SerializerDeserializer<Rule> {
     this.related = "",
     this.trigger = "",
     this.operator = "",
-    this.value,
+    this.value = const [],
+    this.max = false,
+    this.min = false,
   });
 
   String related = "";
   String trigger = "";
   String operator = "";
-  dynamic value;
+  bool min = false;
+  bool max = false;
+  List<dynamic> value = [];
   GlobalKey<State<dynamic>>? key;
 
   @override Map<String, dynamic> serialize() => {};
 
   @override deserialize(Map<String, dynamic> json) {
     return  Rule(
+      min: json.containsKey("min") && json["min"] != null ? bool.parse("${json["min"]}") : false, 
+      max: json.containsKey("max") && json["max"] != null ? bool.parse("${json["max"]}") : false, 
       related :json.containsKey("related") && json["related"] != null ? json["related"] : "", 
       trigger: json.containsKey("trigger") && json["trigger"] != null ? json["trigger"] : "", 
       operator: json.containsKey("operator") && json["operator"] != null ? json["operator"] : "", 
-      value: json.containsKey("value") && json["value"] != null ? bool.parse("${json["value"]}") : false, 
+      value: json.containsKey("value") && json["value"] != null ? json["value"] : [], 
     );
 } }
 const emptyitem = <Item>[];

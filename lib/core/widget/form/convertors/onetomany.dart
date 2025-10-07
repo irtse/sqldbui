@@ -34,12 +34,12 @@ class OneToManyState extends State<OneToManyWidget> {
   bool first = true;
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<OneToManyWidget>>;
-          if (r.value != null && r.value != "") {
+          /*if (r.value != null && r.value != "") {
             widget.value = r.value;
-          }
+          }*/
         }
       }
     }

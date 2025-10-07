@@ -148,12 +148,12 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<SubManyToManyWidget>>;
-          if (r.value != null && r.value != "") {
+          /*if (r.value != null && r.value != "") {
             widget.value = "${r.value}".split(",").map( (e) => { "name" : e, });
-          }
+          }*/
         }
       }
     }

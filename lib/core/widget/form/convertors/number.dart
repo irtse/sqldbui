@@ -1,8 +1,9 @@
 
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
+import 'package:expressions/expressions.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 
 // ignore: must_be_immutable
 class NumberWidget extends StatefulWidget {
@@ -26,13 +27,13 @@ class NumberWidget extends StatefulWidget {
 class _NumberState extends State<NumberWidget> {
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<NumberWidget>>;
-          if (r.value != null && r.value != "") {
+          /*if (r.value.isNotEmpty) {
             if (widget.type.contains("int")) { saveChange(widget.component?.widget.view, widget.form, widget.name, int.parse(r.value));
             } else { saveChange(widget.component?.widget.view, widget.form, widget.name, double.parse(r.value)); }
-          }
+          }*/
         }
       }
     }
@@ -100,12 +101,32 @@ class _NumberState extends State<NumberWidget> {
           validator: (String? value) {
             var err = false;
             if (widget.type.contains("int") && value != null) {
-              try { double.parse(value); } catch (e) { err = true; }
+              try { int.parse(value); } catch (e) { err = true; }
             }
             if ((widget.type.contains("double") || widget.type.contains("float") || widget.type.contains("decimal") || widget.type.contains("money")) && value != null) {
               try { double.parse(value); } catch (e) { err = true; }
             }
-            return (value == null || value.isEmpty) && widget.require && !widget.readOnly || err && widget.require && !widget.readOnly ? 'enter a proper number.' : null;
+            if ((value == null || value.isEmpty) && widget.require && !widget.readOnly || err && widget.require && !widget.readOnly) {
+              return "";
+            }
+            for (var r in (widget.component?.widget.view?.rules ?? [])) {
+              if (r.trigger == widget.name) {
+                for (var v in r.value.where( (e) => e != null )) {
+                  var b = "${double.parse(value!)} ${r.operator} ";
+                  var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+                  var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+                  b += "$val";
+                  try {
+                    final expression = Expression.parse(b);
+                    final evaluator = const ExpressionEvaluator();
+                    if (!evaluator.eval(expression, {})) {
+                      return "";
+                    }
+                  } catch (e) { print(e); }
+                }
+              }
+            }
+            return null;
           },
         ));
   }

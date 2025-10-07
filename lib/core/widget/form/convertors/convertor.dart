@@ -26,15 +26,21 @@ Map<String, dynamic> cacheChanges = {};
 Map<String, GlobalKey<FormFieldState>> detectChanges = {};
 
 saveChange(model.View? view, Map<String,dynamic> form, String name, dynamic value) {
-  form[name] = value;
-  if (view != null && view.rules.isNotEmpty) {
+  if (view != null && view.rules.isNotEmpty && form[name] != value) {
     for (var r in view.rules) {
-      if (r.related == name) {
+      if (r.related == name && r.key != null) {
         firstAPI = true;
         r.key?.currentState?.setState( () { });
       }
+      for (var v in r.value) {
+        if (v.contains(name) && r.key != null) {
+          firstAPI = true;
+          r.key?.currentState?.setState( () { });
+        }
+      }
     }
   }
+  form[name] = value;
 }
 
 abstract class ConvertorWidget {

@@ -42,12 +42,9 @@ class TextWidget extends StatefulWidget {
 class _TextState extends State<TextWidget> {
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<TextWidget>>;
-          if (r.value != null && r.value != "") {
-            widget.value = "${r.value}";
-          }
         }
       }
     }
@@ -132,8 +129,47 @@ class _TextState extends State<TextWidget> {
       },
       onSaved: (String? value) => saveChange(widget.component?.widget.view, widget.form, widget.name, value),
         validator: (String? value) {
-          var t = (value == null || value.isEmpty) && widget.require && !widget.readOnly ? "" : null;
-          return t;
+          if ((value == null || value.isEmpty) && widget.require && !widget.readOnly) {
+            return "";
+          }
+          for (var r in (widget.component?.widget.view?.rules ?? [])) {
+            if (r.trigger == widget.name) {
+              if (r.operator.toLowerCase().contains("in")) {
+                if (r.operator.toLowerCase().contains("not") && r.value.contains(value)) {
+                  return "";
+                } else if (!r.value.contains(value)) {
+                  return "";
+                }
+                return null;
+              }
+              for (var v in r.value.where( (e) => e != null )) {
+                var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+                var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+                if (r.operator.toLowerCase().contains("like")) {
+                  if (r.operator.toLowerCase().contains("not")) {
+                    if ((value?.contains(val) ?? true)) {
+                      return "";
+                    }
+                  } else {
+                    if (!(value?.contains(val) ?? false)) {
+                      return "";
+                    } 
+                  }
+                } else if (r.operator.contains("=")) {
+                  if (r.operator.contains("!")) {
+                    if (value != val) {
+                      return "";
+                    }
+                  } else {
+                    if (value == val) {
+                      return "";
+                    }
+                  }
+                }
+              }
+            }
+          }
+          return null;
         },
       );
   }

@@ -203,9 +203,16 @@ class GridWidgetState extends State<GridWidget> {
         child: Stack(children: [
           Container(
             margin: EdgeInsets.only(top: isEditMode[viewID] == true && showFunctions[viewID] == true ? 95 : 55),
-            child: Scrollbar(
+            child:ScrollbarTheme(
+              data: ScrollbarThemeData(
+                thumbColor: WidgetStateProperty.all(Colors.grey.shade200),
+                thickness: WidgetStateProperty.all(8),
+                radius: const Radius.circular(10),
+              ),
+              child: Scrollbar(
                 controller: _vertical,
                 thumbVisibility: true,
+                trackVisibility: true,
                 interactive: !globalLoading,
                 notificationPredicate: (notif) => notif.depth > -1,
                 child:  SizedBox( 
@@ -244,7 +251,7 @@ class GridWidgetState extends State<GridWidget> {
                       ])
                     )
                   )
-            )),
+            ))),
       Container(  
         decoration: BoxDecoration(
           color: Theme.of(context).highlightColor,

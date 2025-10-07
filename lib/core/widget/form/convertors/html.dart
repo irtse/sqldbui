@@ -55,12 +55,9 @@ class HTMLState extends State<HTMLWidget> {
   }
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<HTMLWidget>>;
-          if (r.value != null && r.value != "") {
-            widget.value = "${r.value}";
-          }
         }
       }
     }
@@ -84,51 +81,99 @@ class HTMLState extends State<HTMLWidget> {
     } else if (widget.translatable) {
       val = await getOnFlow(val);
     }
-    return Container( 
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
-        border: Border.all( color: Theme.of(context).splashColor, )),
-      width: MediaQuery.of(context).size.width, height: 300, child: Column(
-      children: [
-            QuillSimpleToolbar(
-              controller: _controller,
-              configurations: QuillSimpleToolbarConfigurations(
-                showClipboardPaste: true,
-                embedButtons: FlutterQuillEmbeds.toolbarButtons(),
-                customButtons: [ ],
-                buttonOptions: QuillSimpleToolbarButtonOptions(
-                  base: QuillToolbarBaseButtonOptions(
-                    afterButtonPressed: () {
-                      final isDesktop = {
-                        TargetPlatform.linux,
-                        TargetPlatform.windows,
-                        TargetPlatform.macOS
-                      }.contains(defaultTargetPlatform);
-                      if (isDesktop) {
-                        _editorFocusNode.requestFocus();
-                      }
-                    },
-                  ),
-                  linkStyle: QuillToolbarLinkStyleButtonOptions(),
-                ),
-              ),
-            ),
-            Expanded(
-              child: QuillEditor(
-                focusNode: _editorFocusNode,
-                scrollController: _editorScrollController,
+    var placeholder = await getOnFlow('Start writing your notes...');
+    return FormField<String>(
+      validator: (value) {
+        value = _controller.document.toPlainText().trim();
+        if (value.isEmpty && widget.require && !widget.readOnly) {
+            return "";
+          }
+          for (var r in (widget.component?.widget.view?.rules ?? [])) {
+            if (r.trigger == widget.name) {
+              if (r.operator.toLowerCase().contains("in")) {
+                if (r.operator.toLowerCase().contains("not") && r.value.contains(value)) {
+                  return "";
+                } else if (!r.value.contains(value)) {
+                  return "";
+                }
+                return null;
+              }
+              for (var v in r.value.where( (e) => e != null )) {
+                var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+                var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+                if (r.operator.toLowerCase().contains("like")) {
+                  if (r.operator.toLowerCase().contains("not")) {
+                    if (value.contains(val)) {
+                      return "";
+                    }
+                  } else {
+                    if (!value.contains(val)) {
+                      return "";
+                    } 
+                  }
+                } else if (r.operator.contains("=")) {
+                  if (r.operator.contains("!")) {
+                    if (value != val) {
+                      return "";
+                    }
+                  } else {
+                    if (value == val) {
+                      return "";
+                    }
+                  }
+                }
+              }
+            }
+          }
+          return null;
+      },
+      builder: (state) {
+        return Container( 
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          border: Border.all( color: Theme.of(context).splashColor, )),
+        width: MediaQuery.of(context).size.width, height: 300, child: Column(
+        children: [
+              QuillSimpleToolbar(
                 controller: _controller,
-                configurations: QuillEditorConfigurations(
-                  placeholder: (await getOnFlow('Start writing your notes...')).toLowerCase(),
-                  padding: const EdgeInsets.all(16),
-                  embedBuilders: kIsWeb ? FlutterQuillEmbeds.editorWebBuilders() : FlutterQuillEmbeds.editorBuilders(),
+                configurations: QuillSimpleToolbarConfigurations(
+                  showClipboardPaste: true,
+                  embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+                  customButtons: [ ],
+                  buttonOptions: QuillSimpleToolbarButtonOptions(
+                    base: QuillToolbarBaseButtonOptions(
+                      afterButtonPressed: () {
+                        final isDesktop = {
+                          TargetPlatform.linux,
+                          TargetPlatform.windows,
+                          TargetPlatform.macOS
+                        }.contains(defaultTargetPlatform);
+                        if (isDesktop) {
+                          _editorFocusNode.requestFocus();
+                        }
+                      },
+                    ),
+                    linkStyle: QuillToolbarLinkStyleButtonOptions(),
+                  ),
                 ),
               ),
-            ),
-          ],
-    ));
+              Expanded(
+                child: QuillEditor(
+                  focusNode: _editorFocusNode,
+                  scrollController: _editorScrollController,
+                  controller: _controller,
+                  configurations: QuillEditorConfigurations(
+                    placeholder:placeholder.toLowerCase(),
+                    padding: const EdgeInsets.all(16),
+                    embedBuilders: kIsWeb ? FlutterQuillEmbeds.editorWebBuilders() : FlutterQuillEmbeds.editorBuilders(),
+                  ),
+                ),
+              ),
+            ],
+      ));
+    });
   }
   _onEditorChanged() {
     List deltaJson = _controller.document.toDelta().toJson();

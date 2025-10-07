@@ -27,12 +27,12 @@ class BooleanWidget extends StatefulWidget {
 class _BooleanState extends State<BooleanWidget> {
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<BooleanWidget>>;
-          if (r.value != null && r.value != "") {
+          /*if (r.value != null && r.value != "") {
             widget.value = "${r.value}" == "true";
-          }
+          }*/
         }
       }
     }
@@ -78,7 +78,30 @@ class _BooleanState extends State<BooleanWidget> {
       );
     }
     ValueNotifier<bool> ctrl = ValueNotifier(widget.value ?? ("${widget.autofill}" == "true"));
-    return AdvancedSwitch( width : 200,
+    return FormField<bool>(
+      validator: (value) {
+        value = ctrl.value;
+        for (var r in (widget.component?.widget.view?.rules ?? [])) {
+          if (r.trigger == widget.name) {
+            for (var v in r.value.where( (e) => e != null )) {
+              var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+              var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? false;
+              if (r.operator.contains("!")) {
+                if (value != val) {
+                  return "";
+                }
+              } else {
+                if (value == val) {
+                  return "";
+                }
+              }
+            }
+          }
+        }
+        return null;
+      },
+      builder: (state) {
+        return  AdvancedSwitch( width : 200,
           enabled: !widget.readOnly,
           controller: ctrl,
           activeColor: Colors.green, inactiveColor: Colors.grey,
@@ -91,6 +114,7 @@ class _BooleanState extends State<BooleanWidget> {
             saveChange(widget.component?.widget.view, widget.form, widget.name, value);
             ctrl.value = value;
           }
-    );
+      );
+    });
   }
 }

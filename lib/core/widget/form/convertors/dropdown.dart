@@ -10,6 +10,8 @@ import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:expressions/expressions.dart';
+
 
 Map<String,Map<String,String>> currentDropdown = {};
 // ignore: must_be_immutable
@@ -45,7 +47,7 @@ class DropDownWidget extends StatefulWidget {
 class DropDownState extends State<DropDownWidget> {
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in widget.component!.widget.view!.rules) {
+      for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<DropDownWidget>>;
           widget.enrichPath[r.related]="${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
@@ -181,7 +183,47 @@ class DropDownState extends State<DropDownWidget> {
             labelText: label.toLowerCase(),
           ),
           validator: (String? value) {
-            return (value == null || value.isEmpty) && widget.require ? "" : null;
+            if ((value == null || value.isEmpty) && widget.require) {
+              return "";
+            }
+            for (var r in (widget.component?.widget.view?.rules ?? [])) {
+              if (r.trigger == widget.name) {
+                if (r.operator.toLowerCase().contains("in")) {
+                  if (r.operator.toLowerCase().contains("not") && r.value.contains(value)) {
+                    return "";
+                  } else if (!r.value.contains(value)) {
+                    return "";
+                  }
+                  return null;
+                }
+                for (var v in r.value.where( (e) => e != null )) {
+                  var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+                  var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString();
+                  if (r.operator.toLowerCase().contains("like")) {
+                    if (r.operator.toLowerCase().contains("not")) {
+                      if ((value?.contains(val) ?? true)) {
+                        return "";
+                      }
+                    } else {
+                      if (!(value?.contains(val) ?? false)) {
+                        return "";
+                      } 
+                    }
+                  } else if (r.operator.contains("=")) {
+                    if (r.operator.contains("!")) {
+                      if (value != val) {
+                        return "";
+                      }
+                    } else {
+                      if (value == val) {
+                        return "";
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            return null;
           },
       ); 
     }
@@ -452,6 +494,23 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         validator: (value) {
                           if ((value == null || value.isEmpty) && widget.require) {
                             return '';
+                          }
+                          for (var r in (widget.component?.widget.view?.rules ?? [])) {
+                            if (r.trigger == widget.name) {
+                              for (var v in r.value.where( (e) => e != null )) {
+                                var b = "$value ${r.operator} ";
+                                var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
+                                var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v.toString() ?? "";
+                                b += "$val";
+                                try {
+                                  final expression = Expression.parse(b);
+                                  final evaluator = const ExpressionEvaluator();
+                                  if (!evaluator.eval(expression, {})) {
+                                    return "";
+                                  }
+                                } catch (e) { print(e); }
+                              }
+                            }
                           }
                           return null;
                         },
