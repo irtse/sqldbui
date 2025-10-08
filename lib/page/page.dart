@@ -1,3 +1,9 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqldbui2/core/sections/head_menu.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
@@ -15,6 +21,8 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/page/translate.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 
 bool noMenu = false;
@@ -88,7 +96,7 @@ class PageWidgetState extends State<PageWidget> {
                 : launchUrl(Uri( path: "${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/assets/pdf/tutorial.pdf"), mode: LaunchMode.externalApplication) // Opens in new tab), 
             )
           ),*/
-          DialogButtonWidget(icon: Icons.info_outline, widget: TutorialPopUpWidget(), tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
+          DialogButtonWidget(icon: Icons.info_outline, onChanged: kIsWeb ? openPdf : null, widget: !kIsWeb ? TutorialPopUpWidget(): null, tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
           DialogButtonWidget( left: 12.5, right: 50,
             icon: Icons.logout_outlined,
             widget: ConfirmBoxWidget(purpose: "disconnect your account", validate: () { _authProvider.logOut(context); }), 
@@ -104,6 +112,55 @@ class PageWidgetState extends State<PageWidget> {
       backgroundColor: Theme.of(context).secondaryHeaderColor);
   }
 
+
+  static const String assetPath = 'assets/pdf/tutorial.pdf';
+  static const String assetWebPath = 'assets/pdf/tutorial.pdf'; // relative url on web
+
+  Future<void> openPdf(BuildContext context) async {
+    try {
+      if (kIsWeb) {
+        // On web the assets are served from '/assets/...' by default.
+        // url_launcher will open it in a new tab/window.
+        final url = assetWebPath;
+        final launched = await launchUrlString(
+          url,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!launched) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open PDF in new tab.')),
+          );
+        }
+        return;
+      }
+
+      // For mobile/desktop: load bytes from asset, write to temp file, then open it
+      final ByteData bytesData = await rootBundle.load(assetPath);
+      final Uint8List bytes = bytesData.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final filePath = '${tempDir.path}/my_file_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final file = File(filePath);
+      await file.writeAsBytes(bytes, flush: true);
+
+      // Use open_file to open the file with default application
+      final result = await OpenFile.open(file.path);
+
+      // Optionally show result code/message in debug or to user
+      if (result.type != ResultType.done) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Opening file returned: ${result.message ?? result.type}')),
+        );
+      }
+
+      // Note: you may delete the temp file later if desired.
+    } catch (e, st) {
+      debugPrint('Error opening PDF: $e\n$st');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error opening PDF: $e')),
+      );
+    }
+  }
   
   Widget? buildDrawer() {
     return noMenu ? Drawer(

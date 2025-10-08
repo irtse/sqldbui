@@ -73,7 +73,7 @@ class ActionService {
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                          InfoAlertBannerChild(text: "${method == "post" ? "created" : ( method == "put" ? "saved" : method + "d")} successfully"), // <-- Put any widget here you want!
+                          InfoAlertBannerChild(text: " success"), // <-- Put any widget here you want!
                                                       alertBannerLocation:  AlertBannerLocation.bottom);
             } 
         }

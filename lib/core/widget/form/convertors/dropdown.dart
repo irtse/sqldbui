@@ -251,7 +251,6 @@ class DropDownState extends State<DropDownWidget> {
                         labelText: label.toLowerCase(),
                       ) ));
     }
-    
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>(
@@ -363,11 +362,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     try {
     List<DropdownItem<String>> items = [];
-    int max = 0;
     var l = widget.datas.toList();
+    int max = l.isNotEmpty ? l.first.max : 0;
+    print(max);
     ctrls = MultiSelectController<String>();
     for (var item in l) {
-      max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
       v = v.replaceAll("''", "'");
       var t = items.where((e) => e.value.toString() == "${item.id}"); 

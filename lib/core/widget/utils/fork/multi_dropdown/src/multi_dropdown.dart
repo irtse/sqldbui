@@ -29,7 +29,7 @@ typedef DropdownItemBuilder<T> = Widget Function(
 typedef OnSelectionChanged<T> = void Function(List<T> selectedItems);
 
 /// typedef for the callback when the search field value changes.
-typedef OnSearchChanged = ValueChanged<String>;
+typedef OnSearchChanged = ValueChanged<List<String>>;
 
 /// typedef for the selected item builder.
 typedef SelectedItemBuilder<T> = Widget Function(DropdownItem<T> item);

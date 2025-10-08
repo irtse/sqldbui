@@ -4,18 +4,20 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class DialogButtonWidget extends StatefulWidget {
-  Widget widget;
+  Widget? widget;
   String tooltip;
   IconData icon;
   double right = 0;
   double left = 0;
+  void Function(BuildContext)? onChanged;
   DialogButtonWidget ({ 
     super.key, 
     required this.icon,
-    required this.widget, 
+    this.widget, 
     required this.tooltip,
     this.left = 0,
     this.right = 0,
+    this.onChanged
   });
   @override DialogButtonWidgetState createState() => DialogButtonWidgetState();
 }
@@ -25,8 +27,8 @@ class DialogButtonWidgetState extends State<DialogButtonWidget> {
       child: IconButton(
         icon: Icon( widget.icon, color: Colors.white ), 
           tooltip: widget.tooltip,
-          onPressed: () async => showDialog(context: context, builder: (BuildContext context) { 
-            return widget.widget; 
+          onPressed: () async => widget.onChanged != null ? widget.onChanged!(context) : showDialog(context: context, builder: (BuildContext context) { 
+            return widget.widget ?? Container(); 
           }), 
       )
     );

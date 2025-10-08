@@ -57,7 +57,7 @@ class _Dropdown<T> extends StatelessWidget {
   final ValueChanged<DropdownItem<T>> onItemTap;
 
   /// The callback when the search field value changes.
-  final ValueChanged<String>? onSearchChange;
+  final ValueChanged<List<String>>? onSearchChange;
   /// Whether the selection is single.
   final bool singleSelect;
 
@@ -207,7 +207,7 @@ class _Dropdown<T> extends StatelessWidget {
     );
   }
 
-  void _onSearchChange(String value) => onSearchChange?.call(value);
+  void _onSearchChange(List<String> value) => onSearchChange?.call(value);
 
   bool _reachedMaxSelection(DropdownItem<dynamic> option) {
     return !option.selected &&
@@ -216,7 +216,7 @@ class _Dropdown<T> extends StatelessWidget {
   }
 }
 Map<String,TextEditingController> searchCtrl = {};
-Map<String, String> search = {};
+Map<String, List<String>> search = {};
 Map<String, List<String>> alreadySearch = {};
 
 // ignore: must_be_immutable
@@ -231,7 +231,7 @@ class _SearchField extends StatelessWidget {
 
   final String label;
   final SearchFieldDecoration decoration;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<List<String>> onChanged;
   final void Function(String)? function;
   final void Function(String)? changeFunction;
 
@@ -250,7 +250,10 @@ class _SearchField extends StatelessWidget {
     }
     if ((searchCtrl[label]?.text ?? "") != "" ) {
       Future.delayed(Duration(seconds: 1), () {
-        search[label]=searchCtrl[label]?.text ?? "";
+        if (search[label] == null) {
+          search[label]=[];
+        }
+        search[label]!.add(searchCtrl[label]?.text ?? "");
         onChanged(search[label]!);
       });
     }
@@ -269,19 +272,20 @@ class _SearchField extends StatelessWidget {
           suffixIcon: decoration.searchIcon,
         ),
         onChanged: (String v) {
-          search[label] = searchCtrl[label]?.text ?? "";
+          search[label] = (searchCtrl[label]?.text ?? "").split(" ");
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
-              if (searchCtrl[label]?.text == search[label] && !(alreadySearch[label]?.contains(search[label]) ?? false)) {
-                if (alreadySearch[label] == null) {
-                  alreadySearch[label] = [];
+                if ( search[label]?.join(" ") != null && searchCtrl[label]?.text == search[label]?.join(" ") && !(alreadySearch[label]?.contains(search[label]?.join(" ")) ?? false)) {
+                  if (alreadySearch[label] == null) {
+                    alreadySearch[label] = [];
+                  }
+                  alreadySearch[label]?.add(search[label]!.join(" "));
+                  changeFunction!(searchCtrl[label]?.text ?? "");
                 }
-                alreadySearch[label]?.add(search[label] ?? "");
-                changeFunction!(searchCtrl[label]?.text ?? "");
-              }
+                   
             });
           }
-          onChanged(v);
+          onChanged(search[label] ??  []);
         },
       ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
       child: InkWell( 

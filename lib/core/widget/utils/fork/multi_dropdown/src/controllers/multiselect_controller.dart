@@ -14,7 +14,7 @@ class MultiSelectController<T> extends ChangeNotifier {
 
   List<DropdownItem<T>> _filteredItems = [];
 
-  String _searchQuery = '';
+  List<String> _searchQuery = [];
 
   /// Gets the list of dropdown items.
   List<DropdownItem<T>> get items =>
@@ -125,8 +125,7 @@ class MultiSelectController<T> extends ChangeNotifier {
     if (_searchQuery.isNotEmpty) {
       _filteredItems = _items
           .where(
-            (item) =>
-                item.label.toLowerCase().contains(_searchQuery.toLowerCase()),
+            (item) => _searchQuery.where( (s) => item.label.toLowerCase().contains(s.toLowerCase())).isNotEmpty,
           )
           .toList();
     }
@@ -225,15 +224,14 @@ class MultiSelectController<T> extends ChangeNotifier {
 
   // sets the search query.
   // The [query] parameter is the search query.
-  void _setSearchQuery(String query) {
+  void _setSearchQuery(List<String> query) {
     _searchQuery = query;
     if (_searchQuery.isEmpty) {
       _filteredItems = List.from(_items);
     } else {
       _filteredItems = _items
           .where(
-            (item) =>
-                item.label.toLowerCase().contains(_searchQuery.toLowerCase()),
+            (item) => _searchQuery.where( (s) => item.label.toLowerCase().contains(s.toLowerCase())).isNotEmpty,
           )
           .toList();
     }
@@ -243,7 +241,7 @@ class MultiSelectController<T> extends ChangeNotifier {
 
   // clears the search query.
   void _clearSearchQuery({bool notify = false}) {
-    _searchQuery = '';
+    _searchQuery = [];
     if (notify) notifyListeners();
   }
 
