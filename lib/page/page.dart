@@ -114,7 +114,7 @@ class PageWidgetState extends State<PageWidget> {
 
 
   static const String assetPath = 'assets/pdf/tutorial.pdf';
-  static const String assetWebPath = 'assets/pdf/tutorial.pdf'; // relative url on web
+  static const String assetWebPath = 'assets/assets/pdf/tutorial.pdf'; // relative url on web
 
   Future<void> openPdf(BuildContext context) async {
     try {
