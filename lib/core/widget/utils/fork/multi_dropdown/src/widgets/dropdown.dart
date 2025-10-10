@@ -275,17 +275,12 @@ class _SearchField extends StatelessWidget {
           search[label] = (searchCtrl[label]?.text ?? "").split(" ");
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
-                if ( search[label]?.join(" ") != null && searchCtrl[label]?.text == search[label]?.join(" ") && !(alreadySearch[label]?.contains(search[label]?.join(" ")) ?? false)) {
-                  if (alreadySearch[label] == null) {
-                    alreadySearch[label] = [];
-                  }
-                  alreadySearch[label]?.add(search[label]!.join(" "));
+                if ( search[label]?.join(" ") != null && searchCtrl[label]?.text == search[label]?.join(" ")) {
                   changeFunction!(searchCtrl[label]?.text ?? "");
-                }
-                   
+                  onChanged(search[label] ??  []);
+                } 
             });
           }
-          onChanged(search[label] ??  []);
         },
       ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
       child: InkWell( 

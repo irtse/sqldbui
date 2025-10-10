@@ -64,7 +64,6 @@ class DataAccess extends SerializerDeserializer<DataAccess> {
   DateTime? accessDate;
 
   @override deserialize(Map<String, dynamic> json) {
-    print(json);
     return DataAccess(
     user: json.containsKey("user") ? json["user"] : "unknown user", 
     update: json.containsKey("update") ? bool.parse("${json["update"]}") : false, 
