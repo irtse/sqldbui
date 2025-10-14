@@ -296,8 +296,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                             ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
                               "name": value,
                             }, label: value, selected: true));
-                            ctrls.closeDropdown();
-                            ctrls.openDropdown(null, widget.label);
+                            ctrls.openDropdown(null, widget.label, true);
                         } : null,
                         controller: ctrls,
                         items: items,
@@ -436,12 +435,10 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
         } 
       }
       if (ctrls.isOpen && found) {
-        ctrls.closeDropdown();
-        ctrls.openDropdown(value, widget.label);
+        ctrls.openDropdown(value, widget.label, true);
       }
     } catch(e) {
-      ctrls.closeDropdown();
-        ctrls.openDropdown(value, "");
+        ctrls.openDropdown(value, "", true);
     }
   }
 }

@@ -120,7 +120,7 @@ class AppRouter {
           label: "${await getOnFlow(currentView!.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", ""))} -> ${ 
             await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
       }
-      navigatorCtrls.openDropdown("", "");
+      navigatorCtrls.openDropdown("", "", true);
       navigatorCtrls.closeDropdown();
     });
   }
@@ -168,7 +168,7 @@ class AppRouter {
                       await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
           }
       });
-      navigatorCtrls.openDropdown("", "");
+      navigatorCtrls.openDropdown("", "", true);
       navigatorCtrls.closeDropdown();
     }
   }

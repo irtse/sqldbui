@@ -151,7 +151,9 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     if (viewID != null && !rects.containsKey(viewID)) { rects[viewID] = {}; }
     late Rect rect = rects[viewID]!.containsKey(widget.columnName) ? rects[viewID]![widget.columnName]! : Rect.fromCenter(
       center: MediaQuery.of(context).size.center(Offset.zero), width: width.isNaN ? 300 : width + 32, height: 55 );
-    if (currentView != null && rects.containsKey(viewID)) { rects[viewID]![widget.columnName] = rect; }
+    if (currentView != null && rects.containsKey(viewID)) { 
+      rects[viewID]![widget.columnName] = rect; 
+    }
     List<DropdownMenuItem<String>> dpItems = []; 
     if (widget.isEditMode && showFunctions[viewID] == true) {
       List<String> t = widget.columnName == "id" ? [] : ["count"];
@@ -262,7 +264,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           } 
         },
         contentBuilder: (context, rect, flip) {
-          var size = rects[viewID]![widget.columnName]!.width - 40 - (widget.show ? (buttons.length) * 40 : 0);
+          var size = (rects[viewID]![widget.columnName]?.width ??  300 ) - 40 - (widget.show ? (buttons.length) * 40 : 0);
           return MouseRegion(
             onEnter: (b) { setState(() { widget.show = true; });}, // todo if datas lenght == 0
             onExit: (b) { setState(() { widget.show = false; });}, // todo if datas lenght == 0

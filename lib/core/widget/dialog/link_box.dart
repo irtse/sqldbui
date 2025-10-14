@@ -114,9 +114,9 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
               ),
             onShowPicker: (context, currentValue) { return showDatePicker(
                   context: context,
-                  firstDate: DateTime(1900),
+                  firstDate: add.contains("end") && widget.sharing?.body[add.replaceAll("end", "start")] != null ? DateTime.parse(widget.sharing?.body[add.replaceAll("end", "start")]) : DateTime(1900),
                   initialDate: currentValue,
-                  lastDate: DateTime(2100));
+                  lastDate: add.contains("start") && widget.sharing?.body[add.replaceAll("start", "end")] != null ? DateTime.parse(widget.sharing?.body[add.replaceAll("start", "end")]) : DateTime(2100));
             },
             onChanged: (DateTime? value) { 
                 widget.sharing?.body[add] = value?.toIso8601String(); 
@@ -183,6 +183,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
     var shared = await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.filterPlaceholder);
     var search = await getOnFlow(TranslateConstants.search);
     var select = await getOnFlow(TranslateConstants.selectValue);
+    print(widget.url);
     return FutureBuilder(
         future: APIService().get<model.Shallowed>("${widget.url}&shallow=enable", true, context),
         builder: (a,s) {
@@ -330,8 +331,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
           }
     } 
     if (ctrls.isOpen && found) {
-      ctrls.closeDropdown();
-      ctrls.openDropdown(value, "");
+      ctrls.openDropdown(value, "", true);
     }
   }
 }

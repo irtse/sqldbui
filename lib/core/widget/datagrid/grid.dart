@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -25,6 +26,7 @@ Map<String?, List<String>> notNew = {};
 Map<String?, Map<String, Rect>> rects = {};
 // ignore: must_be_immutable
 class GridWidget extends StatefulWidget {
+  final model.View? view; 
   Map<String, model.Shallowed> contentShallowed;
   GlobalKey<ViewWidgetState>? viewKey; 
   bool showColumnHeaderIconOnHover;
@@ -34,20 +36,22 @@ class GridWidget extends StatefulWidget {
   Color backgroundColor; 
   double contextWidth;
   double borderWidth; 
-  List<Value> source;
   Color borderColor;
   String schemaID;
   int maxLength;
   bool isEnum;
   double scroll = 0;
+  Map<String, String> links = {};
+  Map<String, Map<String, dynamic>> cache = <String, Map<String, dynamic>>{};
 
   GridWidget({ super.key,
     required this.columns, 
-    required this.source, 
+    required this.view, 
     required this.schemaID, 
     required this.contentShallowed, 
     required this.maxLength, 
     required this.contextWidth, 
+    this.links = const {}, 
     this.viewKey,
     this.isSelected = true,
     this.isEnum = false,
@@ -105,19 +109,46 @@ class GridWidgetState extends State<GridWidget> {
     });
   }
   @override Widget build(BuildContext context) {
-  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+    Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
+    List<Value> datas = <Value>[];
+    if (widget.view != null) {
+      for (var item in (widget.view?.items ?? [] as List<model.Item>)) {
+        if (!widget.cache.containsKey(widget.view!.schemaName)) { widget.cache[widget.view!.schemaName]=<String,dynamic>{}; } 
+        if (!widget.cache.containsKey("id")) { 
+          widget.cache[widget.view!.schemaName]!["id"]=item.values["id"];
+          if (item.linkPath != "") {  widget.links[item.values['id']] = item.linkPath; }
+          for (var key in item.valuesShallow.keys) { 
+            widget.contentShallowed['$key:${item.values["id"]}'] = item.valuesShallow[key]!; 
+          }
+        } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
+        if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
+        datas.add(Value(
+          dataRef: item.dataRef,
+          schemaID: item.schemaID,
+          schema: schema,
+          valuesMany: item.valuesMany,
+          isNew: item.news,
+          isDraft: item.isDraft,
+          cellID: item.values["id"],
+          values: item.values, 
+          sharing: item.sharing,
+          isLink: item.linkPath != "", 
+          readOnly: (widget.view?.readOnly ?? false) || item.readonly)); 
+      }
+  }
+  return FutureBuilder(future: futureBuild(context, datas), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
       }
       return Container();
     });
   }
-  Future<Widget> futureBuild(BuildContext context) async {
+  Future<Widget> futureBuild(BuildContext context, List<Value> values) async {
     if (viewID == null) { return Container(); }
     lastWidth = rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width;
     List<Widget> additionnalContent = [];
-    if (currentView != null && viewID != null) { notNew[viewID] = []; }
-    List<GridRowWidget> rows = buildRows(widget.columns, widget.source);
+    if (widget.view != null && viewID != null) { notNew[viewID] = []; }
+    List<GridRowWidget> rows = buildRows(widget.columns, values);
     if (widget.isSelected && selectedGrid.isEmpty) { 
       for (var row in rows) { 
         selectedGrid.add(row.cellID); 
@@ -213,6 +244,7 @@ class GridWidgetState extends State<GridWidget> {
                 controller: _vertical,
                 thumbVisibility: true,
                 trackVisibility: true,
+                scrollbarOrientation: ScrollbarOrientation.left,
                 interactive: !globalLoading,
                 notificationPredicate: (notif) => notif.depth > -1,
                 child:  SizedBox( 
@@ -231,18 +263,30 @@ class GridWidgetState extends State<GridWidget> {
                         )
                       ) : Column(children: [
                         ...rows, 
-                        currentView != null && currentView!.items.length < currentView!.max 
+                        widget.view != null && widget.view!.items.length < widget.view!.max 
                         ? Center(child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10), 
                           child: VisibilityDetector(
                             key: Key("my-widget"),
-                            onVisibilityChanged: (VisibilityInfo info) {
+                            onVisibilityChanged: (VisibilityInfo info) async {
                               if (info.visibleFraction > 0) {
-                                if (currentView != null && currentView!.items.length < currentView!.max) {
-                                  if ((currentView?.items.length ?? 0) >= globalOffset) { 
+                                if (widget.view != null && widget.view!.items.length < widget.view!.max) {
+                                  if ((widget.view?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = globalOffset + globalLimit; 
                                   }
-                                  globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
+                                  var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
+                                  var e = await APIService().getWithOffset<model.View>(widget.view?.linkPath ?? defaultPath, false, context);
+                                  for (var view in e.data!.sublist(1)) { 
+                                    if (view.items.isEmpty || ((widget.view?.max ?? 0) <= globalOffset && (widget.view?.max ?? 0) > (widget.view?.items.length ?? 0))) {
+                                      widget.view?.max = widget.view?.items.length ?? 0;
+                                    }
+                                    for (var item in view.items) { 
+                                      if (widget.view!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { 
+                                        widget.view!.items.add(item); 
+                                      }
+                                    }
+                                  }
+                                  setState(() {});
                                 }
                               }
                             },

@@ -189,7 +189,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
                 label: "${await getOnFlow(currentView!.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", ""))} -> ${
                   await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
               }
-              navigatorCtrls.openDropdown("", "");
+              navigatorCtrls.openDropdown("", "", true);
               navigatorCtrls.closeDropdown();
             });
           } else {
@@ -207,7 +207,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
                   value: "@${widget.schemaID}${widget.cellID}", 
                   label: "${(currentView!.label ?? currentView!.name).replaceAll("_", "").replaceAll("db", "")} -> ${ 
                     currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : ""}".toLowerCase()));
-                navigatorCtrls.openDropdown("", "");
+                navigatorCtrls.openDropdown("", "", true);
                 navigatorCtrls.closeDropdown();
               }
             });

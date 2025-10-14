@@ -699,7 +699,7 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
 
     if (_portalController.isShowing && _dropdownController.isOpen) return;
 
-    _dropdownController.openDropdown(null, widget.fieldDecoration.labelText ?? "");
+    _dropdownController.openDropdown(null, widget.fieldDecoration.labelText ?? "", false);
   }
 
   void _handleOutsideTap() {

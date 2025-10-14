@@ -1,4 +1,3 @@
-import 'package:encrypt/encrypt.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
@@ -23,7 +22,6 @@ class MainGridWidget extends StatefulWidget {
   int subSize;
   double subWidthSize;
   GlobalKey<ViewWidgetState>? viewKey;
-  Map<String, Map<String, dynamic>> cache = <String, Map<String, dynamic>>{};
 
   MainGridWidget ({ super.key, this.view, this.viewKey, required this.subWidthSize, this.forceOrder, this.max = 5,
     this.links = const {}, this.isSelected = false, required this.subSize, this.subTable = false });
@@ -39,29 +37,6 @@ class MainGridWidgetState extends State<MainGridWidget> {
     Map<String, model.Shallowed> contentShallowed = <String, model.Shallowed>{};
     if (widget.view != null) {
       schema = widget.view!.schema;
-      for (var item in (widget.view?.items ?? [] as List<model.Item>)) {
-        if (!widget.cache.containsKey(widget.view!.schemaName)) { widget.cache[widget.view!.schemaName]=<String,dynamic>{}; } 
-        if (!widget.cache.containsKey("id")) { 
-          widget.cache[widget.view!.schemaName]!["id"]=item.values["id"];
-          if (item.linkPath != "") {  widget.links[item.values['id']] = item.linkPath; }
-          for (var key in item.valuesShallow.keys) { 
-            contentShallowed['$key:${item.values["id"]}'] = item.valuesShallow[key]!; 
-          }
-        } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
-        if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
-        datas.add(Value(
-          dataRef: item.dataRef,
-          schemaID: item.schemaID,
-          schema: schema,
-          valuesMany: item.valuesMany,
-          isNew: item.news,
-          isDraft: item.isDraft,
-          cellID: item.values["id"],
-          values: item.values, 
-          sharing: item.sharing,
-          isLink: item.linkPath != "", 
-          readOnly: currentView!.readOnly || item.readonly)); 
-      }
       var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, widget.max);
       for (var fieldName in order) {
           columns = getColumn(columns, widget.schemeItems, schema, fieldName, datas, order);
@@ -75,7 +50,8 @@ class MainGridWidgetState extends State<MainGridWidget> {
           color:  Theme.of(context).highlightColor
         ), 
         child : GridWidget( 
-          source: datas, 
+          view: widget.view, 
+          links: widget.links,
           columns: columns,
           key: globalGridKey, 
           viewKey: widget.viewKey, 

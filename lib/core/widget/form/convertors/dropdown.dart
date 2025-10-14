@@ -50,7 +50,6 @@ class DropDownState extends State<DropDownWidget> {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<DropDownWidget>>;
-          print("${r.related} ${r.trigger} ${widget.name} ${currentDropdown[viewID ?? ""]?[r.related]} ${widget.form[r.related]}");
           widget.enrichPath[r.related]="${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
           if (widget.enrichPath[r.related] == "") {
             widget.enrichPath.remove(r.related);
@@ -365,7 +364,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
     List<DropdownItem<String>> items = [];
     var l = widget.datas.toList();
     int max = l.isNotEmpty ? l.first.max : 0;
-    print(max);
     ctrls = MultiSelectController<String>();
     for (var item in l) {
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
@@ -422,11 +420,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
               e.selected = false;
             }
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
-            ctrls.closeDropdown();
-            ctrls.openDropdown(null, widget.label);
+            ctrls.openDropdown(null, widget.label, true);
         } : null,
                         controller: ctrls,
                         singleSelect: true,
+                        closeOnBackButton: true,
                         items: items,
                         searchEnabled: max > 10,
                         chipDecoration: ChipDecoration(
@@ -556,8 +554,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
           }
     } 
     if (ctrls.isOpen && found) {
-      ctrls.closeDropdown();
-      ctrls.openDropdown(value, widget.label);
+      ctrls.openDropdown(value, widget.label, true);
     }
   }
 }

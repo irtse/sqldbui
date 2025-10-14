@@ -143,7 +143,7 @@ class ViewWidgetState extends State<ViewWidget> {
     }
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 
-        DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view,);
+        DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view);
         if (widget.stillLoading) {
           Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
         }

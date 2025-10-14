@@ -615,8 +615,7 @@ class Convertor {
           }
     } 
     if (ctrls.isOpen && found) {
-      ctrls.closeDropdown();
-      ctrls.openDropdown(value, label);
+      ctrls.openDropdown(value, label, true);
     }
   }
 }
