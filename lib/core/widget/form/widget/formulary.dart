@@ -120,7 +120,10 @@ class FormularyWidgetState extends State<FormularyWidget> {
           
           String? mainUrl, url;
           if (field.actionPath != "") { mainUrl = field.actionPath; }
-          if (field.valuesPath != "") { url = field.valuesPath; }
+          if (field.valuesPath != "") { 
+            url = field.valuesPath; 
+          }
+          
           value = value == "" ? null : value;
           if (fieldName == "state") {
             value = "$value".replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "");

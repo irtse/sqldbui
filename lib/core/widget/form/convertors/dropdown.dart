@@ -50,6 +50,7 @@ class DropDownState extends State<DropDownWidget> {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<DropDownWidget>>;
+          print("${r.related} ${r.trigger} ${widget.name} ${currentDropdown[viewID ?? ""]?[r.related]} ${widget.form[r.related]}");
           widget.enrichPath[r.related]="${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
           if (widget.enrichPath[r.related] == "") {
             widget.enrichPath.remove(r.related);

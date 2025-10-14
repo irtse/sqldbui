@@ -411,6 +411,30 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
           }
         }
       } 
+      if (widget.type.toLowerCase().contains("add")) {
+        var e = await APIService().get<model.Shallowed>("${widget.mainURL}&shallow=enable$filter&offset=$start&limit=$interval", filter != "", null);
+        if (e.data != null) {
+          for (var item in e.data!) {
+            if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isEmpty) {
+              found = true;
+              var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
+              try {
+                if (widget.translatable) {
+                  v = await getOnFlow(v);
+                  if (v.toUpperCase() == v) {
+                    v = v.toUpperCase();
+                  } else {
+                    v = v.toLowerCase();
+                  }
+                }
+              } catch(e) {}
+              items.add(DropdownItem<Map<String, dynamic>>(
+                value: item.serialize(), label: v, selected: false));
+              ctrls.addItem(items.last);
+            }
+          }
+        } 
+      }
       if (ctrls.isOpen && found) {
         ctrls.closeDropdown();
         ctrls.openDropdown(value, widget.label);

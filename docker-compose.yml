@@ -10,10 +10,14 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
+      - "--certificatesresolvers.mytlsresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.mytlsresolver.acme.email=morgane.roques@irt-saintexupery.com"
+      - "--certificatesresolvers.mytlsresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"  # Expose Traefik on port 8000    
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - "./letsencrypt:/letsencrypt"
   sqldbui:
     image: irtse/sqldbui
     container_name: sqldbui
@@ -23,8 +27,9 @@ services:
       - sqldb
     labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.front.entrypoints=web"
+        - "traefik.http.routers.front.entrypoints=websecure"
         - "traefik.http.routers.front.rule=PathPrefix(`/`)"
+        - "traefik.http.routers.front.tls.certresolver=mytlsresolver"
         - "traefik.http.services.front.loadbalancer.server.port=80"
 networks:
   sqldb:
