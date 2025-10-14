@@ -133,7 +133,7 @@ class GridWidgetState extends State<GridWidget> {
           values: item.values, 
           sharing: item.sharing,
           isLink: item.linkPath != "", 
-          readOnly: (widget.view?.readOnly ?? false) || item.readonly)); 
+          readOnly: currentView!.readOnly || item.readonly)); 
       }
   }
   return FutureBuilder(future: futureBuild(context, datas), builder: (b,a) {
@@ -147,7 +147,7 @@ class GridWidgetState extends State<GridWidget> {
     if (viewID == null) { return Container(); }
     lastWidth = rects[viewID]?[widget.columns.last.columnName]?.width ?? widget.columns.last.width;
     List<Widget> additionnalContent = [];
-    if (widget.view != null && viewID != null) { notNew[viewID] = []; }
+    if (currentView != null && viewID != null) { notNew[viewID] = []; }
     List<GridRowWidget> rows = buildRows(widget.columns, values);
     if (widget.isSelected && selectedGrid.isEmpty) { 
       for (var row in rows) { 
@@ -263,15 +263,15 @@ class GridWidgetState extends State<GridWidget> {
                         )
                       ) : Column(children: [
                         ...rows, 
-                        widget.view != null && widget.view!.items.length < widget.view!.max 
+                        currentView != null && currentView!.items.length < currentView!.max 
                         ? Center(child: Container(
                           padding: EdgeInsets.symmetric(vertical: 10), 
                           child: VisibilityDetector(
                             key: Key("my-widget"),
                             onVisibilityChanged: (VisibilityInfo info) async {
                               if (info.visibleFraction > 0) {
-                                if (widget.view != null && widget.view!.items.length < widget.view!.max) {
-                                  if ((widget.view?.items.length ?? 0) >= globalOffset) { 
+                                if (currentView != null && currentView!.items.length < currentView!.max) {
+                                  if ((currentView?.items.length ?? 0) >= globalOffset) { 
                                     globalOffset = globalOffset + globalLimit; 
                                   }
                                   var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
@@ -286,7 +286,7 @@ class GridWidgetState extends State<GridWidget> {
                                       }
                                     }
                                   }
-                                  setState(() {});
+                                  globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
                                 }
                               }
                             },
