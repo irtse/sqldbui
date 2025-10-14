@@ -412,10 +412,10 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
         }
       } 
       if (widget.type.toLowerCase().contains("add")) {
-        var e = await APIService().get<model.Shallowed>("${widget.mainURL}&shallow=enable$filter&offset=$start&limit=$interval", filter != "", null);
+        var e = await APIService().get<model.Shallowed>("${widget.mainURL}$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {
-            if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isEmpty) {
+            if (items.where( (e) => "${e.value["label"]}" == "${item.label ??  item.name}" || "${e.value["name"]}" == "${item.label ??  item.name}").isEmpty) {
               found = true;
               var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
               try {
