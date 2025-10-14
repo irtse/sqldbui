@@ -10,13 +10,13 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.mytlsresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.mytlsresolver.acme.email=morgane.roques@irt-saintexupery.com"
-      - "--certificatesresolvers.mytlsresolver.acme.storage=/letsencrypt/acme.json"
+      # - "--entrypoints.websecure.address=:443"
+      # - "--certificatesresolvers.mytlsresolver.acme.tlschallenge=true"
+      #- "--certificatesresolvers.mytlsresolver.acme.email=morgane.roques@irt-saintexupery.com"
+      #- "--certificatesresolvers.mytlsresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"  # Expose Traefik on port 8000    
-      - "443:443"
+      #- "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - "./letsencrypt:/letsencrypt"
