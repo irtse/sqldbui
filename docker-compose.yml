@@ -29,7 +29,7 @@ services:
       - sqldb
     labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.front.entrypoints=websecure"
+        - "traefik.http.routers.front.entrypoints=web"
         - "traefik.http.routers.front.rule=Host(`${HOST:-capitalisation.irt-aese.local}`) && PathPrefix(`/`)"
         - "traefik.http.routers.front.tls.certresolver=mytlsresolver"
         - "traefik.http.services.front.loadbalancer.server.port=80"
