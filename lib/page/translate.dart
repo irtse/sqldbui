@@ -57,7 +57,7 @@ class TranslateConstants {
 
   static String home = "home page";
   static String loading = "LOADING";
-  static String found = "items found";
+  static String found = "elements";
   static String url = "actual url...";
   static String goto = "go to";
 

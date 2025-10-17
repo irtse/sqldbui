@@ -337,8 +337,9 @@ class ActionService {
     return views;
   }
 
-  static Future<void> submitFile(String path, PlatformFile file, BuildContext context) async {
-    await APIService().sendFile(path, file.path ?? "", file.name, file.bytes, context);
-  }
+  
 }
 // debug oneto + loader main
+Future<void> submitFile(String path, PlatformFile file, BuildContext context) async {
+  await APIService().sendFile(path, file.path ?? "", file.name, file.bytes, context);
+}

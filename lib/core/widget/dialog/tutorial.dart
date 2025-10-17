@@ -1,14 +1,6 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sqldbui2/page/translate.dart';
 import 'package:pdfx/pdfx.dart';
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 class TutorialPopUpWidget extends StatefulWidget {
   const TutorialPopUpWidget ({ super.key,});
   @override

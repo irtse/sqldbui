@@ -1,16 +1,14 @@
-
-import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
-import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
-import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/main.dart';
+import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/view.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/model/view.dart';
-import 'package:sqldbui2/page/translate.dart';
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 
-Map<String, List<GlobalKey<FormState>>> formRowFilterKeys = <String,List<GlobalKey<FormState>>>{};
 
 // ignore: must_be_immutable
 class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
@@ -130,7 +128,6 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     if ((widget.columnName ?? "") != "") {
       widget.type = widget.schema[widget.columnName]?.type ?? "text";
     }
-    widget.isNull = widget.value == "NULL" || widget.value == "NOT NULL";
     String url = widget.schema[widget.columnName] != null && widget.schema[widget.columnName]?.actionPath != ""  ? "${widget.schema[widget.columnName]!.actionPath}&shallow=enable" : "";
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(
       context, 
@@ -270,12 +267,13 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                       border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
                     )): w)),
               widget.columnName == null || widget.columnName == "" || widget.type.contains("bool") || widget.columnName == "id" || widget.schema[widget.columnName]!.require ? Container() : Row(children: [
-                Padding(padding: const EdgeInsets.only(right: 10), child:  Checkbox(value: widget.isNull, 
+                Padding(padding: const EdgeInsets.only(right: 10), child:  Checkbox(
+                  value: widget.isNull, 
                   onChanged: (value) => setState(() { 
                     widget.value = null;
                     widget.isNull = value ?? false; 
 
-                    widget.widget.widget.value = value; 
+                    widget.widget.widget.value = null; 
                     widget.widget.widget.isNull = value ?? false; 
                   }),
                   activeColor: Theme.of(context).primaryColor, overlayColor:  WidgetStateProperty.resolveWith((states) => Theme.of(context).splashColor),

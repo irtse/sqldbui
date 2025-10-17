@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -81,7 +82,7 @@ class APIService {
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter, globalFilter[viewID]);
       var command = "";
-      if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
+      if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
         dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter", options: Options(responseType: ResponseType.bytes)).then((value) async {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
@@ -146,13 +147,13 @@ class APIService {
   String getCmdCol() {
     var command = "";
     for (var column in (filterTempOrderView[viewID] ?? [])) {
-      if (colFunction[viewID] != null && isEditMode[viewID] == true) {
+      if (colFunction[viewID] != null && modeIndex == 1) {
         if (colFunction[viewID]![column] != null && colFunction[viewID]![column] != "") {
           command += "$column:${colFunction[viewID]![column]},";
         }
       }
     }
-    if (isEditMode[viewID] == true) {
+    if (modeIndex == 1) {
       var col = mathColName[viewID] ?? "total";
       if (colFunction[viewID] != null && colFunction[viewID]![col] != null && colFunction[viewID]![col] != "") {
         command += "$col:${colFunction[viewID]![col]},";
@@ -200,6 +201,7 @@ class APIService {
     }
     return filter;
   }
+
   Future<APIResponse<T>> main<T extends SerializerDeserializer>(String url, dynamic body, 
                                                                 String method, String succeed, bool force, 
                                                                 BuildContext? context, int? limit, int? offset, 
@@ -219,21 +221,19 @@ class APIService {
         var cols = getColumns(url, offset != null);
         // if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var command = "";
-        if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { 
+        if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
         url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter";
-        if (method.toLowerCase() != "get") {
-          cache = {};
-        }
         if (method == "get") {
-          if (!(force || noReload || resize) && cache.containsKey(url) && cache[url] != null ) { 
+          if (!force && cache.containsKey(url) && cache[url] != null ) { 
             return cache[url]! as APIResponse<T>;
           }
         }
+        // print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy${ url.contains("dbview") || method != "get" ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}");
+        var response = await request("$url${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}", method, body, options);        
+        // print("AFTER $method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}");
 
-        var response = await request("$url${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}", method, body, options);        
-        //print("$force ${stopwatch.elapsed.inSeconds} $method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy");
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
@@ -241,18 +241,17 @@ class APIService {
           }
         }
         if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
-          if (method == "delete") { 
-            cache.remove(url); 
-          }
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
 
           if (resp.error == "") {    
             if (method == "get") { 
-              if (limit != null && cache.containsKey(url) && offset != null && offset > 0) {
+              if (limit != null && cache.containsKey(url) && offset != null && offset > 0 ) {
                   cache[url]!.data!.addAll(resp.data!);
                   cache[url]!.offset = offset; 
                   return cache[url]! as APIResponse<T>;
-              } else { cache[url]=resp; } 
+              } else { 
+                cache[url]=resp; 
+              } 
             }
             if (context != null && succeed != "") {
               // ignore: use_build_context_synchronously
@@ -265,7 +264,6 @@ class APIService {
             return resp; 
           }
           err = resp.error ?? "internal error";
-          print(err);
         } 
         if (response.statusCode == 401) { err = "not authorized"; }
       } catch(e, s) {  
@@ -275,7 +273,7 @@ class APIService {
           err = "server unreachable";
         } else {
           err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; }
-        }
+      }
     } else { err = "no url"; }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {
@@ -295,8 +293,8 @@ class APIService {
         dio.options.headers["authorization"] = auth;
         dio.interceptors.clear(); 
         var command = "";
-        if (commands[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
-        var response = await request("$url$command&rawview=enable", method, body, null);
+        if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
+        var response = await request("$url$command&rawview=enable${ modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )}", method, body, null);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
@@ -314,7 +312,7 @@ class APIService {
         print(e); print(s);
         err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; }
     } else { err = "no url"; }
-    if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
+    if ((err.contains("token") && err.contains("expired")) || err == "not authorized") {  AuthService().unAuthenticate();  }
     throw Exception(err);
   }
 

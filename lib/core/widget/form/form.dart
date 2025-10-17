@@ -379,8 +379,11 @@ class FormWidgetState extends State<DataFormWidget> {
                           data.items.addAll(d.items);
                         }
                       }*/
-                      return MainGridWidget(view: data, 
-                        viewKey: null, subTable: true, 
+                      return MainGridWidget(
+                        view: data, 
+                        schema: widget.view?.schema ??  {},
+                        viewKey: null, 
+                        subTable: true, 
                         forceOrder: data.order,
                         links: {}, subSize: 0, 
                         subWidthSize: 100);

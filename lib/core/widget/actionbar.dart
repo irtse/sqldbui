@@ -1,6 +1,8 @@
+import 'package:sqldbui2/core/widget/datagrid/buttons/datagrid_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/link_box.dart';
+import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
@@ -20,11 +22,11 @@ MultiSelectController<String> navigatorCtrls = MultiSelectController<String>();
 bool translation = true;
 GlobalKey<ActionBarState> globalActionBar = GlobalKey<ActionBarState>();
 class ActionBarWidget extends StatefulWidget {
-  final model.View? view;
+  model.View? view;
   final DataFormWidget? form;
   final DatagridWidget? grid;
   final GlobalKey<GridWidgetState>? gridKey;
-  const ActionBarWidget ({ super.key, this.view, this.gridKey, this.grid, this.form});
+  ActionBarWidget ({ super.key, required this.view, this.gridKey, this.grid, this.form});
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
@@ -63,13 +65,30 @@ class ActionBarState extends State<ActionBarWidget> {
       List<Widget> actions = <Widget>[];
       if (viewID != null && widget.view != null) {
         if (widget.view!.isList) {
-          actions.add( getIconOffset( (await getOnFlow(!translation ? TranslateConstants.translationOFF.toLowerCase() : TranslateConstants.translationON)).toLowerCase(), 
-          !translation ? Icons.translate : Icons.g_translate, null, () {
-            translation = !translation;
-            confirmCache = {};
-            navigate = true;
-            globalMainViewKey.currentState?.setState(() { });
-          }, false));
+          if (allSelected || selectedGrid.isNotEmpty) {
+            if (modeIndex == 1) {
+              actions.add(DatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {}, mode: "update"));
+            } else if (modeIndex == 2) {
+              actions.add(DatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {}, mode: "delete"));
+            } else {        
+              actions.addAll([
+                PopupButtonWidget(
+                  tooltip: (currentView!.isList ? TranslateConstants.rowsListExport : TranslateConstants.rowsExport).toLowerCase(),
+                  icon: Icons.file_download,
+                  widget: MappingPopUpWidget(isExport: true, format: "csv")
+                )
+              ]);
+            }
+            if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
+              actions.add(
+                PopupButtonWidget(
+                  tooltip: TranslateConstants.rowsImport,
+                  icon: Icons.upload,
+                  widget: MappingPopUpWidget(isExport: true, format: "csv")
+                )
+              );
+            }
+          }
         } else if (currentView?.items.isNotEmpty ?? false) { 
           if (mainForm.currentState != null && !currentView!.readOnly) {
             if (currentView!.actions.contains("put") && !currentView!.isEmpty) {

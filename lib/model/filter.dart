@@ -111,10 +111,11 @@ class Filters {
     globalFilter[viewID] = Filters(); 
     globalOrder[viewID] = {};
     for (var field in fields) {
-        globalFilter[viewID]!.add(field.column ?? "", Filter(type: field.type,
-          column: field.column, index: field.index,  comparator: field.comparator, 
-          value: field.value, connector: field.connector));
-        globalOrder[viewID]![field.column!] = field.dir;
+      globalFilter[viewID]!.add(field.column ?? "", Filter(type: field.type,
+        column: field.column, index: field.index,  comparator: field.comparator, 
+        value: field.value, connector: field.connector)
+      );
+      globalOrder[viewID]![field.column!] = field.dir;
     }
     filterRowsWidget = [];
     noFilterRetrieval = true;

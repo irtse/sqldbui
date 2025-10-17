@@ -1,20 +1,20 @@
 
 // ignore: must_be_immutable
-import 'package:flutter/foundation.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/actionbar.dart';
-import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/router.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 // ignore: must_be_immutable
 class GridCell {
   String? dataRef;
@@ -63,7 +63,7 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   String cellID; 
   String schemaID;
   double maxheight;
-  bool translatable = true;
+  bool translatable = false;
   bool isNew = false;
   String? dataRef;
 
@@ -100,13 +100,13 @@ class GridCellWidgetState extends State<GridCellWidget> {
     if ( widget.shal != null && widget.value == "") {
       widget.value = widget.shal!.id;
     }
-    var edit = (isEditMode[viewID] ?? false) && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
+    var edit = modeIndex == 1 && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
                 && !widget.cell.readOnly && !widget.readOnly;
     if (edit && widget.shal != null) {
       widget.value = "${widget.shal!.id ?? widget.value}";
     }
-    String url = currentView!.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]!.actionPath == "" ? 
-      "" : "${currentView!.schema[widget.cell.columnName]!.actionPath}&shallow=enable";
+    String url = currentView?.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]?.actionPath == "" ? 
+      "" : "${currentView?.schema[widget.cell.columnName]!.actionPath}";
     var v = widget.value;
     if (widget.shal?.name != null) {
       widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
@@ -158,10 +158,10 @@ class GridCellWidgetState extends State<GridCellWidget> {
           return Container();
         })) : 
       ListTile( 
-        mouseCursor: (isEditMode[viewID] ?? false) || !widget.isLink ? MouseCursor.defer : null, 
+        mouseCursor: modeIndex == 1 || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 
         onTap: () {
-          if ((isEditMode[viewID] ?? false) || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
+          if (modeIndex == 1 || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
           try {
             List<model.View> v = [];
             for (var cat in categories.values) { v = cat.where( (v) => "${v.id}" == viewID?.substring(1)).toList(); }

@@ -1,15 +1,14 @@
-import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/model/user.dart';
 import 'package:injectable/injectable.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqldbui2/page/page.dart';
+import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 var timeBomb = 60;
 @lazySingleton

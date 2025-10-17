@@ -1,24 +1,23 @@
 import 'dart:async';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
-import 'package:sqldbui2/core/widget/datagrid/buttons/save_button.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
-import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
-import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
+import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
-import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
+import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
+import 'package:sqldbui2/core/widget/datagrid/buttons/datagrid_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/page/translate.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 
 Map<String, List<DropdownMenuItem<String>>> schemeItems = {};
 Map<String, Map<String,String>> fastTranslation = {};
@@ -60,6 +59,7 @@ int globalLimit = 5;
 int globalOffset = 0;
 List<String> unselectedGrid = [];
 List<String> selectedGrid = []; 
+bool allSelected = true;
 Map<String?, int> filterIDName = <String, int>{};
 Map<String?, String> filterRestr = <String, String>{};
 GlobalKey<GridWidgetState> globalGridKey = GlobalKey<GridWidgetState>();
@@ -79,7 +79,7 @@ class DatagridWidget extends StatefulWidget {
   @override
   DatagridWidgetState createState() => DatagridWidgetState();
 }
-bool show = true;
+bool showMore = true;
 class DatagridWidgetState extends State<DatagridWidget> {
   List<DropdownMenuItem<String>> dpItems = <DropdownMenuItem<String>>[];
 
@@ -107,7 +107,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     }
     
     var index = 0;    
-    if (!(isEditMode[viewID] ?? false)) {
+    if (modeIndex != 1) {
       if (filterRestr[viewID] != null && !tempRemoval) {
         if ((globalFilter[viewID]?.filters ?? {}).isNotEmpty) {
           filterRowsWidget = globalFilter[viewID]?.toRow(schema) ?? [];
@@ -143,7 +143,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         index++;
       }
     }
-    var subSize = show ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(isEditMode[viewID] ?? false) ? 0 : 138);
+    var subSize = showMore ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
     if (currentWidth <= 1000) { subSize = 0; }
     return Column( children: [ 
       Container( 
@@ -153,33 +153,48 @@ class DatagridWidgetState extends State<DatagridWidget> {
         child: Column( children: [
           Stack( children: [ 
             currentWidth > 1000 ? 
-            Positioned( top: 3.5, left: 32, child: (isEditMode[viewID] ?? false) ? 
-                FunctionsSelectorWidget(mathAllowed: realOrder(widget.view, false, false, null, 5).length > 2)
-              : FilterSelectorWidget(schema: schema, filterMain: globalFilter[viewID], schemaName: widget.view?.schemaName ?? "")) 
-            : Container(),
+              Positioned( 
+                top: 3.5, left: 32, 
+                child: FilterSelectorWidget(schema: schema, filterMain: globalFilter[viewID], schemaName: widget.view?.schemaName ?? "")
+              ) : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
               Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
-                child: Row(children: [ 
-                  ...getButtons(), 
-                  FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) 
-                ])) 
+                child: FutureBuilder<List<Widget>>(future: getButtons(), builder: (a,s) {
+                  if (s.data != null) {
+                    return Row(children: [ 
+                      ...s.data!, 
+                      FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) 
+                    ]);
+                  }
+                 return Row(children: [ 
+                    FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) 
+                 ]); 
+              })) 
             ]) 
           ]), 
           currentWidth <= 1000 ? Container() 
             : Container( 
-              constraints: BoxConstraints( maxHeight:  (currentHeigth > (120 + subSize) ? subSize 
-                : currentHeigth - 120).toDouble()), 
+              constraints: BoxConstraints( 
+                maxHeight:  (currentHeigth > (120 + subSize) ? subSize : currentHeigth - 120).toDouble()), 
               child: SingleChildScrollView( 
                 child: Column( 
-                  children : [  !(isEditMode[viewID] ?? false) ? (filterRowsWidget.isEmpty ? 
-                Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)) : ( 
-                  editMode[viewID] != TranslateConstants.math.toLowerCase() || functionMathRowsWidget.isEmpty ? Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
+                  children : [  
+                    modeIndex != 1 ? (filterRowsWidget.isEmpty ?  Container() 
+                    : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)) : ( 
+                  editMode[viewID] != "math" || functionMathRowsWidget.isEmpty ? 
+                  Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
                 ),  
-              ...(show && !(isEditMode[viewID] ?? false) ? filterRowsWidget : (editMode[viewID] == TranslateConstants.math.toLowerCase() ? functionMathRowsWidget : [])) ] 
+              ...(showMore ? filterRowsWidget :  []) ,
+              ...(editMode[viewID] == "math" ? functionMathRowsWidget : [])
+            ] 
             ))),
-          MainGridWidget(links: links, view: widget.view, viewKey: widget.viewKey, 
+          MainGridWidget(
+            links: links, 
+            view: widget.view, 
+            viewKey: widget.viewKey, 
             subSize: subSize,
             subWidthSize: menuSize,
+            schema: schema,
             isSelected: widget.isSelected) 
         ])
       ),
@@ -204,65 +219,10 @@ class DatagridWidgetState extends State<DatagridWidget> {
       }
     }
   }
-  List<Widget> getButtons() {
-    var buttons = <Widget>[
-      Padding( 
-        padding: const EdgeInsets.only(right: 10), 
-        child: AdvancedSwitch(
-          initialValue: isEditMode[viewID] ?? false,
-          activeColor: Theme.of(context).primaryColor,
-          inactiveColor: Colors.grey,
-          borderRadius:  const BorderRadius.all(Radius.circular(15)),
-          activeChild: const Icon(Icons.edit, color: Colors.white, size: 15),
-          inactiveChild: const Icon(Icons.remove_red_eye, color: Colors.white, size: 15),
-          width: 50.0, height: 20.0, disabledOpacity: 0.5,
-          onChanged: (value) => Future.delayed( const Duration(milliseconds: 500), 
-            () => setState(() { 
-              rects.remove(viewID);
-              filterTempOrderView.remove(viewID);
-              isEditMode[viewID] = value; 
-            }) 
-          ))) 
-    ];
-    if (widget.isSelected || selectedGrid.isNotEmpty) {
-      if (isEditMode[viewID] ?? false) {
-        buttons.add(SaveDatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {},));
-      } else {
-        if (widget.view?.actions.contains("delete") ?? false) {
-          /*buttons.add(Padding(padding: EdgeInsets.symmetric(horizontal: 10), 
-          child: Tooltip( 
-            message: (currentView!.isList ? TranslateConstants.rowsListDelete : TranslateConstants.rowsDelete).toLowerCase(),
-            child: InkWell( 
-              onTap: () { 
-                if (selectedGrid.isEmpty) { return; }
-                List<String> ids = [];
-                String schemaID = "${widget.view?.schemaID}";
-                for (var item in selectedGrid) { 
-                  ids.add(item.toString()); 
-                }
-                showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete element(s) <${ids.join(',')}>", validate: () {
-                  globalMainViewKey.currentState?.setState(() { 
-                    APIService().delete("${APIConstants.genericEndpost}$schemaID?rows=${ids.join(",")}", context).then( (e) {
-                      Future.delayed(Duration(seconds: 3), () {
-                        globalMainViewKey.currentState?.setState(() {
-                          navigate = true;
-                        });
-                      });
-                    }); });
-                }));                
-              }, 
-              child: Icon(Icons.delete, color: Theme.of(context).highlightColor, size: 20)
-          ))));*/
-        }
-        buttons.addAll([
-          PopupButtonWidget(
-            tooltip: (currentView!.isList ? TranslateConstants.rowsListExport : TranslateConstants.rowsExport).toLowerCase(),
-            icon: Icons.file_download,
-            widget: MappingPopUpWidget(isExport: true, format: "csv")
-          )
-        ]);
-      }
-    }
+
+  Future<List<Widget>> getButtons() async {
+    var buttons = <Widget>[];
+    
     if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
       buttons.add(
         PopupButtonWidget(

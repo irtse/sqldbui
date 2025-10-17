@@ -1,15 +1,16 @@
 
 
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/updater/updaterRow.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
@@ -22,10 +23,11 @@ Map<String?, String> editMode = {};
 Map<String?, String> commands = {};
 // ignore: must_be_immutable
 class FunctionsSelectorWidget extends StatefulWidget {
+  Map<String, model.SchemaField> schema;
   String mode = TranslateConstants.edit.toLowerCase(); 
   var mathAllowed = true;
   String value = TranslateConstants.total.toLowerCase();
-  FunctionsSelectorWidget ({ super.key, required this.mathAllowed });
+  FunctionsSelectorWidget ({ super.key, required this.mathAllowed, required this.schema });
   @override FunctionsSelectorWidgetState createState() => FunctionsSelectorWidgetState();
 }
 class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
@@ -38,13 +40,13 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    var toggles = [TranslateConstants.edit.toLowerCase(), TranslateConstants.math.toLowerCase()];
-    var togglesLabels = [(await getOnFlow(TranslateConstants.edit)).toLowerCase(), (await getOnFlow(TranslateConstants.math)).toLowerCase()];
+    var toggles = [TranslateConstants.edit.toLowerCase(), "math"];
+    var togglesLabels = [(await getOnFlow(TranslateConstants.edit)).toLowerCase(), (await getOnFlow("math")).toLowerCase()];
     Map<String, model.SchemaField> fields = {};
     if (mathColName[viewID] == null) { mathColName[viewID] = TranslateConstants.total.toLowerCase(); 
     } else { widget.value = mathColName[viewID] ?? TranslateConstants.total.toLowerCase(); }
     if (editMode[viewID] == null) { editMode[viewID] = TranslateConstants.edit.toLowerCase(); }
-    if (editMode[viewID] == TranslateConstants.math.toLowerCase()) {
+    if (editMode[viewID] == "math") {
       for (var item in (schemeItems[viewID] ?? [])) {
         if (currentView!.schema[item.value] != null) { fields[item.value!] = currentView!.schema[item.value]!; 
         } else if (item.value != null) { fields[item.value!] = model.SchemaField(label: item.value!); }
@@ -60,7 +62,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     var o = realOrder(currentView, false, true, null, 5);
     var mathValue = (await getOnFlow(TranslateConstants.mathValuePlaceholder));
     var mathError = (await getOnFlow(TranslateConstants.mathError));
-    return Row( children: [ 
+    return Row( crossAxisAlignment: CrossAxisAlignment.center, children: [ 
       o.isNotEmpty && editMode[viewID] == "math" ? Padding( padding: const EdgeInsets.only(top: 2), 
         child: InkWell( mouseCursor: SystemMouseCursors.click,
           onTap: () { globalGridWidgetKey.currentState?.setState(() { showFunctions[viewID] = !showFunctions[viewID]!; },); },
@@ -86,7 +88,9 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
               globalGridWidgetKey.currentState?.setState(() { });
             }),
       )),
-      editMode[viewID] == TranslateConstants.math.toLowerCase() ? Container( margin: const EdgeInsets.only(left: 20, right: 10, top: 2), height: 25,  
+      editMode[viewID] == "math" ? Container( 
+        margin: const EdgeInsets.only(left: 20, right: 10, top: 2), 
+        height: 25,  
         width: (currentWidth - menuSize) / 4, 
           child: TextFormField( key: formKey,
           textAlign: TextAlign.start,
@@ -131,9 +135,14 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
               return mathError.toLowerCase();
             }
             return null; 
-          }))
-        : Container(),
-        editMode[viewID] == TranslateConstants.math.toLowerCase() ? Padding(
+          })
+        ) : Container( 
+          margin: const EdgeInsets.only(left: 20, right: 10, top: 2), 
+          height: 40,  
+          width: (currentWidth - menuSize) - 300, 
+          child: UpdaterRowWidget(schema: widget.schema)
+        ),
+        editMode[viewID] == "math" ? Padding(
           padding: const EdgeInsets.only(left: 5, top: 4), 
           child: SizedBox( 
             height: 25, 

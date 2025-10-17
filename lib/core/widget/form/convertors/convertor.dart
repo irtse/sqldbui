@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
@@ -12,17 +12,18 @@ import 'package:sqldbui2/core/widget/form/convertors/number.dart';
 import 'package:sqldbui2/core/widget/form/convertors/html.dart';
 import 'package:sqldbui2/core/widget/form/convertors/text.dart';
 import 'package:sqldbui2/core/widget/form/convertors/date.dart';
-import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/model/filter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter/material.dart';
 
 Map<String, dynamic> cacheChanges = {};
+Map<String, Map<String, List<PlatformFile>>> cacheFilesChanges = {};
 Map<String, GlobalKey<FormFieldState>> detectChanges = {};
 
 saveChange(model.View? view, Map<String,dynamic> form, String name, dynamic value) {
@@ -69,13 +70,13 @@ class Convertor {
                 hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
-    bool isText = type.contains("text") || type.contains("varchar") || type.contains("upload") || (type.contains("link") && url == "");
+    bool isText = type.contains("html") || type.contains("text") || type.contains("varchar") || (type.contains("link") && url == "");
     bool isInt = type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int");
     Widget w = Container();
     if (type.contains("manytomany")) {
       if ((widget.value ?? "") != "") {
         w = FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get<model.Shallowed>("${(subUrl).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
+        future: APIService().get<model.Shallowed>((subUrl).replaceAll("rows=all", "rows=${widget.value}"), false, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
             future: APIService().get(subUrl, true, null), 
@@ -94,7 +95,7 @@ class Convertor {
         });
       } else {
         w = FutureBuilder<APIResponse<model.Shallowed>>(
-          future: APIService().get(subUrl, true, null), 
+          future: APIService().get(subUrl, false, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
             return FutureBuilder<Widget>(
             future: getLink(subUrl, context, widget, id, dec,  formKey, name, label, 
@@ -108,7 +109,47 @@ class Convertor {
           }
         );
       }
-    } else if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
+    } else if (type.contains("upload")) { 
+      print(widget.value);
+        w =  InkWell( 
+            mouseCursor: SystemMouseCursors.click,
+            onTap: () => _pickFile( widget, type, id, formKey, url),
+            child: TextFormField( 
+          key: formKey,
+          textAlign: isGrid ? TextAlign.center : TextAlign.start,
+          initialValue: widget.value?.toString(),
+          style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
+          enabled: false, 
+          autocorrect: true,  
+          expands: isGrid,
+          minLines: isGrid ? null : 1,
+          maxLines: isGrid ? null : 1,
+          decoration: isGrid ? dec : InputDecoration(
+            suffixIconColor: Theme.of(context).splashColor,
+            enabledBorder: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 0) ),
+            border: OutlineInputBorder( borderRadius: BorderRadius.circular(5),
+              borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0)),
+            isDense: true, 
+            hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300), // you need this
+            floatingLabelBehavior: FloatingLabelBehavior.always, 
+            filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
+            contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
+            suffixIcon: Icon(isText ? (type.contains("upload") ? Icons.manage_search_outlined : Icons.text_fields)  : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
+            hintText: (await getOnFlow("select a file")).toLowerCase(),  
+            errorStyle: const TextStyle(fontSize: 0,),
+          ),
+          onChanged: (String? value) { 
+            widget.value = value; 
+            if (id != "") {
+              detectChanges[id] = formKey;
+              cacheChanges[id] = widget.value;
+            }
+          },
+          validator: (String? value) {
+            if (value == null) { return "please enter a file..."; }  
+            return null; 
+          }));
+      }  if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
         w = TextFormField( key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,
           initialValue: cacheChanges[id]?.toString() ?? widget.value?.toString(),
@@ -129,7 +170,7 @@ class Convertor {
             filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
             suffixIcon: Icon(isText ? (type.contains("upload") ? Icons.manage_search_outlined : Icons.text_fields)  : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
-            hintText: (await getOnFlow("$label...")).toLowerCase(),  
+            hintText: (await getOnFlow("type a value")).toLowerCase(),  
             errorStyle: const TextStyle(fontSize: 0,),
           ),
           onChanged: (String? value) { 
@@ -170,8 +211,11 @@ class Convertor {
       var def = cacheChanges[id] ?? widget.value;
       DateTime? d;
       try {
-        d = DateTime.parse(def!);
+        if (def != null) {
+          d = DateTime.parse(def!);
+        }
       } catch(e) {
+        print(e);
         return Container();
       }
       w = DateTimeField( key: formKey,
@@ -183,7 +227,7 @@ class Convertor {
         },
         format: intl.DateFormat('y-M-dd'),
         // mode: widget.type == "time" ? DateTimeFieldPickerMode.time : DateTimeFieldPickerMode.date,
-        style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor ),
+        style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
         decoration: isGrid ? dec : InputDecoration(
             suffixIcon: const Icon(Icons.calendar_month, size: 18,),
             suffixIconColor: Theme.of(context).splashColor,
@@ -196,7 +240,7 @@ class Convertor {
             border: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0) ),
             fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
-            hintText: "",
+            hintText: await getOnFlow("select a date"),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(
               context: context,
@@ -215,58 +259,110 @@ class Convertor {
         },
       );
     } else if (type.contains("enum") ) { // TODO THERE
-      var items = <DropdownMenuItem<String>>[];
+      var items = <DropdownItem<String>>[];
+       var decF = FieldDecoration( 
+      hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
+                border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
+                hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
+      MultiSelectController<String> ctrls = MultiSelectController<String>();
       for (var item in type.replaceAll("enum__", "").split("_")) { 
         if (name == "state") {
           item = item.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
         }
         if (items.where((element) => element.value == item).isEmpty) {
-          items.add(DropdownMenuItem<String>(value: item, alignment: isGrid ? Alignment.center : Alignment.centerLeft, 
-            child: Text((await getOnFlow(item)).toLowerCase(), overflow: TextOverflow.ellipsis)));
+          items.add(DropdownItem<String>(value: item, label: (await getOnFlow(item)).toLowerCase()));
         }
       }
-      w = DropdownButtonFormField<String>( key: formKey, items: items, isExpanded: true,
-        alignment: isGrid ? Alignment.center : Alignment.centerLeft,
-        value: (cacheChanges[id]?.toString() ?? widget.value?.toString()), elevation: 1,
-        validator: (values) { if (values == null) { return ""; } return null; },
-        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w300,
-         color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
-        hint: Text((await getOnFlow(TranslateConstants.placeHolderValue)).toLowerCase(), 
-              overflow: TextOverflow.ellipsis, softWrap: true, 
-              style: TextStyle(fontSize: 13, color: isGrid ? Colors.grey : Theme.of(context).splashColor)),
-        onChanged: (value) { 
-          widget.value = value; 
-          if (id != "") {
-            detectChanges[id] = formKey;
-            cacheChanges[id] = widget.value;
-          }
-          if (isGrid) { globalGridWidgetKey.currentState?.setState(() { }); }
-        }, 
-        dropdownColor: isDark ? Theme.of(context).secondaryHeaderColor : null,
-        decoration: isGrid ? dec : InputDecoration( 
-          errorStyle: const TextStyle(fontSize: 0),
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          filled: true, constraints: const BoxConstraints(minWidth: 0),
-          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-          suffixIconColor: isDark ? Theme.of(context).splashColor : Colors.grey,
-          fillColor:isDark ? Theme.of(context).secondaryHeaderColor : Colors.white, 
-          contentPadding: EdgeInsets.only(top: isDark ? 10 : 17, left: 10.0, right: 10.0),
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
-          hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey),
-          border: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0) ),
+      GlobalKey<MultiDropdownState> formFieldKey = GlobalKey();
+      w = MultiDropdown<String>(
+        key: formFieldKey,
+        label: label,
+        controller: ctrls,
+        singleSelect: true,
+        items: items,
+        forceVerticalAlignment: true,
+        textAlignVertical: TextAlignVertical.center,
+        style: TextStyle(color: isDark ?  Colors.white : Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis ),
+        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
         ),
-      );    
+        fieldDecoration:  isGrid ? decF : FieldDecoration(
+                          padding: kIsWeb ? EdgeInsets.only(left: 12, right: 12, top: 12) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                          backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
+                          labelStyle: TextStyle(fontSize: 0),
+                          hintText: (await getOnFlow("select an option")).toLowerCase(),
+                          hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
+                          prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
+                          showClearIcon: false,
+                          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+                          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+        ),
+        searchDecoration: SearchFieldDecoration(
+                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+                          border : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                          ),
+                          focusedBorder : const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey),
+                            borderRadius: BorderRadius.all(Radius.circular(5)))
+        ),
+        dropdownDecoration: DropdownDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                          marginTop: 2,
+                          maxHeight: 400,
+                          header: Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Text(
+                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                              textAlign: TextAlign.start,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.ellipsis
+                              ),
+                            ),
+                          ),
+                        ),
+                        dropdownItemDecoration: DropdownItemDecoration(
+                          backgroundColor: Theme.of(context).highlightColor,
+                          selectedIcon:
+                              const Icon(Icons.check_box, color: Colors.green),
+                          disabledIcon:
+                              Icon(Icons.lock, color: Colors.grey.shade300),
+                        ),
+                        validator: (value) {
+                          if ((value == null || value.isEmpty)) {
+                            return '';
+                          }
+                          return null;
+                        },
+                        onSelectionChange: (values) {
+                          if (values.isEmpty) { return; }
+                          widget.value = values[0]; 
+                          if (id != "") {
+                            detectChanges[id] = formFieldKey.currentState?.formFieldKey ?? GlobalKey();
+                            cacheChanges[id] = widget.value;
+                          }
+                        },
+        );   
     } else if (type.contains("link") && url != "") {
       if ((widget.value ?? "") != "") {
         w = FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get<model.Shallowed>("${(url).replaceAll("rows=all", "rows=${widget.value}")}&shallow=enable", firstAPI, null), 
+        future: APIService().get<model.Shallowed>((url).replaceAll("rows=all", "rows=${widget.value}"), false, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get<model.Shallowed>("${(url)}&shallow=enable", firstAPI, null), 
+            future: APIService().get<model.Shallowed>((url), false, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
             if (snap.data?.data != null) {
               return FutureBuilder<APIResponse<model.Shallowed>>(
-                future: APIService().get(url, true, null), 
+                future: APIService().get(url, false, null), 
                 builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
                   return FutureBuilder<Widget>(
                   future: getLink(url, context, widget, id, dec,  formKey, name, label, 
@@ -285,7 +381,7 @@ class Convertor {
         });
       } else {
           w = FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get(url, true, null), 
+            future: APIService().get(url, false, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
               return FutureBuilder<Widget>(
               future: getLink(url, context, widget, id, dec,  formKey, name, label, 
@@ -318,7 +414,8 @@ class Convertor {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
       if (name == "state") {
-        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(
+          " (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
       }
       var t = items.where((e) => e.value == "${item.id}"); 
       if (!mapped.containsKey(v) && t.isEmpty){
@@ -352,6 +449,7 @@ class Convertor {
       if (datas.isEmpty || (widget.value ?? "") != "" && !found) {
       return Container();
     }
+    
     GlobalKey<MultiDropdownState> formFieldKey = GlobalKey();
     var decF = FieldDecoration( 
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
@@ -372,10 +470,10 @@ class Convertor {
         controller: ctrls,
         singleSelect: true,
         items: items,
-        forceVerticalAlignment: isDark,
-        textAlignVertical: TextAlignVertical.bottom,
+        forceVerticalAlignment: true,
+        textAlignVertical: TextAlignVertical.center,
         searchEnabled: max > 10,
-        style: TextStyle(color: isDark ?  Colors.white : Theme.of(context).secondaryHeaderColor ),
+        style: TextStyle(color: isDark ?  Colors.white : Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis ),
         chipDecoration: ChipDecoration(
                           backgroundColor: Theme.of(context).primaryColor,
                           labelStyle: TextStyle(color: Colors.white),
@@ -389,7 +487,7 @@ class Convertor {
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                           backgroundColor: isDark ? Theme.of(context).secondaryHeaderColor : Colors.white,
                           labelStyle: TextStyle(fontSize: 0),
-                          hintText: (await getOnFlow(TranslateConstants.placeHolderValue)).toLowerCase(),
+                          hintText: (await getOnFlow("select an option")).toLowerCase(),
                           hintStyle: TextStyle(fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
                           showClearIcon: false,
@@ -418,6 +516,7 @@ class Convertor {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.ellipsis
                               ),
                             ),
                           ),
@@ -620,3 +719,40 @@ class Convertor {
   }
 }
 
+Future<void> _pickFile(ConvertorWidget widget, String type, String id, GlobalKey<FormFieldState<dynamic>> k, String url) async {
+    List<String> extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf', 
+      'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'xls', 'xlsx', 'csv', 'ods'];
+    /*if (widget.type.replaceAll("upload_multiple", "").isNotEmpty) {
+      extension = widget.type.replaceAll("upload_multiple", "").split("_");
+    } else if (widget.type.replaceAll("upload", "").isNotEmpty) {
+      extension = widget.type.replaceAll("upload", "").split("_");
+    }*/
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      withData: kIsWeb,
+      type: FileType.custom,
+      allowedExtensions: extension,
+    );
+    if (result != null) {
+      var selectedFile = result.files.first;
+      if ( (widget.value ?? "") == "" ) {
+        widget.value = selectedFile.name;
+      } else {
+        widget.value += type.contains("multiple") ? ",${selectedFile.name}" : selectedFile.name;
+      }
+      List<PlatformFile> m =  (cacheFilesChanges[id]?[url] ?? []);
+      m.add(selectedFile);
+
+      if (id != "") {
+        detectChanges[id] = k;
+        cacheChanges[id] = widget.value;
+        if (cacheFilesChanges[id] == null) {
+          cacheFilesChanges[id] = {};
+        }
+        print("FILE $url");
+        cacheFilesChanges[id]?[url] = m;
+      }
+      k.currentState?.setState(() {
+        k.currentState?.didChange(widget.value);
+      });
+    }
+  }

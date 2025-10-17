@@ -2,12 +2,12 @@ import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_eval/dart_eval.dart';
 import 'package:sqldbui2/core/utils.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/page/translate.dart';
 
 String transform(String match, String prefix) {
   return match.replaceAll("$prefix(", "").replaceAll(")", "");

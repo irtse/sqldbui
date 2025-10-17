@@ -62,10 +62,10 @@ class ManyToManyState extends State<ManyToManyWidget> {
         }
         if (ids.isNotEmpty) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
-          future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), true, null), 
+          future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), false, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
           return FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get(widget.url!, true, null), 
+            future: APIService().get(widget.url!, false, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
                 if (snap.data?.data != null) {
                   return SubManyToManyWidget(
@@ -91,7 +91,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
         }
       }
       return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get(widget.url ?? "", true, null), 
+        future: APIService().get(widget.url ?? "", false, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
             if (snap.data?.data != null) {
               return SubManyToManyWidget(

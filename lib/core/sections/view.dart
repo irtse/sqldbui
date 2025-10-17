@@ -56,22 +56,11 @@ class MainViewWidgetState extends State<MainViewWidget> {
             Future.delayed(Duration(seconds: 2), () => navigate = false);
             currentView = null;
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
-              currentView = snap.data!.data![0]; 
+              currentView = snap.data!.data![0];               
+              print(currentView?.items.length);
               currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.isEmpty ) {
                 currentView?.max = currentView?.items.length ?? 0;
-              }
-              if (snap.data!.data!.length > 1 && currentView!.isList) {
-                for (var view in snap.data!.data!.sublist(1)) { 
-                  if (view.items.isEmpty || ((currentView?.max ?? 0) <= globalOffset && (currentView?.max ?? 0) > (currentView?.items.length ?? 0))) {
-                    currentView?.max = currentView?.items.length ?? 0;
-                  }
-                  for (var item in view.items) { 
-                    if (currentView!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { 
-                      currentView!.items.add(item); 
-                    }
-                  }
-                }
               }
               try { 
                 var v = widget.views?.firstWhere((element) => "${element.id}" == viewID?.substring(1));

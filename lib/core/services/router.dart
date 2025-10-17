@@ -164,8 +164,8 @@ class AppRouter {
         if (!ok) {
           navigatorCtrls.items.add(DropdownItem<String>( selected: true,
             value: key, 
-            label: "${(await getOnFlow(currentView!.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", "")))} -> ${ 
-                      await getOnFlow(currentView!.items.isNotEmpty ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
+            label: "${(await getOnFlow(currentView?.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", "")))} -> ${ 
+                      await getOnFlow(currentView?.items.isNotEmpty ?? false ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
           }
       });
       navigatorCtrls.openDropdown("", "", true);

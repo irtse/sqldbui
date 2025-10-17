@@ -1,6 +1,6 @@
 
-import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
+import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
@@ -39,8 +39,9 @@ class PopupButtonWidgetState extends State<PopupButtonWidget> {
       color: widget.color ?? Theme.of(context).secondaryHeaderColor, 
       padding: const EdgeInsets.all(0),
       tooltip: (await getOnFlow(widget.tooltip)).toLowerCase(),
-      icon: Icon(widget.icon, 
-        size: 20, 
+      icon: Icon(
+        widget.icon, 
+        size: 22, 
         color: Theme.of(context).highlightColor
       ), 
       splashRadius: 1,

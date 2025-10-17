@@ -50,7 +50,7 @@ class DropDownState extends State<DropDownWidget> {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<DropDownWidget>>;
-          widget.enrichPath[r.related]="${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
+          widget.enrichPath[r.related]="${r.id}_${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
           if (widget.enrichPath[r.related] == "") {
             widget.enrichPath.remove(r.related);
           }
@@ -254,10 +254,10 @@ class DropDownState extends State<DropDownWidget> {
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
         future: APIService().get<model.Shallowed>(
-          "${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable${widget.enrichPath.keys.map( (e) => "&$e=${widget.enrichPath[e]}").join("")}", firstAPI, null), 
+          "${(widget.url ?? widget.mainUrl!).replaceAll("rows=all", "rows=$val")}&shallow=enable${widget.enrichPath.keys.map( (e) => "&$e=${widget.enrichPath[e]}").join("")}", false, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
            return FutureBuilder<APIResponse<model.Shallowed>>(
-            future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", true, null), 
+            future: APIService().get<model.Shallowed>("${(widget.url ?? widget.mainUrl!)}&shallow=enable", false, null), 
             builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
               if (snap.data?.data != null) {
                 return SubDropDownWidget(
@@ -287,7 +287,7 @@ class DropDownState extends State<DropDownWidget> {
         });
     }
     return FutureBuilder<APIResponse<model.Shallowed>>(
-        future: APIService().get("${widget.mainUrl!}${widget.enrichPath.keys.map( (e) => "&$e=${widget.enrichPath[e]}").join("")}", true, null), 
+        future: APIService().get("${widget.mainUrl!}${widget.enrichPath.keys.map( (e) => "&$e=${widget.enrichPath[e]}").join("")}", false, null), 
         builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> snap) {
           if (snap.data?.data != null) {
             return SubDropDownWidget(

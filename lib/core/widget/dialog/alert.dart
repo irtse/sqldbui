@@ -1,6 +1,6 @@
 
-import 'package:flutter/material.dart';
 import 'package:sqldbui2/main.dart';
+import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
 
 class InfoAlertBannerChild extends StatelessWidget {

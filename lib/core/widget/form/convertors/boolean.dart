@@ -18,8 +18,9 @@ class BooleanWidget extends StatefulWidget {
   final dynamic autofill;
   bool error = false;
   BooleanWidget ({ required this.form, required this.schemaName, required this.name,
-                      required this.readOnly, required this.type, required this.value, required this.label,
-                      required this.component, this.require = false, required this.autofill}): super(key: GlobalKey<State<BooleanWidget>>());
+                   required this.readOnly, required this.type, required this.value, required this.label,
+                   required this.component, this.require = false, required this.autofill}): 
+                   super(key: GlobalKey<State<BooleanWidget>>());
   @override
   // ignore: library_private_types_in_public_api
   _BooleanState createState() => _BooleanState();
@@ -27,13 +28,8 @@ class BooleanWidget extends StatefulWidget {
 class _BooleanState extends State<BooleanWidget> {
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
-      for (var r in (widget.component?.widget.view?.rules ?? [])) {
-        if (r.trigger == widget.name) {
-          r.key = widget.key as GlobalKey<State<BooleanWidget>>;
-          /*if (r.value != null && r.value != "") {
-            widget.value = "${r.value}" == "true";
-          }*/
-        }
+      for (var r in (widget.component?.widget.view?.rules ?? []).where( (e) => e.trigger == widget.name)) {
+        r.key = widget.key as GlobalKey<State<BooleanWidget>>;
       }
     }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
@@ -70,7 +66,7 @@ class _BooleanState extends State<BooleanWidget> {
           Wrap( children: [
           Container( padding: EdgeInsets.only(left: widget.readOnly ? 0 : 40), child: 
               Tooltip( message: label.toLowerCase(),
-                child:Text( "${label.toLowerCase()}${widget.require ? "" : "*"} ${ !widget.readOnly ? "" : (await getOnFlow(widget.value == true ? "yes" : "no")).toUpperCase()}", softWrap: true,
+                child: Text( "${label.toLowerCase()}${widget.require ? "" : "*"} ${ !widget.readOnly ? "" : (await getOnFlow(widget.value == true ? "yes" : "no")).toUpperCase()}", softWrap: true,
               style: TextStyle( color: widget.error ? Colors.red : Colors.black)
             ))),
           ])

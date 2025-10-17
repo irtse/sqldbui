@@ -301,6 +301,7 @@ class Workflow extends SerializerDeserializer<Workflow> {
 } }
 class Rule extends SerializerDeserializer<Rule> {
   Rule({
+    this.id = "",
     this.related = "",
     this.trigger = "",
     this.operator = "",
@@ -308,7 +309,7 @@ class Rule extends SerializerDeserializer<Rule> {
     this.max = false,
     this.min = false,
   });
-
+  String id = "";
   String related = "";
   String trigger = "";
   String operator = "";
@@ -321,6 +322,7 @@ class Rule extends SerializerDeserializer<Rule> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Rule(
+      id: json.containsKey("id") && json["id"] != null ? "${json["id"]}" : "", 
       min: json.containsKey("min") && json["min"] != null ? bool.parse("${json["min"]}") : false, 
       max: json.containsKey("max") && json["max"] != null ? bool.parse("${json["max"]}") : false, 
       related :json.containsKey("related") && json["related"] != null ? json["related"] : "", 
@@ -367,7 +369,8 @@ class View extends SerializerDeserializer<View> {
     this.triggers = const [],
     this.commentBody = const {},
     this.innerRedirection = "",
-    this.rules = const []
+    this.rules = const [],
+    this.multiPath = const [],
   });
   String innerRedirection;
   Map<String, dynamic> commentBody;
@@ -405,9 +408,11 @@ class View extends SerializerDeserializer<View> {
   String commentsPath = "";
   Map<String, dynamic> shortcuts= <String, dynamic>{};
   List<Rule> rules = [];
+  List<dynamic> multiPath = [];
 
   @override deserialize(Map<String, dynamic> json) {
     return View(
+    multiPath  : json.containsKey("multi_view_path") && json["multi_view_path"] != null ? json["multi_view_path"] : [],
     rules: json.containsKey("rules") && json["rules"] != null ? fromListJson(json["rules"], Rule()) : <Rule>[],
     exportPath: json.containsKey("export_path") && json["export_path"] != null ? json["export_path"] : "",
     innerRedirection: json.containsKey("inner_redirection") && json["inner_redirection"] != null ? json["inner_redirection"] : "",

@@ -183,7 +183,6 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
     var shared = await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.filterPlaceholder);
     var search = await getOnFlow(TranslateConstants.search);
     var select = await getOnFlow(TranslateConstants.selectValue);
-    print(widget.url);
     return FutureBuilder(
         future: APIService().get<model.Shallowed>("${widget.url}&shallow=enable", true, context),
         builder: (a,s) {

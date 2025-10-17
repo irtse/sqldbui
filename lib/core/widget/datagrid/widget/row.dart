@@ -1,16 +1,16 @@
 
 // ignore: must_be_immutable
-import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/page/translate.dart';
 
 // ignore: must_be_immutable
 class GridRowWidget extends StatefulWidget {
@@ -52,8 +52,7 @@ class GridRowWidget extends StatefulWidget {
 }
 class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
-    var edit = (isEditMode[viewID] ?? false);
-    return edit ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
+    return modeIndex == 1 ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
       if (s.data != null) {
         return s.data!;
       }
@@ -68,10 +67,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
           }
           return Container();
         })]),
-        /*widget.showCheckboxColumn ? Positioned( left : 57.5, child: LinkBoxWidget(
-          path: "@${widget.schemaID}:${widget.cellID}",
-          sharing: widget.sharing,
-        )) : Container(),*/
       ])
     );
   }
@@ -217,7 +212,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
             height: maxheight,
             alignment: Alignment.center, 
             decoration: BoxDecoration( color: widget.news 
-            || ((isEditMode[viewID] ?? false) && (e.readOnly || readOnly || ["id", "description", mathColName[viewID] ?? "total"].contains(e.columnName))) ? 
+            || (modeIndex == 1 && (e.readOnly || readOnly || ["id", "description", mathColName[viewID] ?? "total"].contains(e.columnName))) ? 
               (widget.isHovered ? Colors.grey : Theme.of(context).splashColor) : (widget.isHovered ? Theme.of(context).splashColor  : Colors.white),
             border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth), bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
             width: currentView != null && rects.containsKey(viewID) && rects[viewID]!.containsKey(e.columnName) ? rects[viewID]![e.columnName]!.width : 200, 

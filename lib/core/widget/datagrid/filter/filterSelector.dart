@@ -4,11 +4,11 @@ import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/response.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
@@ -40,14 +40,14 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
       Padding( 
         padding: const EdgeInsets.only(right: 10), 
         child : Tooltip( 
-          message : (await getOnFlow(show ? TranslateConstants.filterHide.toLowerCase() : TranslateConstants.filterShow)).toLowerCase(),
+          message : (await getOnFlow(showMore ? TranslateConstants.filterHide.toLowerCase() : TranslateConstants.filterShow)).toLowerCase(),
           child: InkWell( 
-            child : Icon( show ? Icons.filter_alt : Icons.filter_alt_outlined, 
-              color: show ? Colors.white : Theme.of(context).splashColor, size: 20), 
+            child : Icon( showMore ? Icons.filter_alt : Icons.filter_alt_outlined, 
+              color: showMore ? Colors.white : Theme.of(context).splashColor, size: 20), 
             onTap: () { 
               confirmCache = {};
               navigate = true;
-              globalMainViewKey.currentState?.setState(() { show = !show; }); }
+              globalMainViewKey.currentState?.setState(() { showMore = !showMore; }); }
           )),
         ),
         filterRowsWidget.isNotEmpty ? Container(
@@ -118,7 +118,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
           return Theme.of(context).primaryColor; }), ),
           icon: Icon( Icons.add, size: 17, color: Theme.of(context).highlightColor, ),
           onPressed: () { 
-            show = true;
+            showMore = true;
             navigate = true;
             confirmCache = {};
             filterRestr.remove(viewID);
@@ -132,7 +132,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
             return Theme.of(context).primaryColor; }), ),
             icon: Icon( Icons.remove, size: 17, color: Theme.of(context).highlightColor, ),
             onPressed: () { 
-              show = true;
+              showMore = true;
               navigate = true;
               confirmCache = {};
               filterRestr.remove(viewID);

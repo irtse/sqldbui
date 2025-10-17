@@ -1,47 +1,41 @@
+import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
-import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
-import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
-import 'package:sqldbui2/page/translate.dart';
-
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 // ignore: must_be_immutable
 class MainGridWidget extends StatefulWidget {
-  List<dynamic>? forceOrder;
-  int max = 5;
-  var schemeItems = <DropdownMenuItem<String>>[];
-  final model.View? view; 
-  bool isSelected = true;
-  Map<String, String> links = {};
-  bool subTable = false;
   int subSize;
   double subWidthSize;
+  bool subTable = false;
+  final model.View? view; 
+  bool isSelected = true;
+  List<dynamic>? forceOrder;
+  Map<String, String> links = {};
   GlobalKey<ViewWidgetState>? viewKey;
+  Map<String, model.SchemaField> schema = {};
 
-  MainGridWidget ({ super.key, this.view, this.viewKey, required this.subWidthSize, this.forceOrder, this.max = 5,
-    this.links = const {}, this.isSelected = false, required this.subSize, this.subTable = false });
+  MainGridWidget ({ super.key, 
+    this.view, 
+    this.viewKey, 
+    required this.schema,
+    required this.subWidthSize, 
+    this.forceOrder,
+    this.links = const {}, 
+    this.isSelected = false, 
+    required this.subSize, 
+    this.subTable = false 
+  });
   @override
   MainGridWidgetState createState() => MainGridWidgetState();
 }
-bool show = true;
 class MainGridWidgetState extends State<MainGridWidget> {
   @override Widget build(BuildContext context) {
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
-    List<GridColumnWidget> columns = <GridColumnWidget>[];
-    List<Value> datas = <Value>[];
     Map<String, model.Shallowed> contentShallowed = <String, model.Shallowed>{};
-    if (widget.view != null) {
-      schema = widget.view!.schema;
-      var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, widget.max);
-      for (var fieldName in order) {
-          columns = getColumn(columns, widget.schemeItems, schema, fieldName, datas, order);
-      }
-    }
     return Container( 
         height: widget.subTable ? null : currentHeigth - (120 + widget.subSize) > 0 ? 
           currentHeigth - (120 + widget.subSize) : 0,
@@ -52,61 +46,30 @@ class MainGridWidgetState extends State<MainGridWidget> {
         child : GridWidget( 
           view: widget.view, 
           links: widget.links,
-          columns: columns,
           key: globalGridKey, 
+          schema: widget.schema,
           viewKey: widget.viewKey, 
-          showCheckboxColumn: !widget.subTable, 
+          forceOrder: widget.forceOrder,
           isSelected: widget.isSelected,
+          subWidthSize: widget.subWidthSize,
           showColumnHeaderIconOnHover: true,
           contentShallowed: contentShallowed,  
           schemaID: "${currentView?.schemaID}", 
+          showCheckboxColumn: !widget.subTable, 
           borderColor: Theme.of(context).splashColor,
+          maxLength: realOrder(widget.view, widget.subTable, false, [], 5).length,
           isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
-          maxLength: realOrder(widget.view, widget.subTable, false, widget.forceOrder, widget.max).length, 
           contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
         ) 
       );
-  }
-  
-
-  List<GridColumnWidget> getColumn(List<GridColumnWidget> columns, List<DropdownMenuItem<String>> schemeItems, 
-    Map<String, model.SchemaField> schema, String? fieldName, List<Value> datas, List<dynamic> order) {
-    bool isEdit = isEditMode[viewID] ?? false;
-    bool isNotValidCol = fieldName == null && fieldName == "id";
-    String? lab = (schema[fieldName]?.label ?? "") != "" ? schema[fieldName]!.label : fieldName;
-    String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]!.type);
-    String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase())).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-    if (!isNotValidCol && !(filterTempOrderView[viewID]?.contains(fieldName) ?? true)) { 
-      filterTempOrderView[viewID]?.add(fieldName); 
-    }
-
-    var realLabel = fastTranslation[viewID ?? ""]?[label] ?? label;
-    schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
-      realLabel.toLowerCase(), overflow: TextOverflow.ellipsis,)));
-    columns.add( GridColumnWidget(
-        context: context, 
-        width: double.nan,
-        items: schemeItems, 
-        isEditMode: isEdit,
-        maxLength: order.length + (isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase() ? 1 : 0),
-        borderColor: Theme.of(context).splashColor, 
-        allowSorting: !(datas.isEmpty && !isFilter()) && !isEdit,
-        columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
-        allowFiltering: !(datas.isEmpty && !isFilter()) && !isEdit, 
-        type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
-        url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
-        contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
-        label: label == "id" ? GridValueWidget(fontSize: 13, icon: Icons.tag) : GridValueWidget(fontSize: 13, value: realLabel),
-      ));
-    return columns;
   }
 }
 
 Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaField>? schema,  bool subtable) {
     if (schema == null) { return {}; }
-    bool isMath = isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase();
+    bool isMath =modeIndex == 1 && editMode[viewID] == "math";
     List<String> seen = [];
-    if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
+    if (!(filterTempOrderView[viewID] != null && modeIndex == 1 && editMode[viewID] == "math")
     && filterOrderView[viewID] == null) {
       var newOrder = schema.keys.where( (e) {
         return schema[e]?.inResume != null; 
@@ -134,6 +97,9 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
+      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex == 1) {
+        return false;
+      }
       return ok;
     }).toList();
     if (filterTempID[viewID] ?? false) {
@@ -149,9 +115,9 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
 List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dynamic>? forceOrder, int max) {
     if (view == null) { return []; }
     var schema = view.schema;
-    bool isMath = forceMath || (isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase());
+    bool isMath = forceMath || (modeIndex == 1 && editMode[viewID] == "math");
     List<String> seen = [];
-    if (!(filterTempOrderView[viewID] != null && isEditMode[viewID] == true && editMode[viewID] == TranslateConstants.math.toLowerCase())
+    if (!(filterTempOrderView[viewID] != null && modeIndex == 1 && editMode[viewID] == "math")
     && filterOrderView[viewID] == null) {
       var newOrder = view.schema.keys.where( (e) {
         return view.schema[e]?.inResume != null; 
@@ -184,6 +150,9 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
+      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex == 1) {
+        return false;
+      }
       return !(schema[f]?.hidden ?? false) && (ok);
     }).toList();
     if (filterTempID[viewID] ?? false) {

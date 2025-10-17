@@ -1,17 +1,17 @@
-import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
-import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_popup.dart';
+import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/bottom_column.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
-import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class GridColumnWidget extends StatefulWidget {
   GlobalKey<GridBottomColumnResultWidgetState>? resultKey;

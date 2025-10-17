@@ -1,18 +1,22 @@
 import 'dart:async';
-
-import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/row.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
+import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/bottom_column.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 
@@ -21,16 +25,18 @@ bool wait = false;
 double refWidth = 0;
 double maxWidth = 0;
 Map<String?, Map<String, String>?> colFunction = {};
-Map<String?, bool> isEditMode = {};
+int modeIndex = 0;
 Map<String?, List<String>> notNew = {};
 Map<String?, Map<String, Rect>> rects = {};
 // ignore: must_be_immutable
 class GridWidget extends StatefulWidget {
   final model.View? view; 
+  List<dynamic>? forceOrder;
+  bool subTable = false;
   Map<String, model.Shallowed> contentShallowed;
   GlobalKey<ViewWidgetState>? viewKey; 
   bool showColumnHeaderIconOnHover;
-  List<GridColumnWidget> columns; 
+  List<GridColumnWidget> columns = []; 
   bool showCheckboxColumn; 
   bool isSelected = true;
   Color backgroundColor; 
@@ -40,17 +46,23 @@ class GridWidget extends StatefulWidget {
   String schemaID;
   int maxLength;
   bool isEnum;
+  Map<String, model.SchemaField> schema = {};
   double scroll = 0;
+  double subWidthSize;
   Map<String, String> links = {};
+  var schemeItems = <DropdownMenuItem<String>>[];
   Map<String, Map<String, dynamic>> cache = <String, Map<String, dynamic>>{};
 
   GridWidget({ super.key,
-    required this.columns, 
+    required this.subWidthSize,
     required this.view, 
     required this.schemaID, 
+    required this.schema,
     required this.contentShallowed, 
     required this.maxLength, 
     required this.contextWidth, 
+    this.subTable = false,
+    this.forceOrder = const [],
     this.links = const {}, 
     this.viewKey,
     this.isSelected = true,
@@ -111,6 +123,17 @@ class GridWidgetState extends State<GridWidget> {
   @override Widget build(BuildContext context) {
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
     List<Value> datas = <Value>[];
+    widget.columns = [];
+    if (widget.view != null) {
+      schema = widget.view!.schema;
+      var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, 5);
+      for (var fieldName in order) {
+        if ((schema[fieldName]?.valuesPath ?? "") != "") {
+          APIService().get(schema[fieldName]!.valuesPath, false, context);
+        }
+        widget.columns = getColumn( widget.columns, widget.schemeItems, schema, fieldName, datas, order);   
+      }
+    }
     if (widget.view != null) {
       for (var item in (widget.view?.items ?? [] as List<model.Item>)) {
         if (!widget.cache.containsKey(widget.view!.schemaName)) { widget.cache[widget.view!.schemaName]=<String,dynamic>{}; } 
@@ -157,19 +180,21 @@ class GridWidgetState extends State<GridWidget> {
     }
     List<Widget> bottomColumns = [];
     if (widget.showCheckboxColumn) {
-      if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
+      allSelected = widget.isSelected;
+      if (modeIndex == 1 && showFunctions[viewID] == true) {
         bottomColumns.add(Container( decoration: BoxDecoration(border: Border(right: BorderSide(color: Theme.of(context).splashColor)), 
         color: Theme.of(context).primaryColorLight), width: 79, height: 40, child: null));
       }
       additionnalContent.add(
         Padding(padding: const EdgeInsets.only(left: 5), child: Container(
-          width: 75, height: isEditMode[viewID] == true && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
+          width: 75, height: modeIndex == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(right: BorderSide( color: widget.borderColor, width: widget.borderWidth ),)),
           child: CheckboxListTile(
             enabled: true,
           value: widget.isSelected, 
             onChanged: (value) { 
               widget.isSelected=value ?? false; 
+              allSelected = widget.isSelected;
               globalGridWidgetKey.currentState!.widget.isSelected = widget.isSelected;
               selectedGrid = []; unselectedGrid = []; 
               globalGridWidgetKey.currentState!.setState(() { });
@@ -193,19 +218,32 @@ class GridWidgetState extends State<GridWidget> {
       rects.remove(viewID); 
       for (var col in widget.columns) { col.prefetch(); }
     }
-    var t = show ? (filterRowsWidget.length * 44 < 138 ? filterRowsWidget.length * 44 : 138) : 0;
-    t += isEditMode[viewID] == true && showFunctions[viewID] == true ? ( editMode[viewID] == "math" ? 115 : 70 ) : 0;
+    var t = showMore ? (filterRowsWidget.length * 44 < 138 ? filterRowsWidget.length * 44 : 138) : 0;
+    t += modeIndex == 1 ? 40 : 0;
+    t += modeIndex == 1 && showFunctions[viewID] == true ? ( editMode[viewID] == "math" ? 115 : 70 ) : 0;
     for (var col in widget.columns) {
         var k = GlobalKey<GridBottomColumnResultWidgetState>();
-        bottomColumns.add(GridBottomColumnResultWidget(key: k, columnName: col.columnName, value: "NaN", type: col.type,
-                            isEditMode: col.isEditMode, borderWidth: col.borderWidth, borderColor: col.borderColor));
+        bottomColumns.add(GridBottomColumnResultWidget(
+          key: k, 
+          columnName: col.columnName, 
+          value: "NaN",
+          type: col.type,
+          isEditMode: col.isEditMode, 
+          borderWidth: col.borderWidth, 
+          borderColor: col.borderColor));
         col.resultKey = k;
     }
     List<Widget> bottom = [];
-    if (isEditMode[viewID] == true && showFunctions[viewID] == true) {
-      bottom.add(Positioned( bottom: 0, left: 0, child: Row(children: bottomColumns)));
-    }
-    return Listener(
+    bottom.add(Positioned( bottom: 0, left: 0, 
+      child: Column( children: [
+        if (modeIndex == 1 && showFunctions[viewID] == true) 
+          Row(children: bottomColumns),
+        getBottomBar(widget.schema),
+      ]))
+    );
+  
+    return Stack( children: [ 
+      Listener(
         onPointerDown: (event) {
           _isMouseDown = true;
           _mousePosition = event.position;
@@ -232,8 +270,9 @@ class GridWidgetState extends State<GridWidget> {
         controller: _horizontal,
         scrollDirection: Axis.horizontal, 
         child: Stack(children: [
+          
           Container(
-            margin: EdgeInsets.only(top: isEditMode[viewID] == true && showFunctions[viewID] == true ? 95 : 55),
+            margin: EdgeInsets.only(top: modeIndex == 1 && showFunctions[viewID] == true ? 95 : 55),
             child:ScrollbarTheme(
               data: ScrollbarThemeData(
                 thumbColor: WidgetStateProperty.all(Colors.grey.shade200),
@@ -276,17 +315,22 @@ class GridWidgetState extends State<GridWidget> {
                                   }
                                   var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
                                   var e = await APIService().getWithOffset<model.View>(widget.view?.linkPath ?? defaultPath, false, context);
-                                  for (var view in e.data!.sublist(1)) { 
+                                  for (var view in (e.data?.sublist(1) ?? [])) { 
                                     if (view.items.isEmpty || ((widget.view?.max ?? 0) <= globalOffset && (widget.view?.max ?? 0) > (widget.view?.items.length ?? 0))) {
                                       widget.view?.max = widget.view?.items.length ?? 0;
                                     }
                                     for (var item in view.items) { 
-                                      if (widget.view!.items.where((element) => element.values['id'] == item.values['id']).isEmpty) { 
-                                        widget.view!.items.add(item); 
+                                      if ((widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
+                                        widget.view?.items.add(item); 
                                       }
                                     }
                                   }
-                                  globalMainViewKey.currentState!.refreshUrl(currentView!.linkPath, null, false); 
+                                  Future.delayed(Duration(seconds: 1), () {
+                                    globalActionBar.currentState?.setState(() {
+                                      globalActionBar.currentState?.widget.view = widget.view;
+                                    });
+                                    setState(() { });
+                                  });
                                 }
                               }
                             },
@@ -309,8 +353,124 @@ class GridWidgetState extends State<GridWidget> {
           ],
         ),
         child: Row(children:additionnalContent..addAll(widget.columns))),
+      ],)))))),
       ...bottom,
-    ],))))));
+    ]);
+  }
+
+
+  List<GridColumnWidget> getColumn(List<GridColumnWidget> columns, List<DropdownMenuItem<String>> schemeItems, 
+    Map<String, model.SchemaField> schema, String? fieldName, List<Value> datas, List<dynamic> order) {
+    bool isNotValidCol = fieldName == null && fieldName == "id";
+    String? lab = (schema[fieldName]?.label ?? "") != "" ? schema[fieldName]!.label : fieldName;
+    String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]!.type);
+    String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase())).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
+    if (!isNotValidCol && !(filterTempOrderView[viewID]?.contains(fieldName) ?? true)) { 
+      filterTempOrderView[viewID]?.add(fieldName); 
+    }
+
+    var realLabel = fastTranslation[viewID ?? ""]?[label] ?? label;
+    schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
+      realLabel.toLowerCase(), overflow: TextOverflow.ellipsis,)));
+    columns.add( GridColumnWidget(
+        context: context, 
+        width: double.nan,
+        items: schemeItems, 
+        isEditMode: modeIndex == 1,
+        maxLength: order.length + (modeIndex == 1 && editMode[viewID] == "math" ? 1 : 0),
+        borderColor: Theme.of(context).splashColor, 
+        allowSorting: !(datas.isEmpty && !isFilter()) && modeIndex != 1,
+        columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
+        allowFiltering: !(datas.isEmpty && !isFilter()) && modeIndex != 1, 
+        type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
+        url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
+        contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
+        label: label == "id" ? GridValueWidget(fontSize: 13, icon: Icons.tag) : GridValueWidget(fontSize: 13, value: realLabel),
+      ));
+    return columns;
+  }
+
+  Widget getBottomBar(Map<String, model.SchemaField> schema) {
+    var toggles = [
+        Icons.remove_red_eye,
+        Icons.edit,
+    ];
+    if (widget.view?.actions.contains("delete") ?? false) {
+      toggles.add(Icons.delete);
+    } 
+    if (toggles.length <= modeIndex) {
+      modeIndex = 0;
+    }
+      var w = Padding( 
+      padding: const EdgeInsets.only(right: 10), 
+      child: ToggleSwitch( 
+        icons: toggles, 
+        minHeight: 27.5, 
+        minWidth: 50, 
+        fontSize: 12, 
+        cornerRadius: 5,
+        initialLabelIndex: modeIndex,
+        dividerColor: Colors.white, 
+        inactiveFgColor: Theme.of(context).splashColor,
+        totalSwitches: toggles.length, 
+        inactiveBgColor: Theme.of(context).secondaryHeaderColor,
+        onToggle: (index) async {
+          modeIndex = index ?? 0;
+          globalOffset = 0;
+          rects.remove(viewID);    
+          filterTempOrderView.remove(viewID);
+          var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
+          widget.view?.items = [];
+          var e = await APIService().getWithOffset<model.View>(widget.view?.linkPath ?? defaultPath, true, context);
+          for (var view in e.data ?? []) { 
+            widget.view?.max = view?.max;
+            for (var item in view.items) { 
+              if ((widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
+                widget.view?.items.add(item); 
+              }
+            }
+          }
+          Future.delayed(Duration(seconds: 1), () {
+            globalActionBar.currentState?.setState(() {
+              globalActionBar.currentState?.widget.view = widget.view;
+            });
+            setState(() { });
+          }); 
+        }
+      )
+    );
+    if (modeIndex != 1) {
+      return Container( 
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        color: Colors.transparent, 
+        constraints: const BoxConstraints(minHeight: 40), 
+        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            w
+          ]
+        )
+      );
+    }
+    return Container( 
+        padding: EdgeInsets.symmetric(horizontal: 20),
+        color: Theme.of(context).primaryColorLight, 
+        constraints: const BoxConstraints(minHeight: 40), 
+        width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+        child: Stack( 
+          children: [
+          SizedBox( 
+            width: (currentWidth - menuSize > 0 ? currentWidth - menuSize - 202 : 0),
+            child: FunctionsSelectorWidget(schema: schema, mathAllowed: realOrder(widget.view, false, false, null, 5).length > 2),
+          ),
+          Positioned(
+            right: 0,
+            top: 7,
+            child: w
+          ),
+        ])
+    );
   }
 
   List<GridRowWidget> buildRows(List<GridColumnWidget> columns, List<Value> datas) {
@@ -332,7 +492,7 @@ class GridWidgetState extends State<GridWidget> {
           schemaID: mapped.schemaID,
           isNew: mapped.isNew,
           schemaField: mapped.schema[column.columnName],
-          translatable: mapped.schema[column.columnName]?.translatable ?? true,
+          translatable: mapped.schema[column.columnName]?.translatable ?? false,
           isDraft: mapped.isDraft,
           cellID: mapped.cellID,
           width: column.width, 

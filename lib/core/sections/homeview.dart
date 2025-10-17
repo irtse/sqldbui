@@ -21,7 +21,7 @@ class HomeViewWidget extends StatefulWidget{
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
  
-  Completer<WebViewController> _controller =  Completer<WebViewController>();
+  final Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
