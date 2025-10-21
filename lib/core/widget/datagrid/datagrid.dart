@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -8,20 +9,14 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
-import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
-import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
-import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
-import 'package:sqldbui2/core/widget/datagrid/buttons/datagrid_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 
 Map<String, List<DropdownMenuItem<String>>> schemeItems = {};
 Map<String, Map<String,String>> fastTranslation = {};
-
 bool isFilter() {
   return currentView != null && globalOrder.containsKey(viewID) && globalFilter.containsKey(viewID)
   && (globalOrder[viewID]!.isNotEmpty || (globalFilter[viewID] != null && globalFilter[viewID]!.size() > 0));
@@ -93,7 +88,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     searchCtrl = {};
-
     await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
     List<Value> datas = <Value>[];
@@ -105,97 +99,32 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if ( globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
       datas.sort( (a, b) =>  (b.values["id"] != null ? int.parse( b.values["id"]) : 0) -  (a.values["id"] != null ? int.parse(a.values["id"]) : 0) );
     }
-    
-    var index = 0;    
-    if (modeIndex != 1) {
-      if (filterRestr[viewID] != null && !tempRemoval) {
-        if ((globalFilter[viewID]?.filters ?? {}).isNotEmpty) {
-          filterRowsWidget = globalFilter[viewID]?.toRow(schema) ?? [];
-        } else {
-          var resp = await APIService().get<model.Shallowed>("${currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}")}&is_view=false", true, null);
-          if ((resp.data ?? []).isNotEmpty) {
-            var i = resp.data![0];
-            if ((i.selected && !noFilterRetrieval) || (filterRowsWidget.isEmpty && i.fields.isNotEmpty)) { 
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  globalNew[viewID] = i.elder;
-                  refreshFilter(i.fields);
-                }); 
-              }
-          } else {
-            filterRestr[viewID] = "";
-          }
-        }
-        
-      } else if (tempRemoval) { tempRemoval = false; }
-      for (var i in filterRowsWidget) { 
-        if (filterRowsWidget.length - 1 > index && i.connector == "") { 
-          filterRowsWidget[index] = FilterRowWidget(
-            schema: schema, 
-            index: i.index, 
-            connector: "and", 
-            label: i.label, 
-            type: i.type, 
-            columnName: i.columnName, 
-            value: i.value, 
-            comparator: i.comparator, 
-            dir: i.dir);
-        }
-        index++;
-      }
-    }
-    var subSize = showMore ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
-    if (currentWidth <= 1000) { subSize = 0; }
     return Column( children: [ 
       Container( 
         color: Theme.of(context).primaryColorLight, 
         constraints: const BoxConstraints(minHeight: 40), 
         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
         child: Column( children: [
-          Stack( children: [ 
-            currentWidth > 1000 ? 
-              Positioned( 
-                top: 3.5, left: 32, 
-                child: FilterSelectorWidget(schema: schema, filterMain: globalFilter[viewID], schemaName: widget.view?.schemaName ?? "")
-              ) : Container(),
-            Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 30), 
-                child: FutureBuilder<List<Widget>>(future: getButtons(), builder: (a,s) {
-                  if (s.data != null) {
-                    return Row(children: [ 
-                      ...s.data!, 
-                      FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) 
-                    ]);
-                  }
-                 return Row(children: [ 
-                    FilterColsPopUpWidget(key: filterColsPopUpKey, schema: schema) 
-                 ]); 
-              })) 
-            ]) 
-          ]), 
-          currentWidth <= 1000 ? Container() 
-            : Container( 
-              constraints: BoxConstraints( 
-                maxHeight:  (currentHeigth > (120 + subSize) ? subSize : currentHeigth - 120).toDouble()), 
-              child: SingleChildScrollView( 
-                child: Column( 
-                  children : [  
-                    modeIndex != 1 ? (filterRowsWidget.isEmpty ?  Container() 
-                    : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)) : ( 
-                  editMode[viewID] != "math" || functionMathRowsWidget.isEmpty ? 
-                  Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
-                ),  
-              ...(showMore ? filterRowsWidget :  []) ,
-              ...(editMode[viewID] == "math" ? functionMathRowsWidget : [])
-            ] 
-            ))),
-          MainGridWidget(
-            links: links, 
+          FilterSelectorWidget(
+            schema: schema, 
+            filterMain: globalFilter[viewID], 
+            schemaName: widget.view?.schemaName ?? ""
+          ),
+          GridWidget( 
             view: widget.view, 
-            viewKey: widget.viewKey, 
-            subSize: subSize,
-            subWidthSize: menuSize,
+            links: links,
+            key: globalGridKey, 
             schema: schema,
-            isSelected: widget.isSelected) 
+            viewKey: widget.viewKey, 
+            isSelected: widget.isSelected,
+            subWidthSize: menuSize,
+            showColumnHeaderIconOnHover: true,
+            schemaID: "${currentView?.schemaID}", 
+            borderColor: Theme.of(context).splashColor,
+            maxLength: realOrder(widget.view, false, false, [], 5).length,
+            isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
+            contextWidth: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+          ) 
         ])
       ),
     ]);
@@ -219,20 +148,102 @@ class DatagridWidgetState extends State<DatagridWidget> {
       }
     }
   }
+}
 
-  Future<List<Widget>> getButtons() async {
-    var buttons = <Widget>[];
-    
-    if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
-      buttons.add(
-        PopupButtonWidget(
-          tooltip: TranslateConstants.rowsImport,
-          icon: Icons.upload,
-          widget: MappingPopUpWidget(isExport: true, format: "csv")
-        )
-      );
+
+Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaField>? schema,  bool subtable) {
+    if (schema == null) { return {}; }
+    bool isMath =modeIndex == 1 && editMode[viewID] == "math";
+    List<String> seen = [];
+    if (!(filterTempOrderView[viewID] != null && modeIndex == 1 && editMode[viewID] == "math")
+    && filterOrderView[viewID] == null) {
+      var newOrder = schema.keys.where( (e) {
+        return schema[e]?.inResume != null; 
+      }).toList();
+      newOrder.sort( (e1, e2) => (schema[e1]?.inResume ?? 1000).compareTo((schema[e2]?.inResume ?? 1000))  );
+      if (newOrder.length < 5 ) {
+        for (var o in (ord ?? [])) {
+          if (newOrder.length == 5 ) {
+            break;
+          }
+          if (!newOrder.contains(o)) {
+            newOrder.add(o);
+          }
+        }
+      }
+      if ((ord ?? []).contains("type") && !newOrder.contains("type")) {
+        newOrder = ["type", ...newOrder];
+      }
+      filterTempOrderView[viewID] = newOrder;
     }
-    return buttons;
+    var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? ord ?? [];
+    List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
+      String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
+      bool active = f == null && f == "id" ? true : schema[f]?.active ?? false;
+      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description" && schema[f] != null
+          && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
+      seen.add(f);
+      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex == 1) {
+        return false;
+      }
+      return ok;
+    }).toList();
+    if (filterTempID[viewID] ?? false) {
+      o = ["id", ...o];
+    }
+    Map<String,String> newOrder = {};
+    for (var oo in o) {
+      newOrder[oo] = schema[oo]?.label ?? oo;
+    }
+    return newOrder;
   }
 
-}
+List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dynamic>? forceOrder, int max) {
+    if (view == null) { return []; }
+    var schema = view.schema;
+    bool isMath = forceMath || (modeIndex == 1 && editMode[viewID] == "math");
+    List<String> seen = [];
+    if (!(filterTempOrderView[viewID] != null && modeIndex == 1 && editMode[viewID] == "math")
+    && filterOrderView[viewID] == null) {
+      var newOrder = view.schema.keys.where( (e) {
+        return view.schema[e]?.inResume != null; 
+      }).toList();
+      newOrder.sort( (e1, e2) => (view.schema[e1]?.inResume ?? 1000).compareTo((view.schema[e2]?.inResume ?? 1000))  );
+      if (newOrder.length < 5 ) {
+        for (var o in view.order) {
+          if (newOrder.length == 5 ) {
+            break;
+          }
+          if (!newOrder.contains(o)) {
+            newOrder.add(o);
+          }
+        }
+      }
+      if (newOrder.isEmpty) {
+        filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < max ? (forceOrder ?? view.order).length : max);
+
+      } else {
+        if (view.order.contains("type") && !newOrder.contains("type")) {
+          newOrder = ["type", ...newOrder];
+        }
+        filterTempOrderView[viewID] = forceOrder ?? newOrder;
+      }
+    }
+    var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
+    
+    List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
+      
+      String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
+      bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description" && schema[f] != null
+          && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
+      seen.add(f);
+      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex == 1) {
+        return false;
+      }
+      return !(schema[f]?.hidden ?? false) && (ok);
+    }).toList();
+    if (filterTempID[viewID] ?? false) {
+      o = ["id", ...o];
+    }
+    return o;
+  }

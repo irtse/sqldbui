@@ -57,7 +57,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             currentView = null;
             if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0];               
-              print(currentView?.items.length);
               currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.isEmpty ) {
                 currentView?.max = currentView?.items.length ?? 0;

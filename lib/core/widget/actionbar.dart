@@ -212,7 +212,7 @@ class ActionBarState extends State<ActionBarWidget> {
         row.add(
           Padding(
             padding: const EdgeInsets.only(left: 10), 
-            child: Text("${widget.view == null ? "0" : widget.view?.max} ${(await getOnFlow(TranslateConstants.found)).toLowerCase()}", 
+            child: Text("${ !allSelected ? "${selectedGrid.length}/" : ""}${widget.view == null ? "0" : widget.view?.max} ${(await getOnFlow(TranslateConstants.found)).toLowerCase()}", 
             overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
           )
         );

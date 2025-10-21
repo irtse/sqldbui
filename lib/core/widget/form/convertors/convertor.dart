@@ -110,14 +110,15 @@ class Convertor {
         );
       }
     } else if (type.contains("upload")) { 
-      print(widget.value);
-        w =  InkWell( 
+      var ctrl = TextEditingController(text: widget.value?.toString());
+      w = Stack( alignment: AlignmentDirectional.centerStart, children: [ 
+        Container( padding: EdgeInsets.only(right: 20), child: InkWell( 
             mouseCursor: SystemMouseCursors.click,
             onTap: () => _pickFile( widget, type, id, formKey, url),
-            child: TextFormField( 
+            child: TextFormField(
+          controller: ctrl, 
           key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,
-          initialValue: widget.value?.toString(),
           style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
           enabled: false, 
           autocorrect: true,  
@@ -133,7 +134,7 @@ class Convertor {
             hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300), // you need this
             floatingLabelBehavior: FloatingLabelBehavior.always, 
             filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
-            contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
+            contentPadding: EdgeInsets.only(left: 20.0, right: 20.0),
             suffixIcon: Icon(isText ? (type.contains("upload") ? Icons.manage_search_outlined : Icons.text_fields)  : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
             hintText: (await getOnFlow("select a file")).toLowerCase(),  
             errorStyle: const TextStyle(fontSize: 0,),
@@ -148,7 +149,18 @@ class Convertor {
           validator: (String? value) {
             if (value == null) { return "please enter a file..."; }  
             return null; 
-          }));
+          }))),
+            Positioned(right: 0, child: IconButton(
+                  onPressed: () {
+                    ctrl.text = "";
+                    widget.value = null;
+                    detectChanges[id] = formKey;
+                    cacheChanges[id] = widget.value;
+                    cacheFilesChanges[id]?.remove(url);
+                  },
+                  icon: Icon(Icons.close),
+                )),
+        ]);
       }  if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
         w = TextFormField( key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,

@@ -24,7 +24,6 @@ class GridColumnWidget extends StatefulWidget {
   bool last = false;
   bool allowSorting; 
   bool allowFiltering; 
-  bool isEditMode= false;
 
   String? url;
   String type; String columnName; 
@@ -52,7 +51,6 @@ class GridColumnWidget extends StatefulWidget {
     this.allowFiltering = false, 
     required this.label, 
     this.borderWidth = 1, 
-    this.isEditMode = false,
     this.iconColor = Colors.grey,
     this.borderColor = Colors.grey, 
     this.backgroundColor = Colors.transparent, 
@@ -78,14 +76,11 @@ class GridColumnWidget extends StatefulWidget {
   double getTotal() { return contextWidth - (76 + maxLength); }
 
   void prefetch() {
-    if (currentView != null 
-    && !rects.containsKey(viewID) 
-    && viewID != null) { rects[viewID] = {}; }
+    if (!rects.containsKey(viewID) && viewID != null) { rects[viewID] = {}; }
   
-    if (rects[viewID] != null 
-    && !rects[viewID]!.containsKey(columnName)) {
+    if (rects[viewID] != null  && !rects[viewID]!.containsKey(columnName)) {
       double width = getWidth(false);
-      late Rect rect = rects[viewID]!.containsKey(columnName) && !rects[viewID]![columnName]!.width.isNaN ? rects[viewID]![columnName]! : Rect.fromCenter(
+      late Rect rect = rects[viewID]?[columnName] ?? Rect.fromCenter(
         center: MediaQuery.of(context).size.center(Offset.zero),
         width: width.isNaN ? 130 : width, height: 55,
       );
@@ -138,24 +133,26 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
       if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
       || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName))))) { 
         buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( 
-          message: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(),  child: IconButton(
-        onPressed: () async { 
-          resetFilter(widget.columnName);
-          navigate = true;
-          confirmCache = {};
-          globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-        }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 15,)))));
+          message: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(),  
+          child: IconButton(
+            onPressed: () async { 
+              resetFilter(widget.columnName);
+              navigate = true;
+              confirmCache = {};
+              globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+            }, icon: Icon(Icons.filter_alt_off, color: widget.iconColor, size: 15)
+          )
+        )));
       } 
     }
     widget.width = width + 32;
     if (viewID != null && !rects.containsKey(viewID)) { rects[viewID] = {}; }
-    late Rect rect = rects[viewID]!.containsKey(widget.columnName) ? rects[viewID]![widget.columnName]! : Rect.fromCenter(
-      center: MediaQuery.of(context).size.center(Offset.zero), width: width.isNaN ? 300 : width + 32, height: 55 );
-    if (currentView != null && rects.containsKey(viewID)) { 
-      rects[viewID]![widget.columnName] = rect; 
-    }
+    late Rect rect = rects[viewID]?[widget.columnName] ?? Rect.fromCenter(
+      center: MediaQuery.of(context).size.center(Offset.zero), width: width.isNaN ? 300 : width + 32, height: 55 
+    );
+    rects[viewID]?[widget.columnName] =rect; 
     List<DropdownMenuItem<String>> dpItems = []; 
-    if (widget.isEditMode && showFunctions[viewID] == true) {
+    if (showFunctions[viewID] == true) {
       List<String> t = widget.columnName == "id" ? [] : ["count"];
       bool isDate = widget.type.contains("date") || widget.type.contains("time");
       if (widget.columnName != "id" && (isDate || widget.type.contains("double") || widget.type.contains("float") 
@@ -178,8 +175,8 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         decoration: BoxDecoration( color: Theme.of(context).primaryColor, 
           border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor))),
         alignment: Alignment.center,
-        width: !widget.isEditMode && showFunctions[viewID] == true ? 0 : (rects[viewID] != null && rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width), 
-        height: widget.isEditMode && showFunctions[viewID] == true ? 40 : 0, 
+        width: showFunctions[viewID] == true ? 0 : (rects[viewID]?[widget.columnName]?.width ?? 300 ), 
+        height: showFunctions[viewID] == true ? 40 : 0, 
         padding: const EdgeInsets.all(10),
         child: dpItems.isEmpty ? null : DropdownButtonFormField<String>( 
             value: colFunction[viewID]?[widget.columnName],
@@ -206,7 +203,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           fillColor: (Theme.of(context).primaryColor),  hintStyle: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor),
           border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
         ))),
-      Container(width: rects[viewID] != null && rects[viewID]![widget.columnName]!.width.isNaN ? 300 : rects[viewID]![widget.columnName]!.width, height: 55,
+      Container(width: rects[viewID]?[widget.columnName]?.width ?? 300, height: 55,
       decoration: BoxDecoration( color: widget.backgroundColor, 
       border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor,))),
       child: fork.TransformableBox(
@@ -221,12 +218,10 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         clampingRect: Offset.zero & MediaQuery.sizeOf(context),
         handleAlignment: HandleAlignment.inside,
         onChanged: (result, event) {
-          if (widget.grid != null) { 
-            widget.grid!.setState(() {
               double newWidth = result.rect.width > ((buttons.length + 1) * 40) + 60 ? result.rect.width : ((buttons.length + 1) * 40) + 60;
               if (newWidth < 0) { newWidth = ((buttons.length + 1) * 40) + 60; }
-              if (result.rect.width <= ((buttons.length + 1) * 40) + 60) { delayed = true; }
-              rects[viewID]![widget.columnName] = Rect.fromCenter(
+              //if (result.rect.width <= ((buttons.length + 1) * 40) + 60) { delayed = true; }
+              rects[viewID]?[widget.columnName] =Rect.fromCenter(
                 center: MediaQuery.of(context).size.center(Offset.zero),
                 width: newWidth, height: 55);
               widget.width = newWidth;
@@ -243,7 +238,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
                   var diff = widget.contextWidth - 81.4 - total;
                   newWidth = (rects[viewID]![widget.columnName]!.width < 0 ? (((buttons.length + 1) * 40) + 60) : rects[viewID]![widget.columnName]!.width) + diff;
                   if (newWidth < 0) { newWidth = ((buttons.length + 1) * 40) + 60; }
-                  rects[viewID]![widget.columnName] = Rect.fromCenter(
+                  rects[viewID]?[widget.columnName] =Rect.fromCenter(
                     center: MediaQuery.of(context).size.center(Offset.zero),
                     width: newWidth, height: 55 );
                   widget.width = newWidth;
@@ -258,10 +253,16 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
                   last.setState(() {});
                 }
               }
-              setState(() {});
-              Future.delayed(const Duration(milliseconds: 500), () => setState(() { delayed = false; }));
-            }); 
-          } 
+            for (var row in rows) {
+              row.state?.setState(() {
+                for( var c in (row.state!.widget.cells)) {
+                  if (c.columnName == widget.columnName) {
+                    c.width = widget.width;
+                  }
+                }
+              }); 
+            } 
+          setState(() { });
         },
         contentBuilder: (context, rect, flip) {
           var size = (rects[viewID]![widget.columnName]?.width ??  300 ) - 40 - (widget.show ? (buttons.length) * 40 : 0);

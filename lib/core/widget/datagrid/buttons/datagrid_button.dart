@@ -86,7 +86,7 @@ class DatagridButtonWidgetState extends State<DatagridButtonWidget> {
                   }
                 }
                 if (body.isNotEmpty) {
-                  showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete element(s) <${ids.isEmpty ? "all" : ids.join(',')}>", 
+                  showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "update element(s) <${ids.isEmpty ? "all" : ids.join(',')}>", 
                   validate: () async {
                       for (var lfile in cacheFilesChanges.values) {
                         for (var pathFile in lfile.keys) {

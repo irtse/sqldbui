@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
+import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -5,7 +9,6 @@ import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 
@@ -166,16 +169,11 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     } else if (widget.widget.widget.beforeColumn.length > widget.depth + 1) {
        widget.widget.widget.beforeColumn.sublist(0, widget.depth + 1);
     }
-    List<DropdownMenuItem<String>> items = [];
+    MultiSelectController<String> ctrls = MultiSelectController<String>();
+    List<DropdownItem<String>> items = [];
     for (var o in widget.schema.entries.where((e) => order.contains(e.key))) {
       if (items.where( (e) => e.value == o.key).isEmpty) {
-          items.add(DropdownMenuItem<String>(value: o.key, child: FutureBuilder(future: getOnFlow(o.value.label), builder: (a,s) {
-            if (s.data != null) {
-              return Text(s.data!.toLowerCase(), overflow: TextOverflow.ellipsis);
-            }
-            return Text(o.value.label.toLowerCase(), overflow: TextOverflow.ellipsis);
-            })
-        ));
+          items.add(DropdownItem<String>(value: o.key, label: await getOnFlow(o.value.label), selected: o.key == widget.columnName ));
       }
     }
     List<DropdownMenuItem<String>> conn = [];
@@ -191,42 +189,102 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
       widget.comparator = widget.type.contains("enum") || widget.type == "link"  ? "=" : widget.comparator;
     }
     return Row( children : [
-      SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 7, 
-                child: DropdownButtonFormField<String>( 
-                  items: items, 
-                    value: widget.columnName, 
-                    hint: Text((await getOnFlow(TranslateConstants.colFilter)).toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle(color: Theme.of(context).splashColor)),
-                    isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
-                    validator: (value) { if (value == null) { return ""; } return null; },
-                    onChanged: (value) { 
-                      setState(() {
-                        widget.columnName = value ?? "";
-                        if (widget.widget.widget.beforeColumn.length > (widget.depth)) {
-                          widget.widget.widget.beforeColumn[widget.depth] =  widget.columnName!;
-                          widget.widget.widget.beforeColumn = widget.widget.widget.beforeColumn.sublist(0, widget.depth + 1);
-                        } else {
-                          widget.widget.widget.beforeColumn = [...widget.widget.widget.beforeColumn, ...(widget.columnName != null ? [ widget.columnName! ] : [])];
-                        }
-                        widget.value = null;
-                        widget.label = widget.schema[value ?? ""]?.label;
-                        widget.type = value == "id" ? "integer" : widget.schema[value ?? ""]?.type ?? "text";
-                        widget.comparator = (widget.type.contains("enum") || widget.type.contains("link") || widget.type.contains("many") ? ["=", "!="] : (  
-                          widget.type.contains("link")  ? ["like", "not like"] : ["like", "not like", "=", "!="])).first;
-                        widget.widget.widget.value = null;
-                        widget.widget.widget.label = widget.schema[value ?? ""]?.label;
-                        widget.widget.widget.type = value == "id" ? "integer" : widget.schema[value ?? ""]?.type ?? "text";
-                        widget.widget.widget.comparator = (widget.type.contains("enum") || widget.type.contains("link") || widget.type.contains("many") ? ["=", "!="] : (  
-                          widget.type.contains("link") ? ["like", "not like"] : ["like", "not like", "=", "!="])).first;
-                      });
-                    }, 
-                    dropdownColor: Theme.of(context).secondaryHeaderColor,
-                    decoration: InputDecoration( suffixIconColor: Theme.of(context).primaryColor, errorStyle: const TextStyle(fontSize: 0,),
-                      floatingLabelBehavior: FloatingLabelBehavior.always, filled: true, labelStyle: const TextStyle(color: Colors.white),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
-                      fillColor: (Theme.of(context).secondaryHeaderColor),  hintStyle: TextStyle(fontSize: 10, color: Theme.of(context).splashColor),
-                      border: const OutlineInputBorder(), contentPadding: const EdgeInsets.only(top: 12, left: 20.0, right: 20.0),
-                    ))),
-            ...(w2 != null ? [ w2 ] : [
+      Container(
+        padding: EdgeInsets.only(left: 10),
+        height: 25,  
+        width: (MediaQuery.of(context).size.width - menuSize) / 6, 
+        child: MultiDropdown<String>(
+        controller: ctrls,
+        singleSelect: true,
+        items: items,
+        label: "tp",
+        forceVerticalAlignment: true,
+        textAlignVertical: TextAlignVertical.bottom,
+        searchEnabled: true,
+        style: TextStyle(color: Colors.white ),
+        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
+        ),
+        fieldDecoration: FieldDecoration(
+          padding: kIsWeb ? EdgeInsets.only(left: 12, right: 12, top: 12) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
+          labelStyle: TextStyle(fontSize: 0),
+          hintText: (await getOnFlow("select an option")).toLowerCase(),
+          hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+          prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
+          showClearIcon: false,
+          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+        ),
+        searchDecoration: SearchFieldDecoration(
+          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+          border : const OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          focusedBorder : const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+            borderRadius: BorderRadius.all(Radius.circular(5))
+          )
+        ),
+        dropdownDecoration: DropdownDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          marginTop: 2,
+          maxHeight: 400,
+          header: Padding(
+            padding: EdgeInsets.all(8),
+              child: Text(
+                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          dropdownItemDecoration: DropdownItemDecoration(
+            backgroundColor: Theme.of(context).highlightColor,
+            selectedIcon: const Icon(Icons.check_box, color: Colors.green),
+            disabledIcon: Icon( Icons.lock, color: Colors.grey.shade300) ),
+            validator: (value) {
+              if ((value == null || value.isEmpty)) {
+                return '';
+              }
+              return null;
+            },
+            onSelectionChange: (values) {
+              if (values.isEmpty)  { return; }
+              setState(() {
+                widget.columnName = values[0];
+                widget.widget.widget.columnName = values[0];
+                if (widget.widget.widget.beforeColumn.length > (widget.depth)) {
+                  widget.widget.widget.beforeColumn[widget.depth] =  widget.columnName!;
+                  widget.widget.widget.beforeColumn = widget.widget.widget.beforeColumn.sublist(0, widget.depth + 1);
+                } else {
+                  widget.widget.widget.beforeColumn = [...widget.widget.widget.beforeColumn, ...(widget.columnName != null ? [ widget.columnName! ] : [])];
+                }
+                widget.value = null;
+                widget.label = widget.schema[values[0]]?.label;
+                widget.type = values[0] == "id" ? "integer" : widget.schema[values[0]]?.type ?? "text";
+                widget.comparator = (widget.type.contains("enum") || widget.type.contains("link") || widget.type.contains("many") ? ["=", "!="] : (  
+                            widget.type.contains("link")  ? ["like", "not like"] : ["like", "not like", "=", "!="])).first;
+                widget.widget.widget.value = null;
+                widget.widget.widget.label = widget.schema[values[0]]?.label;
+                widget.widget.widget.type = values[0] == "id" ? "integer" : widget.schema[values[0]]?.type ?? "text";
+                widget.widget.widget.comparator = (widget.type.contains("enum") || widget.type.contains("link") || widget.type.contains("many") ? ["=", "!="] : (  
+                            widget.type.contains("link") ? ["like", "not like"] : ["like", "not like", "=", "!="])).first;
+                });
+              },
+            )
+          ),  
+          ...(w2 != null ? [ w2 ] : [
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 10), 
                 child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 10, child: DropdownButtonFormField<String>( 
                     items: conn, 
@@ -331,3 +389,18 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     ]);
   }
 }
+  
+  Future<List<Widget>> getButtons() async {
+    var buttons = <Widget>[];
+    
+    if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
+      buttons.add(
+        PopupButtonWidget(
+          tooltip: TranslateConstants.rowsImport,
+          icon: Icons.upload,
+          widget: MappingPopUpWidget(isExport: true, format: "csv")
+        )
+      );
+    }
+    return buttons;
+  }

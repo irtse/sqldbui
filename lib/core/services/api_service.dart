@@ -279,9 +279,11 @@ class APIService {
     if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
       Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, durationOfStayingOnScreen: Duration(minutes: 1), () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
-                       alertBannerLocation:  AlertBannerLocation.bottom,))
+                       alertBannerLocation:  AlertBannerLocation.bottom))
       ;
     } 
+    print(err);
+
     throw Exception(err);
   }
 

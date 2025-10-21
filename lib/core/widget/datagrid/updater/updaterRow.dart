@@ -7,7 +7,6 @@ import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/datagrid_button.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -234,8 +233,8 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), 
                 child: SizedBox( height: 25,  width: widget.type == "boolean" ? 100 : ((MediaQuery.of(context).size.width - menuSize) / 3) , child: 
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
-                      DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
-                      DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis,))], 
+                      DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis)),
+                      DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis))], 
                     value: cacheChanges[widget.columnName ?? ""], hint: Text((await getOnFlow(TranslateConstants.colNullFilter)).toLowerCase(), overflow: TextOverflow.ellipsis, 
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),

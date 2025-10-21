@@ -148,7 +148,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     child: TextButton(onPressed: () { 
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
                       globalOffset = 0; 
-                      rects.remove(viewID);
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                       for (var row in filterRowsWidget) {
                         row.rowKey.currentState?.setState(() {});
@@ -181,7 +180,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     APIService().post<model.Shallowed>(currentView!.filterPath, body, null).then((v) async { 
                         forceViewFilter = true;
                         globalOffset = 0; 
-                        rects.remove(viewID);
                         setLatest = true;
                         if (v.data != null && v.data!.isNotEmpty) {
                           var i = v.data?[0];
@@ -319,7 +317,6 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
                         "rows=all", "rows=$value"), <String, dynamic> { "is_selected" : true }, null).then((v) {
                         globalOffset = 0; 
-                        rects.remove(viewID);
                         filterView[viewID] = value;
                         filterTempOrderView.remove(viewID);
                         noSelection=false;

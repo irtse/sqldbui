@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
+import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/form/widget/empty_formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary.dart';
 import 'package:sqldbui2/core/widget/form/widget/formulary_access_history.dart';
@@ -379,13 +380,17 @@ class FormWidgetState extends State<DataFormWidget> {
                           data.items.addAll(d.items);
                         }
                       }*/
-                      return MainGridWidget(
+                      return GridWidget(
                         view: data, 
+                        maxLength: realOrder(widget.view, false, false, [], 5).length,
+                        contextWidth: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
+                        schemaID: "${widget.view?.schemaID ?? ""}",
                         schema: widget.view?.schema ??  {},
+                        borderColor: Theme.of(context).splashColor,
                         viewKey: null, 
                         subTable: true, 
                         forceOrder: data.order,
-                        links: {}, subSize: 0, 
+                        links: {}, 
                         subWidthSize: 100);
                     }
                     return Container( 

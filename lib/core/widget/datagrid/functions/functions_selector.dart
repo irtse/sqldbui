@@ -10,7 +10,6 @@ import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
-import 'package:sqldbui2/core/widget/datagrid/main_grid.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
@@ -82,7 +81,6 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
             dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
             totalSwitches: toggles.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
             onToggle: (index) { 
-              rects.remove(viewID);
               filterTempOrderView.remove(viewID);
               editMode[viewID] = toggles[index ?? 0]; 
               globalGridWidgetKey.currentState?.setState(() { });

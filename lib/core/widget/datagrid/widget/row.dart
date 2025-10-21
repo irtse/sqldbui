@@ -1,5 +1,6 @@
 
 // ignore: must_be_immutable
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -31,6 +32,8 @@ class GridRowWidget extends StatefulWidget {
   List<GridCellWidget> widgetCells = [];  
   bool showCheckboxColumn; 
 
+  GridRowWidgetState? state; 
+
   GridRowWidget ({ 
     super.key, 
     required this.cellID,
@@ -52,6 +55,7 @@ class GridRowWidget extends StatefulWidget {
 }
 class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
+    widget.state = this;
     return modeIndex == 1 ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
       if (s.data != null) {
         return s.data!;
@@ -93,7 +97,10 @@ class GridRowWidgetState extends State<GridRowWidget> {
         Padding(padding: const EdgeInsets.only(left: 5), 
         child: Container( width: 73, height: maxheight, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
-          child: CheckboxListTile(value: widget.isSelected, onChanged: (value) {
+          child: CheckboxListTile(
+            enabled: !allSelected,
+            value: widget.isSelected, 
+            onChanged: (value) {
             widget.isSelected=value ?? false;
             if (widget.isSelected) { 
               selectedGrid.add(cellID);
@@ -106,8 +113,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
               } else { unselectedGrid = []; }
             }
             setState(() {});
-            globalGridWidgetKey.currentState?.setState(() {});
-          },)
+            globalActionBar.currentState?.setState(() {});
+          })
         ))); 
     }
     String? state;

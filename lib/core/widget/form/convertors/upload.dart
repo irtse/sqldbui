@@ -30,6 +30,7 @@ class _UploadState extends State<UploadWidget> {
   bool error = false;
   PlatformFile? _selectedFile;
   TextEditingController text = TextEditingController();
+  bool isNull = false;
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
@@ -88,8 +89,13 @@ class _UploadState extends State<UploadWidget> {
     }
     String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (
       widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null));
+    if (isNull) {
+      iv = "";
+      isNull = false;
+    }
     text = TextEditingController(text: iv);
-    Widget w = InkWell( 
+    Widget w = Stack( children: [
+       InkWell( 
             mouseCursor: SystemMouseCursors.click,
             onTap: () => widget.readOnly ? null : _pickFile(),
             child: TextFormField(
@@ -133,7 +139,20 @@ class _UploadState extends State<UploadWidget> {
                 });
                 return t;
               },
-            ));
+            )),
+            if (widget.form[widget.name] != null)
+              Positioned(right: 30, child: IconButton(
+                onPressed: () {
+                  isNull = true;
+                  widget.value = '';
+                  text.text = '';
+                  widget.component?.widget.detectChange = true;
+                  Map<String,List<PlatformFile>> m = {};
+                  saveChange(widget.component?.widget.view, widget.form, widget.name, m); // PB FOR LINK ADD 
+                },
+                icon: Icon(Icons.close, size: 15),
+              )),
+          ]);
       if (widget.type.contains("multiple")) {
         return Column(children: [
           Wrap( children: widget.value == null ? [] : ("${widget.value}".split(",").map( 

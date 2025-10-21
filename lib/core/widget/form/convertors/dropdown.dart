@@ -145,7 +145,8 @@ class DropDownState extends State<DropDownWidget> {
           items.add(DropdownMenuItem<String>(value: item, child:  Text(v, overflow: TextOverflow.ellipsis)));
         }
       }
-      return DropdownButtonFormField<String>( 
+      return Stack( children: [
+         DropdownButtonFormField<String>( 
           items: items, 
           isExpanded: true,
           hint: Text((await getOnFlow(TranslateConstants.selectValue)).toLowerCase(), style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -225,7 +226,16 @@ class DropDownState extends State<DropDownWidget> {
             }
             return null;
           },
-      ); 
+        ),
+        if (widget.form[widget.name] != null)
+           Positioned(right: 30, child: IconButton(
+              onPressed: () => setState(() {
+                widget.component?.widget.detectChange = true;
+                saveChange(widget.component?.widget.view, widget.form, widget.name, null); // PB FOR LINK ADD 
+              }),
+              icon: Icon(Icons.close, size: 15),
+            )),
+      ]); 
     }
     if (widget.readOnly && !widget.empty) {
       return SizedBox(
@@ -336,7 +346,7 @@ class SubDropDownWidget extends StatefulWidget {
   final String label;
   final bool translatable;
   bool isDark = false;
-  final dynamic autofill;
+  dynamic autofill;
   GlobalKey<SubFormularyWidgetState>? wrappers;
 
   SubDropDownWidget ({ required this.form, required this.datas, required this.mainUrl,
@@ -404,7 +414,8 @@ class SubDropDownState extends State<SubDropDownWidget> {
         }
       }
     }
-    return MultiDropdown<String>(
+    return Stack( children: [
+      MultiDropdown<String>(
         max: max,
         changeFunction: (dynamic value) async {
           if (value == "") {
@@ -525,7 +536,20 @@ class SubDropDownState extends State<SubDropDownWidget> {
                             }
                           } catch(e) {} 
                         },
-                      );
+                      ),
+                      if (widget.form[widget.name] != null )
+                        Positioned(right: 30, child: IconButton(
+                          onPressed: () => setState( () {
+                            currentDropdown[viewID!]?.remove(widget.name);;
+                            widget.value = null;
+                            widget.autofill = null;
+                            ctrls.unselectWhere((i) => true);
+                            widget.component?.widget.detectChange = true;
+                            saveChange(widget.component?.widget.view, widget.form, widget.name, null); // PB FOR LINK ADD 
+                          }),
+                          icon: Icon(Icons.close, size: 15),
+                        )),
+                    ]);
     } catch(e,s) {
       print(e);
       print(s);

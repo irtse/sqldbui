@@ -1,11 +1,14 @@
-import 'package:sqldbui2/core/sections/view.dart';
+import 'package:flutter/material.dart';
+import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/abstract.dart';
-import 'package:sqldbui2/model/view.dart';
+import 'package:sqldbui2/model/view.dart' as models;
+import 'package:sqldbui2/page/translate.dart';
 
 Map<String?, String> globalNew = {};
 Map<String?, Filters> globalFilter = {};
@@ -60,7 +63,7 @@ class Filters {
     return orderedFilters;
   }
 
-  List<FilterRowWidget> toRow(Map<String, SchemaField> schema) {
+  List<FilterRowWidget> toRow(Map<String, models.SchemaField> schema) {
     List<FilterRowWidget> rows = [];
     for (var filter in sort()) {
       rows.add(FilterRowWidget(
@@ -107,7 +110,7 @@ class Filters {
     globalOrder = {};
   }
 
-  void refreshFilter(List<Filter> fields) {
+  Future<void> refreshFilter(List<Filter> fields) async {
     globalFilter[viewID] = Filters(); 
     globalOrder[viewID] = {};
     for (var field in fields) {
@@ -119,10 +122,17 @@ class Filters {
     }
     filterRowsWidget = [];
     noFilterRetrieval = true;
-    navigate = true;
     confirmCache = {};
-    globalMainViewKey.currentState?.setState(() {});
   }
+
+  Future<List<String>> getLabels(List<String> toogles) async {
+    List<String> labels = [];
+    for (var t in toogles) {
+      labels.add(await getOnFlow(t));
+    }
+    return labels;
+  }
+
 
 class Filter extends SerializerDeserializer<Filter> {
   Filter({
