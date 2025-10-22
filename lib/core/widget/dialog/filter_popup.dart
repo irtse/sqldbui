@@ -256,7 +256,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
     
     Widget w = await Convertor.filterFieldByType(
       context, widget as ConvertorWidget, widget.type, "", TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
-      this, false, false, url, url, ""
+      this, false, false, url, url, "", []
     );
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
     var togglesLabels = [(await getOnFlow(TranslateConstants.value)).toUpperCase(), 'NULL'];

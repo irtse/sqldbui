@@ -53,7 +53,7 @@ class ActionService {
                   confirmCache = {};
                   navigate = true;   
                   Future.delayed(Duration(seconds: 1), () {
-                    Future.delayed(Duration(seconds: 1), () {globalActionBar.currentState?.setState(() {}); });
+                    Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID");
                     // globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
                   });

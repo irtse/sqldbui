@@ -150,7 +150,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
         child: FutureBuilder( future: Convertor.filterFieldByType(
         // ignore: use_build_context_synchronously
         context, widget, widget.cell.type, widget.cell.columnName,  "", 
-        this, false, true, url, url, "${widget.cellID}:${widget.cell.columnName}"
+        this, false, true, url, url, "${widget.cellID}:${widget.cell.columnName}", currentView?.rules ?? []
       ), builder: (a,b) {
           if (b.data != null) {
             return Center( child: b.data! );

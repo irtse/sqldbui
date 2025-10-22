@@ -59,7 +59,8 @@ class Convertor {
     bool isGrid, 
     String url, 
     String subUrl,
-    String id
+    String id,
+    List<model.Rule> rules,
   ) async {
     if (widget.value == "no info...") { widget.value = null; }
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
@@ -230,6 +231,45 @@ class Convertor {
         print(e);
         return Container();
       }
+      DateTime dateMin = DateTime(1900);
+      DateTime dateMax = DateTime(2100);
+      for (var r in rules) {
+        if (r.trigger == name) {
+          for (var v in r.value.where( (e) => e != null )) {
+            if (v.toString().toLowerCase().contains("now") || v.toString().toLowerCase().contains("current_date")) {
+              var b = DateTime.now();
+              if (r.min) {
+                  if (dateMin.isBefore(b)) {
+                    dateMin = b;
+                  }
+                }
+                if (r.max) {
+                  if (dateMax.isAfter(b)) {
+                    dateMax = b;
+                  }
+                }
+            } else {
+              var val = cacheChanges[id] ?? v?.toString() ?? "";
+              if (DateTime.tryParse(val) != null) {
+                var b = DateTime.parse(val);
+                if (r.min) {
+                  if (dateMin.isBefore(b)) {
+                    dateMin = b;
+                  }
+                }
+                if (r.max) {
+                  if (dateMax.isAfter(b)) {
+                    dateMax = b;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      if (d?.isBefore(dateMin) ?? false) {
+        dateMin = d!;
+      }
       w = DateTimeField( key: formKey,
         textAlign: isGrid ? TextAlign.center : TextAlign.start,
         initialValue: def == null ? null : d,
@@ -256,9 +296,9 @@ class Convertor {
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(
               context: context,
-              firstDate: DateTime(1900),
+              firstDate: dateMin,
               initialDate: widget.value == null ? currentValue : DateTime.parse(widget.value!),
-              lastDate: DateTime(2100));
+              lastDate: dateMax);
         },
         onChanged: (DateTime? value) { 
           state.setState(() { 

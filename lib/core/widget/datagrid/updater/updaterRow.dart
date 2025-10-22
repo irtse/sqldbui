@@ -109,7 +109,9 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
       widget.type, 
       widget.columnName ?? "",
       TranslateConstants.valueFilterPlaceholder.toLowerCase(), this, true, false, url, 
-      (widget.schema[widget.columnName]?.valuesPath ?? "") != "" ? widget.schema[widget.columnName]!.valuesPath : url, widget.columnName ?? ""), 
+      (widget.schema[widget.columnName]?.valuesPath ?? "") != "" ? widget.schema[widget.columnName]!.valuesPath : url, widget.columnName ?? "",
+      currentView?.rules ?? []
+      ), 
       builder: (a,b) {
         if ((b.data != null)) {
           return b.data!;

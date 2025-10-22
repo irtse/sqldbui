@@ -94,7 +94,9 @@ class _DateState extends State<DateWidget> {
           }
         }
       }
-
+      if (dateValue?.isBefore(dateMin) ?? false) {
+        dateMin = dateValue!;
+      }
       if (widget.readOnly) {
         return SizedBox(width: 400, height: 30, child: TextFormField(
           readOnly: true,
