@@ -21,6 +21,7 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/page/translate.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -52,6 +53,13 @@ class PageWidgetState extends State<PageWidget> {
     menuSize = isMenu && !noMenu ? (250 <= currentWidth ? (
               menuSize == 0 ? 250 : (menuSize <= (currentWidth / 2) ? menuSize : (currentWidth / 2))) : currentWidth) : 0;
     var menu = await getOnFlow(TranslateConstants.menu);
+    var toggles = [
+        await getOnFlow("server running"),
+        await getOnFlow("server in maintenance"),
+    ];
+    if (toggles.length <= modeIndex) {
+      modeIndex = 0;
+    }
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
@@ -85,8 +93,26 @@ class PageWidgetState extends State<PageWidget> {
              onPressed: () { 
               scaffoldKey.currentState!.openEndDrawer();
               // if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
-             })),
-             NotificationWidget(key: appBarKey),
+            })),
+            NotificationWidget(key: appBarKey),
+            if (AuthService.user?.isSuperAdmin ?? false)
+              Padding( 
+                padding: const EdgeInsets.only(right: 10), 
+                child: Tooltip( message: "mode", child: ToggleSwitch( 
+                  labels: toggles, 
+                  minHeight: 27.5, 
+                  minWidth: 50, 
+                  fontSize: 12, 
+                  cornerRadius: 5,
+                  initialLabelIndex: modeIndex,
+                  dividerColor: Colors.white, 
+                  inactiveFgColor: Theme.of(context).splashColor,
+                  totalSwitches: toggles.length, 
+                  inactiveBgColor: Theme.of(context).secondaryHeaderColor,
+                  onToggle: (index) async {
+                    
+                  }
+                )))
           ]),
           /*Padding(padding: EdgeInsets.only(left: 0, right: 0), 
             child: IconButton(

@@ -30,15 +30,18 @@ class User extends SerializerDeserializer<User> {
     this.password = "", // todo something at least protected
     this.token = "",
     this.notifications = const <Notification>[],
+    this.isSuperAdmin = false,
   });
 
   String name;
   String email;
   String password;
   String token;
+  bool isSuperAdmin;
   List<Notification> notifications = <Notification>[];
 
   @override deserialize(Map<String, dynamic> json) => User(
+    isSuperAdmin: json.containsKey("super_admin") ? bool.parse("${json["super_admin"]}") : false, 
     name: json.containsKey("name") ? json["name"] : "unknown user", 
     email: json.containsKey("email") ? json["email"] : "", 
     token: json.containsKey("token") ? json["token"] : "",  

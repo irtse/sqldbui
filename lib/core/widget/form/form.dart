@@ -375,11 +375,11 @@ class FormWidgetState extends State<DataFormWidget> {
                   builder: (a,s) {
                     if (s.data?.data != null && s.data!.data!.isNotEmpty) {
                       var data = s.data!.data![0];
-                        /*if (s.data!.data!.length > 1) {
+                      if (s.data!.data!.length > 1) {
                         for (var d in s.data!.data!.sublist(1)) {
                           data.items.addAll(d.items);
                         }
-                      }*/
+                      }
                       return GridWidget(
                         view: data, 
                         maxLength: realOrder(widget.view, false, false, [], 5).length,

@@ -79,6 +79,32 @@ class ActionBarState extends State<ActionBarWidget> {
                 )
               ]);
             }
+            /*if (currentView != null && currentView!.isList && currentView!.actions.contains("post")) {
+              actions.add(
+                getIconOffset((await getOnFlow("new document")).toLowerCase(), 
+                  Icons.new_label, 20, () {
+                    showDialog(
+                      context: context, 
+                      barrierDismissible: true,
+                      builder: (builder) {
+                        var newView = model.View(
+                          actions: currentView!.actions,
+                          category: currentView!.category,
+                          isEmpty: true,
+                          items: [model.Item()],
+                          schema: currentView!.schema,
+                          schemaID: currentView!.schemaID,
+                          schemaName: currentView!.schemaName,
+                          rules: currentView!.rules,
+                          name: "create new document",
+                          order: currentView!.order,
+                        );
+                        return DataFormWidget(view: newView, key: mainForm);
+                      }
+                    );
+                  }, false)
+              );
+            }*/
             if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
               actions.add(
                 PopupButtonWidget(
