@@ -50,7 +50,7 @@ class Value {
 }
 bool tempRemoval = false;
 bool noFilterRetrieval = false;
-int globalLimit = 5;
+int globalLimit = 10;
 int globalOffset = 0;
 List<String> unselectedGrid = [];
 List<String> selectedGrid = []; 

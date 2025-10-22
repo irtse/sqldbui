@@ -306,6 +306,9 @@ class GridWidgetState extends State<GridWidget> {
                                   }
                                   var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
                                   var e = await APIService().getWithOffset<model.View>(widget.view?.linkPath ?? defaultPath, false, context);
+                                  if ((e.data?.sublist(1) ?? []).isEmpty) {
+                                    widget.view?.max = widget.view?.items.length ?? 0;
+                                  }
                                   for (var view in (e.data?.sublist(1) ?? [])) { 
                                     if (view.items.isEmpty || ((widget.view?.max ?? 0) <= globalOffset && (widget.view?.max ?? 0) > (widget.view?.items.length ?? 0))) {
                                       widget.view?.max = widget.view?.items.length ?? 0;
@@ -354,7 +357,7 @@ class GridWidgetState extends State<GridWidget> {
     Map<String, model.SchemaField> schema, String? fieldName, List<Value> datas, List<dynamic> order) {
     bool isNotValidCol = fieldName == null && fieldName == "id";
     String? lab = (schema[fieldName]?.label ?? "") != "" ? schema[fieldName]!.label : fieldName;
-    String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]!.type);
+    String type = fieldName == null ? "float" : (fieldName == "id" ? "integer" : schema[fieldName]?.type ?? "float");
     String label = (fieldName == "id" ? "id" : (lab ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase())
     ).replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     if (!isNotValidCol && !(filterTempOrderView[viewID]?.contains(fieldName) ?? true)) { 
