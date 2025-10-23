@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/model/user.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -53,13 +54,6 @@ class PageWidgetState extends State<PageWidget> {
     menuSize = isMenu && !noMenu ? (250 <= currentWidth ? (
               menuSize == 0 ? 250 : (menuSize <= (currentWidth / 2) ? menuSize : (currentWidth / 2))) : currentWidth) : 0;
     var menu = await getOnFlow(TranslateConstants.menu);
-    var toggles = [
-        await getOnFlow("server running"),
-        await getOnFlow("server in maintenance"),
-    ];
-    if (toggles.length <= modeIndex) {
-      modeIndex = 0;
-    }
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
@@ -95,24 +89,7 @@ class PageWidgetState extends State<PageWidget> {
               // if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
             })),
             NotificationWidget(key: appBarKey),
-            if (AuthService.user?.isSuperAdmin ?? false)
-              Padding( 
-                padding: const EdgeInsets.only(right: 10), 
-                child: Tooltip( message: "mode", child: ToggleSwitch( 
-                  labels: toggles, 
-                  minHeight: 27.5, 
-                  minWidth: 50, 
-                  fontSize: 12, 
-                  cornerRadius: 5,
-                  initialLabelIndex: modeIndex,
-                  dividerColor: Colors.white, 
-                  inactiveFgColor: Theme.of(context).splashColor,
-                  totalSwitches: toggles.length, 
-                  inactiveBgColor: Theme.of(context).secondaryHeaderColor,
-                  onToggle: (index) async {
-                    
-                  }
-                )))
+            
           ]),
           /*Padding(padding: EdgeInsets.only(left: 0, right: 0), 
             child: IconButton(
@@ -193,7 +170,7 @@ class PageWidgetState extends State<PageWidget> {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(0), bottomRight: Radius.circular(0))),
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         child: FutureBuilder<APIResponse<model.View>>(
-          future: APIService().get<model.View>(APIConstants.mainEndpost, filterMenuMain, null), // a previously-obtained Future<String> or null
+          future: APIService().get<model.View>(APIConstants.mainEndpost, true, null), // a previously-obtained Future<String> or null
           builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
           filterMenuMain = false;
           if (snapshot.hasData && snapshot.data!.data != null) { 
@@ -224,7 +201,7 @@ class PageWidgetState extends State<PageWidget> {
   Widget buildView() {
     return pageViews.isNotEmpty ? buildPage(pageViews) :
       FutureBuilder<APIResponse<model.View>>(
-        future: APIService().get<model.View>(APIConstants.mainEndpost, filterMenuMain, null), // a previously-obtained Future<String> or null
+        future: APIService().get<model.View>(APIConstants.mainEndpost, true, null), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<APIResponse<model.View>> snapshot) {
           var c = <Widget>[];
           if (snapshot.hasData && snapshot.data!.data != null) { 

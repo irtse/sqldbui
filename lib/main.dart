@@ -186,7 +186,7 @@ GlobalKey<NotificationWidgetState> appBarKey = GlobalKey<NotificationWidgetState
 class NotificationWidgetState extends State<NotificationWidget> {
   @override
   Widget build(BuildContext context) {
-    return Positioned( left: 10, child: Container(
+    return Positioned( left: 0, child: Container(
       height: 20, alignment: Alignment.bottomRight,
       child: Container( width: 15, height: 20,
         decoration: BoxDecoration( shape: BoxShape.circle,

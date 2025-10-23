@@ -128,6 +128,7 @@ class MenuWidgetState extends State<MenuWidget> {
         APIService().get<model.View>(APIConstants.mainEndpost, false, null).then((value) {
           if (value.data != null) { widget.views = value.data; }
           for (var view in widget.views!) {
+            print(view.actionPath);
             if (view.id.toString() == viewID?.substring(1) && subViewID != null) {
               try { view.news - 1; } catch(e) { /* */ }     
             }

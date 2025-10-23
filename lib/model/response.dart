@@ -10,6 +10,7 @@ Map<Type, SerializerDeserializer> refs = <Type, SerializerDeserializer> {
   Shallowed : Shallowed(),
   SchemaField : SchemaField(),
   RawData : RawData(),
+  Server: Server(),
 };
 
 class APIResponse<T extends SerializerDeserializer> {

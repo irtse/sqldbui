@@ -173,7 +173,8 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     return Column( mainAxisSize: MainAxisSize.min, children: [ 
       Container( 
         decoration: BoxDecoration( color: Theme.of(context).primaryColor, 
-          border: Border(right: BorderSide( width: widget.borderWidth, color: widget.borderColor))),
+          border: Border(
+            right: BorderSide( width: widget.borderWidth, color: widget.borderColor))),
         alignment: Alignment.center,
         width: showFunctions[viewID] == true ? 0 : (rects[viewID]?[widget.columnName]?.width ?? 300 ), 
         height: showFunctions[viewID] == true ? 40 : 0, 

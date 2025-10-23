@@ -224,16 +224,13 @@ class APIService {
         if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter";
+        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}";
         if (method == "get") {
           if (!force && cache.containsKey(url) && cache[url] != null ) { 
             return cache[url]! as APIResponse<T>;
           }
         }
-        // print("$method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy${ url.contains("dbview") || method != "get" ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}");
-        var response = await request("$url${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}", method, body, options);        
-        // print("AFTER $method $url$cols$command$cmdCol${extend ?? ""}${limit != null ? "&limit=$limit" : "&limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}$orderBy${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}");
-
+        var response = await request(url, method, body, options);        
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
@@ -274,7 +271,10 @@ class APIService {
         } else {
           err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; }
       }
-    } else { err = "no url"; }
+    } else { 
+      
+      err = "no url"; 
+    }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
@@ -350,14 +350,17 @@ class APIService {
   }
 
   Future<APIResponse<T>> post<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
+    cache = {};
     return main(url, values, "post", "send succeed", true, context, null, null, false, null, null);
   }
 
   Future<APIResponse<T>> put<T extends SerializerDeserializer>(String url, Map<String, dynamic> values, BuildContext? context) async {
+    cache = {};
     return main(url, values, "put", "save succeed", true, context, null, null, false, null, null);
   }
 
   Future<APIResponse<T>> delete<T extends SerializerDeserializer>(String url, BuildContext? context) async {
+    cache = {};
     return main(url, null, "delete", "deletion succeed", true, context, null, null, false, null, null);
   }
 }

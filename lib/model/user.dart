@@ -23,6 +23,18 @@ class Notification extends SerializerDeserializer<Notification> {
   @override Map<String, dynamic> serialize() => {};
 }
 
+class Server extends SerializerDeserializer<Server> {
+  Server({
+    this.isMaintenance = false,
+  });
+  bool isMaintenance;
+
+  @override deserialize(Map<String, dynamic> json) => Server(
+    isMaintenance: json.containsKey("is_maintenance") ? bool.parse("${json["is_maintenance"]}") : false, );
+
+  @override Map<String, dynamic> serialize() => { };
+}
+
 class User extends SerializerDeserializer<User> {
   User({
     this.name = "",

@@ -93,9 +93,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
     }    
     var first = true;
     if (widget.showCheckboxColumn) {
+      widget.isSelected = allSelected ? true : widget.isSelected ;
       widgets.add(
-        Padding(padding: const EdgeInsets.only(left: 5), 
-        child: Container( width: 73, height: maxheight, alignment: Alignment.center,
+        Container( width: 73, height: maxheight, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
           child: CheckboxListTile(
             enabled: !allSelected,
@@ -115,7 +115,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
             setState(() {});
             globalActionBar.currentState?.setState(() {});
           })
-        ))); 
+        )); 
     }
     String? state;
     for (var e in widget.cells) {
