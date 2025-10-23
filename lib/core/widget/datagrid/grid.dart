@@ -204,18 +204,28 @@ class GridWidgetState extends State<GridWidget> {
               child: Stack(children: [
                 
                 Container(
-                  margin: EdgeInsets.only(top: modeIndex == 1 && showFunctions[viewID] == true ? 40 : 0),
+                  margin: EdgeInsets.only(top: modeIndex == 1 && showFunctions[viewID] == true ? 95 : 55),
                   child:ScrollbarTheme(
                     data: ScrollbarThemeData(
                       thumbColor: WidgetStateProperty.all(Colors.grey),
                       thickness: WidgetStateProperty.all(8),
                       radius: const Radius.circular(10),
                     ),
-                    child:  Column(children: [
-                      Container(  
-                        decoration: BoxDecoration(
-                        color: Theme.of(context).highlightColor,
-                        boxShadow: [
+                    child: SubGridWidget(
+                        scroll: widget.scroll,
+                        view: widget.view, schema: widget.schema, subWidthSize: widget.subWidthSize, schemaID: widget.schemaID,
+                        contextWidth: widget.contextWidth, isSelected: widget.isSelected, showCheckboxColumn: widget.showCheckboxColumn,
+                        borderColor: widget.borderColor, borderWidth: widget.borderWidth, backgroundColor: widget.backgroundColor,
+                        subTable: widget.subTable, viewKey: widget.viewKey, maxLength: widget.maxLength, isEnum: widget.isEnum, subSize: subSize,
+                      ),
+                      
+                    
+                )
+              ),
+              Container(  
+                decoration: BoxDecoration(
+                  color: Theme.of(context).highlightColor,
+                  boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
                             spreadRadius: 0, 
@@ -225,17 +235,6 @@ class GridWidgetState extends State<GridWidget> {
                         ]),
                         child: Row(children:additionnalContent..addAll(columns))
                       ),
-                      SubGridWidget(
-                        scroll: widget.scroll,
-                        view: widget.view, schema: widget.schema, subWidthSize: widget.subWidthSize, schemaID: widget.schemaID,
-                        contextWidth: widget.contextWidth, isSelected: widget.isSelected, showCheckboxColumn: widget.showCheckboxColumn,
-                        borderColor: widget.borderColor, borderWidth: widget.borderWidth, backgroundColor: widget.backgroundColor,
-                        subTable: widget.subTable, viewKey: widget.viewKey, maxLength: widget.maxLength, isEnum: widget.isEnum, subSize: subSize,
-                      )
-                    ]
-                  )
-                )
-              ),
             ])
           ))
         )
@@ -443,6 +442,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
     return Scrollbar(
       controller: _vertical,
       thumbVisibility: true,
+      trackVisibility: true,
       scrollbarOrientation: ScrollbarOrientation.left,
       interactive: true,
       notificationPredicate: (notif) => notif.depth > -1,

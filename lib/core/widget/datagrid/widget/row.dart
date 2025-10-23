@@ -95,7 +95,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
     if (widget.showCheckboxColumn) {
       widget.isSelected = allSelected ? true : widget.isSelected ;
       widgets.add(
-        Container( width: 73, height: maxheight, alignment: Alignment.center,
+        Container( margin: EdgeInsets.only(left: 5), width: 73, height: maxheight, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
           child: CheckboxListTile(
             enabled: !allSelected,
