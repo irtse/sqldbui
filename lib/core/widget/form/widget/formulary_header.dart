@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/model/view.dart';
 
 import 'package:sqldbui2/core/widget/workflow/workflowPanel.dart';
 import 'package:sqldbui2/core/widget/workflow/workflowbar.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
 
@@ -15,24 +12,26 @@ import 'package:sqldbui2/page/translate.dart';
 class FormularyHeaderWidget extends StatefulWidget {
   bool show;
   bool subForm;
+  double width;
   bool canUpdate;
   model.View view;
   bool edit = false;
   model.Item refItem;
+  bool onlyDraft = false;
   model.Workflow? workflow;
-  GlobalKey<FormWidgetState> parentFormKey; 
   Map<String, model.SchemaField> schema;
   
   final formKey = GlobalKey<FormState>();
   FormularyHeaderWidget ({ 
     super.key, 
-    required this.parentFormKey,
     required this.show,
     required this.view, 
+    required this.width,
     required this.schema,
     required this.refItem,
     required this.subForm, 
     required this.workflow,
+    required this.onlyDraft,
     required this.canUpdate,
   });
   @override FormularyHeaderWidgetState createState() => FormularyHeaderWidgetState();
@@ -139,7 +138,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       )
     );
     
-    /*if (desc.isNotEmpty && !desc.contains("no description")) {
+    if (desc.isNotEmpty && !desc.contains("no description")) {
       title.add(Padding( padding: const EdgeInsets.only(left: 50), child: Row( 
         children: [ 
           Padding( 
@@ -152,12 +151,11 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         ] )));
     }  else {
       title.add(Container(margin: EdgeInsets.only(bottom: 20)));
-    } */
+    } 
     List<Widget> actions = [];
     if (!widget.subForm) {
       if (!widget.view.readOnly) {
-        if ((widget.view.actions.contains("post") && widget.view.isEmpty) 
-        || widget.view.actions.contains("put")) {
+        if ((widget.view.actions.contains("post") && widget.view.isEmpty) || widget.view.actions.contains("put")) {
           if (widget.view.actions.contains("post") && widget.view.isEmpty ) {
             try {  TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
           } catch (e) {}
@@ -171,17 +169,18 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             actions.add(ButtonWidget(method: "put",
               text: TranslateConstants.publish.toUpperCase(), color: Colors.grey, explicitDraft: true, avoidConsent: false));
           }
-          
-          try {
-            TranslateConstants.update = await getOnFlow(TranslateConstants.update);
-          } catch (e) {}
-          actions.add(ButtonWidget(
-            method: !widget.view.actions.contains("put") || widget.view.isEmpty ? "post" : "put", 
-            text: (!widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish
-                : TranslateConstants.update).toUpperCase(), 
-                // ignore: use_build_context_synchronously
-            color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
-            avoidConsent: true, noRedirection: !widget.view.isEmpty));
+          if (!widget.onlyDraft) {
+            try {
+              TranslateConstants.update = await getOnFlow(TranslateConstants.update);
+            } catch (e) {}
+            actions.add(ButtonWidget(
+              method: !widget.view.actions.contains("put") || widget.view.isEmpty ? "post" : "put", 
+              text: (!widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish
+                  : TranslateConstants.update).toUpperCase(), 
+                  // ignore: use_build_context_synchronously
+              color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
+              avoidConsent: true, noRedirection: !widget.view.isEmpty));
+          }
         }
         if ((widget.view.actions.contains("delete") || widget.view.actions.contains("put") && (currentView?.schemaName ?? "" ).contains("task")) && !widget.view.isEmpty) {
           if (!((currentView?.workflow?.isClose ?? false) || (currentView?.items.first.workflow?.isClose ?? false))) {
@@ -198,7 +197,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       }   
       widgets.add( 
           Container( 
-            width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
+            width: widget.width, 
             height: widget.workflow == null && !widget.view.isEmpty ? 112 : (widget.workflow?.currentHub ?? false ? 203 : 152),
             decoration: BoxDecoration( 
               color: Colors.white, boxShadow: [ BoxShadow(color: Colors.black.withOpacity(0.3), spreadRadius: 0, blurRadius: 3, offset: const Offset(3, 3) ),
@@ -207,14 +206,14 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               Padding(
                 padding: EdgeInsets.only(top: 40, bottom: widget.workflow == null && !widget.view.isEmpty ? 25 : 0), 
                 child: Column( mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Container( height: 47, child: Column( mainAxisAlignment: MainAxisAlignment.center,  children: [
+                  SizedBox( height: 47, child: Column( mainAxisAlignment: MainAxisAlignment.center,  children: [
                     ...title,
                   ])),
-                  widget.workflow != null ? WorkflowBarWidget(workflow: widget.workflow!) 
-                  : ( widget.view.isEmpty ? WorkflowBarWidget(workflow: Workflow()) : Container()),
-                  widget.workflow != null ?  WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, 
+                  widget.workflow != null ? WorkflowBarWidget(workflow: widget.workflow!, width: widget.width ) 
+                  : ( widget.view.isEmpty ? WorkflowBarWidget(workflow: Workflow(), width: widget.width) : Container()),
+                  widget.workflow != null ?  WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, width: widget.width,
                     workflow: widget.workflow!, readOnly: widget.refItem.readonly) 
-                  : ( widget.view.isEmpty ?  WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, 
+                  : ( widget.view.isEmpty ?  WorkflowPanelWidget(key: globalWorkflowPanelWidgetKey, width: widget.width,
                     workflow: Workflow(), readOnly: widget.refItem.readonly) : Container()),
                 ]
               )

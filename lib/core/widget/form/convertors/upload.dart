@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -56,6 +58,45 @@ class _UploadState extends State<UploadWidget> {
       widget.value = null;
     }
     if (widget.readOnly) {
+      if (widget.type.contains("multiple")) {
+        List<Widget> rows = [];
+        int index = 1;
+        for (var vv in (widget.value?.toString().split(",") ?? [])) {
+          rows.add(
+            SizedBox(width: 400, height: 30, child: TextFormField(
+              readOnly: true,
+              initialValue: vv ?? (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null),
+              style: TextStyle(fontSize: 14, color: Colors.black),
+              decoration: InputDecoration(
+                filled: true,
+                suffixIcon: InkWell( 
+                  onTap: () async {
+                      String? newDirectory = (kIsWeb ? "/${vv.toString().split("/").last}" : await FilePicker.platform.saveFile(
+                        fileName: vv.toString().split("/").last,
+                        dialogTitle: await getOnFlow("select a folder where to download file")));
+                      await APIService().getWithDownload("${APIConstants.downloadEndpost}/${vv.toString().split("/").last}", "", {}, "$newDirectory", kIsWeb, null);
+                  },
+                  child: Icon(Icons.attach_file, size: 20, color: Theme.of(context).primaryColor)),
+                errorStyle: const TextStyle(height: -2),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
+                hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+                focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+                errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: error ? Colors.red : Theme.of(context).splashColor, width: 1.0)),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
+                hintText: (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
+                labelText: "${label.toLowerCase()} $index",
+              )
+            ))
+          );
+          index = index + 1;
+        }
+        return Wrap(children: rows);
+      }
       return SizedBox(width: 400, height: 30, child: TextFormField(
         readOnly: true,
         initialValue: widget.value ?? (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null),
@@ -64,11 +105,14 @@ class _UploadState extends State<UploadWidget> {
           filled: true,
           suffixIcon: InkWell( 
             onTap: () async {
-              String? newDirectory = (kIsWeb ? "/${widget.value.toString().split("/").last}" : await FilePicker.platform.saveFile(
-                fileName: widget.value.toString().split("/").last,
-                dialogTitle: await getOnFlow("select a folder where to download file")));
-              await APIService().getWithDownload("${APIConstants.downloadEndpost}/${widget.value.toString().split("/").last}", "", {}, 
-                    "$newDirectory", kIsWeb, null);
+              var vSub = widget.value.toString().split(",");
+              for (var v in vSub ) {
+                String? newDirectory = (kIsWeb ? "/${v.toString().split("/").last}" : await FilePicker.platform.saveFile(
+                  fileName: v.toString().split("/").last,
+                  dialogTitle: await getOnFlow("select a folder where to download file")));
+                await APIService().getWithDownload("${APIConstants.downloadEndpost}/${v.toString().split("/").last}", "", {}, 
+                      "$newDirectory", kIsWeb, null);
+              }
             },
             child: Icon(Icons.attach_file, size: 20, color: Theme.of(context).primaryColor)),
           errorStyle: const TextStyle(height: -2),
@@ -217,26 +261,28 @@ class _UploadState extends State<UploadWidget> {
       allowedExtensions: extension,
     );
     if (result != null) {
-      _selectedFile = result.files.first;
-      widget.component?.widget.detectChange = true;
-      if ("${widget.value ?? ""}" == "" ) {
-        widget.value = _selectedFile?.name;
-      } else {
-        widget.value += widget.type.contains("multiple") ? ",${_selectedFile?.name}" : _selectedFile?.name;
-      }
-      
-      if (widget.url != null && _selectedFile != null) {
-        if (widget.form[widget.name] == null || widget.form[widget.name] is! Map) {
-          saveChange(widget.component?.widget.view, widget.form, widget.name, <String,List<PlatformFile>>{});
+      _selectedFile = result.files.first;      
+      if (_selectedFile != null) {
+        widget.component?.widget.detectChange = true;
+        if ("${widget.value ?? ""}" == "" ) {
+          widget.value = _selectedFile?.name;
+        } else {
+          widget.value = widget.type.contains("multiple") ? "${widget.value},${_selectedFile?.name}" : _selectedFile?.name;
         }
-        var m = widget.form[widget.name] as Map<String,List<PlatformFile>>;
-        if (m[widget.url ?? ""] == null) {
-          m[widget.url ?? ""] = [];
+        print(widget.value);
+        if (widget.url != null && _selectedFile != null) {
+          if (widget.form[widget.name] == null || widget.form[widget.name] is! Map) {
+            saveChange(widget.component?.widget.view, widget.form, widget.name, <String,List<PlatformFile>>{});
+          }
+          var m = widget.form[widget.name] as Map<String,List<PlatformFile>>;
+          if (m[widget.url ?? ""] == null || !widget.type.contains("multiple")) {
+            m[widget.url ?? ""] = [];
+          }
+          m[widget.url ?? ""]?.add(_selectedFile!);
+          saveChange(widget.component?.widget.view, widget.form, widget.name, m);
         }
-        m[widget.url ?? ""]?.add(_selectedFile!);
-        saveChange(widget.component?.widget.view, widget.form, widget.name, m);
-      }
-      setState(() { });
+        setState(() { });
+      } 
     }
   }
 }

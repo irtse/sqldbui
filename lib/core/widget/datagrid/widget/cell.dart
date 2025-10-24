@@ -1,5 +1,6 @@
 
 // ignore: must_be_immutable
+import 'package:flutter/gestures.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -91,6 +92,9 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   @override GridCellWidgetState createState() => GridCellWidgetState();
 }
 class GridCellWidgetState extends State<GridCellWidget> {
+  String breakableText(String text) {
+    return text.split('').join('\u200B');
+  }
   @override Widget build(BuildContext context) { 
     if (cacheChanges["${widget.cellID}:${widget.cell.columnName}"] != null) { 
       widget.cell.value = cacheChanges["${widget.cellID}:${widget.cell.columnName}"]; 
@@ -111,13 +115,36 @@ class GridCellWidgetState extends State<GridCellWidget> {
     if (widget.shal?.name != null) {
       widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
     }
-    Widget wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
+    Widget? wid;
+    if (widget.cell.type.contains("upload") && v !=  "no info...") {
+      wid = Text.rich(
+      TextSpan( children: "$v".split(",").map((link) {
+            return TextSpan(
+              text: '${breakableText(link)}${v.split(",").length > 1 ? "         " : ""}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).primaryColor,
+              ),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () async {
+                  String? newDirectory =  (kIsWeb ? "/${link.toString().split("/").last}" : await FilePicker.platform.saveFile(
+                  fileName: link.toString().split("/").last,
+                  dialogTitle: await getOnFlow("select a folder where to download file")));
+                  await APIService().getWithDownload("${APIConstants.downloadEndpost}/${link.toString().split("/").last}", "", {}, "$newDirectory", kIsWeb, null);
+                },
+            );
+          }).toList(),
+        ),
+      );
+    } else {
+      wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
             // ignore: use_build_context_synchronously
             color: (widget.schemaField?.type ?? "").contains("upload") && v !=  "no info..."  ? Theme.of(context).primaryColor : Theme.of(context).primaryColorLight)
           );
+    }
     if (widget.translatable || widget.cell.type.contains("bool") || v.contains("no info")) {
       wid = FutureBuilder(future: getOnFlow("$v"), builder: (a,b) {
         String t = "";

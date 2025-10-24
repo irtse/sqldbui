@@ -124,7 +124,7 @@ class GridWidgetState extends State<GridWidget> {
     if (viewID == null) { return Container(); }
     columns = [];
     if (widget.view != null) {
-      var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, 5);
+      var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, null);
       for (var fieldName in order) {
         if ((widget.schema[fieldName]?.valuesPath ?? "") != "") {
           APIService().get(widget.schema[fieldName]!.valuesPath, false, context);
@@ -311,7 +311,7 @@ class GridWidgetState extends State<GridWidget> {
           children: [
           SizedBox( 
             width: (currentWidth - menuSize > 0 ? currentWidth - menuSize - 202 : 0),
-            child: FunctionsSelectorWidget(schema: schema, mathAllowed: realOrder(widget.view, false, false, null, 5).length > 2),
+            child: FunctionsSelectorWidget(schema: schema, mathAllowed: realOrder(widget.view, false, false, null, null).length > 2),
           ),
           Positioned(
             right: 0,
@@ -597,7 +597,7 @@ class MainCheckWidgetState extends State<MainCheckWidget>  {
             width:  globalGridKey.currentState?.widget.borderWidth ?? 1 ),)),
           child: CheckboxListTile(
             enabled: true,
-            value: globalGridKey.currentState?.widget.isSelected, 
+            value: globalGridKey.currentState?.widget.isSelected ?? true, 
             onChanged: (value) { 
               setState(() {
                 globalGridKey.currentState?.widget.isSelected=(value ?? false); 

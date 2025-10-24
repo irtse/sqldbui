@@ -16,7 +16,6 @@ import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart'
 class GridColumnWidget extends StatefulWidget {
   GlobalKey<GridBottomColumnResultWidgetState>? resultKey;
   final BuildContext context;
-  GridWidgetState? grid; 
   List<DropdownMenuItem<String>> items = [];
   GlobalKey<GridColumnWidgetState>? nextColumn;
   

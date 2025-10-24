@@ -31,9 +31,10 @@ class DataFormWidget extends StatefulWidget {
   final model.View? view;
   bool detectChange = false;
   String superFormSchemaName;
-  //Map<String, dynamic> cacheForm = {};
-  bool scroll, subForm, subSubForm, isSplitted, noTitle;
+  bool scroll, subForm, subSubForm, noSub, isSplitted, noTitle;
   List<DataFormWidget> wrappers = <DataFormWidget>[];
+  double? width;
+  bool onlyDraft = false;
   
   bool isOneToMany = false;
   GlobalKey<SubFormularyWidgetState> subKey = GlobalKey<SubFormularyWidgetState>(); 
@@ -44,8 +45,11 @@ class DataFormWidget extends StatefulWidget {
   final formKey = GlobalKey<FormState>();
   DataFormWidget ({ super.key, 
     this.view, 
+    this.width,
+    this.onlyDraft = false,
     this.noTitle = false,
     this.scroll = true, 
+    this.noSub = false,
     this.subForm = false, 
     this.subSubForm = false,
     this.isSplitted = false,
@@ -73,7 +77,8 @@ class FormWidgetState extends State<DataFormWidget> {
       double ratioSplit = isSplitted && !isLower ? 0.75 : 1;
       Widget? content;
       if (widget.view != null && widget.view!.items.isNotEmpty) {
-        double mainWidth = ((currentWidth - menuSize) * ratioSplit) > 0 ?  ((currentWidth - menuSize) * ratioSplit) : 0;
+        double mWidth = widget.width ?? ((currentWidth - menuSize) > 0 ?  (currentWidth - menuSize) : 0);
+        double mainWidth = widget.width ?? (((currentWidth - menuSize) * ratioSplit) > 0 ?  ((currentWidth - menuSize) * ratioSplit) : 0);
         double wfSize = (workflow == null && !(widget.view?.isEmpty ?? false) ? 112 : ( workflow?.currentHub ?? false ? 200 :  152));
         double mainHeight =  currentHeigth - wfSize > 0 ? currentHeigth - wfSize : 0;
 
@@ -83,14 +88,17 @@ class FormWidgetState extends State<DataFormWidget> {
         widget.wrappers = [];
         additionnal = [];
         widget.wrappersGlobalKey = [];
+
+        if (!widget.noSub) {
+          additionnal.add(SubFormularyWidget( 
+            key: widget.subKey, 
+            item: refItem,
+            component: widget, 
+            isEmpty: widget.view?.isEmpty ?? false, 
+            relatedDatas: refItem.dataPath
+          )); 
+        }
         
-        additionnal.add(SubFormularyWidget( 
-          key: widget.subKey, 
-          item: refItem,
-          component: widget, 
-          isEmpty: widget.view?.isEmpty ?? false, 
-          relatedDatas: refItem.dataPath
-        )); 
         var menuItems = [TranslateConstants.formulary, TranslateConstants.comments];
         if ((refItem.synthesisPath ?? "") != "") {
           menuItems.add(TranslateConstants.synthesis);
@@ -119,7 +127,6 @@ class FormWidgetState extends State<DataFormWidget> {
               newCacheEntry: newCacheEntry,
               additionnalWidgets: additionnal,
               formIsEmpty: widget.formIsEmpty,
-              state: widget.key as GlobalKey<FormWidgetState>,
               superFormSchemaName: widget.superFormSchemaName,
             );
           } else if (TranslateConstants.comments == menuItems[widget.subMenuIndex]) {
@@ -182,7 +189,7 @@ class FormWidgetState extends State<DataFormWidget> {
           } else {
             return Container( 
               padding: EdgeInsets.only(top: 20, bottom: 10),
-              margin: EdgeInsets.only(left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0, bottom: 20),
+              margin: widget.noSub ? null : EdgeInsets.only(left: widget.subForm ? 30 : 0, right: widget.subForm ? 30 : 0, bottom: 20),
               decoration: BoxDecoration(
                 boxShadow: [ BoxShadow( color: Colors.grey.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 3)) ],
                 color: Colors.white,
@@ -190,14 +197,15 @@ class FormWidgetState extends State<DataFormWidget> {
               ),
               child: Column( children: [
                 widget.noTitle ? Container() : FormularyHeaderWidget(
+                  onlyDraft: widget.onlyDraft,
                   key: widget.headerKey,
                   show: show,
                   schema: schema,
+                  width: mWidth,
                   refItem: refItem,
                   view: widget.view!,
                   workflow: workflow,
                   subForm: widget.subForm,
-                  parentFormKey: widget.key as GlobalKey<FormWidgetState>,
                   canUpdate: widget.view!.actions.contains("put") && widget.view!.actions.contains("delete"),
                 ),
                 fields.isEmpty && content == null ? EmptyFormularyWidget() : content!
@@ -270,11 +278,12 @@ class FormWidgetState extends State<DataFormWidget> {
             ] : [])
           ]), 
           widget.noTitle ? Container() : FormularyHeaderWidget(
+                onlyDraft: widget.onlyDraft,
                 key: widget.headerKey,
                 show: show,
                 schema: schema,
-                parentFormKey: widget.key as GlobalKey<FormWidgetState>,
                 refItem: refItem,
+                width: mWidth,
                 view: widget.view!,
                 workflow: workflow,
                 subForm: widget.subForm,
@@ -382,7 +391,7 @@ class FormWidgetState extends State<DataFormWidget> {
                       }
                       return GridWidget(
                         view: data, 
-                        maxLength: realOrder(widget.view, false, false, [], 5).length,
+                        maxLength: realOrder(widget.view, false, false, [], null).length,
                         contextWidth: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
                         schemaID: "${widget.view?.schemaID ?? ""}",
                         schema: widget.view?.schema ??  {},

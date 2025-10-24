@@ -57,7 +57,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
     } 
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     if (showFunctions[viewID] == null) { showFunctions[viewID] = false; }
-    var o = realOrder(currentView, false, true, null, 5);
+    var o = realOrder(currentView, false, true, null, null);
     var mathValue = (await getOnFlow(TranslateConstants.mathValuePlaceholder));
     var mathError = (await getOnFlow(TranslateConstants.mathError));
     return Row( crossAxisAlignment: CrossAxisAlignment.center, children: [ 

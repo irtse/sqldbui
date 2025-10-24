@@ -93,6 +93,7 @@ class AppRouter {
     selectedGrid = []; 
     unselectedGrid = [];
     realHistory.removeLast();
+    navigate = true;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("url", realHistory.last);
     prefs.setString("history", realHistory.join(","));
@@ -136,6 +137,7 @@ class AppRouter {
       cacheChanges = {};
       detectChanges = {};
       globalLoading = true;
+      navigate = true;
       selectedGrid = []; unselectedGrid = [];
       var index = history.indexOf(realHistory.last);
       realHistory.add(history[index + 1]); 
@@ -165,7 +167,8 @@ class AppRouter {
           navigatorCtrls.items.add(DropdownItem<String>( selected: true,
             value: key, 
             label: "${(await getOnFlow(currentView?.label ?? currentView!.name.replaceAll("_", "").replaceAll("db", "")))} -> ${ 
-                      await getOnFlow(currentView?.items.isNotEmpty ?? false ?currentView!.items.first.values["name"] ?? "data" : "")}".toLowerCase()));
+                      await getOnFlow(currentView?.items.isNotEmpty ?? false ? currentView!.items.first.values["name"] ?? "data" : "")
+                    }".toLowerCase()));
           }
       });
       navigatorCtrls.openDropdown("", "", true);

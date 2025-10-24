@@ -79,11 +79,17 @@ class ActionBarState extends State<ActionBarWidget> {
                 )
               ]);
             }
-            /*if (currentView != null && currentView!.isList && currentView!.actions.contains("post")) {
+            if (currentView != null && currentView!.isList && currentView!.actions.contains("post") && (currentView?.schemaNew.isNotEmpty ?? false)) {
               actions.add(
                 getIconOffset((await getOnFlow("new document")).toLowerCase(), 
-                  Icons.new_label, 20, () {
+                  Icons.new_label, 20, () async {
+                    var label = await getOnFlow("create new document");
+                    String desc = "";
+                    if (currentView!.multiPath.length > 1) {
+                      desc = await getOnFlow("BEWARE ! it can be another type than one wished, it's a top level type <${currentView!.schemaName.replaceAll("_", " ").replaceAll("db", "")}>");
+                    }
                     showDialog(
+                      // ignore: use_build_context_synchronously
                       context: context, 
                       barrierDismissible: true,
                       builder: (builder) {
@@ -91,20 +97,40 @@ class ActionBarState extends State<ActionBarWidget> {
                           actions: currentView!.actions,
                           category: currentView!.category,
                           isEmpty: true,
-                          items: [model.Item()],
-                          schema: currentView!.schema,
+                          items: [model.Item(values: { "description": desc })],
+                          schema: currentView!.schemaNew,
                           schemaID: currentView!.schemaID,
                           schemaName: currentView!.schemaName,
                           rules: currentView!.rules,
-                          name: "create new document",
+                          name: label.toLowerCase(),
                           order: currentView!.order,
                         );
-                        return DataFormWidget(view: newView, key: mainForm);
+                        return Center(
+                        child: Material(
+                          color: Colors.transparent,
+                          elevation: 12,
+                          borderRadius: BorderRadius.circular(16),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: currentWidth - 100, 
+                              maxHeight: currentHeigth - 100, 
+                              minWidth: 300,
+                              minHeight: 200,
+                            ),
+                            child:Center( child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    width: currentWidth - 100,
+                                    height: currentHeigth - 100,
+                                    child: DataFormWidget(view: newView, onlyDraft: true, noSub: true, subForm: false, key: mainForm, width: currentWidth - 100)
+                           ))
+                        ) ));
                       }
                     );
                   }, false)
               );
-            }*/
+            }
             if (currentView != null && currentView!.isList && currentView!.actions.contains("import")) {
               actions.add(
                 PopupButtonWidget(

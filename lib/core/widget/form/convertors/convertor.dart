@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
@@ -789,10 +791,13 @@ Future<void> _pickFile(ConvertorWidget widget, String type, String id, GlobalKey
       if ( (widget.value ?? "") == "" ) {
         widget.value = selectedFile.name;
       } else {
-        widget.value += type.contains("multiple") ? ",${selectedFile.name}" : selectedFile.name;
+        widget.value = type.contains("multiple") ? "${widget.value},${selectedFile.name}" : selectedFile.name;
       }
-      List<PlatformFile> m =  (cacheFilesChanges[id]?[url] ?? []);
-      m.add(selectedFile);
+      Map<String, List<PlatformFile>> m =  (cacheFilesChanges[id] ?? {});
+      if (cacheFilesChanges[id]?[url] == null || !type.contains("multiple")) {
+        m[url] = [];
+      }
+      m[url]!.add(selectedFile);
 
       if (id != "") {
         detectChanges[id] = k;
@@ -800,7 +805,7 @@ Future<void> _pickFile(ConvertorWidget widget, String type, String id, GlobalKey
         if (cacheFilesChanges[id] == null) {
           cacheFilesChanges[id] = {};
         }
-        cacheFilesChanges[id]?[url] = m;
+        cacheFilesChanges[id] = m;
       }
       k.currentState?.setState(() {
         k.currentState?.didChange(widget.value);

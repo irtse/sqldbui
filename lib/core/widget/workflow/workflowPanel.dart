@@ -7,7 +7,8 @@ import 'package:sqldbui2/page/translate.dart';
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
   final bool readOnly;
-  const WorkflowPanelWidget ({ super.key, required this.workflow, this.readOnly = false });
+  double width;
+  WorkflowPanelWidget ({ super.key, required this.width, required this.workflow, this.readOnly = false });
   @override WorkflowPanelWidgetState createState() => WorkflowPanelWidgetState();
 }
 GlobalKey<WorkflowPanelWidgetState> globalWorkflowPanelWidgetKey = GlobalKey<WorkflowPanelWidgetState>();
@@ -45,7 +46,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
               onChanged: (value) => change = true,
             )));
       }
-      return Container( width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, decoration: BoxDecoration(color: Theme.of(context).splashColor,
+      return Container( width: widget.width, decoration: BoxDecoration(color: Theme.of(context).splashColor,
           border: const Border(top: BorderSide(color: Colors.white, width: 1))),
         padding: const EdgeInsets.all(10), child: 
             Wrap(alignment: WrapAlignment.center, 

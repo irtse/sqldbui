@@ -121,7 +121,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
             showColumnHeaderIconOnHover: true,
             schemaID: "${currentView?.schemaID}", 
             borderColor: Theme.of(context).splashColor,
-            maxLength: realOrder(widget.view, false, false, [], 5).length,
+            maxLength: realOrder(widget.view, false, false, [], null).length,
             isEnum: schema.keys.where((element) => !["name", "label", "id"].contains(element)).isEmpty,
             contextWidth: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
           ) 
@@ -130,7 +130,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     ]);
   }
   Future<void> fillSchemeItem() async {
-    var order = realOrder(widget.view, false, false, null, 5);
+    var order = realOrder(widget.view, false, false, null, null);
     if (!schemeItems.containsKey(viewID)) {
       schemeItems[viewID ?? ""] = [];
       fastTranslation[viewID ?? ""] = {};
@@ -198,7 +198,7 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
     return newOrder;
   }
 
-List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dynamic>? forceOrder, int max) {
+List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dynamic>? forceOrder, int? max) {
     if (view == null) { return []; }
     var schema = view.schema;
     bool isMath = forceMath || (modeIndex == 1 && editMode[viewID] == "math");
@@ -220,7 +220,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
         }
       }
       if (newOrder.isEmpty) {
-        filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < max ? (forceOrder ?? view.order).length : max);
+        filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < (max ?? 1000) ? (forceOrder ?? view.order).length : max);
 
       } else {
         if (view.order.contains("type") && !newOrder.contains("type")) {

@@ -8,7 +8,7 @@ Map<String, Map<String, Map<String,model.Consent>>> consentCache = {};
 
 // ignore: must_be_immutable
 class ConsentWidget extends StatefulWidget {
-  GlobalKey<FormWidgetState> state;
+  FormWidgetState state;
   model.Consent consent;
   dynamic value;
   ConsentWidget ({ 
@@ -30,10 +30,10 @@ class ConsentState extends State<ConsentWidget> {
     if (consentErrCache[viewID ?? ""] == null) {
       consentErrCache[viewID ?? ""] = {};
     }
-    if (consentCache[viewID ?? ""]?[widget.state.currentState?.widget.view?.name] == null) {
-      consentCache[viewID ?? ""]![widget.state.currentState?.widget.view?.name ?? ""] = {};
+    if (consentCache[viewID ?? ""]?[widget.state.widget.view?.name] == null) {
+      consentCache[viewID ?? ""]![widget.state.widget.view?.name ?? ""] = {};
     }
-    consentCache[viewID ?? ""]![widget.state.currentState?.widget.view?.name]![widget.consent.name] = model.Consent(
+    consentCache[viewID ?? ""]![widget.state.widget.view?.name]![widget.consent.name] = model.Consent(
       consent: widget.value ?? false, 
       body: widget.consent.body,
       optionnal: widget.consent.optionnal, 
@@ -62,7 +62,7 @@ class ConsentState extends State<ConsentWidget> {
                 setState(() {
                   widget.value = value ?? false;
                   consentErrCache[viewID ?? ""]?.remove(widget.consent.name);
-                  consentCache[viewID ?? ""]![widget.state.currentState?.widget.view?.name]![widget.consent.name] = model.Consent(
+                  consentCache[viewID ?? ""]![widget.state.widget.view?.name]![widget.consent.name] = model.Consent(
                     consent: value ?? false, 
                     body: widget.consent.body,
                     optionnal: widget.consent.optionnal, 

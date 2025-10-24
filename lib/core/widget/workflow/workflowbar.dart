@@ -7,7 +7,8 @@ import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class WorkflowBarWidget extends StatefulWidget{
   final model.Workflow workflow;
-  const WorkflowBarWidget ({ super.key, required this.workflow, });
+  double width;
+  WorkflowBarWidget ({ super.key, required this.width, required this.workflow, });
   @override WorkflowBarWidgetState createState() => WorkflowBarWidgetState();
 }
 class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
@@ -19,7 +20,8 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
         return Container();
       });
   }
-  Future<Widget> futureBuild(BuildContext context) async {    double max = currentWidth - menuSize > 0 ? currentWidth - menuSize : 0;
+  Future<Widget> futureBuild(BuildContext context) async {    
+    double max = widget.width;
     var itemWidth = (max - 200) / widget.workflow.steps.length;
     List<Widget> items = [];
     var curr = 0;

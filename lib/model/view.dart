@@ -342,6 +342,7 @@ class View extends SerializerDeserializer<View> {
     this.description = "",
     this.isList = false,
     this.schema = emptySchema,
+    this.schemaNew = emptySchema,
     this.schemaName = "",
     this.linkPath = "",
     this.id = -1,
@@ -398,6 +399,8 @@ class View extends SerializerDeserializer<View> {
   int? schemaID;
   int? viewID;
   Map<String, SchemaField> schema;
+  Map<String, SchemaField> schemaNew;
+
   Map<String, SchemaField>? wrapperSchema;
   Map<String, dynamic> favorizeBody;
   List<dynamic> order;
@@ -441,6 +444,8 @@ class View extends SerializerDeserializer<View> {
     description: json.containsKey("description") && json["description"] != null ? json["description"] : "no description...", 
     isList: json.containsKey("is_list") && json["is_list"] != null ? bool.parse("${json["is_list"]}") : false, 
     wrapperSchema: json.containsKey("wrapper_schema") && json["wrapper_schema"] != null ? fromMapJson(json["wrapper_schema"], SchemaField()) : null,
+    schemaNew: json.containsKey("schema_new") && json["schema_new"] != null ? fromMapJson(json["schema_new"], SchemaField()) : <String,SchemaField>{},
+
     schema: json.containsKey("schema") && json["schema"] != null ? fromMapJson(json["schema"], SchemaField()) : <String,SchemaField>{},
     schemaName: json.containsKey("schema_name") && json["schema_name"] != null ? json["schema_name"] : "", 
     order: json.containsKey("order") && json["order"] != null ? json["order"] : <String>[],  
