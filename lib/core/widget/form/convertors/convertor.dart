@@ -115,7 +115,7 @@ class Convertor {
     } else if (type.contains("upload")) { 
       var ctrl = TextEditingController(text: widget.value?.toString());
       w = Stack( alignment: AlignmentDirectional.centerStart, children: [ 
-        Container( padding: EdgeInsets.only(right: 20), child: InkWell( 
+        InkWell( 
             mouseCursor: SystemMouseCursors.click,
             onTap: () => _pickFile( widget, type, id, formKey, url),
             child: TextFormField(
@@ -136,11 +136,12 @@ class Convertor {
             isDense: true, 
             hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300), // you need this
             floatingLabelBehavior: FloatingLabelBehavior.always, 
-            filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
-            contentPadding: EdgeInsets.only(left: 20.0, right: 20.0),
-            suffixIcon: Icon(isText ? (type.contains("upload") ? Icons.manage_search_outlined : Icons.text_fields)  : (type.contains("money") ? Icons.euro : Icons.onetwothree)), 
+            filled: true, 
+            fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
+            contentPadding: EdgeInsets.only(left: 20.0, right: 40.0),
+            suffixIcon: Icon(Icons.attach_file), 
             hintText: (await getOnFlow("select a file")).toLowerCase(),  
-            errorStyle: const TextStyle(fontSize: 0,),
+            errorStyle: const TextStyle(fontSize: 0),
           ),
           onChanged: (String? value) { 
             widget.value = value; 
@@ -152,8 +153,8 @@ class Convertor {
           validator: (String? value) {
             if (value == null) { return "please enter a file..."; }  
             return null; 
-          }))),
-            Positioned(right: 0, child: IconButton(
+          })),
+            Positioned(right: 20, child: IconButton(
                   onPressed: () {
                     ctrl.text = "";
                     widget.value = null;
@@ -456,6 +457,7 @@ class Convertor {
     InputDecoration? dec, GlobalKey<FormFieldState<dynamic>> formKey, String name,
     String label, String type, List<model.Shallowed>? datas,
     bool isGrid, bool isDark, bool isText) async {
+    print("LINK $datas");
     MultiSelectController<String> ctrls = MultiSelectController<String>();
     List<DropdownItem<String>> items = <DropdownItem<String>>[];
     Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};

@@ -46,15 +46,14 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
       widget.cache, context, "", widget.schema, 
       widget.field.type, widget.label, widget.field.label, 
       widget.field.description, widget.field.require, widget.field.readonly, 
-      null, 
-              widget.field.actionPath, widget.field.valuesPath, 
-              "", null, currentView?.isEmpty ?? false, widget.field.autoFill,  widget.field.translatable, null);
-              widgets.add(
-                Container( 
-                  width: currentWidth / 1.5,
-                  padding: EdgeInsets.all(10),
-                  child: w)
-              );
+      null, widget.field.actionPath, widget.field.valuesPath, 
+      "", null, currentView?.isEmpty ?? false, widget.field.autoFill,  widget.field.translatable, null);
+      widgets.add(
+        Container( 
+          width: currentWidth / 1.5,
+          padding: EdgeInsets.all(10),
+          child: w)
+        );
     return AlertWidget(
       widget:  SingleChildScrollView( child:  Column(
         mainAxisSize: MainAxisSize.min, 

@@ -155,7 +155,7 @@ class TranslateConstants {
   static String needRule13 = "-> only request, task shows workflow completion, on top of their forms. it consists of a simple bar declining steps with a list of parrallel subtask depending on step.";
   static String needRule14 = "-> grey color define not reached step, vivid color step is done or currently doing, icons in subtask will give you its current state (done or doing). task can show you a optionnal hub under main workflow, by this you can choose wich are the next step to launch.";
 
-  static String showMenu = "show menu";
+  static String showMenu = "open menu";
   static String showFilter = "show filter";
 
   static String savedFolder = "saved to folder";

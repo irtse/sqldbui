@@ -219,7 +219,6 @@ class APIService {
         
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
         var cols = getColumns(url, offset != null);
-        // if (currentView != null && offset != null && currentView!.max < offset) { globalOffset = offset = 0;  }
         var command = "";
         if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
@@ -239,7 +238,6 @@ class APIService {
         }
         if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
-
           if (resp.error == "") {    
             if (method == "get") { 
               if (limit != null && cache.containsKey(url) && offset != null && offset > 0 ) {

@@ -73,6 +73,7 @@ class DropDownState extends State<DropDownWidget> {
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) {}
+    print("${widget.value} ${widget.autofill} ${currentDropdown[viewID ?? ""]?[widget.name]}");
     if ((currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill) != null) {
       val = "${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }

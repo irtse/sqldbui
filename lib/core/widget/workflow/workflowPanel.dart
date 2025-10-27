@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
-import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
+
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
   final bool readOnly;
