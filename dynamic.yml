@@ -1,0 +1,5 @@
+# dynamic.yml
+tls:
+  certificates:
+    - certFile: /certs/opps.irt-aese.local.crt
+      keyFile: /certs/opps.irt-aese.local.key
