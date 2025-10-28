@@ -21,7 +21,6 @@ bool navigate = true;
 model.View? currentView;
 String? currentCat;
 GlobalKey<MainViewWidgetState> globalMainViewKey = GlobalKey<MainViewWidgetState>();
-GlobalKey<LoaderViewWidgetState> globalLoaderMainViewKey = GlobalKey<LoaderViewWidgetState>();
 // ignore: must_be_immutable
 class MainViewWidget extends StatefulWidget{
   List<model.View>? views;
@@ -33,7 +32,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return ViewWidget(
-        stillLoading: false,
         view: currentView, 
         views: widget.views
       );
@@ -76,7 +74,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             selectedGrid = [];
             unselectedGrid = [];
             return ViewWidget( 
-              stillLoading: false,
               view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, 
               views: widget.views
             );
@@ -98,10 +95,9 @@ class MainViewWidgetState extends State<MainViewWidget> {
 bool isTriggerOpen = false;
 // ignore: must_be_immutable
 class ViewWidget extends StatefulWidget{
-  bool stillLoading = true;
   List<model.View>? views;
   model.View? view;
-  ViewWidget ({ super.key, required this.view, required this.views, this.stillLoading = true });
+  ViewWidget ({ super.key, required this.view, required this.views });
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
@@ -124,15 +120,9 @@ class ViewWidgetState extends State<ViewWidget> {
       });
     }
     List<Widget> comps = <Widget>[];
-    if (widget.stillLoading || widget.view == null) {
-      comps.add(LoaderMainViewWidget(key: globalLoaderMainViewKey));
-    }
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 
         DatagridWidget w = DatagridWidget(key: globalGridWidgetKey, view: widget.view);
-        if (widget.stillLoading) {
-          Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
-        }
         return Stack( children: [ 
           Container(margin: const EdgeInsets.only(top: 40), child: w),
           ActionBarWidget(key: globalActionBar, view: widget.view, grid: w, gridKey: globalGridKey), ...comps]);
@@ -147,10 +137,6 @@ class ViewWidgetState extends State<ViewWidget> {
     }
     List<Widget> childs = [];
     if (viewID == null) {
-      if (widget.stillLoading) {
-        Future.delayed(Duration(seconds: 1), () => setState( () => widget.stillLoading = false));
-      }
-        
       return Stack(children: [ 
         HomeViewWidget(), 
         ActionBarWidget(key: globalActionBar, view: widget.view ) 
@@ -171,18 +157,5 @@ class ViewWidgetState extends State<ViewWidget> {
         decoration: BoxDecoration(color: Theme.of(context).splashColor),
         child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : childs))),
       ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]); 
-  }
-}
-
-class LoaderMainViewWidget extends StatefulWidget{
-  const LoaderMainViewWidget ({ super.key });
-  @override LoaderViewWidgetState createState() => LoaderViewWidgetState();
-}
-class LoaderViewWidgetState extends State<LoaderMainViewWidget> {
-  @override Widget build(BuildContext context) {
-    return globalLoading ? Container( width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
-                   height: currentHeigth > 0 ? currentHeigth - 40 : 0,
-                   color: Theme.of(context).secondaryHeaderColor.withOpacity(0.5),
-                   child: const SpinKitCircle(color: Colors.white, size: 100.0,)) : Container();
   }
 }
