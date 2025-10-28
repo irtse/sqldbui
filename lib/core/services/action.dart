@@ -228,7 +228,7 @@ class ActionService {
           showAlertBanner(context, durationOfStayingOnScreen: Duration(minutes: 1), () {}, AlertAlertBannerChild(text: errorStr), // <-- Put any widget here you want!
                           alertBannerLocation:  AlertBannerLocation.top,);
         }
-        if (form.view != null && (form.view?.isEmpty ?? false) && errorStr == "") { globalMenuKey.currentState?.refresh(true); }
+        // if (form.view != null && (form.view?.isEmpty ?? false) && errorStr == "") { globalMenuKey.currentState?.refresh(true); }
     }
     return views;
   }

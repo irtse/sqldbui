@@ -344,7 +344,7 @@ class GridWidgetState extends State<GridWidget> {
         borderColor: Theme.of(context).splashColor, 
         allowSorting: !(datas.isEmpty && !isFilter()) && modeIndex != 1,
         columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
-        allowFiltering: !(datas.isEmpty && !isFilter()) && modeIndex != 1, 
+        allowFiltering: !(schema[fieldName]?.type.contains("many") ?? false), 
         type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
         url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
         contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,

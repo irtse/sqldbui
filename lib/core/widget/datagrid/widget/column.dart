@@ -47,7 +47,7 @@ class GridColumnWidget extends StatefulWidget {
     this.allowSorting = false, 
     required this.maxLength, 
     required this.contextWidth,
-    this.allowFiltering = false, 
+    this.allowFiltering = true, 
     required this.label, 
     this.borderWidth = 1, 
     this.iconColor = Colors.grey,

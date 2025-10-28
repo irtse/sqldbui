@@ -32,7 +32,11 @@ class MainViewWidget extends StatefulWidget{
 class MainViewWidgetState extends State<MainViewWidget> {
   @override Widget build(BuildContext context) {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
-      return ViewWidget(view: currentView, views: widget.views);
+      return ViewWidget(
+        stillLoading: false,
+        view: currentView, 
+        views: widget.views
+      );
     }
     model.View? view; 
     try { 
@@ -66,23 +70,17 @@ class MainViewWidgetState extends State<MainViewWidget> {
                 var v = widget.views?.firstWhere((element) => "${element.id}" == viewID?.substring(1));
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
               } catch(e) { /* */ }
-              Future.delayed(const Duration(seconds: 1), () { setState() { } });
             } 
             Future.delayed(const Duration(seconds:5), () { firstAPI = false; });
             widget.url = null;
             selectedGrid = [];
             unselectedGrid = [];
-            return ViewWidget( view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, views: widget.views);
+            return ViewWidget( 
+              stillLoading: false,
+              view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, 
+              views: widget.views
+            );
         });
-  }
-  void refreshUrl(String? path, String? id, bool load) {
-    subViewID = id;
-    firstAPI = true;
-    globalLoading = load;
-    confirmCache = {};
-    navigate = true;
-    setState(() { widget.url = path;});
-    AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
   }
   void refresh(String? id, String? subID, model.View? view, bool forceFirstAPI) {
     setState(() {
@@ -103,7 +101,7 @@ class ViewWidget extends StatefulWidget{
   bool stillLoading = true;
   List<model.View>? views;
   model.View? view;
-  ViewWidget ({ super.key, required this.view, required this.views });
+  ViewWidget ({ super.key, required this.view, required this.views, this.stillLoading = true });
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
@@ -122,8 +120,7 @@ class ViewWidgetState extends State<ViewWidget> {
       Future.delayed(const Duration(milliseconds: 100), () {
         var triggers = TriggerCacheService.getTriggers();
         showDialog(context: context, barrierDismissible: false,
-        builder: (builder) => TriggerBoxWidget(
-          triggers: triggers, isCached: true,));
+        builder: (builder) => TriggerBoxWidget(triggers: triggers, isCached: true,));
       });
     }
     List<Widget> comps = <Widget>[];

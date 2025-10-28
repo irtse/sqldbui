@@ -119,32 +119,6 @@ class MenuWidgetState extends State<MenuWidget> {
       )
     ]);
   }
-  void refresh(bool getView) {
-      filterRowsWidget = []; functionMathRowsWidget = [];
-      selectedGrid = []; unselectedGrid = [];
-      detectChanges = {};
-      cacheChanges = {};
-      if (widget.views == null || getView || firstAPI) {
-        APIService().get<model.View>(APIConstants.mainEndpost, false, null).then((value) {
-          if (value.data != null) { widget.views = value.data; }
-          for (var view in widget.views!) {
-            if (view.id.toString() == viewID?.substring(1) && subViewID != null) {
-              try { view.news - 1; } catch(e) { /* */ }     
-            }
-          }
-          setState(() {}); 
-        });
-        globalMainViewKey.currentState?.setState(() {}); 
-      } else {
-        for (var view in widget.views!) {
-          if (viewID != null && view.id.toString() == viewID?.substring(1) && subViewID != null) {
-            try { view.news - 1; } catch(e) { /* */ }     
-          }
-        }
-        globalMainViewKey.currentState?.setState(() {}); 
-        setState(() {});
-      }
-  }
   
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
     if (id != null && !globalFilter.containsKey(id)) { 
@@ -162,8 +136,8 @@ class MenuWidgetState extends State<MenuWidget> {
     subViewID=null;
     widget.url = null;
     currentView = null;
-    filterRowsWidget = []; functionMathRowsWidget = [];
-    if(full) { refresh(true); }
+    filterRowsWidget = []; 
+    functionMathRowsWidget = [];
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 
       || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;

@@ -272,11 +272,6 @@ class ActionBarState extends State<ActionBarWidget> {
       String path = "";
       if (viewID != null) { path += "$viewID${ subViewID != null ? ":$subViewID" : "" }"; }
       var controller = TextEditingController(text: path);
-      if (widget.view != null && globalLoading) { 
-        Future.delayed(const Duration(seconds: 1), () { 
-          globalLoaderMainViewKey.currentState?.setState(() { globalLoading = false; }); 
-        }); 
-      }
       List<Widget> rows = [];
       if (currentWidth > 700) {
         List<DropdownItem<String>> items = [];
