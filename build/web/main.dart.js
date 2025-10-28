@@ -194699,7 +194699,7 @@ d=A.b6(b2)
 A.fT(e)
 A.fT(d)
 if(J.cN(J.bS(e),"connection error")){b1.a="server unreachable"
-a8="server unreachable"}else{a9=A.f(J.bS(e))+" https://opps.irt-aese.local/sqldb"
+a8="server unreachable"}else{a9=A.f(J.bS(e))+" https://opps.irt-aese.local"
 b1.a=a9
 a8=a9}s=9
 break
@@ -194760,7 +194760,7 @@ i=A.aA(b)
 h=A.b6(b)
 A.fT(i)
 A.fT(h)
-c=A.f(J.bS(i))+" https://opps.irt-aese.local/sqldb"
+c=A.f(J.bS(i))+" https://opps.irt-aese.local"
 s=9
 break
 case 6:s=2
@@ -227614,7 +227614,7 @@ r($,"dpA","cbr",()=>A.ry(null,A.aF("a0n")))
 r($,"dpD","Bl",()=>A.ry(null,A.aF("Q5")))
 r($,"dpC","ir",()=>A.ry(null,A.aF("a1Q")))
 r($,"dpB","cju",()=>A.ry(null,A.aF("a1C")))
-s($,"de3","Ga",()=>{var q=A.cL9("https://opps.irt-aese.local/sqldb/v1",B.J,A.j(["Content-Type","application/json; charset=UTF-8"],t.N,t.z),B.J,B.J),p=A.cvy(),o=new A.arr(A.a([B.awe],A.aF("D<oa?>")))
+s($,"de3","Ga",()=>{var q=A.cL9("https://opps.irt-aese.local/v1",B.J,A.j(["Content-Type","application/json; charset=UTF-8"],t.N,t.z),B.J,B.J),p=A.cvy(),o=new A.arr(A.a([B.awe],A.aF("D<oa?>")))
 p=new A.b4Y(p,o,A.cvy(),new A.bel(51200),!1)
 p.N4$=q
 p.abM$=new A.aZI(A.b2(t.lZ))
