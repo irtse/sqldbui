@@ -29,6 +29,8 @@ Map<String, Map<String, List<PlatformFile>>> cacheFilesChanges = {};
 Map<String, GlobalKey<FormFieldState>> detectChanges = {};
 
 saveChange(model.View? view, Map<String,dynamic> form, String name, dynamic value) {
+  form[name] = value;
+  cacheForm[view?.name ?? ""]?[name] = value;
   if (view != null && view.rules.isNotEmpty && form[name] != value) {
     for (var r in view.rules) {
       if (r.related == name && r.key != null) {
@@ -43,7 +45,6 @@ saveChange(model.View? view, Map<String,dynamic> form, String name, dynamic valu
       }
     }
   }
-  form[name] = value;
 }
 
 abstract class ConvertorWidget {

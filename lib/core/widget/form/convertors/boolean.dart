@@ -40,7 +40,10 @@ class _BooleanState extends State<BooleanWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    widget.value = "${(widget.form[widget.name]) ?? false}" == "true"; 
+    widget.value = "${(widget.form[widget.name]) ?? widget.value ?? widget.autofill ?? false}" == "true"; 
+    if (widget.value != null) {
+      saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
+    }
     var label = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     try { 
       label = await getOnFlow(label);
@@ -81,7 +84,7 @@ class _BooleanState extends State<BooleanWidget> {
           if (r.trigger == widget.name) {
             for (var v in r.value.where( (e) => e != null )) {
               var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-              var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? false;
+              var val = widget.form[s] ?? v?.toString() ?? false;
               if (r.operator.contains("!")) {
                 if (value != val) {
                   return "";

@@ -50,6 +50,10 @@ class _UploadState extends State<UploadWidget> {
   }
   var stringTagController = StringTagController();
   Future<Widget> futureBuild(BuildContext context) async {
+    widget.value = widget.value ?? widget.autofill; 
+    if (widget.value != null) {
+      saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
+    }
     var label = "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);

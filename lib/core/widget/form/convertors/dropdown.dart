@@ -13,7 +13,6 @@ import 'package:sqldbui2/page/translate.dart';
 import 'package:expressions/expressions.dart';
 
 
-Map<String,Map<String,String>> currentDropdown = {};
 // ignore: must_be_immutable
 class DropDownWidget extends StatefulWidget {
   final FormWidgetState? component;
@@ -50,7 +49,7 @@ class DropDownState extends State<DropDownWidget> {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<DropDownWidget>>;
-          widget.enrichPath[r.related]="${r.id}_${(currentDropdown[viewID ?? ""]?[r.related] ?? widget.form[r.related])}".replaceAll("''", "'");
+          widget.enrichPath[r.related]="${r.id}_${(widget.form[r.related])}".replaceAll("''", "'");
           if (widget.enrichPath[r.related] == "") {
             widget.enrichPath.remove(r.related);
           }
@@ -73,9 +72,8 @@ class DropDownState extends State<DropDownWidget> {
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) {}
-    print("${widget.value} ${widget.autofill} ${currentDropdown[viewID ?? ""]?[widget.name]}");
-    if ((currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill) != null) {
-      val = "${(currentDropdown[viewID ?? ""]?[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
+    if ((widget.form[widget.name] ?? widget.value  ?? widget.autofill) != null) {
+      val = "${(widget.form[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }
     if (val != null) {
       saveChange(widget.component?.widget.view, widget.form, widget.name, val);
@@ -200,7 +198,7 @@ class DropDownState extends State<DropDownWidget> {
                 }
                 for (var v in r.value.where( (e) => e != null )) {
                   var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-                  var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString();
+                  var val = widget.form[s] ?? v?.toString();
                   if (r.operator.toLowerCase().contains("like")) {
                     if (r.operator.toLowerCase().contains("not")) {
                       if ((value?.contains(val) ?? true)) {
@@ -385,8 +383,8 @@ class SubDropDownState extends State<SubDropDownWidget> {
         if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
           var vv = v;
           bool select = false;
-          if ("${currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill ?? ""}" == "${item.id}") {
-            saveChange(widget.component?.widget.view, widget.form, widget.name, currentDropdown[viewID!]?[widget.name] ?? widget.value ?? widget.autofill);
+          if ("${widget.form[widget.name] ?? widget.value ?? widget.autofill ?? ""}" == "${item.id}") {
+            saveChange(widget.component?.widget.view, widget.form, widget.name, widget.form[widget.name] ?? widget.value ?? widget.autofill);
             select = true;
             if (widget.url != null) {
                 Future.delayed(Duration(seconds: 1), () {
@@ -431,7 +429,9 @@ class SubDropDownState extends State<SubDropDownWidget> {
             for (var e in ctrls.items) {
               e.selected = false;
             }
-            ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+            if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
+              ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+            }
             ctrls.openDropdown(null, widget.label, true);
         } : null,
                         controller: ctrls,
@@ -510,7 +510,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                               for (var v in r.value.where( (e) => e != null )) {
                                 var b = "$value ${r.operator} ";
                                 var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-                                var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v.toString() ?? "";
+                                var val = widget.form[s] ?? v.toString() ?? "";
                                 b += "$val";
                                 try {
                                   final expression = Expression.parse(b);
@@ -541,7 +541,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
                       if (widget.form[widget.name] != null )
                         Positioned(right: 30, child: IconButton(
                           onPressed: () => setState( () {
-                            currentDropdown[viewID!]?.remove(widget.name);;
                             widget.value = null;
                             widget.autofill = null;
                             ctrls.unselectWhere((i) => true);

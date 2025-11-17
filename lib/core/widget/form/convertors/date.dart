@@ -46,9 +46,7 @@ class _DateState extends State<DateWidget> {
       var label = "${widget.label.replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ').toLowerCase()}${widget.require ? '*' : ''}";
       try {  label = await getOnFlow(label);
       } catch(e) {}
-      if (widget.form[widget.name] != null) { 
-        widget.value = widget.form[widget.name]; 
-      }
+      widget.value = widget.form[widget.name] ?? widget.value ?? widget.autofill; 
       if (widget.value != null) {
         dateValue = DateTime.parse(widget.value);
         saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
@@ -76,7 +74,7 @@ class _DateState extends State<DateWidget> {
                 }
             } else {
               var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-              var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+              var val = widget.form[s] ?? v?.toString() ?? "";
               if (DateTime.tryParse(val) != null) {
                 var b = DateTime.parse(val);
                 if (r.min) {

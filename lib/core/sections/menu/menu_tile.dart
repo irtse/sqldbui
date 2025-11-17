@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -41,6 +42,9 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                 onTap: () async { 
                   setState(() { 
                     confirmCache = {};
+                    cacheForm = {};
+                    oneToManiesForm[widget.view?.name ?? ""] = {};
+                    oneToManiesStateForm[widget.view?.name ?? ""] = [];
                     //navigate = true;
                     for (var t in tiles) {
                       t.currentState?.setState(() {

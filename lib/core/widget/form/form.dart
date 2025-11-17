@@ -63,8 +63,8 @@ class FormWidgetState extends State<DataFormWidget> {
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
     try{
-      oneToManiesForm[widget.view?.name ?? ""] = {};
-      oneToManiesStateForm[widget.view?.name ?? ""] = [];
+      oneToManiesForm[widget.view?.name ?? ""] = oneToManiesForm[widget.view?.name ?? ""] ?? {};
+      oneToManiesStateForm[widget.view?.name ?? ""] = oneToManiesStateForm[widget.view?.name ?? ""] ?? [];
       searchCtrl = {};
 
       widget.detectChange = false;
@@ -106,11 +106,10 @@ class FormWidgetState extends State<DataFormWidget> {
         if ((refItem.historyPath ?? "") != "") {
           menuItems.add(TranslateConstants.history);
         }
-        var newCacheEntry = <String,dynamic>{"id" : refItem.values["id"]};
-        cacheForm[widget.view?.name ?? ""] = newCacheEntry;
-        
+        print(cacheForm);
+        cacheForm[widget.view?.name ?? ""] = cacheForm[widget.view?.name ?? ""] ?? <String,dynamic>{"id" : refItem.values["id"]}; 
         if (TranslateConstants.formulary == menuItems[widget.subMenuIndex]) {
-            GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
+          GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
           content = FormularyWidget(   
               key: key,
               show: show, 
@@ -124,7 +123,6 @@ class FormWidgetState extends State<DataFormWidget> {
               wrappers: widget.subKey,
               formKey: widget.formKey,
               hideField: widget.hideField, 
-              newCacheEntry: newCacheEntry,
               additionnalWidgets: additionnal,
               formIsEmpty: widget.formIsEmpty,
               superFormSchemaName: widget.superFormSchemaName,

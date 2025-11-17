@@ -60,7 +60,7 @@ class _TextState extends State<TextWidget> {
     try {
       label = await getOnFlow(label);
     } catch (e) {}
-    if (widget.form[widget.name] != null) { widget.value = widget.form[widget.name]; }
+    widget.value = widget.form[widget.name] ?? widget.value ?? widget.autofill; 
     if ((widget.type.contains("time") || widget.type.contains("date")) && widget.value != null) {
       widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
     }
@@ -144,7 +144,7 @@ class _TextState extends State<TextWidget> {
               }
               for (var v in r.value.where( (e) => e != null )) {
                 var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-                var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+                var val = widget.form[s] ?? v?.toString() ?? "";
                 if (r.operator.toLowerCase().contains("like")) {
                   if (r.operator.toLowerCase().contains("not")) {
                     if ((value?.contains(val) ?? true)) {

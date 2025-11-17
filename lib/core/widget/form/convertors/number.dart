@@ -52,8 +52,9 @@ class _NumberState extends State<NumberWidget> {
     try {
       TranslateConstants.writeNumber = await getOnFlow(TranslateConstants.writeNumber);
     } catch(e) {}
-    if (widget.form[widget.name] != null) { 
-      widget.value = widget.form[widget.name]; 
+    widget.value = widget.form[widget.name] ?? widget.value ?? widget.autofill; 
+    if (widget.value != null) {
+      saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
     }
     func(String? value) {
       try {
@@ -114,7 +115,7 @@ class _NumberState extends State<NumberWidget> {
                 for (var v in r.value.where( (e) => e != null )) {
                   var b = "${double.parse(value!)} ${r.operator} ";
                   var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-                  var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+                  var val = widget.form[s] ?? v?.toString() ?? "";
                   b += "$val";
                   try {
                     final expression = Expression.parse(b);

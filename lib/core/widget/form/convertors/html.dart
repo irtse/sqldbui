@@ -70,11 +70,14 @@ class HTMLState extends State<HTMLWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    if (widget.form[widget.name] != null) { widget.value = widget.form[widget.name]; }
+    widget.value = widget.form[widget.name] ?? widget.value ?? widget.autofill; 
     if ((widget.type.contains("time") || widget.type.contains("date")) && widget.value != null) {
       widget.value = '${widget.value}'.substring(0, widget.value.length > 10 ? 10 : widget.value.length);
     }
     var val = widget.value  ?? widget.autofill;
+    if (widget.value != null) {
+      saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
+    }
     val = val?.replaceAll("''", "'");
     if (val == null) {
       val = widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null;
@@ -100,7 +103,7 @@ class HTMLState extends State<HTMLWidget> {
               }
               for (var v in r.value.where( (e) => e != null )) {
                 var s = v.toString().split("(").last.replaceAll("'", "").replaceAll(")", "");
-                var val = cacheForm[widget.component?.widget.view?.name]?[s] ?? v?.toString() ?? "";
+                var val = widget.form[s] ?? v?.toString() ?? "";
                 if (r.operator.toLowerCase().contains("like")) {
                   if (r.operator.toLowerCase().contains("not")) {
                     if (value.contains(val)) {

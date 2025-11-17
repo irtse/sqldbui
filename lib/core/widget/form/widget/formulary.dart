@@ -7,6 +7,7 @@ import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
+
 // ignore: must_be_immutable
 class FormularyWidget extends StatefulWidget {
   String error = "";
@@ -19,7 +20,6 @@ class FormularyWidget extends StatefulWidget {
   FormWidgetState component;
   String superFormSchemaName;
   List<String> hideField = [];
-  Map<String,dynamic> newCacheEntry;
   bool formIsEmpty = false;
   Map<String, model.SchemaField> schema;
   List<Widget> additionnalWidgets;
@@ -41,7 +41,6 @@ class FormularyWidget extends StatefulWidget {
     required this.hideField,
     required this.isSplitted,
     required this.formIsEmpty,
-    required this.newCacheEntry,
     required this.additionnalWidgets,
     required this.superFormSchemaName    
   });
@@ -110,8 +109,6 @@ class FormularyWidgetState extends State<FormularyWidget> {
           }
           if (widget.refItem.valuesMany.containsKey(fieldName)) { value = widget.refItem.valuesMany[fieldName]!; }
           if (widget.refItem.valuesManyPath.containsKey(fieldName)) { value = widget.refItem.valuesManyPath[fieldName]!; }
-
-          widget.newCacheEntry[fieldName] = widget.newCacheEntry[fieldName] ?? value;
           if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { 
             continue; 
           }
@@ -131,7 +128,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           }
           double max = widget.width - 100 > 0 ? widget.width - 100 : 1;
           var f = FutureBuilder( future: Convertor.formFieldByType(
-              widget.newCacheEntry, 
+              cacheForm[widget.view.name]!, 
               context, 
               widget.view.schemaName, 
               widget.view.schema,

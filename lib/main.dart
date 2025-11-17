@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +21,11 @@ final ThemeData myTheme = ThemeData(
   highlightColor: const Color.fromRGBO(248, 248, 242 , 1),
   shadowColor: const Color.fromRGBO(98, 114, 164  , 1),
 );
+
+class BuildInfo {
+  static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'unknown');
+  static const String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: 'unknown');
+}
 
 void main() async { 
     // ensureInitialized() is required if the plugin is initialized before runApp()
@@ -64,8 +70,9 @@ class MyApp extends StatelessWidget {
         resize = true;
         currentHeigth = MediaQuery.of(context).size.height;
     }
+    print(cacheForm);
     if (resize) {
-      Future.delayed(Duration(seconds: 2), () => resize == false );
+      Future.delayed(Duration(seconds: 1), () => resize = false );
     }
     TranslateConstants.lang = const String.fromEnvironment("LANG", defaultValue: "fr");
     return MaterialApp.router(

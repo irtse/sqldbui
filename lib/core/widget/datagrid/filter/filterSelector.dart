@@ -403,7 +403,9 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
             e.selected = false;
           }
           filterRestr[viewID] = value; 
-          ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+          if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
+            ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+          }
           ctrls.openDropdown("", value, true);
           setState(() {});
         },

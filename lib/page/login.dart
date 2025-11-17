@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/widget/utils/fork/login/flutter_login.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
+import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
 
 // @RoutePage<bool>()
@@ -41,28 +42,33 @@ class _LoginWidgetState extends State<LoginScreen> {
       });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    return FlutterLogin(
-      title: '',
-      userValidator: (value) {
-        if (value == null || value == "") { return "Must not be empty";}
-        return null;
-      },
-      hideForgotPasswordButton: true,
-      userType: LoginUserType.name,
-      logo: const AssetImage('assets/images/logo.png'),
-      onLogin: _authUser,
-      onSignup: null,
-      messages: LoginMessages(
-        userHint: (await getOnFlow('username/email')).toLowerCase(),
-        passwordHint: (await getOnFlow('password')).toLowerCase(),
-        loginButton: (await getOnFlow('LOGIN')).toUpperCase(),
-        forgotPasswordButton: '',
-        recoverPasswordButton: '',
-      ),
-      onSubmitAnimationCompleted: () {
-        if (AuthService.isLoggedIn) {  setState(() { context.go("/"); }); }   
-      },
-      onRecoverPassword: null,
-    );
+    return Stack( children: [ FlutterLogin(
+        title: '',
+        userValidator: (value) {
+          if (value == null || value == "") { return "Must not be empty";}
+          return null;
+        },
+        hideForgotPasswordButton: true,
+        userType: LoginUserType.name,
+        logo: const AssetImage('assets/images/logo.png'),
+        onLogin: _authUser,
+        onSignup: null,
+        messages: LoginMessages(
+          userHint: (await getOnFlow('username/email')).toLowerCase(),
+          passwordHint: (await getOnFlow('password')).toLowerCase(),
+          loginButton: (await getOnFlow('LOGIN')).toUpperCase(),
+          forgotPasswordButton: '',
+          recoverPasswordButton: '',
+        ),
+        onSubmitAnimationCompleted: () {
+          if (AuthService.isLoggedIn) {  setState(() { context.go("/"); }); }   
+        },
+        onRecoverPassword: null,
+      ), 
+      Positioned( bottom: 20, right: 50, child: Text("version ${BuildInfo.buildId} ~ ${BuildInfo.buildDate}", 
+        style: TextStyle(
+          fontFamily: "arial", decoration: TextDecoration.none, fontWeight: FontWeight.normal,
+          fontSize: 12, color: Colors.white))),
+    ]);
   }
 }

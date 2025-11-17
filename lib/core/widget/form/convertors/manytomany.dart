@@ -170,14 +170,14 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
     ctrls = MultiSelectController<Map<String, dynamic>>();
-    saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[]);
+    widget.value = (widget.form[widget.name]) ?? widget.value ?? []; 
+    saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
     var l = widget.label;
     try {
       l = await getOnFlow(widget.label);
     } catch(e) {}
     int max = 0;
     if (widget.datas != null) {
-      saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[]);
       for (var item in widget.datas!) {
         if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
           continue;
@@ -238,7 +238,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 
               } else if (val.id == item.id) {
                 select = true;
-                saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[...( widget.form[widget.name] as List), val.serialize()]);
+                saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[...( widget.value as List), val.serialize()]);
                 break;
               }
             }
@@ -293,10 +293,13 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     }
     return MultiDropdown<Map<String, dynamic>>(
                         addFunction: widget.type == "manytomany_add" ? (String value) {
+                          print("${ctrls.items.where( (i) => i.label.toString() == value)} $value");
+                          if (ctrls.items.where( (i) => i.label.toString() == value).isEmpty) {
                             ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
                               "name": value,
                             }, label: value, selected: true));
-                            ctrls.openDropdown(null, widget.label, true);
+                          }
+                          ctrls.openDropdown(null, widget.label, true);
                         } : null,
                         controller: ctrls,
                         items: items,

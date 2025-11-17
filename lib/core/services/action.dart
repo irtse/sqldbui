@@ -62,7 +62,7 @@ class ActionService {
                   subViewID = splitted[1];
                   navigate = true;  
                   confirmCache = {}; 
-                  Future.delayed(Duration(seconds: 1), () {
+                  Future.delayed(Duration(seconds: 2), () {
                     Future.delayed(Duration(seconds: 1), () { globalActionBar.currentState?.setState(() {}); });
                     AppRouter.navigateTo("$viewID:$subViewID");
                     //globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true); 
@@ -70,6 +70,8 @@ class ActionService {
                 }
               }
               cacheForm = {};
+              oneToManiesForm = {};
+              oneToManiesStateForm = {};
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
