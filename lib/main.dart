@@ -23,7 +23,7 @@ final ThemeData myTheme = ThemeData(
 );
 
 class BuildInfo {
-  static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'dd/MM/YYYY HH:mm');
+  static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'dd/MM/YYYY-HH:mm');
   static String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: Uuid().v1());
 }
 
