@@ -106,8 +106,8 @@ class FormWidgetState extends State<DataFormWidget> {
         if ((refItem.historyPath ?? "") != "") {
           menuItems.add(TranslateConstants.history);
         }
-        print(cacheForm);
-        cacheForm[widget.view?.name ?? ""] = cacheForm[widget.view?.name ?? ""] ?? <String,dynamic>{"id" : refItem.values["id"]}; 
+        cacheForm[widget.view?.name ?? ""] = cacheForm[widget.view?.name ?? ""] ?? <String,dynamic>{}; 
+        cacheForm[widget.view?.name ?? ""]?["id"] = refItem.values["id"];
         if (TranslateConstants.formulary == menuItems[widget.subMenuIndex]) {
           GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
           content = FormularyWidget(   

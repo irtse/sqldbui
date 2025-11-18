@@ -159,7 +159,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                   },
                   style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
-                    child: Text(apply.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),)),
+                    child: Text(apply.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))))),
                   TextButton(onPressed: () {
                     resetFilter(widget.columnName);
                     navigate = true;
@@ -264,7 +264,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
     var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));
     if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
     return Column(children: [ 
-      Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch( minHeight: 25,
+      Container( margin: const EdgeInsets.only(bottom: 20, top: 10),  child: ToggleSwitch( minHeight: 25,
           initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase())),
           fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / togglesMode.length,
           totalSwitches: togglesMode.length, labels: togglesLabels, inactiveBgColor: Theme.of(context).splashColor,
@@ -302,7 +302,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(
         initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == (widget.comparator.toLowerCase() == "not like" ? "!like" : widget.comparator)),
         fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / toggles.length,
-        customWidths: !isMath && !isNull ? [44, 88, 44, 44] : null,
+        customWidths: !isMath && !isNull ? [55, 55, 55, 55] : null,
         totalSwitches: toggles.length, labels: toggles, inactiveBgColor: Theme.of(context).splashColor,
         onToggle: (index) { widget.comparator = toggles[index ?? 0].toLowerCase() == "!like" ? "not like" : toggles[index ?? 0].toLowerCase(); },)),
       Divider(color: Theme.of(context).splashColor,),

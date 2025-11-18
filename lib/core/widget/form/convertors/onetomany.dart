@@ -37,9 +37,6 @@ class OneToManyState extends State<OneToManyWidget> {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
         if (r.trigger == widget.name) {
           r.key = widget.key as GlobalKey<State<OneToManyWidget>>;
-          /*if (r.value != null && r.value != "") {
-            widget.value = r.value;
-          }*/
         }
       }
     }

@@ -70,7 +70,7 @@ class MenuWidgetState extends State<MenuWidget> {
     for (var cat in categories.keys) {
       var count = 0;
       if (initiallyExpanded[cat] == null) {
-        initiallyExpanded[cat] = cat.toLowerCase() == "general";
+        initiallyExpanded[cat] = true;
       }
       if (!categories[cat]!.isNotEmpty) { continue; }
       for (var catIndex in categories[cat]!) { 

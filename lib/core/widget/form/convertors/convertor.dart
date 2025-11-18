@@ -458,7 +458,6 @@ class Convertor {
     InputDecoration? dec, GlobalKey<FormFieldState<dynamic>> formKey, String name,
     String label, String type, List<model.Shallowed>? datas,
     bool isGrid, bool isDark, bool isText) async {
-    print("LINK $datas");
     MultiSelectController<String> ctrls = MultiSelectController<String>();
     List<DropdownItem<String>> items = <DropdownItem<String>>[];
     Map<String, model.Shallowed> mapped = <String, model.Shallowed>{};

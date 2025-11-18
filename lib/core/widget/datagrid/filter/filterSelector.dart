@@ -259,7 +259,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                                   globalNew[viewID] = toggles[index]; 
                                 }
                                 confirmCache = {};
-                                globalGridKey.currentState?.setState(() {});
+                                navigate = true;
+                                globalMainViewKey.currentState?.setState(() {});
                               },
                             );
                           } else {

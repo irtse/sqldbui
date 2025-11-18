@@ -199,7 +199,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
         items: items,
         label: "tp",
         forceVerticalAlignment: true,
-        textAlignVertical: TextAlignVertical.center,
+        textAlignVertical: kIsWeb ? TextAlignVertical.bottom : TextAlignVertical.center,
         searchEnabled: true,
         style: TextStyle(color: Colors.white ),
         chipDecoration: ChipDecoration(

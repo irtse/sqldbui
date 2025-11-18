@@ -273,7 +273,6 @@ class _UploadState extends State<UploadWidget> {
         } else {
           widget.value = widget.type.contains("multiple") ? "${widget.value},${_selectedFile?.name}" : _selectedFile?.name;
         }
-        print(widget.value);
         if (widget.url != null && _selectedFile != null) {
           if (widget.form[widget.name] == null || widget.form[widget.name] is! Map) {
             saveChange(widget.component?.widget.view, widget.form, widget.name, <String,List<PlatformFile>>{});

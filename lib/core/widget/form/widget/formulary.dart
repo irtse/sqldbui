@@ -105,6 +105,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           if (widget.refItem.valuesShallow.containsKey(fieldName)) { 
             var v = widget.refItem.valuesShallow[fieldName]!;
             value = readOnly ? v.label ?? v.name : "${v.id}";
+            cacheForm[widget.view.name]?[fieldName] = v.id;
             path = v.ref ?? "";
           }
           if (widget.refItem.valuesMany.containsKey(fieldName)) { value = widget.refItem.valuesMany[fieldName]!; }
@@ -144,7 +145,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
               path, 
               widget.component, 
               widget.view.isEmpty,
-              cacheForm[widget.view.name]?[fieldName] ?? field.autoFill,
+              field.autoFill,
               field.translatable,
               widget.wrappers,
             ), builder: (a,b) {

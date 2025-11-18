@@ -3,7 +3,6 @@ import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.da
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/form/widget/subformulary.dart';
-import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -72,6 +71,7 @@ class DropDownState extends State<DropDownWidget> {
     try {
       TranslateConstants.selectValue = await getOnFlow(TranslateConstants.selectValue);
     } catch(e) {}
+
     if ((widget.form[widget.name] ?? widget.value  ?? widget.autofill) != null) {
       val = "${(widget.form[widget.name] ?? widget.value  ?? widget.autofill)}".replaceAll("''", "'");
     }
@@ -150,7 +150,7 @@ class DropDownState extends State<DropDownWidget> {
           isExpanded: true,
           hint: Text((await getOnFlow(TranslateConstants.selectValue)).toLowerCase(), style: TextStyle(fontSize: 12, color: Colors.grey),
             overflow: TextOverflow.ellipsis, softWrap: true),
-          value: widget.value ?? (widget.autofill != null ? "${widget.autofill}" : null),
+          value: widget.value ??  "${widget.autofill}",
           style: TextStyle(fontSize: 14, 
             color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, 
             overflow: TextOverflow.ellipsis),

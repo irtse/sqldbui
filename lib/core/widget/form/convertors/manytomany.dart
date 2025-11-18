@@ -293,7 +293,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     }
     return MultiDropdown<Map<String, dynamic>>(
                         addFunction: widget.type == "manytomany_add" ? (String value) {
-                          print("${ctrls.items.where( (i) => i.label.toString() == value)} $value");
                           if (ctrls.items.where( (i) => i.label.toString() == value).isEmpty) {
                             ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
                               "name": value,

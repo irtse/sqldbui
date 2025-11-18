@@ -76,13 +76,14 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
     } else {
       if (widget.isExport) {
         items.addAll([
-        Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), 
+        Padding(padding: const EdgeInsets.only(left: 20, right: 20), 
           child: Divider(color: Theme.of(context).splashColor)),
-        Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10), 
+        Padding(padding: const EdgeInsets.only(left: 20, right: 20, top: 20 ), 
           child: Form( key: formKey, 
           autovalidateMode: AutovalidateMode.always,
           child: Wrap( children : [
-            Padding(
+            Container(
+              height: 40,
               padding: const EdgeInsets.only( bottom: 10), 
             child: TextWidget(
               form : cache, 
@@ -94,7 +95,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               translatable: false,
               require: true, type: "varchar", 
               component: null, isDark: true)),
-            DropDownWidget(
+            SizedBox(
+              height: 40,
+            child: DropDownWidget(
               form : cache, 
               schemaName: "", 
               schema: <String,model.SchemaField>{},
@@ -112,7 +115,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               wrappers: null,
               translatable: false,
               autofill: null,
-              empty: currentView?.isEmpty ?? false)
+              empty: currentView?.isEmpty ?? false))
         ]))),
         Padding(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), child: Divider(color: Theme.of(context).splashColor,))]);
       } else {
@@ -146,12 +149,16 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
           continue;
         }
         var f = TextWidget(form : newCacheEntry, 
-          schemaName: currentView!.schemaName, name: scheme, 
-          readOnly: false, value: scheme, 
-          label: "${schema[scheme]!.label} as label", 
+          schemaName: currentView!.schemaName, 
+          name: scheme, 
+          readOnly: false, 
+          value: await getOnFlow(schema[scheme]!.label), 
+          label: "${schema[scheme]!.label} ${await getOnFlow("as label")}", 
           translatable: false,
-          require: false, type: "varchar", 
-          component: null, isDark: true);
+          require: false, 
+          type: "varchar", 
+          component: null, 
+          isDark: true);
         mapping.add(Padding(padding: const EdgeInsets.only(bottom: 10), 
                     child: Container( width: 300,
                     decoration: BoxDecoration( borderRadius: BorderRadius.circular(10),
@@ -197,7 +204,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                   style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
               Padding( padding: const EdgeInsets.only(right: 20, bottom: 10), 
               child: TextButton( style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge, backgroundColor: Theme.of(context).primaryColor),
-                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), child: Text(widget.isExport ? "Export" : "Import", 
+                child: Padding( 
+                  padding: const EdgeInsets.only(right: 10, left: 10), 
+                  child: Text((await getOnFlow(widget.isExport ? "Export" : "Import")).toUpperCase(), 
                 style: TextStyle(color: Theme.of(context).highlightColor))), 
                 onPressed: () async { 
                   if (widget.isExport && formKey.currentState!.validate()) {

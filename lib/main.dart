@@ -70,7 +70,6 @@ class MyApp extends StatelessWidget {
         resize = true;
         currentHeigth = MediaQuery.of(context).size.height;
     }
-    print(cacheForm);
     if (resize) {
       Future.delayed(Duration(seconds: 1), () => resize = false );
     }

@@ -51,7 +51,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
 
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
-    // print("TEST ${widget.url} ${view != null && view.linkPath != "" ? view.linkPath : defaultPath} ${widget.url ?? (view != null && view.linkPath != "" ? view.linkPath : defaultPath)}");
     return FutureBuilder<APIResponse<model.View>>(
       future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null && view.linkPath != "" ? view.linkPath : defaultPath), navigate, context) : 
         APIService().get<model.View>(widget.url ?? (view != null && view.linkPath != "" ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
