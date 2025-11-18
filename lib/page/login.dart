@@ -65,7 +65,7 @@ class _LoginWidgetState extends State<LoginScreen> {
         },
         onRecoverPassword: null,
       ), 
-      Positioned( bottom: 20, right: 50, child: Text("build ${BuildInfo.buildId} ~ ${BuildInfo.buildDate}", 
+      Positioned( bottom: 20, left: 50, child: Text("build ${BuildInfo.buildId} ~ ${BuildInfo.buildDate}", 
         style: TextStyle(
           fontFamily: "arial", decoration: TextDecoration.none, fontWeight: FontWeight.normal,
           fontSize: 12, color: Colors.white))),

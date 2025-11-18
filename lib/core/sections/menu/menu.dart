@@ -110,14 +110,30 @@ class MenuWidgetState extends State<MenuWidget> {
     firstAPI = false;
     noReload = false;
     var height = noMenu ? currentHeigth - 81 : currentHeigth - 162;
-    return Column( children : [ 
-      MenuHeaderWidget(controller: controller), 
-      SizedBox( height: height > 0 ? height : 0,
-        child: SingleChildScrollView( 
-          child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps )
-        )
-      )
-    ]);
+    return SizedBox( height: currentHeigth,
+          child: Stack( children: [ 
+      Column( children : [ 
+        MenuHeaderWidget(controller: controller), 
+        SizedBox( height: height > 0 ? height : 0,
+          child: SingleChildScrollView( 
+            child: Column(mainAxisAlignment: MainAxisAlignment.start, children: comps )
+          )
+        ),
+        Positioned( bottom: 0, child: SizedBox(
+          width: menuSize - 40 > 0 ? menuSize - 40 : 0,
+          child: Column( children: [
+            Text(BuildInfo.buildId,  softWrap: true, overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: "arial", decoration: TextDecoration.none, fontWeight: FontWeight.normal,
+              fontSize: 12, color: Theme.of(context).splashColor)),
+            Text(BuildInfo.buildDate,  softWrap: true, overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: "arial", decoration: TextDecoration.none, fontWeight: FontWeight.normal,
+              fontSize: 12, color: Theme.of(context).splashColor))
+          ]),
+        ))
+      ])
+    ]));
   }
   
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {

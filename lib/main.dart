@@ -1,6 +1,6 @@
+import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/page.dart';
 import 'package:sqldbui2/page/login.dart';
 import 'package:go_router/go_router.dart';
@@ -11,9 +11,9 @@ import 'package:sqldbui2/core/services/router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 import 'package:flutter_linux_webview/flutter_linux_webview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -23,8 +23,8 @@ final ThemeData myTheme = ThemeData(
 );
 
 class BuildInfo {
-  static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'unknown');
-  static const String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: 'unknown');
+  static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'dd/MM/YYYY HH:mm');
+  static String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: Uuid().v1());
 }
 
 void main() async { 
