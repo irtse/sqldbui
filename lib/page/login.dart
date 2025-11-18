@@ -42,7 +42,6 @@ class _LoginWidgetState extends State<LoginScreen> {
       });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    print("THERE");
     return Stack( children: [ FlutterLogin(
         title: '',
         userValidator: (value) {

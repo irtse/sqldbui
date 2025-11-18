@@ -100,7 +100,7 @@ class PageWidgetState extends State<PageWidget> {
             )
           ),*/
           DialogButtonWidget(icon: Icons.info_outline, onChanged: kIsWeb ? openPdf : null, widget: !kIsWeb ? TutorialPopUpWidget(): null, tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
-          DialogButtonWidget( left: 12.5, right: 50,
+          DialogButtonWidget( barrierDismissible: true, left: 12.5, right: 50,
             icon: Icons.logout_outlined,
             widget: ConfirmBoxWidget(purpose: "disconnect your account", validate: () { _authProvider.logOut(context); }), 
             tooltip: (await getOnFlow(TranslateConstants.logout)).toLowerCase()),

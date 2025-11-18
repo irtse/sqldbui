@@ -9,6 +9,7 @@ class DialogButtonWidget extends StatefulWidget {
   IconData icon;
   double right = 0;
   double left = 0;
+  bool barrierDismissible = false;
   void Function(BuildContext)? onChanged;
   DialogButtonWidget ({ 
     super.key, 
@@ -17,7 +18,8 @@ class DialogButtonWidget extends StatefulWidget {
     required this.tooltip,
     this.left = 0,
     this.right = 0,
-    this.onChanged
+    this.onChanged,
+    this.barrierDismissible = false,
   });
   @override DialogButtonWidgetState createState() => DialogButtonWidgetState();
 }
@@ -27,9 +29,12 @@ class DialogButtonWidgetState extends State<DialogButtonWidget> {
       child: IconButton(
         icon: Icon( widget.icon, color: Colors.white ), 
           tooltip: widget.tooltip,
-          onPressed: () async => widget.onChanged != null ? widget.onChanged!(context) : showDialog(context: context, builder: (BuildContext context) { 
-            return widget.widget ?? Container(); 
-          }), 
+          onPressed: () async => widget.onChanged != null ? widget.onChanged!(context) : showDialog(
+            context: context, 
+            barrierDismissible: widget.barrierDismissible,
+            builder: (BuildContext context) { 
+              return widget.widget ?? Container(); 
+            }), 
       )
     );
   }
