@@ -1,4 +1,3 @@
-import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/page/page.dart';
@@ -24,7 +23,7 @@ final ThemeData myTheme = ThemeData(
 
 class BuildInfo {
   static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'dd/MM/YYYY-HH:mm');
-  static String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: Uuid().v1());
+  static String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: '89c3970a-0416-48ec-8311-eb6130b649a7');
 }
 
 void main() async { 
