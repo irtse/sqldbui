@@ -182,6 +182,11 @@ class ActionService {
       }
       if ((form.view?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
         // ignore: use_build_context_synchronously
+        if ((method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
+          for (var pathFile in files.keys) {
+            await submitFile(pathFile, files[pathFile]!, context);
+          }
+        }
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
             views.add(value.data!.first);
@@ -204,7 +209,7 @@ class ActionService {
               consentCache.remove(viewID);
             }
              
-            onSuccessMethod(method, views.last, { ...(cacheForm[form.view?.name] ?? {})}, views.last.schema, files, context);
+            onSuccessMethod(method, views.last, { ...(cacheForm[form.view?.name] ?? {})}, views.last.schema, context);
             if (views.last.items.isNotEmpty) {
               if (form.view?.isEmpty ?? false) { 
                 isNew = value.data![0].items[0].values["id"]; 
@@ -235,14 +240,9 @@ class ActionService {
     return views;
   }
   static onSuccessMethod(String method, model.View view, Map<String, dynamic> values, 
-    Map<String, model.SchemaField> schema, Map<String, PlatformFile> files, BuildContext context) async {
+    Map<String, model.SchemaField> schema, BuildContext context) async {
     if (view.items.isNotEmpty) {            
       values["id"]=view.items.first.values["id"];
-    }
-    if ((method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") && (values["id"] ?? "") != "") {
-      for (var pathFile in files.keys) {
-        await submitFile(pathFile.replaceAll("rows=all", "rows=${values["id"]}"), files[pathFile]!, context);
-      }
     }
     if ((method.toUpperCase() == "POST" || (method.toUpperCase() == "PUT"))) {
       TriggerCacheService.setTriggers(view.triggers);

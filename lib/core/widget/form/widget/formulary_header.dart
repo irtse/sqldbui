@@ -119,25 +119,25 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               child: Icon(widget.edit ? Icons.edit_off : Icons.edit, color: Theme.of(context).primaryColor ))
           ) : Container(),*/
           ...states,
-
-          SizedBox(  width: widget.width / 3, 
-           child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
-            widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
-          children: [ 
-            if (widget.refItem.metadata != null)
-              Text("${await getOnFlow("created : ")} ${widget.refItem.metadata!.creationDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.creationUser}".toLowerCase(), 
-                  overflow: TextOverflow.ellipsis,  
-                  style: const TextStyle(color: Colors.grey, fontSize: 11))
-            ] )),
-            widget.refItem.metadata?.updateUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
+          if (!widget.view.isEmpty)
+            SizedBox(  width: widget.width / 3, 
+            child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
+              widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
             children: [ 
               if (widget.refItem.metadata != null)
-                Text("${await getOnFlow("last update : ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
+                Text("${await getOnFlow("created : ")} ${widget.refItem.metadata!.creationDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.creationUser}".toLowerCase(), 
                     overflow: TextOverflow.ellipsis,  
                     style: const TextStyle(color: Colors.grey, fontSize: 11))
-              
-            ] ))
-          ]))
+              ] )),
+              widget.refItem.metadata?.updateUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
+              children: [ 
+                if (widget.refItem.metadata != null)
+                  Text("${await getOnFlow("last update : ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
+                      overflow: TextOverflow.ellipsis,  
+                      style: const TextStyle(color: Colors.grey, fontSize: 11))
+                
+              ] ))
+            ]))
         ])
       )
     );
