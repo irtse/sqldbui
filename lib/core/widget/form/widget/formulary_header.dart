@@ -102,13 +102,15 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         )
       );
     }
-    title.add(Padding( padding: const EdgeInsets.only(left: 53), 
+    title.add(Container( 
+      padding: const EdgeInsets.only(left: 53), 
       child: Row( 
         children: [ 
-          Text( name.toUpperCase(), overflow: TextOverflow.ellipsis,
+          Container( constraints:  BoxConstraints(maxWidth: widget.width / 2), 
+          child : Text( name.toUpperCase(), overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Theme.of(context).primaryColor, 
               fontWeight: FontWeight.bold,
-              fontSize: widget.subForm ? 30 : 19)), 
+              fontSize: widget.subForm ? 30 : 19))), 
           /*widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),
             child: InkWell( onTap: () => setState(() {
@@ -117,7 +119,9 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               child: Icon(widget.edit ? Icons.edit_off : Icons.edit, color: Theme.of(context).primaryColor ))
           ) : Container(),*/
           ...states,
-          Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+          SizedBox(  width: widget.width / 3, 
+           child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
             widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
           children: [ 
             if (widget.refItem.metadata != null)
@@ -133,7 +137,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                     style: const TextStyle(color: Colors.grey, fontSize: 11))
               
             ] ))
-          ])
+          ]))
         ])
       )
     );
@@ -149,8 +153,6 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                 style: const TextStyle(color: Colors.grey, fontSize: 12))
               
         ] )));
-    }  else {
-      title.add(Container(margin: EdgeInsets.only(bottom: 20)));
     } 
     List<Widget> actions = [];
     if (!widget.subForm) {
@@ -204,9 +206,10 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             ]), 
             child: Stack(children: [ 
               Padding(
-                padding: EdgeInsets.only(top: 40, bottom: widget.workflow == null && !widget.view.isEmpty ? 25 : 0), 
+                padding: EdgeInsets.only(top: 40), 
                 child: Column( mainAxisAlignment: MainAxisAlignment.center, children: [
-                  SizedBox( height: 47, child: Column( mainAxisAlignment: MainAxisAlignment.center,  children: [
+                  SizedBox( height: 47,  child: Column( 
+                    mainAxisAlignment: MainAxisAlignment.center,  children: [
                     ...title,
                   ])),
                   widget.workflow != null ? WorkflowBarWidget(workflow: widget.workflow!, width: widget.width ) 
@@ -224,10 +227,11 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         decoration: BoxDecoration(
           border: Border(bottom: BorderSide(color: Theme.of(context).splashColor)),
         ),
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.only(left: 30, top: 20, bottom: 20),
+        margin: EdgeInsets.only(bottom: widget.subForm ? 20 : 0),
+        padding: EdgeInsets.only(left: 30, top: 20, bottom: widget.subForm ? 10 : 0),
         child: Wrap( children: [ 
-          Padding(
+          Container(
+          constraints: BoxConstraints( maxWidth:  widget.width ),
           padding: const EdgeInsets.only(right: 30), 
             // ignore: use_build_context_synchronously
           child: Row( children: [ 

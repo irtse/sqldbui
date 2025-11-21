@@ -322,11 +322,11 @@ class Convertor {
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
       MultiSelectController<String> ctrls = MultiSelectController<String>();
       for (var item in type.replaceAll("enum__", "").split("_")) { 
-        if (name == "state") {
-          item = item.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
-        }
+        var v = item;
+        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+     
         if (items.where((element) => element.value == item).isEmpty) {
-          items.add(DropdownItem<String>(value: item, label: (await getOnFlow(item)).toLowerCase()));
+          items.add(DropdownItem<String>(value: item, label: (await getOnFlow(v)).toLowerCase()));
         }
       }
       GlobalKey<MultiDropdownState> formFieldKey = GlobalKey();
@@ -469,10 +469,9 @@ class Convertor {
     for (var item in datas) {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-      if (name == "state") {
-        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(
+      v = v.toString().replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(
           " (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
-      }
+      
       var t = items.where((e) => e.value == "${item.id}"); 
       if (!mapped.containsKey(v) && t.isEmpty){
         mapped[v]=item;

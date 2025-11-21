@@ -51,9 +51,6 @@ class _UploadState extends State<UploadWidget> {
   var stringTagController = StringTagController();
   Future<Widget> futureBuild(BuildContext context) async {
     widget.value = widget.value ?? widget.autofill; 
-    if (widget.value != null) {
-      saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
-    }
     var label = "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
@@ -191,12 +188,13 @@ class _UploadState extends State<UploadWidget> {
             if (widget.form[widget.name] != null)
               Positioned(right: 30, child: IconButton(
                 onPressed: () {
-                  isNull = true;
-                  widget.value = '';
-                  text.text = '';
-                  widget.component?.widget.detectChange = true;
-                  Map<String,List<PlatformFile>> m = {};
-                  saveChange(widget.component?.widget.view, widget.form, widget.name, m); // PB FOR LINK ADD 
+                    isNull = true;
+                    widget.value = '';
+                    text.text = '';
+                    widget.component?.widget.detectChange = true;
+                    Map<String,List<PlatformFile>> m = {};
+                    saveChange(widget.component?.widget.view, widget.form, widget.name, m);
+                   // PB FOR LINK ADD 
                 },
                 icon: Icon(Icons.close, size: 15),
               )),
@@ -218,6 +216,7 @@ class _UploadState extends State<UploadWidget> {
                   Text(e, style: TextStyle( color: Colors.white), overflow: TextOverflow.ellipsis ), 
                   InkWell( 
                     onTap: () => setState(() { 
+                      try {
                       if (widget.value == null) {
                         return;
                       }
@@ -237,6 +236,10 @@ class _UploadState extends State<UploadWidget> {
                         newM[f] = files;
                       } 
                       saveChange(widget.component?.widget.view, widget.form, widget.name, newM);
+                      } catch(e,s) {
+                        print(e);
+                        print(s);
+                      }
                     }),
                     child: Padding(
                       padding: EdgeInsets.only(left: 10), 

@@ -89,7 +89,6 @@ class PageWidgetState extends State<PageWidget> {
               // if (AuthService.user!.notifications.isNotEmpty) { scaffoldKey.currentState!.openEndDrawer(); }
             })),
             NotificationWidget(key: appBarKey),
-            
           ]),
           /*Padding(padding: EdgeInsets.only(left: 0, right: 0), 
             child: IconButton(
@@ -100,10 +99,15 @@ class PageWidgetState extends State<PageWidget> {
             )
           ),*/
           DialogButtonWidget(icon: Icons.info_outline, onChanged: kIsWeb ? openPdf : null, widget: !kIsWeb ? TutorialPopUpWidget(): null, tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
-          DialogButtonWidget( barrierDismissible: true, left: 12.5, right: 50,
-            icon: Icons.logout_outlined,
-            widget: ConfirmBoxWidget(purpose: "disconnect your account", validate: () { _authProvider.logOut(context); }), 
-            tooltip: (await getOnFlow(TranslateConstants.logout)).toLowerCase()),
+          Container( 
+            padding: EdgeInsets.only(right: 50, left: 12.5),
+            child: Tooltip(
+             message: (await getOnFlow(TranslateConstants.logout)).toLowerCase(),
+             child: IconButton(icon: const Icon(Icons.logout_outlined, color: Colors.white, size: 25,),
+             onPressed: () { 
+              _authProvider.logOut(context);
+            })),
+          )
         ],
       ),
       body: Stack( 
