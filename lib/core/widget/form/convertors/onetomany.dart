@@ -118,9 +118,8 @@ class OneToManyState extends State<OneToManyWidget> {
           rows.add(IconButton(icon: const Icon(Icons.remove), onPressed: () {
             widget.component?.widget.detectChange = true;
             setState(() { 
-              var val = oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.where((element) => element.view!.name.contains(widget.label)) ?? [];
-              if (val.isNotEmpty) {
-                oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.remove(val.last); 
+              if ((oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).isNotEmpty) {
+                oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.removeLast(); 
               }
           });}));
         }
@@ -184,7 +183,7 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
           var dataForm = DataFormWidget(key: k, isOneToMany: true,
             noTitle: true, view: view, scroll: false, subForm: true, superFormSchemaName: widget.schemaName);
 
-          if (!widget.readOnly && (currentView?.actions.contains("delete") ?? false)) {
+          if (!widget.readOnly && (currentView?.actions.contains("put") ?? false)) {
             var w = Stack( children: [ 
               dataForm,
               Positioned(top: 30,  right: 30,  child: IconButton(onPressed: () {

@@ -5,6 +5,7 @@ import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +88,9 @@ class AppRouter {
 
   static back() async {
     if (realHistory.length <= 1) { return; }
+    cacheForm = {};
+    oneToManiesForm = {};
+    oneToManiesStateForm= {};
     cacheChanges = {};
     detectChanges = {};
     globalLoading = true;
@@ -134,6 +138,9 @@ class AppRouter {
   }
   static forward() async {
     if (canForward()) { 
+      cacheForm = {};
+      oneToManiesForm = {};
+      oneToManiesStateForm= {};
       cacheChanges = {};
       detectChanges = {};
       globalLoading = true;

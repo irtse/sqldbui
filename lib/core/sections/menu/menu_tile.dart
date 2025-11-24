@@ -43,8 +43,8 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                   setState(() { 
                     confirmCache = {};
                     cacheForm = {};
-                    oneToManiesForm[widget.view?.name ?? ""] = {};
-                    oneToManiesStateForm[widget.view?.name ?? ""] = [];
+                    oneToManiesForm = {};
+                    oneToManiesStateForm= {};
                     //navigate = true;
                     for (var t in tiles) {
                       t.currentState?.setState(() {

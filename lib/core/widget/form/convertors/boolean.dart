@@ -40,10 +40,8 @@ class _BooleanState extends State<BooleanWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    widget.value = "${(widget.form[widget.name]) ?? widget.value ?? widget.autofill ?? false}" == "true"; 
-    if (widget.value != null) {
-      saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
-    }
+    widget.value = "${widget.form[widget.name] ?? widget.value ?? widget.autofill ?? false}" == "true"; 
+    saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
     var label = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
     try { 
       label = await getOnFlow(label);
@@ -61,7 +59,9 @@ class _BooleanState extends State<BooleanWidget> {
               value: widget.value,
               onChanged: (value) { 
                 widget.value = value;
-                saveChange(widget.component?.widget.view, widget.form, widget.name, value);
+                widget.component?.widget.detectChange = true;
+                print(widget.value);
+                saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
                 setState(() { });
               },
             ),

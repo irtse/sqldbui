@@ -87,7 +87,6 @@ class ActionService {
                                                     BuildContext context, Map<String, dynamic> add, 
                                                     bool isDraft, bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore) async {  
     var body = <String, dynamic>{};
-    
     var resp = await formSubForms(form.wrappers, {}, method, schemaName, context, true, false, isDraft, overrideDest, explicitDraft, avoidConsent, ignore);
     if (resp.isNotEmpty  && !overrideDest) {
       if (resp.first.items.isNotEmpty) { 
@@ -95,6 +94,7 @@ class ActionService {
       }
       body["dbschema_id"]=resp.first.schemaID;
     }
+  
     for (var v in (oneToManiesForm[form.view?.name] ?? {}).entries) {
       for (var vv in v.value) {
         if (!(vv.formKey.currentState?.validate() ?? true)) {
@@ -103,15 +103,12 @@ class ActionService {
           errors = ["form is not valid !"]; 
           break;
         }
-        if (vv.detectChange) {
-          form.detectChange = true; 
-          break;
-        }
+        form.detectChange = true; 
       }
     }
     for (var v in schema.keys) {
-      if ((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
-      && (schema[v]?.require ?? false) && (oneToManiesForm[form.view?.name]?[v] ?? []).isEmpty) {
+      if (((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
+      && (schema[v]?.require ?? false) && (oneToManiesForm[form.view?.name]?[v] ?? []).isEmpty) && !avoidConsent) {
         errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
         errorFormKey[form.formKey]?.currentState?.setState((){});
         errors = ["form is not valid !"]; 
@@ -125,7 +122,7 @@ class ActionService {
       }
     }
     if (method != "delete" && errors.isEmpty && !ignore) {
-      if (form.formKey.currentState == null || !(form.formKey.currentState?.validate() ?? true)) { 
+      if ((form.formKey.currentState == null || !(form.formKey.currentState?.validate() ?? true)) && !avoidConsent) { 
         if (form.formKey.currentState != null && form.subForm) {
           errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
           errorFormKey[form.formKey]?.currentState?.setState((){});
@@ -280,7 +277,7 @@ class ActionService {
     }
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var fieldName in schema.keys) {
-          if (values[fieldName] == null && method.toUpperCase() == "PUT") { continue; }          
+          if (values[fieldName] == null && oneToManies[fieldName] == null && method.toUpperCase() == "PUT") { continue; }      
           if (!["dbdest_table_id"].contains(fieldName) && !(["dbschema_id"].contains(fieldName) && values[fieldName] == null)
           && !(method.toUpperCase() == "PUT" && (schema[fieldName]?.readonly ?? false))) { 
             if (values[fieldName] is Map<String, List<PlatformFile>>){

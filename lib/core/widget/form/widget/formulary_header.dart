@@ -225,6 +225,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     } else if (name != "") {
       widgets.add(Container( 
         decoration: BoxDecoration(
+          
           border: Border(bottom: BorderSide(color: Theme.of(context).splashColor)),
         ),
         margin: EdgeInsets.only(bottom: widget.subForm ? 20 : 0),
