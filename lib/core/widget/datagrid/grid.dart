@@ -553,7 +553,6 @@ class SubGridWidgetState extends State<SubGridWidget> {
         contextWidth: widget.contextWidth, 
         isEnum : widget.isEnum, 
         cells: columns.map<GridCell>((column) {
-          print("FORCE ${column.columnName} ${mapped.schema[column.columnName]?.forceNotReadOnly}");
         return GridCell( 
           dataRef: mapped.dataRef,
           schemaID: mapped.schemaID,

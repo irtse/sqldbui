@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/alert.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart';

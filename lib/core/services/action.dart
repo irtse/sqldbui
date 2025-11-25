@@ -68,9 +68,6 @@ class ActionService {
                   });
                 }
               }
-              cacheForm = {};
-              oneToManiesForm = {};
-              oneToManiesStateForm = {};
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
@@ -163,7 +160,7 @@ class ActionService {
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
     body = await getBody(method, { ...(cacheForm[form.view?.name] ?? {})}, body, schema, oneToManiesForm[form.view?.name] ?? {}, context);
-    print("BB $path $body");
+    print("BB $path $body $oneToManiesForm");
     var files = await getFiles(method, { ...(cacheForm[form.view?.name] ?? {})}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }

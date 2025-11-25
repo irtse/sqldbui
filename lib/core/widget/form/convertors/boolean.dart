@@ -60,7 +60,6 @@ class _BooleanState extends State<BooleanWidget> {
               onChanged: (value) { 
                 widget.value = value;
                 widget.component?.widget.detectChange = true;
-                print(widget.value);
                 saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
                 setState(() { });
               },

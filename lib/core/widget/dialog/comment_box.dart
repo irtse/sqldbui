@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/alert.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -90,9 +91,7 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
           ),
           onPressed: () {
             context.pop();
-            navigate = true;
             confirmCache = {};
-            globalMainViewKey.currentState?.setState(() { });
         },
         child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
           child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
