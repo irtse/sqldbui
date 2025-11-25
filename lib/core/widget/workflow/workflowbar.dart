@@ -59,7 +59,7 @@ class WorkflowBarWidgetState extends State<WorkflowBarWidget> {
     if (widget.workflow.steps.isNotEmpty) {
       items.add(StepWidget(
         content : Padding(padding: const EdgeInsets.only(left: 10), 
-        child: Icon(widget.workflow.isDismiss ? Icons.close : Icons.check, color: Colors.white,)), width: 100, gotBefore: true, 
+        child: Icon(widget.workflow.isDismiss ? Icons.block : Icons.check, color: Colors.white,)), width: 100, gotBefore: true, 
         beforeCurrent: widget.workflow.current != "" && curr == widget.workflow.steps.length && !widget.workflow.isClose,
         beforeDismissible: widget.workflow.isDismiss,
         isDismissible: widget.workflow.isDismiss,

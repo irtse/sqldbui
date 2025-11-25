@@ -214,6 +214,9 @@ class AppRouter {
     var splitted = path.split(":");
     viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
     subViewID=splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
+    cacheForm = {};
+    oneToManiesForm = {};
+    oneToManiesStateForm = {};
     cacheChanges = {};
     detectChanges = {};
     currentView = null;

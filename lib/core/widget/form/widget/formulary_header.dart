@@ -91,7 +91,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       );
     }
     if (widget.refItem.values["state"] != null) {
-      var value = (widget.refItem.valuesShallow["state"]?.label ?? widget.refItem.valuesShallow["state"]?.name ?? widget.refItem.values["state"]).toString().replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "");;
+      var value = (widget.refItem.valuesShallow["state"]?.label ?? widget.refItem.valuesShallow["state"]?.name ?? widget.refItem.values["state"]).toString().replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (in progress)", "");;
       states.add(Padding(
         padding: const EdgeInsets.only(top: 3, left: 12), 
         child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
@@ -147,10 +147,10 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         children: [ 
           Padding( 
             padding: const EdgeInsets.only(right: 10), 
-            child: Icon(Icons.info_outline, size: 20 , color: Theme.of(context).splashColor)), 
+            child: Icon(Icons.info_outline, size: 15, color: Theme.of(context).splashColor)), 
           Text(desc.join(":").toLowerCase(), 
                 overflow: TextOverflow.ellipsis,  
-                style: const TextStyle(color: Colors.grey, fontSize: 12))
+                style: const TextStyle(color: Colors.grey, fontSize: 10))
               
         ] )));
     } 

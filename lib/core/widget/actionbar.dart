@@ -88,6 +88,9 @@ class ActionBarState extends State<ActionBarWidget> {
                     if (currentView!.multiPath.length > 1) {
                       desc = await getOnFlow("BEWARE ! it can be another type than one wished, it's a top level type <${currentView!.schemaName.replaceAll("_", " ").replaceAll("db", "")}>");
                     }
+                    cacheForm = {};
+                    oneToManiesForm = {};
+                    oneToManiesStateForm = {};
                     showDialog(
                       // ignore: use_build_context_synchronously
                       context: context, 

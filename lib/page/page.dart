@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqldbui2/core/sections/head_menu.dart';
 import 'package:sqldbui2/core/sections/notifications.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/tutorial.dart';
 import 'package:sqldbui2/core/widget/utils/dialog_button.dart';
 import 'package:sqldbui2/main.dart';
@@ -15,15 +14,12 @@ import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/model/user.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:sqldbui2/core/widget/utils/fork/tranformablebox.dart' as fork;
 import 'package:sqldbui2/page/translate.dart';
-import 'package:toggle_switch/toggle_switch.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 

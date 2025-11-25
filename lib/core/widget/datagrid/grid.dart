@@ -531,7 +531,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
           values: item.values, 
           sharing: item.sharing,
           isLink: item.linkPath != "", 
-          readOnly: currentView!.readOnly || item.readonly)); 
+          readOnly: item.readonly )); 
       }
     }
     return datas;
@@ -553,6 +553,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
         contextWidth: widget.contextWidth, 
         isEnum : widget.isEnum, 
         cells: columns.map<GridCell>((column) {
+          print("FORCE ${column.columnName} ${mapped.schema[column.columnName]?.forceNotReadOnly}");
         return GridCell( 
           dataRef: mapped.dataRef,
           schemaID: mapped.schemaID,
@@ -562,7 +563,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
           isDraft: mapped.isDraft,
           cellID: mapped.cellID,
           width: column.width, 
-          readOnly: mapped.readOnly,
+          readOnly: mapped.readOnly && !(mapped.schema[column.columnName]?.forceNotReadOnly ?? false),
           borderWidth: widget.borderWidth, 
           borderColor: widget.borderColor,
           backgroundColor: widget.backgroundColor, 

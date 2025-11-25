@@ -122,7 +122,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           
           value = value == "" ? null : value;
           if (fieldName == "state") {
-            value = "$value".replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (progressing)", "");
+            value = "$value".replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (in progress)", "");
           }
           if (readOnly && value == null) {
             continue;

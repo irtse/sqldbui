@@ -1,7 +1,6 @@
 
 // ignore: must_be_immutable
 import 'package:flutter/gestures.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -138,7 +137,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
         ),
       );
     } else {
-      wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (progressing)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
+      wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 
@@ -202,9 +201,6 @@ class GridCellWidgetState extends State<GridCellWidget> {
 
           globalMenuKey.currentState!.setState(() {});
           if (widget.dataRef != null) {
-            cacheForm = {};
-            oneToManiesForm = {};
-            oneToManiesStateForm={};
             AppRouter.navigateTo(widget.dataRef!);
             Future.delayed(Duration(seconds: 1), () async {
               bool ok = false;

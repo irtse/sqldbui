@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/user.dart';
@@ -108,6 +109,9 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
     );
   }
   void clear() {
+    cacheForm = {};
+    oneToManiesForm = {};
+    oneToManiesStateForm = {};
     globalMainViewKey.currentState?.setState(() {
       currentView = null;
       viewID = "dashboard";

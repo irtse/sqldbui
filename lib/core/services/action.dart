@@ -163,6 +163,7 @@ class ActionService {
       if (method.toUpperCase() == "DELETE" || method.toUpperCase() == "PUT") { path = path.replaceAll("rows=all", "rows=${body["id"]}"); }
     } else if (method.toUpperCase() == "PUT") { method = "post"; }
     body = await getBody(method, { ...(cacheForm[form.view?.name] ?? {})}, body, schema, oneToManiesForm[form.view?.name] ?? {}, context);
+    print("BB $path $body");
     var files = await getFiles(method, { ...(cacheForm[form.view?.name] ?? {})}, schema, context);
     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
         for (var k in add.keys) { body[k] = add[k]; }
@@ -177,7 +178,7 @@ class ActionService {
       if (explicitDraft) {
         body["is_draft"]=isDraft;
       }
-      if ((form.view?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
+      if ((currentView?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
         // ignore: use_build_context_synchronously
         if ((method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
           for (var pathFile in files.keys) {
@@ -322,7 +323,7 @@ class ActionService {
       if (delete && many.view != null && (many.view?.actions.contains("delete") ?? false) && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view?.items[0].values["id"]}"), null
                                  );
-      } else if (many.view != null && (many.view?.actions.contains(method) ?? false)) {
+      } else if (many.view != null && (currentView?.actions.contains(method) ?? false)) {
         if (add) { 
           views.addAll(await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 

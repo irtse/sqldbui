@@ -3,6 +3,7 @@ import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
 
+// ignore: must_be_immutable
 class WorkflowPanelWidget extends StatefulWidget {
   final model.Workflow workflow;
   final bool readOnly;

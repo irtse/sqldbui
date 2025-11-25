@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -174,6 +175,9 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             color: Colors.white,
             shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
             onSelected: (value) {
+              cacheForm = {};
+              oneToManiesForm = {};
+              oneToManiesStateForm = {};
               globalMenuKey.currentState?.refreshView("#$value", "", false, false, false);
             },
             itemBuilder: (BuildContext context) { return item; }
@@ -218,6 +222,9 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [ 
                     Tooltip( message: "$goto $dash", child:  InkWell( 
                       onTap: () {
+                        cacheForm = {};
+                        oneToManiesForm = {};
+                        oneToManiesStateForm = {};
                         globalMainViewKey.currentState?.setState(() { viewID = null; });
                         Future.delayed(Duration(milliseconds: 50), () {
                           globalMainViewKey.currentState?.setState(() {

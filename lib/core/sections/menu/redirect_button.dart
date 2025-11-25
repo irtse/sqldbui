@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+// ignore: must_be_immutable
 class RedirectButtonWidget extends StatefulWidget {
   String id;
   String name;
@@ -36,8 +38,13 @@ class RedirectButtonWidgetState extends State<RedirectButtonWidget> {
       onExit: (h) => setState(() {
         widget.isHovered = false;
       }),
-      child: InkWell( onTap: () { globalMenuKey.currentState?.refreshView("#${widget.id}", widget.category, false, false, false); },
-          child: Container(
+      child: InkWell( onTap: () { 
+        cacheForm = {};
+        oneToManiesForm = {};
+        oneToManiesStateForm = {};
+        globalMenuKey.currentState?.refreshView("#${widget.id}", widget.category, false, false, false); 
+      },
+      child: Container(
             decoration: BoxDecoration(
               color: c,
               border: Border( right: BorderSide(color: Theme.of(context).splashColor)
@@ -46,7 +53,7 @@ class RedirectButtonWidgetState extends State<RedirectButtonWidget> {
           height: 40,
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Text((await getOnFlow(widget.name)).toUpperCase(), style: TextStyle( fontSize: 12, color: Colors.white ) )
-        )
+      )
     ));
   }
 }
