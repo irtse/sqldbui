@@ -66,7 +66,6 @@ class FormWidgetState extends State<DataFormWidget> {
       oneToManiesForm[widget.view?.name ?? ""] = oneToManiesForm[widget.view?.name ?? ""] ?? {};
       oneToManiesStateForm[widget.view?.name ?? ""] = oneToManiesStateForm[widget.view?.name ?? ""] ?? [];
       searchCtrl = {};
-      print("ONE $oneToManiesForm $oneToManiesStateForm");
       widget.detectChange = false;
       additionnal = [];
       List<Widget> fields = <Widget>[];

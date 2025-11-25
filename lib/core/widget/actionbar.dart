@@ -58,6 +58,9 @@ class ActionBarState extends State<ActionBarWidget> {
     form.currentState?.widget.wrappersGlobalKey.forEach( (f) {
       triggers.addAll(getTriggers(f));
     });
+    if (currentView?.items.length == 1 && (currentView?.items.first.isDraft ?? true)) {
+      return [];
+    }
     return triggers;
   }
   Future<Widget> futureBuild(BuildContext context) async{
