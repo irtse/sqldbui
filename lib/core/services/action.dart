@@ -95,7 +95,7 @@ class ActionService {
     for (var v in (oneToManiesForm[form.view?.name] ?? {}).entries) {
       for (var vv in v.value) {
         if (!(vv.formKey.currentState?.validate() ?? true)) {
-          errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
+          errorFormKey[form.formKey]?.currentState?.widget.error = await getOnFlow(TranslateConstants.errorRequire);
           errorFormKey[form.formKey]?.currentState?.setState((){});
           errors = ["form is not valid !"]; 
           break;
@@ -105,7 +105,7 @@ class ActionService {
     for (var v in schema.keys) {
       if (((schema[v]?.type.toLowerCase().contains("onetomany") ?? false) 
       && (schema[v]?.require ?? false) && (oneToManiesForm[form.view?.name]?[v] ?? []).isEmpty) && !avoidConsent) {
-        errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
+        errorFormKey[form.formKey]?.currentState?.widget.error = await getOnFlow(TranslateConstants.errorRequire);
         errorFormKey[form.formKey]?.currentState?.setState((){});
         errors = ["form is not valid !"]; 
         for ( var o in oneToManiesStateForm[form.view?.name] ?? [] ) {
@@ -120,7 +120,7 @@ class ActionService {
     if (method != "delete" && errors.isEmpty && !ignore) {
       if ((form.formKey.currentState == null || !(form.formKey.currentState?.validate() ?? true)) && !avoidConsent) { 
         if (form.formKey.currentState != null && form.subForm) {
-          errorFormKey[form.formKey]?.currentState?.widget.error = TranslateConstants.errorRequire;
+          errorFormKey[form.formKey]?.currentState?.widget.error = await getOnFlow(TranslateConstants.errorRequire);
           errorFormKey[form.formKey]?.currentState?.setState((){});
           errors = ["form is not valid !"]; 
         }

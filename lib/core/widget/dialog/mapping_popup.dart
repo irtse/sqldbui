@@ -69,6 +69,9 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                 backgroundColor: Theme.of(context).splashColor,
                 circularStrokeCap: CircularStrokeCap.round,
                 progressColor: Theme.of(context).primaryColor,
+                onAnimationEnd: () => setState(() {
+                  isLoading = false;
+                }),
               ),
             ],
           );
@@ -106,7 +109,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               value: widget.format, 
               label: "format", 
               require: true, 
-              type: "enum__csv_xlsf_pdf_json", 
+              type: "enum__csv_xlsf_json", 
               component: null, 
               mainUrl: null,
               url: null, 
@@ -237,7 +240,6 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
                       widget.isExport ? 
                         await APIService().getWithDownload(path, cache["format"], newCacheEntry, 
                                 "$directory/${cache["filename"]}.${cache["format"]}", isWeb, context) : null; 
-                      if (widget.isExport) { setState(() { isLoading = false; }); }
                     }
                   }
                   if (widget.files.isNotEmpty) {

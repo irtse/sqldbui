@@ -59,7 +59,7 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                       }
                     }
                     var newView = model.View(
-                      name: TranslateConstants.dataFormulary,
+                      name: "${TranslateConstants.dataFormulary} : ${data.schemaName.replaceAll("db", "").replaceAll("_", "")}",
                       workflow: data.workflow,
                       linkPath: data.linkPath, 
                       schema: data.schema, 
@@ -76,7 +76,7 @@ class SubFormularyWidgetState extends State<SubFormularyWidget> {
                     
                     newView.isEmpty = widget.component.view!.isEmpty;
                     GlobalKey<FormWidgetState> newViewKey = GlobalKey<FormWidgetState>();
-                    return FutureBuilder(future: getOnFlow(TranslateConstants.dataFormulary), builder: (a,s) {
+                    return FutureBuilder(future: getOnFlow("${TranslateConstants.dataFormulary} : ${data.schemaName.replaceAll("db", "").replaceAll("_", " ")}"), builder: (a,s) {
                       cacheForm.remove(newView.name);
                       newView.name = s.data ?? newView.name;
                       widget.component.wrappers.removeWhere( (e) => e.view?.name == newView.name);

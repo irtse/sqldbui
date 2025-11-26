@@ -86,7 +86,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    print("DSQDSq");
     searchCtrl = {};
     await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
@@ -99,7 +98,6 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if ( globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
       datas.sort( (a, b) =>  (b.values["id"] != null ? int.parse( b.values["id"]) : 0) -  (a.values["id"] != null ? int.parse(a.values["id"]) : 0) );
     }
-     print("DSQDSsssq");
     return Column( children: [ 
       Container( 
         color: Theme.of(context).primaryColorLight, 

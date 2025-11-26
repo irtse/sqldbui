@@ -173,7 +173,7 @@ class TranslateConstants {
 
   static String commentary = "write your commentary";
   static String enterProper = "enter a proper value.";
-  static String dataFormulary = "fill data formulary";
+  static String dataFormulary = "fill formulary";
   static String formulary = "form";
 
   static String data = "the data";
