@@ -126,7 +126,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     if (viewID != null) { 
                       if (widget.ascOrder != null) { globalOrder[viewID]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
                       if (widget.ascOrder == null) { globalOrder[viewID]?.remove(widget.columnName); }
-                      globalFilter[viewID]!.remove(widget.columnName);
+                      globalFilter[viewID]?.remove(widget.columnName);
                       var founded = filterRowsWidget.where((element) => element.columnName == widget.columnName).toList();
                       for (var search in advancedSearch) { 
                         if (search.globalKey.currentState!.validate() && search.value != null && search.value != "") {
@@ -137,14 +137,14 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                               columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: filterRowsWidget.length));
-                            globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
+                            globalFilter[viewID]?.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
-                            search.index = globalFilter[viewID]!.size();
+                            search.index = globalFilter[viewID]?.size();
                           } else {
                             filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);
-                            globalFilter[viewID]!.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 
+                            globalFilter[viewID]?.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = founded.first.index;
                             founded.remove(founded.first); 
@@ -252,7 +252,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
         child: Text((await getOnFlow(TranslateConstants.delete)).toUpperCase(),  style: TextStyle(color: Colors.grey, fontSize: 11)))));
     }
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link") || widget.type.contains("enum") || widget.type.contains("upload");
-    String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
+    String url = currentView?.schema[widget.columnName] == null ? "" : "${currentView?.schema[widget.columnName]?.actionPath}&shallow=enable";
     
     Widget w = await Convertor.filterFieldByType(
       context, widget as ConvertorWidget, widget.type, "", TranslateConstants.valueFilterPlaceholder.toLowerCase(), 

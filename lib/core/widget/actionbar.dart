@@ -30,6 +30,14 @@ class ActionBarWidget extends StatefulWidget {
   @override ActionBarState createState() => ActionBarState();
 }
 class ActionBarState extends State<ActionBarWidget> {
+  late ThemeData _theme;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _theme = Theme.of(context);
+  }
+
   Future<Widget> getDescription(String content, double? size, Color color) async {
     return Flexible( child: Text((await getOnFlow(content)), overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: size, color: color ) ));
   }
@@ -40,8 +48,8 @@ class ActionBarState extends State<ActionBarWidget> {
       tooltip: tooltip,
       style: ButtonStyle( 
         overlayColor: WidgetStateProperty.resolveWith((states) => isTransluscent ? Colors.transparent : (
-          states.contains(WidgetState.pressed) ? Colors.green : Theme.of(context).primaryColor))),
-      icon: Icon( icon, color: isTransluscent ? Theme.of(context).splashColor : Theme.of(context).highlightColor, size: size ), 
+          states.contains(WidgetState.pressed) ? Colors.green : _theme.primaryColor))),
+      icon: Icon( icon, color: isTransluscent ? _theme.splashColor : _theme.highlightColor, size: size ), 
       onPressed: () {  onPressed(); });
   }
   @override Widget build(BuildContext context) {
@@ -249,20 +257,20 @@ class ActionBarState extends State<ActionBarWidget> {
           (widget.view == null ? (globalLoading ? TranslateConstants.loading : TranslateConstants.home)
           : (widget.view!.label ?? widget.view!.name)).toLowerCase(),  
           // ignore: use_build_context_synchronously
-          null, Theme.of(context).highlightColor));
+          null, _theme.highlightColor));
       } catch(e) {
         row.add(await getDescription(
           (widget.view == null ? (  globalLoading ? TranslateConstants.loading : TranslateConstants.home) 
           : (widget.view!.name != "" ? excludeDB(widget.view!.name)  : "")).toLowerCase(),  
           // ignore: use_build_context_synchronously
-          null, Theme.of(context).highlightColor));
+          null, _theme.highlightColor));
       }
       row.add(Padding(
           padding: const EdgeInsets.only(left: 10), 
           child: Icon(
             widget.view == null || !(widget.view?.isList ?? false)  ? Icons.edit_document : Icons.list, 
             // ignore: use_build_context_synchronously
-            color: Theme.of(context).splashColor, 
+            color: _theme.splashColor, 
             size: widget.view == null || !(widget.view?.isList ?? false) ? 20 : 25, 
           )
         ));
@@ -271,7 +279,7 @@ class ActionBarState extends State<ActionBarWidget> {
           Padding(
             padding: const EdgeInsets.only(left: 10), 
             child: Text("${ !allSelected ? "${selectedGrid.length}/" : ""}${widget.view == null ? "0" : widget.view?.max} ${(await getOnFlow(TranslateConstants.found)).toLowerCase()}", 
-            overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: Theme.of(context).splashColor ) )
+            overflow: TextOverflow.ellipsis, style: TextStyle( fontSize: 11, color: _theme.splashColor ) )
           )
         );
       }
@@ -304,7 +312,7 @@ class ActionBarState extends State<ActionBarWidget> {
         searchEnabled: true,
         style: TextStyle(color: Colors.grey.shade200),
         chipDecoration: ChipDecoration(
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: _theme.primaryColor,
                           labelStyle: TextStyle(color: Colors.white),
                           wrap: true,
                           runSpacing: 2,
@@ -312,20 +320,20 @@ class ActionBarState extends State<ActionBarWidget> {
         ),                             // ignore: use_build_context_synchronously
         fieldDecoration: FieldDecoration(
                           errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
-                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: _theme.splashColor, width: 1.0)),
                           padding: const EdgeInsets.all(1),
-                          backgroundColor: Theme.of(context).secondaryHeaderColor,
+                          backgroundColor: _theme.secondaryHeaderColor,
                           labelStyle: TextStyle(fontSize: 0),
                           hintText: await getOnFlow(TranslateConstants.url.toLowerCase()),
-                          hintStyle: TextStyle(color: Theme.of(context).splashColor, fontSize: 15),
-                          prefixIcon: Icon(Icons.account_tree, size: 18,  color: Theme.of(context).splashColor),
+                          hintStyle: TextStyle(color: _theme.splashColor, fontSize: 15),
+                          prefixIcon: Icon(Icons.account_tree, size: 18,  color: _theme.splashColor),
                           showClearIcon: false,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
                             // ignore: use_build_context_synchronously
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                            borderSide: BorderSide(color: _theme.primaryColor)),
                           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
                             // ignore: use_build_context_synchronously
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor)),
+                            borderSide: BorderSide(color: _theme.primaryColor)),
         ),
         searchDecoration: SearchFieldDecoration(
                           hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
@@ -354,7 +362,7 @@ class ActionBarState extends State<ActionBarWidget> {
                           ),
                         ),
                         dropdownItemDecoration: DropdownItemDecoration(
-                          backgroundColor: Theme.of(context).highlightColor,
+                          backgroundColor: _theme.highlightColor,
                           selectedIcon:
                               const Icon(Icons.check_box, color: Colors.green),
                           disabledIcon:
@@ -384,24 +392,24 @@ class ActionBarState extends State<ActionBarWidget> {
                       child: dp, /* TextFormField(
                         cursorHeight: 15,
                         // ignore: use_build_context_synchronously
-                        style: TextStyle(height: 1, color: Theme.of(context).highlightColor, fontSize: 12),
+                        style: TextStyle(height: 1, color: _theme.highlightColor, fontSize: 12),
                         controller: controller,
                         decoration: InputDecoration( 
                           filled: true,
                           // ignore: use_build_context_synchronously
-                          labelStyle: TextStyle(color: Theme.of(context).splashColor),
+                          labelStyle: TextStyle(color: _theme.splashColor),
                           // ignore: use_build_context_synchronously
-                          hintStyle: TextStyle(color: Theme.of(context).splashColor),
+                          hintStyle: TextStyle(color: _theme.splashColor),
                           contentPadding: const EdgeInsets.all(1),
                           // ignore: use_build_context_synchronously
-                          fillColor: Theme.of(context).secondaryHeaderColor,
+                          fillColor: _theme.secondaryHeaderColor,
                           // ignore: use_build_context_synchronously
-                          iconColor: Theme.of(context).highlightColor,
+                          iconColor: _theme.highlightColor,
                           prefixIcon: const Icon(Icons.account_tree),      
                           hintText:  await getOnFlow(TranslateConstants.url.toLowerCase()),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
                             // ignore: use_build_context_synchronously
-                            borderSide: BorderSide(color: Theme.of(context).primaryColor))
+                            borderSide: BorderSide(color: _theme.primaryColor))
                         )
                       ) */
                     ), 
@@ -420,7 +428,7 @@ class ActionBarState extends State<ActionBarWidget> {
         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0,
         decoration: BoxDecoration(
           // ignore: use_build_context_synchronously
-          color: Theme.of(context).secondaryHeaderColor,
+          color: _theme.secondaryHeaderColor,
           boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: rows)); 

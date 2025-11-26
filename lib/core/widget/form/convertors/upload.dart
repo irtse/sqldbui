@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
@@ -8,8 +6,8 @@ import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:textfield_tags/textfield_tags.dart';
-import 'package:diacritic/diacritic.dart'; // remove accents
-
+// import 'package:diacritic/diacritic.dart'; // remove accents
+/*
 String sanitizeFilename(String input) {
   // 1. Remove accents
   String noAccents = removeDiacritics(input);
@@ -23,7 +21,7 @@ String sanitizeFilename(String input) {
   // 4. Collapse multiple underscores
   safe = safe.replaceAll(RegExp(r'_+'), '_');
   return safe;
-}
+}*/
 
 // ignore: must_be_immutable
 class UploadWidget extends StatefulWidget {

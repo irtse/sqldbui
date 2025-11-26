@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
@@ -8,7 +7,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/function_math_row.dart';
@@ -87,6 +86,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    print("DSQDSq");
     searchCtrl = {};
     await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
@@ -99,6 +99,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if ( globalOrder[viewID] == null || globalOrder[viewID]!.isEmpty ) {
       datas.sort( (a, b) =>  (b.values["id"] != null ? int.parse( b.values["id"]) : 0) -  (a.values["id"] != null ? int.parse(a.values["id"]) : 0) );
     }
+     print("DSQDSsssq");
     return Column( children: [ 
       Container( 
         color: Theme.of(context).primaryColorLight, 

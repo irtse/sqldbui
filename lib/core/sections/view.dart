@@ -1,11 +1,9 @@
-import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/homeview.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/services/router.dart';
@@ -38,8 +36,13 @@ class MainViewWidgetState extends State<MainViewWidget> {
     }
     model.View? view; 
     try { 
-      view = currentView ?? widget.views?.firstWhere((v) => '${v.id}' == viewID?.substring(1) && (viewID != null && !viewID!.contains("@"))); 
+      view = currentView ?? widget.views?.firstWhere((v) {
+        return '${v.id}' == viewID?.substring(1) && (viewID != null && !viewID!.contains("@"));
+      }); 
+            
+
     } catch (e) { 
+      print(e);
       if ((viewID == null || viewID == "") && (widget.views?.length ?? 0 ) > 0) { 
         view = widget.views?.first;
         viewID = "#${view!.id}";
@@ -47,7 +50,9 @@ class MainViewWidgetState extends State<MainViewWidget> {
         AppRouter.setRouteCookie(viewID!, context);
       }
     }
-    
+    if (view != null) {
+      currentView = view;
+    }
 
     bool isList = (view != null && view.isList) || subViewID == null || (viewID != null && viewID!.contains("#"));
     var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
@@ -57,7 +62,7 @@ class MainViewWidgetState extends State<MainViewWidget> {
       builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
             Future.delayed(Duration(seconds: 2), () => navigate = false);
             currentView = null;
-            if (snap.hasData && snap.data!.data != null && snap.data!.data!.isNotEmpty) { 
+            if (snap.data?.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0];               
               currentView!.isList = isList && !currentView!.isEmpty;
               if (snap.data!.data!.isEmpty ) {
@@ -100,25 +105,18 @@ class ViewWidget extends StatefulWidget{
   @override ViewWidgetState createState() => ViewWidgetState();
 }
 class ViewWidgetState extends State<ViewWidget> {
-  @override Widget build(BuildContext context) { return FutureBuilder(future: _build(context), builder: (a, s) {
-    if (s.data != null) {
-      return s.data!;
-    }
-    return Container();
-  });  }
-  Future<Widget> _build(BuildContext context) async {
+  @override Widget build(BuildContext context) { 
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return HomeViewWidget();
     }
-    if (TriggerCacheService.getTriggers().isNotEmpty && !isTriggerOpen && !(widget.view?.items.first.isDraft ?? true)) {
+    if (TriggerCacheService.getTriggers().isNotEmpty && !isTriggerOpen && ( widget.view?.items.length == 1 && !(widget.view?.items.first.isDraft ?? true))) {
       isTriggerOpen = true;
       Future.delayed(const Duration(milliseconds: 100), () {
         var triggers = TriggerCacheService.getTriggers();
         showDialog(context: context, barrierDismissible: false,
         builder: (builder) => TriggerBoxWidget(triggers: triggers, isCached: true,));
       });
-    }
-    if (widget.view?.items.first.isDraft ?? true) {
+    } else {
       TriggerCacheService.triggers = [];
     }
     List<Widget> comps = <Widget>[];
@@ -138,19 +136,11 @@ class ViewWidgetState extends State<ViewWidget> {
       }
     }
     List<Widget> childs = [];
-    if (viewID == null) {
+    if (viewID == null || widget.view == null) {
       return Stack(children: [ 
         HomeViewWidget(), 
         ActionBarWidget(key: globalActionBar, view: widget.view ) 
       ]);
-    }
-    if (!firstLoad) {
-      childs = [
-        Icon(Icons.error, color: Colors.white, size: 100.0,),
-        Padding(padding: EdgeInsets.all(10),
-                child: Text((await getOnFlow(TranslateConstants.lost)).toLowerCase(), 
-                style: TextStyle(color: Colors.white, fontSize: 20.0)),)
-      ];
     }
     return Stack( children: [ 
       Container(margin: const EdgeInsets.only(top: 40),
