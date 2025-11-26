@@ -380,7 +380,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                           return null;
                         },
                         onSelectionChange: (values) {
-                          widget.component?.widget.detectChange = true;
                           saveChange(widget.component?.widget.view, widget.form, widget.name, values);
                         },
                       );

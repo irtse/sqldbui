@@ -145,7 +145,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
       }
       var schema = widget.forcedSchema ?? currentView!.schema;
       for (var scheme in schema.keys) {
-        if (!(filterTempOrderView[viewID]?.contains(scheme) ?? false) ) {
+        if (!(filterOrderView[viewID]?.contains(scheme) ?? false) && !(filterTempOrderView[viewID]?.contains(scheme) ?? false)) {
           continue;
         }
         var f = TextWidget(form : newCacheEntry, 

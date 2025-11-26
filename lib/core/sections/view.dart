@@ -118,6 +118,9 @@ class ViewWidgetState extends State<ViewWidget> {
         builder: (builder) => TriggerBoxWidget(triggers: triggers, isCached: true,));
       });
     }
+    if (widget.view?.items.first.isDraft ?? true) {
+      TriggerCacheService.triggers = [];
+    }
     List<Widget> comps = <Widget>[];
     if (widget.view != null) {
       if (widget.view!.isList && subViewID == null) { 

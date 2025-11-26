@@ -78,6 +78,7 @@ dependencies:
   flutter_pdfview: ^1.4.1+1
   file_saver: ^0.2.14
   expressions: ^0.2.5+3
+  diacritic: ^0.1.6
 
 dev_dependencies:
   flutter_test:

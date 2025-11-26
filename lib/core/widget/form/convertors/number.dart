@@ -88,7 +88,6 @@ class _NumberState extends State<NumberWidget> {
           ),
           onSaved: func,
           onChanged: (String? value) {
-            widget.component?.widget.detectChange = true;
             try {
               if (value == null) { saveChange(widget.component?.widget.view, widget.form, widget.name, null);
               } else if (widget.type.contains("int")) { saveChange(widget.component?.widget.view, widget.form, widget.name, int.parse(value));

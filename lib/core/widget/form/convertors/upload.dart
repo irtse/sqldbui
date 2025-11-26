@@ -8,6 +8,23 @@ import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:textfield_tags/textfield_tags.dart';
+import 'package:diacritic/diacritic.dart'; // remove accents
+
+String sanitizeFilename(String input) {
+  // 1. Remove accents
+  String noAccents = removeDiacritics(input);
+
+  // 2. Replace spaces with underscores
+  String noSpaces = noAccents.replaceAll(' ', '_');
+
+  // 3. Remove unsafe characters
+  String safe = noSpaces.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '');
+
+  // 4. Collapse multiple underscores
+  safe = safe.replaceAll(RegExp(r'_+'), '_');
+  return safe;
+}
+
 // ignore: must_be_immutable
 class UploadWidget extends StatefulWidget {
   final FormWidgetState? component;
@@ -191,7 +208,6 @@ class _UploadState extends State<UploadWidget> {
                     isNull = true;
                     widget.value = '';
                     text.text = '';
-                    widget.component?.widget.detectChange = true;
                     Map<String,List<PlatformFile>> m = {};
                     saveChange(widget.component?.widget.view, widget.form, widget.name, m);
                    // PB FOR LINK ADD 
@@ -270,7 +286,15 @@ class _UploadState extends State<UploadWidget> {
     if (result != null) {
       _selectedFile = result.files.first;      
       if (_selectedFile != null) {
-        widget.component?.widget.detectChange = true;
+        /*_selectedFile =  !widget.type.contains("multiple") && (widget.form["name"] ?? "") != "" ? PlatformFile(
+          name:  sanitizeFilename("${widget.form["name"]}.${_selectedFile!.extension}"),
+          size: _selectedFile!.size,
+          bytes: _selectedFile!.bytes,
+        ) : PlatformFile(
+          name: sanitizeFilename(_selectedFile!.name),
+          size: _selectedFile!.size,
+          bytes: _selectedFile!.bytes,
+        );*/
         if ("${widget.value ?? ""}" == "" ) {
           widget.value = _selectedFile?.name;
         } else {

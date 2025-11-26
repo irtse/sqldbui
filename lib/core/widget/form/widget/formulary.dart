@@ -104,7 +104,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           String path = "";
           if (widget.refItem.valuesShallow.containsKey(fieldName)) { 
             var v = widget.refItem.valuesShallow[fieldName]!;
-            value = readOnly ? v.label ?? v.name : "${v.id}";
+            value = (readOnly || (value != null && widget.view.isEmpty) || fieldName == "state") && !field.forceNotReadOnly ? v.label ?? v.name : "${v.id}";
             cacheForm[widget.view.name]?[fieldName] = v.id;
             path = v.ref ?? "";
           }

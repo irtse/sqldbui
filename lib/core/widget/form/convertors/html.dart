@@ -181,7 +181,6 @@ class HTMLState extends State<HTMLWidget> {
   _onEditorChanged() {
     List deltaJson = _controller.document.toDelta().toJson();
     var html = DeltaToHTML.encodeJson(deltaJson);
-    widget.component?.widget.detectChange = true;
     saveChange(widget.component?.widget.view, widget.form, widget.name, html);
   }
 }

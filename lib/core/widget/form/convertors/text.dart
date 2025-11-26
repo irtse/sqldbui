@@ -124,7 +124,6 @@ class _TextState extends State<TextWidget> {
         errorStyle: const TextStyle(fontSize: 0,),
       ),
       onChanged: (String? value) {
-        widget.component?.widget.detectChange = true;
         saveChange(widget.component?.widget.view, widget.form, widget.name, value);
       },
       onSaved: (String? value) => saveChange(widget.component?.widget.view, widget.form, widget.name, value),

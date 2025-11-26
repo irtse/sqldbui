@@ -155,7 +155,6 @@ class DropDownState extends State<DropDownWidget> {
             color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, 
             overflow: TextOverflow.ellipsis),
           onChanged: (value) {
-            widget.component?.widget.detectChange = true;
             if (value == null) { saveChange(widget.component?.widget.view, widget.form, widget.name, null);
             } else { saveChange(widget.component?.widget.view, widget.form, widget.name, value); }
           },
@@ -229,7 +228,6 @@ class DropDownState extends State<DropDownWidget> {
         if (widget.form[widget.name] != null)
            Positioned(right: 30, child: IconButton(
               onPressed: () => setState(() {
-                widget.component?.widget.detectChange = true;
                 saveChange(widget.component?.widget.view, widget.form, widget.name, null); // PB FOR LINK ADD 
               }),
               icon: Icon(Icons.close, size: 15),
@@ -526,7 +524,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         },
                         onSelectionChange: (values) {
                           if (values.isEmpty) { return; }
-                          widget.component?.widget.detectChange = true;
                           saveChange(widget.component?.widget.view, widget.form, widget.name,mapped[values[0]]?.id ?? values[0]); // PB FOR LINK ADD 
                           try {
                             var item = mapped[values[0]];
@@ -544,7 +541,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
                             widget.value = null;
                             widget.autofill = null;
                             ctrls.unselectWhere((i) => true);
-                            widget.component?.widget.detectChange = true;
                             saveChange(widget.component?.widget.view, widget.form, widget.name, null); // PB FOR LINK ADD 
                           }),
                           icon: Icon(Icons.close, size: 15),

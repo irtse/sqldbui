@@ -59,7 +59,6 @@ class _BooleanState extends State<BooleanWidget> {
               value: widget.value,
               onChanged: (value) { 
                 widget.value = value;
-                widget.component?.widget.detectChange = true;
                 saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
                 setState(() { });
               },
@@ -108,7 +107,6 @@ class _BooleanState extends State<BooleanWidget> {
           borderRadius:  const BorderRadius.all(Radius.circular(15)),
           height: 30.0, disabledOpacity: 0.5,
           onChanged: (value) {
-            widget.component?.widget.detectChange = true;
             saveChange(widget.component?.widget.view, widget.form, widget.name, value);
             ctrl.value = value;
           }

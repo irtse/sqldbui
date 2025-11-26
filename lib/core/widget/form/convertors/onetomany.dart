@@ -91,7 +91,6 @@ class OneToManyState extends State<OneToManyWidget> {
     if (!readOnly && (canPost || widget.component?.widget.view != null) || (widget.component?.widget.view?.isEmpty ?? false)) {
         var filtered = oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? [];
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
-          widget.component?.widget.detectChange = true;
           var mapped = <String, dynamic>{};
           List<String> order = <String>[];
           for (var fieldName in scheme.schema.keys) { 
@@ -103,7 +102,6 @@ class OneToManyState extends State<OneToManyWidget> {
             actions: scheme.actions, actionPath: scheme.actionPath,
             schema: scheme.schema, order: order, isEmpty: true, 
             items: <model.Item>[model.Item(values: mapped)]);
-          widget.component?.widget.detectChange = true;
           setState(() { 
             var k = GlobalKey<FormWidgetState>();
             if (oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] == null) {
@@ -116,7 +114,6 @@ class OneToManyState extends State<OneToManyWidget> {
         }));
         if (filtered.isNotEmpty && filtered.length > datasLen) {
           rows.add(IconButton(icon: const Icon(Icons.remove), onPressed: () {
-            widget.component?.widget.detectChange = true;
             setState(() { 
               if ((oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).isNotEmpty) {
                 oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.removeLast(); 
@@ -187,7 +184,6 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
             var w = Stack( children: [ 
               dataForm,
               Positioned(top: 30,  right: 30,  child: IconButton(onPressed: () {
-                  widget.component?.widget.detectChange = true;
                   items.removeAt(i);
                   oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.removeWhere( (e) => e.view?.name == view.name);
                   setState(() { });

@@ -251,7 +251,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       child: Padding( padding: EdgeInsets.all(10), 
         child: Text((await getOnFlow(TranslateConstants.delete)).toUpperCase(),  style: TextStyle(color: Colors.grey, fontSize: 11)))));
     }
-    bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link");
+    bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link") || widget.type.contains("enum") || widget.type.contains("upload");
     String url = currentView!.schema[widget.columnName] == null ? "" : "${currentView!.schema[widget.columnName]!.actionPath}&shallow=enable";
     
     Widget w = await Convertor.filterFieldByType(
@@ -260,14 +260,23 @@ class FilterSearchState extends State<FilterSearchWidget> {
     );
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
     var togglesLabels = [(await getOnFlow(TranslateConstants.value)).toUpperCase(), 'NULL'];
-    if (!isText) { togglesMode.add("MATH"); }
+    if (!isText) { 
+      togglesMode.add("MATH"); 
+      togglesLabels.add(await getOnFlow("MATH")); 
+    }
     var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));
     if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
     return Column(children: [ 
-      Container( margin: const EdgeInsets.only(bottom: 20, top: 10),  child: ToggleSwitch( minHeight: 25,
+      Container( margin: const EdgeInsets.only(bottom: 20, top: 10),  
+      child: ToggleSwitch( 
+        minHeight: 25,
           initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase())),
-          fontSize: 11, dividerColor: Colors.white, inactiveFgColor: Colors.grey, minWidth: 220 / togglesMode.length,
-          totalSwitches: togglesMode.length, labels: togglesLabels, inactiveBgColor: Theme.of(context).splashColor,
+          fontSize: 11, dividerColor: Colors.white, 
+          inactiveFgColor: Colors.grey, 
+          minWidth: 220 / togglesLabels.length,
+          totalSwitches: togglesLabels.length, 
+          labels: togglesLabels, 
+          inactiveBgColor: Theme.of(context).splashColor,
           onToggle: (index) { setState(() {
             isNull = togglesMode[index ?? 0].toLowerCase().contains("null");
             isMath = togglesMode[index ?? 0].toLowerCase().contains("math");
@@ -287,7 +296,8 @@ class FilterSearchState extends State<FilterSearchWidget> {
                 style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
                 onChanged: (value) { widget.value = value; }, 
                 dropdownColor: Theme.of(context).highlightColor,
-                decoration: InputDecoration( isDense: true,
+                decoration: InputDecoration( 
+                  isDense: true,
                   suffixIconColor: Theme.of(context).primaryColor,
                   errorStyle: const TextStyle(height: -2),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -309,7 +319,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Padding( padding: const EdgeInsets.only(right: 10), child: await connectorButton("and")),
                   await connectorButton("or"), ...additionnal
-      ],),
+      ],), 
     ]); 
   }
 }

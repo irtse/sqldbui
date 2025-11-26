@@ -32,6 +32,7 @@ class ActionService {
                                  bool overrideDest, bool explicitDraft, bool avoidConsent, bool ignore, bool noRedirection) {
       redirection = null;
       errors = [];
+
       return pressedForm(widget, mainForm, schemaName, url, schema, method, context, isDraft, overrideDest, overrideMap, explicitDraft, avoidConsent, ignore, noRedirection);
   }
   static void Function() pressedList(ButtonWidget widget, String schemaName, String url, 
@@ -71,8 +72,7 @@ class ActionService {
             }   
             if (v.isNotEmpty) {
               showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, 
-                          InfoAlertBannerChild(text: " success"), // <-- Put any widget here you want!
-                                                      alertBannerLocation:  AlertBannerLocation.bottom);
+                          InfoAlertBannerChild(text: " success"), alertBannerLocation:  AlertBannerLocation.bottom);
             } 
         }
         widget?.loaded();
@@ -100,7 +100,6 @@ class ActionService {
           errors = ["form is not valid !"]; 
           break;
         }
-        form.detectChange = true; 
       }
     }
     for (var v in schema.keys) {
@@ -174,7 +173,7 @@ class ActionService {
       if (explicitDraft) {
         body["is_draft"]=isDraft;
       }
-      if ((currentView?.actions.contains(method.toLowerCase()) ?? false) && (body.isNotEmpty || !["put", "post"].contains(method))) {
+      if ((body.isNotEmpty || !["put", "post"].contains(method))) {
         // ignore: use_build_context_synchronously
         if ((method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
           for (var pathFile in files.keys) {
@@ -320,7 +319,7 @@ class ActionService {
       if (delete && many.view != null && (many.view?.actions.contains("delete") ?? false) && (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT")) {
         await APIService().delete<model.View>(many.view!.actionPath.replaceAll("rows=all", "rows=${many.view?.items[0].values["id"]}"), null
                                  );
-      } else if (many.view != null && (currentView?.actions.contains(method) ?? false)) {
+      } else if (many.view != null) {
         if (add) { 
           views.addAll(await pressedFormFuture(many, many.view!.schemaName, (many.view?.actionPath ?? "") != "" ? many.view!.actionPath: many.view!.linkPath, 
                                                         many.view!.schema, method, 
