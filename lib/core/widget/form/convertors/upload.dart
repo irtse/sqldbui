@@ -66,6 +66,12 @@ class _UploadState extends State<UploadWidget> {
   var stringTagController = StringTagController();
   Future<Widget> futureBuild(BuildContext context) async {
     widget.value = widget.value ?? widget.autofill; 
+    if (widget.form[widget.name] != null) {
+      widget.value = "";
+      for ( var k in ((widget.form[widget.name] as Map<String,List<PlatformFile>>)[widget.url] ?? [])) {
+        widget.value = widget.type.contains("multiple") && widget.value.isNotEmpty ? "${widget.value},${k.name}" : k.name;
+      }
+    }
     var label = "${widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ')}${widget.require ? '*' : ''}";
     try {
       label = await getOnFlow(label);
@@ -296,7 +302,7 @@ class _UploadState extends State<UploadWidget> {
         if ("${widget.value ?? ""}" == "" ) {
           widget.value = _selectedFile?.name;
         } else {
-          widget.value = widget.type.contains("multiple") ? "${widget.value},${_selectedFile?.name}" : _selectedFile?.name;
+          widget.value = widget.type.contains("multiple") && widget.value.isNotEmpty ? "${widget.value},${_selectedFile?.name}" : _selectedFile?.name;
         }
         if (widget.url != null && _selectedFile != null) {
           if (widget.form[widget.name] == null || widget.form[widget.name] is! Map) {

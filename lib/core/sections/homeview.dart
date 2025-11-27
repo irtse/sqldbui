@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -176,6 +177,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             shape: const ContinuousRectangleBorder(side: BorderSide(color: Colors.transparent)),
             onSelected: (value) {
               cacheForm = {};
+              consentCache = {};
               oneToManiesForm = {};
               oneToManiesStateForm = {};
               globalMenuKey.currentState?.refreshView("#$value", "", false, false, false);
@@ -223,6 +225,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                     Tooltip( message: "$goto $dash", child:  InkWell( 
                       onTap: () {
                         cacheForm = {};
+                        consentCache = {};
                         oneToManiesForm = {};
                         oneToManiesStateForm = {};
                         globalMainViewKey.currentState?.setState(() { viewID = null; });

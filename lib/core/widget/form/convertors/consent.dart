@@ -33,6 +33,7 @@ class ConsentState extends State<ConsentWidget> {
     if (consentCache[viewID ?? ""]?[widget.state.widget.view?.name] == null) {
       consentCache[viewID ?? ""]![widget.state.widget.view?.name ?? ""] = {};
     }
+    widget.value = consentCache[viewID ?? ""]![widget.state.widget.view?.name]?[widget.consent.name]?.consent ?? widget.value;
     consentCache[viewID ?? ""]![widget.state.widget.view?.name]![widget.consent.name] = model.Consent(
       consent: widget.value ?? false, 
       body: widget.consent.body,

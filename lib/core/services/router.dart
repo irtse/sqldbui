@@ -3,6 +3,7 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -91,6 +92,7 @@ class AppRouter {
   static back() async {
     if (realHistory.length <= 1) { return; }
     cacheForm = {};
+    consentCache = {};
     oneToManiesForm = {};
     oneToManiesStateForm= {};
     cacheChanges = {};
@@ -141,6 +143,7 @@ class AppRouter {
   static forward() async {
     if (canForward()) { 
       cacheForm = {};
+      consentCache = {};
       oneToManiesForm = {};
       oneToManiesStateForm= {};
       cacheChanges = {};
@@ -217,6 +220,7 @@ class AppRouter {
     viewID = splitted.isNotEmpty && splitted[0] != "" ? splitted[0] : null;
     subViewID=splitted.length > 1 && splitted[1] != "" ? splitted[1] : null;
     cacheForm = {};
+    consentCache = {};
     oneToManiesForm = {};
     oneToManiesStateForm = {};
     cacheChanges = {};

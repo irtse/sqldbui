@@ -4,6 +4,7 @@ import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/dialog/link_box.dart';
 import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -100,6 +101,7 @@ class ActionBarState extends State<ActionBarWidget> {
                       desc = await getOnFlow("BEWARE ! it can be another type than one wished, it's a top level type <${currentView!.schemaName.replaceAll("_", " ").replaceAll("db", "")}>");
                     }
                     cacheForm = {};
+                    consentCache = {};
                     oneToManiesForm = {};
                     oneToManiesStateForm = {};
                     showDialog(

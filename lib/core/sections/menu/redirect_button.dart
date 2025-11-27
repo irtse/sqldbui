@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/page/translate.dart';
 
@@ -40,6 +41,7 @@ class RedirectButtonWidgetState extends State<RedirectButtonWidget> {
       }),
       child: InkWell( onTap: () { 
         cacheForm = {};
+        consentCache = {};
         oneToManiesForm = {};
         oneToManiesStateForm = {};
         globalMenuKey.currentState?.refreshView("#${widget.id}", widget.category, false, false, false); 
