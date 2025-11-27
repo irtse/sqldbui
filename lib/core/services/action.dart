@@ -238,7 +238,7 @@ class ActionService {
       values["id"]=view.items.first.values["id"];
     }
 
-    if ((method.toUpperCase() == "POST" || (method.toUpperCase() == "PUT"))) {
+    if ((method.toUpperCase() == "POST" || (method.toUpperCase() == "PUT")) && view.triggers.isNotEmpty) {
       TriggerCacheService.setTriggers(view.triggers);
     }
   }

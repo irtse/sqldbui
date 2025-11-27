@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/core/widget/dialog/link_box.dart';
 import 'package:sqldbui2/core/widget/utils/button.dart';
 import 'package:sqldbui2/model/view.dart';
 
@@ -232,6 +233,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
           ), Positioned(top: 50, right: 50, child : Row( children : actions))]), )
       );
     } else if (name != "") {
+      print(widget.refItem.sharing?.shallowPath);
       widgets.add(Container( 
         decoration: BoxDecoration(
           
@@ -254,7 +256,23 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               name.toLowerCase(), 
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
-              style: TextStyle(color: _theme.secondaryHeaderColor, fontSize: 15)) 
+              style: TextStyle(color: _theme.secondaryHeaderColor, fontSize: 15)),
+              if (widget.refItem.sharing != null)
+                Padding( padding: EdgeInsets.only(left: 20),
+                      child: LinkBoxWidget(
+                        isDelete: true,
+                        color: Colors.grey,
+                        path: "@${widget.view.schemaID}:${widget.view.id}",
+                        sharing: widget.refItem.sharing,
+                      )),
+              if (widget.refItem.sharing != null)
+                Padding( padding: EdgeInsets.only(right: 10),
+                      child: LinkBoxWidget(
+                        isDelete: false,
+                        color: Colors.grey,
+                        path: "@${widget.view.schemaID}:${widget.view.id}",
+                        sharing: widget.refItem.sharing,
+                      ))
             ]
           )),
           name2.toLowerCase() != name.toLowerCase() ? Text(
@@ -262,6 +280,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
               style: TextStyle(color: Colors.grey, fontSize: 12)) : Container(),
+          
       ])));
     }
     return Stack( children: widgets);
