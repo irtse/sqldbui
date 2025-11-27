@@ -165,7 +165,8 @@ class GridWidgetState extends State<GridWidget> {
       child: Column( children: [
         if (modeIndex == 1 && showFunctions[viewID] == true) 
           Row(children: bottomColumns),
-        getBottomBar(widget.schema),
+        if (!widget.subTable)
+          getBottomBar(widget.schema),
       ]))
     );
     return Container( 
