@@ -29,7 +29,6 @@ class DataFormWidget extends StatefulWidget {
   List<String> hideField = [];
   bool formIsEmpty = false;
   final model.View? view;
-  bool detectChange = false;
   String superFormSchemaName;
   bool scroll, subForm, subSubForm, noSub, isSplitted, noTitle;
   List<DataFormWidget> wrappers = <DataFormWidget>[];
@@ -63,10 +62,9 @@ class FormWidgetState extends State<DataFormWidget> {
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
     try{
-      oneToManiesForm[widget.view?.name ?? ""] = oneToManiesForm[widget.view?.name ?? ""] ?? {};
-      oneToManiesStateForm[widget.view?.name ?? ""] = oneToManiesStateForm[widget.view?.name ?? ""] ?? [];
+      oneToManiesForm[widget.view?.name ?? ""] = {};
+      oneToManiesStateForm[widget.view?.name ?? ""] = [];
       searchCtrl = {};
-      widget.detectChange = false;
       additionnal = [];
       List<Widget> fields = <Widget>[];
       List<Widget> subMenu = [];

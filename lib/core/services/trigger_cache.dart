@@ -13,7 +13,9 @@ class TriggerCacheService {
 
   static void deleteTriggers(int index) {
     if (triggers.isNotEmpty) {
-      triggers.removeAt(index);
+      try{
+        triggers.removeAt(index);
+      } catch(e) {}
     }
   }
 }

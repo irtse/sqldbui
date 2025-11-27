@@ -78,8 +78,10 @@ class AppRouter {
       realHistory.add(path);
       history.add(path);
       if (history.length > 10) { 
-        realHistory.removeAt(0); 
-        history.removeAt(0);
+        try {
+          realHistory.removeAt(0); 
+          history.removeAt(0);
+        } catch(e) {}
       }
       prefs.setString("history", realHistory.join(","));
       routerKey.currentState?.setState(() { });

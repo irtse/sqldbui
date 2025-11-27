@@ -155,7 +155,6 @@ class _DateState extends State<DateWidget> {
               lastDate: dateMax);
         },
         onChanged: (DateTime? value) { 
-          widget.component?.widget.detectChange = true;
           setState(() {
             dateValue=value!; 
             saveChange(widget.component?.widget.view, widget.form, widget.name, value.toIso8601String());

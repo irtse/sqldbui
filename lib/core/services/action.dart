@@ -287,7 +287,7 @@ class ActionService {
                   }
                 }
               }
-            } else if ((oneToManies[fieldName] ?? []).isNotEmpty) {
+            } else if (oneToManies[fieldName] != null) {
               body[fieldName] = [];
               for (var o in (oneToManies[fieldName] ?? []).toList()) {
                 var b = await getBody(method, (cacheForm[o.view?.name] ?? {}), {}, schema[fieldName]!.schema, oneToManiesForm[o.view?.name] ?? {}, context);

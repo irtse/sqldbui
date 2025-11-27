@@ -158,10 +158,10 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
     if (widget.datas != null && isFirst) {
       isFirst = false;
       items = [];
-      for (var (i, data) in widget.datas!.indexed) {
+      for (var ( data) in widget.datas!) {
         widget.readOnly = widget.readOnly || !data.actions.contains("put");
         widget.canPost = data.actions.contains("post");
-        for (var item in data.items) {
+        for (var (i,item ) in data!.items.indexed) {
           item.readonly = widget.readOnly;
           var view = model.View(
             id: int.parse(item.values["id"]), 
@@ -184,9 +184,12 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
             var w = Stack( children: [ 
               dataForm,
               Positioned(top: 30,  right: 30,  child: IconButton(onPressed: () {
+                try{
                   items.removeAt(i);
-                  oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.removeWhere( (e) => e.view?.name == view.name);
+                  oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.removeAt(i);
                   setState(() { });
+                } catch(e) {}
+                  
               }, 
               icon: const Icon(Icons.delete, color: Colors.grey)))
             ]);
@@ -197,11 +200,7 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
           if (oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] == null) {
             oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] = [];
           }
-          if ((oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.where(
-            (e) => e.view?.name == dataForm.view?.name 
-          ) ?? []).isEmpty) {
-            oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]!.add(dataForm); 
-          }
+          oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]!.add(dataForm); 
         }      
       }
     }
