@@ -98,7 +98,7 @@ class OneToManyState extends State<OneToManyWidget> {
             order.add(fieldName);
           }
           var newView = model.View(
-            name: "${widget.label} ${(oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).length + 1}", 
+            name: "${widget.label} ${(oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).length + 2}", 
             actions: scheme.actions, actionPath: scheme.actionPath,
             schema: scheme.schema, order: order, isEmpty: true, 
             items: <model.Item>[model.Item(values: mapped)]);
