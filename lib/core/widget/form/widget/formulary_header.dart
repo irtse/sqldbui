@@ -91,7 +91,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       );
     }
     if (widget.refItem.values["state"] != null) {
-      var value = (widget.refItem.valuesShallow["state"]?.label ?? widget.refItem.valuesShallow["state"]?.name ?? widget.refItem.values["state"]).toString().replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (in progress)", "");;
+      var value = (widget.refItem.valuesShallow["state"]?.label ?? widget.refItem.valuesShallow["state"]?.name ?? widget.refItem.values["state"]).toString().replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "");;
       states.add(Padding(
         padding: const EdgeInsets.only(top: 3, left: 12), 
         child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),

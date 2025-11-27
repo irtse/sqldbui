@@ -127,7 +127,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
   /// The [future] is the future request for the dropdown items.
   /// You can use this to fetch the dropdown items asynchronously.
   ///
-  /// A loading indicator will be displayed while the future is in progress at the suffix icon.
+  /// A loading indicator will be displayed while the future is running at the suffix icon.
   /// The dropdown will be disabled until the future is completed.
   ///
   /// Example:

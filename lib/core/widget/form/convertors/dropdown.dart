@@ -122,14 +122,14 @@ class DropDownState extends State<DropDownWidget> {
       }
       var items = <DropdownMenuItem<String>>[];
       if (widget.value != null && widget.name == "state") {
-        widget.value = widget.value.toString().replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+        widget.value = widget.value.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
       }
       var values = widget.type.replaceAll("enum__", "").split("_");
       for (var item in values) { 
         if (items.where((element) => element.value == item).isEmpty) {
           var v = item;
           if (widget.name == "state") {
-            v = v.toString().replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+            v = v.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
           }
           if (widget.translatable) {
             try {
@@ -394,7 +394,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
             }
           }
           if (widget.name == "state") {
-            vv = vv.toString().replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+            vv = vv.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
           }
           try {
             if (widget.translatable) {

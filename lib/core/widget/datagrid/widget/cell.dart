@@ -137,7 +137,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
         ),
       );
     } else {
-      wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
+      wid = Text( "$v".replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", ""), 
           textAlign: TextAlign.center, 
           style: TextStyle(
             fontSize: widget.cell.fontSize, 

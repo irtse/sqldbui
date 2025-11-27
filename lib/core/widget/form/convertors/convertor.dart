@@ -323,7 +323,7 @@ class Convertor {
       MultiSelectController<String> ctrls = MultiSelectController<String>();
       for (var item in type.replaceAll("enum__", "").split("_")) { 
         var v = item;
-        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
+        v = v.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
      
         if (items.where((element) => element.value == item).isEmpty) {
           items.add(DropdownItem<String>(value: item, label: (await getOnFlow(v)).toLowerCase()));
@@ -469,7 +469,7 @@ class Convertor {
     for (var item in datas) {
       max = item.max;
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
-      v = v.toString().replaceAll(" (pending)", "").replaceAll(" (in progress)", "").replaceAll(
+      v = v.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(
           " (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
       
       var t = items.where((e) => e.value == "${item.id}"); 

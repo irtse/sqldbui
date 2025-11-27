@@ -155,7 +155,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
         if ((state ?? "") != "") {
           try {
             bs.add(
-              FutureBuilder(future: getOnFlow(state!.replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (in progress)", "")), 
+              FutureBuilder(future: getOnFlow(state!.replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "")), 
               builder: (a, s) {
                 if (s.data != null) {
                   return Container(
