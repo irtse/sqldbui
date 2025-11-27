@@ -214,9 +214,7 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
         }),
         ...items, ...widget.filtered
       ]);
-    } catch(e, s) {
-      print(e);
-      print(s);
+    } catch(e) {
       return Container();
     }
   }

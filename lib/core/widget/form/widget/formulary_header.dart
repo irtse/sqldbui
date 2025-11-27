@@ -39,6 +39,15 @@ class FormularyHeaderWidget extends StatefulWidget {
 class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
   String name = "Unknown Name";
   String description = "no description";
+
+  late ThemeData _theme;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _theme = Theme.of(context);  // ✔️ sûr ici
+  }
+
   @override Widget build(BuildContext context) {
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.data != null) {
@@ -74,7 +83,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       description = widget.refItem.values["description"].toLowerCase(); 
       for (var d in description.split(":")) {
         try { desc.add(await getOnFlow(d));
-        } catch(e) { print(e); }
+        } catch(e) { }
       } 
     }
     if (widget.refItem.isDraft) {
@@ -108,7 +117,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         children: [ 
           Container( constraints:  BoxConstraints(maxWidth: widget.width / 2), 
           child : Text( name.toUpperCase(), overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Theme.of(context).primaryColor, 
+            style: TextStyle(color: _theme.primaryColor, 
               fontWeight: FontWeight.bold,
               fontSize: widget.subForm ? 30 : 19))), 
           /*widget.canUpdate ? Padding(
@@ -116,7 +125,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             child: InkWell( onTap: () => setState(() {
               widget.edit = !widget.edit;
             }),
-              child: Icon(widget.edit ? Icons.edit_off : Icons.edit, color: Theme.of(context).primaryColor ))
+              child: Icon(widget.edit ? Icons.edit_off : Icons.edit, color: _theme.primaryColor ))
           ) : Container(),*/
           ...states,
           if (!widget.view.isEmpty)
@@ -147,7 +156,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
         children: [ 
           Padding( 
             padding: const EdgeInsets.only(right: 10), 
-            child: Icon(Icons.info_outline, size: 15, color: Theme.of(context).splashColor)), 
+            child: Icon(Icons.info_outline, size: 15, color: _theme.splashColor)), 
           Text(desc.join(":").toLowerCase(), 
                 overflow: TextOverflow.ellipsis,  
                 style: const TextStyle(color: Colors.grey, fontSize: 10))
@@ -180,7 +189,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               text: (!widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish
                   : TranslateConstants.update).toUpperCase(), 
                   // ignore: use_build_context_synchronously
-              color: Theme.of(context).primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
+              color: _theme.primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
               avoidConsent: !(!widget.view.actions.contains("put") || widget.view.isEmpty), noRedirection: !widget.view.isEmpty));
           }
         }
@@ -226,7 +235,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       widgets.add(Container( 
         decoration: BoxDecoration(
           
-          border: Border(bottom: BorderSide(color: Theme.of(context).splashColor)),
+          border: Border(bottom: BorderSide(color: _theme.splashColor)),
         ),
         margin: EdgeInsets.only(bottom: widget.subForm ? 20 : 0),
         padding: EdgeInsets.only(left: 30, top: 20, bottom: widget.subForm ? 10 : 0),
@@ -239,13 +248,13 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
             Padding(
               padding: const EdgeInsets.only(right: 15, top: 1), 
               // ignore: use_build_context_synchronously
-              child: Icon(Icons.document_scanner, color: Theme.of(context).splashColor, size: 20 )
+              child: Icon(Icons.document_scanner, color: _theme.splashColor, size: 20 )
             ), 
             Text(
               name.toLowerCase(), 
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
-              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 15)) 
+              style: TextStyle(color: _theme.secondaryHeaderColor, fontSize: 15)) 
             ]
           )),
           name2.toLowerCase() != name.toLowerCase() ? Text(
@@ -256,9 +265,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       ])));
     }
     return Stack( children: widgets);
-    } catch (e, s) {
-        print(e);
-        print(s);
+    } catch (e) {
         return Container();
       }
   }

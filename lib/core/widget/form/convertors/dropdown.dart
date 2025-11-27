@@ -516,7 +516,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                                   if (!evaluator.eval(expression, {})) {
                                     return "";
                                   }
-                                } catch (e) { print(e); }
+                                } catch (e) { }
                               }
                             }
                           }
@@ -546,9 +546,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           icon: Icon(Icons.close, size: 15),
                         )),
                     ]);
-    } catch(e,s) {
-      print(e);
-      print(s);
+    } catch(e) {
       return Container();
     }
   }

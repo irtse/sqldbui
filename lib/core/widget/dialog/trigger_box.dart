@@ -56,10 +56,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
                   padding: EdgeInsets.all(10),
                   child: w)
               );
-          } catch(e,s) {
-            print(e);
-            print(s);
-          }
+          } catch(e) {}
         }
       }
     }
@@ -171,9 +168,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
     ])));
-    } catch(e,s) {
-      print(e);
-      print(s);
+    } catch(e) {
       return Container();
     }
   }

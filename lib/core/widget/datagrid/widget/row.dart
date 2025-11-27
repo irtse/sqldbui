@@ -180,10 +180,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
                 );
               }
             ));
-          } catch(e, s) {
-            print(s);
-            print(e);
-          }
+          } catch(e) { }
         }
       }
       

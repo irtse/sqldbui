@@ -100,9 +100,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
         height: currentHeigth,
         color: Theme.of(context).secondaryHeaderColor,
         child: SingleChildScrollView( child: Column(children: notifs) ));
-    } catch(e, s) {
-     print(e);
-     print(s); 
+    } catch(e) { 
      return Container();
     }
   }

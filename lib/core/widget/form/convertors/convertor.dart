@@ -232,7 +232,6 @@ class Convertor {
           d = DateTime.parse(def!);
         }
       } catch(e) {
-        print(e);
         return Container();
       }
       DateTime dateMin = DateTime(1900);

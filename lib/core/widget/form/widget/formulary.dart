@@ -202,9 +202,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
           ]
         )
       );
-    }catch (e,s) {
-    print(e);
-    print(s);
+    }catch (e) {
     return Container();
   }
   } 

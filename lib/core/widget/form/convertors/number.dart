@@ -122,7 +122,7 @@ class _NumberState extends State<NumberWidget> {
                     if (!evaluator.eval(expression, {})) {
                       return "";
                     }
-                  } catch (e) { print(e); }
+                  } catch (e) { }
                 }
               }
             }

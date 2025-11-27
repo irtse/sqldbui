@@ -491,7 +491,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
                     }
                   );
                 }
-              } catch(e) { print(e); }
+              } catch(e) { }
               },
             )
           );

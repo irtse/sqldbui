@@ -434,9 +434,7 @@ class ActionBarState extends State<ActionBarWidget> {
           boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: rows)); 
-    } catch(e,s) {
-      print(e);
-      print(s);
+    } catch(e) {
       return Container();
     }     
   }

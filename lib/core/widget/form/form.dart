@@ -298,9 +298,7 @@ class FormWidgetState extends State<DataFormWidget> {
         ]);
     }
     return EmptyFormularyWidget();
-    } catch(e,s) {
-      print(s);
-      print(e);
+    } catch(e) {
       return Container();
     }
   }

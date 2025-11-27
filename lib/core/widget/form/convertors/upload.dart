@@ -256,10 +256,7 @@ class _UploadState extends State<UploadWidget> {
                         newM[f] = files;
                       } 
                       saveChange(widget.component?.widget.view, widget.form, widget.name, newM);
-                      } catch(e,s) {
-                        print(e);
-                        print(s);
-                      }
+                      } catch(e) {}
                     }),
                     child: Padding(
                       padding: EdgeInsets.only(left: 10), 

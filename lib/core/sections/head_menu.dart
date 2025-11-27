@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -110,6 +111,7 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
   }
   void clear() {
     cacheForm = {};
+    consentCache = {};
     oneToManiesForm = {};
     oneToManiesStateForm = {};
     globalMainViewKey.currentState?.setState(() {

@@ -42,7 +42,6 @@ class MainViewWidgetState extends State<MainViewWidget> {
             
 
     } catch (e) { 
-      print(e);
       if ((viewID == null || viewID == "") && (widget.views?.length ?? 0 ) > 0) { 
         view = widget.views?.first;
         viewID = "#${view!.id}";
