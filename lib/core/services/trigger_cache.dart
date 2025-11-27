@@ -4,7 +4,13 @@ class TriggerCacheService {
   static List<Trigger> triggers = [];
 
   static void setTriggers(List<Trigger> t) {
-    triggers.addAll(t);
+    triggers = [];
+    for (var t in triggers) {
+      if (triggers.where( (tt) => tt.name == t.name).isEmpty) {
+        triggers.add(t);
+      }
+    }
+    print(t.length);
   }
 
   static List<Trigger> getTriggers() {

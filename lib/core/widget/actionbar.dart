@@ -65,7 +65,12 @@ class ActionBarState extends State<ActionBarWidget> {
   List<model.Trigger> getTriggers(GlobalKey<FormWidgetState> form) {
     var triggers = form.currentState?.widget.view?.triggers.where( (e) => e.mode == "mail").toList() ?? [];
     form.currentState?.widget.wrappersGlobalKey.forEach( (f) {
-      triggers.addAll(getTriggers(f));
+      for (var t in getTriggers(f)) {
+        if (triggers.where( (tt) => tt.name != t.name).isEmpty) {
+           triggers.add(t);
+        }
+
+      }
     });
     if (currentView?.items.length == 1 && (currentView?.items.first.isDraft ?? true)) {
       return [];
@@ -161,14 +166,18 @@ class ActionBarState extends State<ActionBarWidget> {
           if (mainForm.currentState != null && !currentView!.readOnly) {
             if (currentView!.actions.contains("put") && !currentView!.isEmpty) {
               var triggers = getTriggers(mainForm);
-              if (triggers.isNotEmpty) {
+              List<model.Trigger> tt = [];
+              for (var t in triggers) {
+                if (tt.where( (ts) => ts.name == t.name).isEmpty) {
+                  tt.add(t);
+                }
+              }
+              if (tt.isNotEmpty) {
                 actions.add(getIconOffset((await getOnFlow(TranslateConstants.sendMail)).toLowerCase(), 
                   Icons.mail, 20, () {
                     showDialog(
-                      context: context, 
-                      barrierDismissible: false,
-                      builder: (builder) => TriggerBoxWidget(
-                            triggers: triggers, isCached: false)
+                      context: context,  barrierDismissible: true,
+                      builder: (builder) => TriggerBoxWidget( triggers: tt, isCached: false)
                     );
                   }, false));
               }

@@ -1,10 +1,10 @@
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:sqldbui2/page/translate.dart';
 // ignore: must_be_immutable
 class NotificationDrawerWidget extends StatefulWidget{
   const NotificationDrawerWidget ({ super.key });
@@ -42,9 +42,6 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
         var name = notif.name;
         var desc = notif.description;
         List<String> d = [];
-        try { name = await getOnFlow(notif.name);
-        } catch(e) {}
-        
         for (var dd in desc.split(":")) {
           try { 
             d.add(await getOnFlow(dd));
@@ -63,7 +60,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
             AppRouter.navigateTo(notif.ref); 
             Future.delayed(const Duration(seconds: 1), () => setState(() { APIService().delete<model.View>(notif.linkPath.replaceAll("rows=all", "rows=${notif.id}"), null); }));
           }, 
-          child: Container( width: currentWidth / 3.5, child: Row(
+          child: SizedBox( width: currentWidth / 3.5, child: Row(
             children: [
               Padding( padding: const EdgeInsets.only(right: 10), 
                 child: Icon(Icons.message, color: Theme.of(context).splashColor)), Expanded( child: Text( 
@@ -72,7 +69,7 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
                   overflow: TextOverflow.visible,
                   style: TextStyle(color: Theme.of(context).highlightColor))),
             ])))),
-           Container( width: currentWidth / 3.5, child: Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
+           SizedBox( width: currentWidth / 3.5, child: Padding( padding: const EdgeInsets.symmetric(horizontal: 40), 
             child: Row( children: [ Expanded( 
             child: Text(d.isEmpty ? "" : d.join(":").toLowerCase(), 
              style: TextStyle(color: Theme.of(context).splashColor), 

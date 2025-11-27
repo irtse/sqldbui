@@ -6,7 +6,6 @@ import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/alert.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart';
