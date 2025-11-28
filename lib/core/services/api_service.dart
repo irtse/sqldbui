@@ -225,10 +225,11 @@ class APIService {
         }
         url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}";
         if (method == "get") {
-          if (!force && cache.containsKey(url) && cache[url] != null ) { 
+          if (!force && cache.containsKey(url) && cache[url] != null && cache[url]!.data != null && cache[url]!.data!.isNotEmpty ) { 
             return cache[url]! as APIResponse<T>;
           }
         }
+        print(url);
         var response = await request(url, method, body, options);        
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
@@ -237,6 +238,7 @@ class APIService {
           }
         }
         if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
+          
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") {    
             if (method == "get") { 

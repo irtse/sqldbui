@@ -258,21 +258,20 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               // ignore: use_build_context_synchronously
               style: TextStyle(color: _theme.secondaryHeaderColor, fontSize: 15)),
               if (widget.refItem.sharing != null)
-                Padding( padding: EdgeInsets.only(left: 20),
-                      child: LinkBoxWidget(
-                        isDelete: true,
-                        color: Colors.grey,
-                        path: "@${widget.view.schemaID}:${widget.view.id}",
-                        sharing: widget.refItem.sharing,
-                      )),
-              if (widget.refItem.sharing != null)
-                Padding( padding: EdgeInsets.only(right: 10),
-                      child: LinkBoxWidget(
+                LinkBoxWidget(
                         isDelete: false,
                         color: Colors.grey,
                         path: "@${widget.view.schemaID}:${widget.view.id}",
                         sharing: widget.refItem.sharing,
-                      ))
+                      ),
+              if (widget.refItem.sharing != null)
+                LinkBoxWidget(
+                        isDelete: true,
+                        color: Colors.grey,
+                        path: "@${widget.view.schemaID}:${widget.view.id}",
+                        sharing: widget.refItem.sharing,
+                      ),
+              
             ]
           )),
           name2.toLowerCase() != name.toLowerCase() ? Text(
