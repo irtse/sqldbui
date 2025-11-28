@@ -233,7 +233,7 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
           ), Positioned(top: 50, right: 50, child : Row( children : actions))]), )
       );
     } else if (name != "") {
-      print(widget.refItem.sharing?.shallowPath);
+      print("${widget.refItem.sharing?.shallowPath} SHAL");
       widgets.add(Container( 
         decoration: BoxDecoration(
           

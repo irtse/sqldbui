@@ -161,7 +161,7 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
       for (var ( data) in widget.datas!) {
         widget.readOnly = widget.readOnly || !data.actions.contains("put");
         widget.canPost = data.actions.contains("post");
-        print(data!.items);
+        print("${data!.items} NULL");
         for (var (i,item ) in data!.items.indexed) {
           item.readonly = widget.readOnly;
           var view = model.View(

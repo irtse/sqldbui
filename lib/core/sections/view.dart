@@ -108,7 +108,6 @@ class ViewWidgetState extends State<ViewWidget> {
     if ((viewID ?? "").contains(TranslateConstants.dashboard.toLowerCase()) || (viewID ?? "").contains("dashboard")) {
       return HomeViewWidget();
     }
-    print(TriggerCacheService.getTriggers());
     if (TriggerCacheService.getTriggers().isNotEmpty && !isTriggerOpen && ( widget.view?.items.length == 1 && !(widget.view?.items.first.isDraft ?? true))) {
       isTriggerOpen = true;
       Future.delayed(const Duration(milliseconds: 100), () {
