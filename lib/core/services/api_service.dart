@@ -229,7 +229,6 @@ class APIService {
             return cache[url]! as APIResponse<T>;
           }
         }
-        print(url);
         var response = await request(url, method, body, options);        
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');

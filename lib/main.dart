@@ -27,6 +27,7 @@ class BuildInfo {
 }
 
 void main() async { 
+  printWelcome();
     // ensureInitialized() is required if the plugin is initialized before runApp()
   WidgetsFlutterBinding.ensureInitialized();
   // Run `LinuxWebViewPlugin.initialize()` first before creating a WebView.
@@ -202,4 +203,13 @@ class NotificationWidgetState extends State<NotificationWidget> {
             style: const TextStyle(fontSize: 9, color: Colors.white),
     )))));
   }
+}
+
+void printWelcome() {
+  print('''
+────────────────────────────────────────
+   🧪  Welcome to OPPS  
+   Your companion for scientific publications
+────────────────────────────────────────
+''');
 }

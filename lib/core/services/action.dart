@@ -148,7 +148,7 @@ class ActionService {
       return views;
     }
 
-    if (isDraft && ((form.view?.schemaName.contains("request") ?? false ) || (form.view?.schemaName.contains("task") ?? false))) {
+    if ((isDraft) && ((form.view?.schemaName.contains("request") ?? false ) || (form.view?.schemaName.contains("task") ?? false))) {
       return views;
     }
 

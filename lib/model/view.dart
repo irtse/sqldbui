@@ -269,10 +269,12 @@ class Workflow extends SerializerDeserializer<Workflow> {
     this.currentDismiss = false,
     this.isDismiss = false,
     this.isDismissable = true,
+    this.isRefusable = false,
   });
   String id = "";
   bool isClose = false;
   bool isDismissable = true;
+  bool isRefusable = false;
   bool isDismiss = false;
   String current = "";
   String position = "";
@@ -293,6 +295,7 @@ class Workflow extends SerializerDeserializer<Workflow> {
       currentClose: json.containsKey("current_close") && json["current_close"] != null ? bool.parse("${json["current_close"]}") : false, 
       isClose: json.containsKey("is_close") && json["is_close"] != null ? bool.parse("${json["is_close"]}") : false, 
       isDismissable: json.containsKey("is_dismissable") && json["is_dismissable"] != null ? bool.parse("${json["is_dismissable"]}") : true, 
+      isRefusable: json.containsKey("is_refusable") && json["is_refusable"] != null ? bool.parse("${json["is_refusable"]}") : true, 
 
       isDismiss: json.containsKey("is_dismiss") && json["is_dismiss"] != null ? bool.parse("${json["is_dismiss"]}") : false, 
       currentHub: json.containsKey("current_hub") && json["current_hub"] != null ? bool.parse("${json["current_hub"]}") : false, 

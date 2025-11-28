@@ -52,6 +52,9 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
           if ((widget.isFirst || !(widget.workflow?.isDismissable ?? true)) && state.key == "dismiss") {
             continue;
           }
+           if ((!(widget.workflow?.isRefusable ?? true)) && state.key == "refused" && !widget.isFirst) {
+            continue;
+          }
           var purpose = await getOnFlow("${widget.refItem.values["override_state_${state.key}"] ?? state.value["purpose"]}");
           positionnedBar.add(Padding( padding: const EdgeInsets.only(left: 20), child: FloatingActionButton(
             tooltip: purpose.toLowerCase(),

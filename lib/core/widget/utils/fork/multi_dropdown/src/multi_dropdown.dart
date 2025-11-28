@@ -361,7 +361,6 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           _portalController.hide();
-          print("THERE");
         });
       });
     }
