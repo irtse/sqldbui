@@ -62,8 +62,8 @@ class FormWidgetState extends State<DataFormWidget> {
     List<Widget> additionnal = <Widget>[];
     @override Widget build(BuildContext context) {
     try{
-      oneToManiesForm[widget.view?.name ?? ""] = {};
-      oneToManiesStateForm[widget.view?.name ?? ""] = [];
+      oneToManiesForm[widget.view?.name ?? ""] = oneToManiesForm[widget.view?.name ?? ""] ?? {};
+      oneToManiesStateForm[widget.view?.name ?? ""] = oneToManiesStateForm[widget.view?.name ?? ""] ?? [];
       searchCtrl = {};
       additionnal = [];
       List<Widget> fields = <Widget>[];
