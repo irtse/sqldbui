@@ -532,7 +532,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                                 widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                               }); 
                             }
-                          } catch(e) {} 
+                          } catch(e) { print(e); } 
                         },
                       ),
                       if (widget.form[widget.name] != null )

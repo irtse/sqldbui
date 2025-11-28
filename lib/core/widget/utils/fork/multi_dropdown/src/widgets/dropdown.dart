@@ -275,7 +275,6 @@ class _SearchField extends StatelessWidget {
           search[label] = (searchCtrl[label]?.text ?? "").split(" ");
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
-              print("${searchCtrl[label]?.text} $v");
               if (searchCtrl[label]?.text == v) {
                 changeFunction!(searchCtrl[label]?.text ?? "");
                 onChanged(search[label] ??  []);

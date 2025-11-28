@@ -358,7 +358,11 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
       _dropdownController._clearSearchQuery();
       Future.delayed(const Duration(milliseconds: 100), () {
         if (!mounted) return;
-        _portalController.hide();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _portalController.hide();
+          print("THERE");
+        });
       });
     }
   }
