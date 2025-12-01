@@ -78,61 +78,24 @@ class OneToManyState extends State<OneToManyWidget> {
           component: widget.component);
       });
     }
-    return Column(children: [
-      FutureBuilder(future: controlButtons(widget.readOnly, widget.canPost, scheme, 0), builder: (a,s) {
-        if (s.data != null) {
-          return Row(children: s.data! );
-        }
-        return Row(children: [] );
-      }), ...widget.filtered]);
-  }
+    return SubOneToManyWidget(schemaName: widget.schemaName, 
+          name: widget.name, 
+          datas: [], 
+          readOnly: widget.readOnly, 
+          value: widget.value, 
+          label: widget.label, 
+          require: widget.require, 
+          type: widget.type, 
+          url: widget.url, 
+          state: this,
+          scheme: scheme,
+          filtered: [],
+          component: widget.component
+        );
+    }
+ }
 
-  Future<List<Widget>> controlButtons(bool readOnly, bool canPost, model.SchemaField scheme,  int datasLen) async {
-    var val = widget.label.toLowerCase().replaceAll('db', '').replaceAll('_id', '').replaceAll('_', ' ');
-    if (widget.translatable) {
-      val = await getOnFlow(val);
-    }
-    List<Widget> rows = [Padding( 
-      padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10), 
-      child: Text("$val ${widget.require ? '*' : ''}:", style: TextStyle( color: widget.require 
-      && (oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).isEmpty && errorFormKey[widget.component?.widget.formKey]?.currentState?.widget.error != null ? Colors.red : null )))]; 
-    if (!readOnly && (canPost || widget.component?.widget.view != null) || (widget.component?.widget.view?.isEmpty ?? false)) {
-        var filtered = oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? [];
-        rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
-          var mapped = <String, dynamic>{};
-          List<String> order = <String>[];
-          for (var fieldName in scheme.schema.keys) { 
-            mapped[fieldName] = null; 
-            order.add(fieldName);
-          }
-          var newView = model.View(
-            name: "${widget.label} ${(oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).length + 2}", 
-            actions: scheme.actions, actionPath: scheme.actionPath,
-            schema: scheme.schema, order: order, isEmpty: true, 
-            items: <model.Item>[model.Item(values: mapped)]);
-          setState(() { 
-            var k = GlobalKey<FormWidgetState>();
-            if (oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] == null) {
-              oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] = [];
-            }
-            oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.add( 
-              DataFormWidget(key: k, noTitle: true, view: newView, scroll: false, subForm: true, isOneToMany: true,
-              superFormSchemaName: widget.schemaName)); 
-          });
-        }));
-        if (filtered.isNotEmpty && filtered.length > datasLen) {
-          rows.add(IconButton(icon: const Icon(Icons.remove), onPressed: () {
-            setState(() { 
-              if ((oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).isNotEmpty) {
-                oneToManiesForm[widget.component?.widget.view?.name]?[widget.name]?.removeLast(); 
-              }
-          });}));
-        }
-    }
-    return rows;
-  }
-}
-// ignore: must_be_immutable
+// ignore: must_be_immutables
 class SubOneToManyWidget extends StatefulWidget {
   final model.SchemaField scheme;
   final List<DataFormWidget> filtered;
@@ -206,8 +169,7 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
       padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10), 
       child: Text("$val ${widget.require ? '*' : ''}:", style: TextStyle( color: widget.require 
       && widget.filtered.isEmpty && errorFormKey[widget.component?.widget.formKey]?.currentState?.widget.error != null ? Colors.red : null )))]; 
-    print(canPost);
-    if (!readOnly && (canPost) ) {
+    if (!readOnly && (canPost || currentView!.isEmpty) ) {
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
           var mapped = <String, dynamic>{};
           List<String> order = <String>[];
@@ -215,7 +177,6 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
             mapped[fieldName] = null; 
             order.add(fieldName);
           }
-          print(mapped);
           var newView = model.View(
             name: "${widget.label} ${(oneToManiesForm[widget.component?.widget.view?.name]?[widget.name] ?? []).length + 100}", 
             actions: scheme.actions, actionPath: scheme.actionPath,

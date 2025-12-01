@@ -6,6 +6,7 @@ import 'package:sqldbui2/page/translate.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:textfield_tags/textfield_tags.dart';
+import 'package:diacritic/diacritic.dart';
 // import 'package:diacritic/diacritic.dart'; // remove accents
 /*
 String sanitizeFilename(String input) {
@@ -271,6 +272,17 @@ class _UploadState extends State<UploadWidget> {
       return w;
   }
 
+  String sanitizeFilenameSmart(String name) {
+    // Convert é → e, ü → u, etc.
+    name = removeDiacritics(name);
+    // Remove everything non-ASCII after accent stripping
+    name = name.replaceAll(RegExp(r'[^\x00-\x7F]'), '');
+
+    // Remove bad filename characters
+    name = name.replaceAll(RegExp("[<>:\"/\\\\|?*']"), '');
+    return name.trim().replaceAll(RegExp(r'\s+'), '_');
+  }
+
   Future<void> _pickFile() async {
     List<String> extension = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf', 
       'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'heic', 'xls', 'xlsx', 'csv', 'ods'];
@@ -287,6 +299,12 @@ class _UploadState extends State<UploadWidget> {
     if (result != null) {
       _selectedFile = result.files.first;      
       if (_selectedFile != null) {
+        _selectedFile = PlatformFile(
+          path: _selectedFile!.path,
+          name: sanitizeFilenameSmart(_selectedFile!.name),
+          size: _selectedFile!.size,
+          bytes: _selectedFile!.bytes,
+        );
         /*_selectedFile =  !widget.type.contains("multiple") && (widget.form["name"] ?? "") != "" ? PlatformFile(
           name:  sanitizeFilename("${widget.form["name"]}.${_selectedFile!.extension}"),
           size: _selectedFile!.size,
