@@ -110,7 +110,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
             } else if (advancedSearch.length == 1) {
               advancedSearch.add(FilterSearchWidget(filter: this, innerIndex: 0, state: setState, type: widget.type,
                 columnName: widget.columnName, label: widget.label, value: advancedSearch.first.value,
-                comparator: advancedSearch.first.comparator,));
+                comparator: advancedSearch.first.comparator));
                 advancedSearch.remove(advancedSearch.first);
             }
             stateFilter = setState;

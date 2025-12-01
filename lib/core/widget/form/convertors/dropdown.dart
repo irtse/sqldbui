@@ -522,8 +522,10 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           }
                           return null;
                         },
+                        
                         onSelectionChange: (values) {
                           if (values.isEmpty) { return; }
+                          print("${widget.name} ${mapped[values[0]]?.id} ${values[0]}");
                           saveChange(widget.component?.widget.view, widget.form, widget.name,mapped[values[0]]?.id ?? values[0]); // PB FOR LINK ADD 
                           try {
                             var item = mapped[values[0]];

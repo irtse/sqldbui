@@ -74,7 +74,7 @@ class Convertor {
                 hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
-    bool isText = type.contains("html") || type.contains("text") || type.contains("varchar") || (type.contains("link") && url == "");
+    bool isText = type.contains("html") || type.contains("text") || type.contains("varchar") || (type.contains("link") && url == "") || type.contains("upload");
     bool isInt = type.contains("double") || type.contains("float") || type.contains("money") || type.contains("decimal") || type.contains("int");
     Widget w = Container();
     if (type.contains("manytomany")) {
@@ -113,60 +113,7 @@ class Convertor {
           }
         );
       }
-    } else if (type.contains("upload")) { 
-      var ctrl = TextEditingController(text: widget.value?.toString());
-      w = Stack( alignment: AlignmentDirectional.centerStart, children: [ 
-        InkWell( 
-            mouseCursor: SystemMouseCursors.click,
-            onTap: () => _pickFile( widget, type, id, formKey, url),
-            child: TextFormField(
-          controller: ctrl, 
-          key: formKey,
-          textAlign: isGrid ? TextAlign.center : TextAlign.start,
-          style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Theme.of(context).secondaryHeaderColor , overflow: TextOverflow.ellipsis),
-          enabled: false, 
-          autocorrect: true,  
-          expands: isGrid,
-          minLines: isGrid ? null : 1,
-          maxLines: isGrid ? null : 1,
-          decoration: isGrid ? dec : InputDecoration(
-            suffixIconColor: Theme.of(context).splashColor,
-            enabledBorder: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 0) ),
-            border: OutlineInputBorder( borderRadius: BorderRadius.circular(5),
-              borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0)),
-            isDense: true, 
-            hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300), // you need this
-            floatingLabelBehavior: FloatingLabelBehavior.always, 
-            filled: true, 
-            fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
-            contentPadding: EdgeInsets.only(left: 20.0, right: 40.0),
-            suffixIcon: Icon(Icons.attach_file), 
-            hintText: (await getOnFlow("select a file")).toLowerCase(),  
-            errorStyle: const TextStyle(fontSize: 0),
-          ),
-          onChanged: (String? value) { 
-            widget.value = value; 
-            if (id != "") {
-              detectChanges[id] = formKey;
-              cacheChanges[id] = widget.value;
-            }
-          },
-          validator: (String? value) {
-            if (value == null) { return "please enter a file..."; }  
-            return null; 
-          })),
-            Positioned(right: 20, child: IconButton(
-                  onPressed: () {
-                    ctrl.text = "";
-                    widget.value = null;
-                    detectChanges[id] = formKey;
-                    cacheChanges[id] = widget.value;
-                    cacheFilesChanges[id]?.remove(url);
-                  },
-                  icon: Icon(Icons.close),
-                )),
-        ]);
-      }  if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
+    } else if ((isText || (isInt && url == "")) && !type.contains("enum")) { 
         w = TextFormField( key: formKey,
           textAlign: isGrid ? TextAlign.center : TextAlign.start,
           initialValue: cacheChanges[id]?.toString() ?? widget.value?.toString(),
@@ -325,7 +272,7 @@ class Convertor {
         v = v.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
      
         if (items.where((element) => element.value == item).isEmpty) {
-          items.add(DropdownItem<String>(value: item, label: (await getOnFlow(v)).toLowerCase()));
+          items.add(DropdownItem<String>(value: item, label: (await getOnFlow(v)).toLowerCase(), selected: item == widget.value));
         }
       }
       GlobalKey<MultiDropdownState> formFieldKey = GlobalKey();

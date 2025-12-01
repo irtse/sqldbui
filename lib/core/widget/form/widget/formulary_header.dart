@@ -251,11 +251,14 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               // ignore: use_build_context_synchronously
               child: Icon(Icons.document_scanner, color: _theme.splashColor, size: 20 )
             ), 
-            Text(
+            Container(
+          constraints: BoxConstraints( maxWidth:  widget.width / 3.5),
+            // ignore: use_build_context_synchronously
+          child:Text(
               name.toLowerCase(), 
               overflow: TextOverflow.ellipsis,
               // ignore: use_build_context_synchronously
-              style: TextStyle(color: _theme.secondaryHeaderColor, fontSize: 15)),
+              style: TextStyle(color: _theme.secondaryHeaderColor, fontSize: 15))),
               if (widget.refItem.sharing != null)
                 LinkBoxWidget(
                         isDelete: false,

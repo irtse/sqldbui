@@ -189,6 +189,7 @@ class APIService {
           } else if (f.comparator == "not like") { filter += "${f.realName ?? f.column}%3C%3E~%25${f.value}%25"; 
           } else if (f.comparator == "<=") { filter += "${f.realName ?? f.column}%3C%3A${f.value}";
           } else if (f.comparator == ">=") { filter += "${f.realName ?? f.column}%3E%3A${f.value}";
+          } else if (f.comparator == "in file") { filter += "${f.realName ?? f.column}~~${f.value}";
           } else { filter += "${f.realName ?? f.column}${f.comparator == "<" ? "%3C" : "%3E"}${f.value}"; }
           filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "");
         }
@@ -286,8 +287,7 @@ class APIService {
     throw Exception(err);
   }
 
-  Future<APIResponse<RawData>> raw(String url, dynamic body, 
-                                                                String method,) async {
+  Future<APIResponse<RawData>> raw(String url, dynamic body, String method,) async {
     var err = ""; 
     if (url != "") {
       try {

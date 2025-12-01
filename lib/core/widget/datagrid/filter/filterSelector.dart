@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
@@ -147,27 +148,22 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         }
                       })) : Container(),
                     filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(right: 5), 
-                    child: IconButton( constraints: const BoxConstraints(), 
-                    tooltip: (await getOnFlow(TranslateConstants.filterDeleteT)).toLowerCase(), style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
-                      return Theme.of(context).primaryColor; }), ),
-                      icon: Icon(Icons.delete, size: 18, color: Theme.of(context).splashColor, ),
-                      onPressed: () { 
-                        showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
-                            removeFilter(); 
-                            confirmCache = {};
-                            var id = filterRestr[viewID];
-                            filterRestr[viewID] = ""; 
-                            globalFilter.remove(viewID);
-                            try {
-                              if (int.parse(filterRestr[viewID]!) > 0) {
-                                APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=$id"), context).then((value) {
-                                  forceFilter = true; 
-                                  resetList();
-                                });
-                              } 
-                            } catch(e) { resetList(); }
-                          }));
-                        })) : Container() ,
+                    child: FilterSelectorButtonWidget(parent: this, tooltip: await getOnFlow(TranslateConstants.filterDeleteT), icon: Icons.delete,
+                    showDialog: "delete filter", 
+                    function: () async {
+                      removeFilter(); 
+                      confirmCache = {};
+                      var id = filterRestr[viewID];
+                      filterRestr[viewID] = ""; 
+                      globalFilter.remove(viewID);
+                      try {
+                        if (int.parse(filterRestr[viewID]!) > 0) {
+                          await APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=$id"), context).then((value) {
+                          forceFilter = true; 
+                         });
+                        } 
+                      } catch(e) { }
+                    })) : Container() ,
                     currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", firstAPI || forceFilter, null), 
                       builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
                       forceFilter = false;
@@ -203,11 +199,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         })),
                     if (filterRowsWidget.isNotEmpty)
                       Padding(padding: const EdgeInsets.only(left: 5), 
-                      child: IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterApplyT)).toLowerCase(), 
-                        style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
-                        icon: Icon( Icons.check, size: 17, color: Theme.of(context).highlightColor ),
-                        onPressed: () {
-                          if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
+                      child: FilterSelectorButtonWidget(function: () async {
+                        if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
                           globalFilter[viewID] = Filters(); // empty filter to refill with new
                           for (var filter in filterRowsWidget) {
                             if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
@@ -225,26 +218,15 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                           }
                           noFilterRetrieval = true;
                           confirmCache = {};
-                          resetList();
-                        })),
+                      }, icon: Icons.check, tooltip: await getOnFlow(TranslateConstants.filterApplyT), parent: this)),
                     filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
-                    child: IconButton( constraints: const BoxConstraints(), 
-                    tooltip: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(), 
-                    style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
-                      return Theme.of(context).primaryColor; }), ),
-                      icon: Icon( Icons.filter_alt_off, size: 18, color: Theme.of(context).highlightColor ),
-                      onPressed: () async { 
-                        setState(() { });
-                        Future.delayed(const Duration(seconds: 1), 
-                          () {
-                            removeFilter();
-                            filterRestr[viewID] = ""; 
-                            confirmCache = {};
-                            resetList();
-                          }); 
-                        
-                        APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
-                          <String, dynamic> { "is_selected" : false }, null); })) : Container(),
+                    child: FilterSelectorButtonWidget(function: () async {
+                        removeFilter();
+                        filterRestr[viewID] = ""; 
+                        confirmCache = {};
+                        await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
+                          <String, dynamic> { "is_selected" : false }, null);
+                      }, icon: Icons.filter_alt_off, tooltip: await getOnFlow(TranslateConstants.filterResetT), parent: this)) : Container(),
                       Padding(padding: const EdgeInsets.only(left: 10), 
                         child: FutureBuilder(future: getLabels(toggles), builder: (a,s) {
                           if (s.data != null) {
@@ -336,6 +318,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
     globalGridKey.currentState?.setState(() { });
     setState(() { });
   }
+
   Future<List<String>> getLabels(List<String> toogles) async {
     List<String> labels = [];
     for (var t in toogles) {
@@ -495,5 +478,51 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
               },
             )
           );
+  }
+}
+
+// ignore: must_be_immutable
+class FilterSelectorButtonWidget extends StatefulWidget {
+  FilterSelectorWidgetState parent;
+  String tooltip;
+  IconData icon;
+  Future<void> Function() function;
+  bool isLoading = false;
+  String? showDialog;
+  FilterSelectorButtonWidget ({ super.key, required this.parent, required this.tooltip, required this.icon, required this.function, this.showDialog,
+});
+  @override FilterSelectorButtonWidgetState createState() => FilterSelectorButtonWidgetState();
+}
+class FilterSelectorButtonWidgetState extends State<FilterSelectorButtonWidget> {
+  @override Widget build(BuildContext context) {
+    if (widget.isLoading) {
+      return SpinKitCircle(color: Colors.white, size: 17.0 );
+    }
+    return IconButton( constraints: const BoxConstraints(), tooltip: widget.tooltip.toLowerCase(), 
+                        style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) { return Theme.of(context).primaryColor; }), ),
+                        icon: Icon( widget.icon, size: 17, color: Theme.of(context).highlightColor ),
+                        onPressed: () async {
+                          if (widget.showDialog != null) {
+                              showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: widget.showDialog!, validate: () async {
+                                setState(() {
+                                widget.isLoading = true;
+                              });
+                              await widget.function();
+                              await widget.parent.resetList();
+                              setState(() {
+                                widget.isLoading = false;
+                              });
+                            }));
+                            return;
+                          }
+                          setState(() {
+                            widget.isLoading = true;
+                          });
+                          await widget.function();
+                          await widget.parent.resetList();
+                          setState(() {
+                            widget.isLoading = false;
+                          });
+                        });
   }
 }

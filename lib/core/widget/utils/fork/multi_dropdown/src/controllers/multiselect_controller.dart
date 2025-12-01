@@ -238,7 +238,10 @@ class MultiSelectController<T> extends ChangeNotifier {
           .toList();
     }
     _onSearchChanged?.call(query);
-    notifyListeners();
+    try {
+      notifyListeners();
+    } catch(e) {}
+    
   }
 
   // clears the search query.

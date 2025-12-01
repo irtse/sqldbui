@@ -129,7 +129,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     if ((widget.columnName ?? "") != "") {
-      widget.type = widget.schema[widget.columnName]?.type ?? "text";
+      widget.type = (widget.schema[widget.columnName]?.type ?? "text");
     }
     String url = widget.schema[widget.columnName] != null && widget.schema[widget.columnName]?.actionPath != ""  ? "${widget.schema[widget.columnName]!.actionPath}&shallow=enable" : "";
     Widget w = FutureBuilder<Widget>(future: Convertor.filterFieldByType(
@@ -145,7 +145,6 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
         }
         return Container();
     });
-
     Widget? w2;
     List<String> order = (widget.isSub ? widget.schema : realOrderMap(widget.schema.keys.toList(), widget.schema, false)).keys.where(
       (e) => !(widget.schema[e]?.hidden ?? false) ).toList();
@@ -179,7 +178,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     List<DropdownMenuItem<String>> conn = [];
     var indications = widget.type.contains("enum") || widget.type.contains("link") || widget.type.contains("many") ? ["=", "!="] : (  
       widget.type.contains("link")  ? ["like", "not like"] : ["like", "not like", "=", "!="]);
-    for (var indication in ( widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link") || widget.type.contains("enum") || widget.type.contains("many") ? indications : [...indications, "<", ">", "<=", ">="])) {
+    for (var indication in ( widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("upload") ||  widget.type.contains("link") || widget.type.contains("enum") || widget.type.contains("many") ? indications : [...indications, "<", ">", "<=", ">="])) {
       conn.add( DropdownMenuItem<String>(
         value: indication, 
         child: Text(indication, overflow: TextOverflow.ellipsis)
@@ -188,6 +187,13 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     if (!["=", "!="].contains(widget.comparator)) {
       widget.comparator = widget.type.contains("enum") || widget.type == "link"  ? "=" : widget.comparator;
     }
+    if (widget.type.contains("upload")) {
+      conn.add( DropdownMenuItem<String>(
+        value: "in file", 
+        child: Text(await getOnFlow("in document"), overflow: TextOverflow.ellipsis)
+      ));
+    }
+
     return Row( children : [
       Container(
         padding: EdgeInsets.only(left: 10),
@@ -199,7 +205,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
         items: items,
         label: "tp",
         forceVerticalAlignment: true,
-        textAlignVertical: TextAlignVertical.center,
+        textAlignVertical: kIsWeb ? TextAlignVertical.center : TextAlignVertical.bottom,
         searchEnabled: true,
         style: TextStyle(color: Colors.white ),
         chipDecoration: ChipDecoration(
@@ -286,7 +292,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
           ),  
           ...(w2 != null ? [ w2 ] : [
               widget.columnName == null || widget.columnName == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 10), 
-                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 10, child: DropdownButtonFormField<String>( 
+                child: SizedBox( height: 25,  width: (MediaQuery.of(context).size.width - menuSize) / 9, child: DropdownButtonFormField<String>( 
                     items: conn, 
                     value: widget.comparator, 
                     hint: Text((await getOnFlow(TranslateConstants.colCompFilter)).toLowerCase(), 
