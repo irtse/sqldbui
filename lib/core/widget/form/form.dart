@@ -329,6 +329,7 @@ class FormWidgetState extends State<DataFormWidget> {
                       List<FormularyAccessHistory> arr = [];
                       for (var data in s.data!.data!) {
                         arr.add(FormularyAccessHistory(
+                          patchNote: data.patchNote,
                           user: data.user,
                           accessDate: data.accessDate,
                           kindOfAccess: data.update ? "update" : (data.write ? 'create' : 'read'),

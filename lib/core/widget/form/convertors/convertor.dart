@@ -1,6 +1,9 @@
 import 'dart:math';
 
+import 'package:alert_banner/exports.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:sqldbui2/core/widget/dialog/alert.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:sqldbui2/core/widget/form/convertors/manytomany.dart';
@@ -759,3 +762,9 @@ Future<void> _pickFile(ConvertorWidget widget, String type, String id, GlobalKey
       });
     }
   }
+
+void copyToClipboard(String text, BuildContext context) {
+  Clipboard.setData(ClipboardData(text: text));
+  showAlertBanner(context, durationOfStayingOnScreen: Duration(seconds: 5), () {}, InfoAlertBannerChild(text: "copy to clipboard"), // <-- Put any widget here you want!
+                alertBannerLocation:  AlertBannerLocation.bottom,);
+}

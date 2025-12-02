@@ -63,7 +63,9 @@ class _NumberState extends State<NumberWidget> {
         } else { saveChange(widget.component?.widget.view, widget.form, widget.name, double.parse(value)); }
       } catch (e) { /* empty and proud to be */}
     }
-    return SizedBox(width: 300, height: 30, child: TextFormField(
+    var focusNode = FocusNode();
+
+    var w =  SizedBox(width: 300, height: 30, child: TextFormField( focusNode: focusNode,
           readOnly: widget.readOnly,
           initialValue: widget.value != null ? "${widget.value}"
             : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null)), 
@@ -129,5 +131,11 @@ class _NumberState extends State<NumberWidget> {
             return null;
           },
         ));
+    return  GestureDetector( onLongPress:  widget.readOnly ? () {
+          FocusScope.of(context).requestFocus(focusNode); 
+          copyToClipboard(widget.value != null ? "${widget.value}"
+            : (widget.autofill != null ? "${widget.autofill}" : ""), context);
+          } : null, child: Tooltip( message:  widget.value != null ? "${widget.value}"
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null)), child: w ));
   }
 }

@@ -86,7 +86,9 @@ class _UploadState extends State<UploadWidget> {
         int index = 1;
         for (var vv in (widget.value?.toString().split(",") ?? [])) {
           rows.add(
-            SizedBox(width: 400, height: 30, child: TextFormField(
+            GestureDetector( onLongPress: () {
+          copyToClipboard("${ vv?? ""}", context);
+        }, child:  Tooltip( message: "${ vv ?? ""}", child: SizedBox(width: 400, height: 30, child: TextFormField(
               readOnly: true,
               initialValue: vv ?? (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null),
               style: TextStyle(fontSize: 14, color: Colors.black),
@@ -115,12 +117,18 @@ class _UploadState extends State<UploadWidget> {
                 labelText: "${label.toLowerCase()} $index",
               )
             ))
-          );
+          )));
           index = index + 1;
         }
         return Wrap(children: rows);
       }
-      return SizedBox(width: 400, height: 30, child: TextFormField(
+       var focusNode = FocusNode();
+
+        return GestureDetector( onLongPress:  () {
+          FocusScope.of(context).requestFocus(focusNode);
+          copyToClipboard("${ widget.value ?? ""}", context);
+        }, child:  Tooltip( message: "${ widget.value ?? ""}", child:  SizedBox(width: 400, height: 30, 
+        child: TextFormField( focusNode:focusNode,
         readOnly: true,
         initialValue: widget.value ?? (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null),
         style: TextStyle(fontSize: 14, color: Colors.black),
@@ -152,7 +160,7 @@ class _UploadState extends State<UploadWidget> {
           hintText: (await getOnFlow(TranslateConstants.writePath)).toLowerCase(),
           labelText: label.toLowerCase(),
         )
-      ));
+      ))));
     }
     String? iv = widget.value ?? (widget.autofill != null ? "${widget.autofill}" : (
       widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null));

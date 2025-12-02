@@ -6,12 +6,14 @@ class FormularyAccessHistory extends StatelessWidget {
   final String user;
   final DateTime? accessDate;
   final String kindOfAccess;
+  final String patchNote;
 
   const FormularyAccessHistory({
     Key? key,
     required this.user,
     required this.accessDate,
     required this.kindOfAccess,
+    required this.patchNote,
   }) : super(key: key);
 
   @override
@@ -72,6 +74,16 @@ class FormularyAccessHistory extends StatelessWidget {
                   }
                   return Text("Access: $kindOfAccess");
                 }),
+                if (patchNote != "") 
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SingleChildScrollView(
+                      child: SelectableText(
+                        patchNote.replaceAll("->", "⮕"),
+                        style: const TextStyle(fontSize: 14, height: 1.4),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

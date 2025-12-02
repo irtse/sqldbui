@@ -83,7 +83,11 @@ class _TextState extends State<TextWidget> {
       TranslateConstants.writeValue = await getOnFlow(TranslateConstants.writeValue);
     } catch(e) {}
     
-    return TextFormField(
+    var focusNode = FocusNode();
+        return GestureDetector( onLongPress:  () {
+          FocusScope.of(context).requestFocus(focusNode);
+          copyToClipboard("$val", context);
+        }, child:  Tooltip( message: "$val", child: TextFormField( focusNode: focusNode,
       obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
       readOnly: widget.readOnly,
       initialValue: val,
@@ -176,6 +180,6 @@ class _TextState extends State<TextWidget> {
           }
           return null;
         },
-      );
+      )));
   }
 }

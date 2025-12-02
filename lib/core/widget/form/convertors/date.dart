@@ -95,8 +95,17 @@ class _DateState extends State<DateWidget> {
       if (dateValue?.isBefore(dateMin) ?? false) {
         dateMin = dateValue!;
       }
+      var v = widget.value != null ? "${widget.value}"
+            : (widget.autofill != null ? "${widget.autofill}" : "");
       if (widget.readOnly) {
-        return SizedBox(width: 400, height: 30, child: TextFormField(
+       var focusNode = FocusNode();
+
+       GestureDetector( onLongPress:  () {
+         FocusScope.of(context).requestFocus(focusNode);
+         copyToClipboard(v, context);
+       },  child : Tooltip( message:  widget.value != null ? "${widget.value}"
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null)), child: SizedBox(width: 400, height: 30, 
+            child: TextFormField( focusNode: focusNode,
           readOnly: true,
           initialValue: widget.value != null ? "${widget.value}" 
             : (widget.autofill != null ? "${widget.autofill}" : (
@@ -119,7 +128,7 @@ class _DateState extends State<DateWidget> {
             contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
             hintText: (await getOnFlow(TranslateConstants.selectDate)).toLowerCase(),
             labelText: label.toLowerCase(),
-          ) ));
+          ) ))));
       }
       return DateTimeField(
         validator: (DateTime? value) {

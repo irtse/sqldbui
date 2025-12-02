@@ -71,15 +71,18 @@ class DataAccess extends SerializerDeserializer<DataAccess> {
     this.write = false,
     this.update = false, // todo something at least protected
     this.accessDate,
+    this.patchNote = "",
   });
 
   String user;
   bool write;
   bool update;
   DateTime? accessDate;
+  String patchNote;
 
   @override deserialize(Map<String, dynamic> json) {
     return DataAccess(
+    patchNote: json.containsKey("patch_note") && json["patch_note"] != null ? json["patch_note"] : "", 
     user: json.containsKey("user") ? json["user"] : "unknown user", 
     update: json.containsKey("update") ? bool.parse("${json["update"]}") : false, 
     write: json.containsKey("write") ? bool.parse("${json["write"]}") : false,  

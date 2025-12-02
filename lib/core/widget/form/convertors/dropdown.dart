@@ -92,8 +92,13 @@ class DropDownState extends State<DropDownWidget> {
     }
     if (widget.type.contains("enum")) {
       if (widget.readOnly) {
-        return SizedBox(width: 400, height: 30, 
-          child: TextFormField(
+        var focusNode = FocusNode();
+        return GestureDetector( onLongPress:  () {
+          FocusScope.of(context).requestFocus(focusNode);
+          copyToClipboard("$val", context);
+        }, child: SizedBox(width: 400, height: 30, 
+          
+          child: Tooltip( message: "${val ?? ""}", child: TextFormField( focusNode: focusNode,
             readOnly: true,
             initialValue: val,
             style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
@@ -117,8 +122,8 @@ class DropDownState extends State<DropDownWidget> {
                 hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                 labelText: label.toLowerCase(),
               )
-            )
-          );
+            ))
+          ));
       }
       var items = <DropdownMenuItem<String>>[];
       if (widget.value != null && widget.name == "state") {
@@ -235,10 +240,12 @@ class DropDownState extends State<DropDownWidget> {
       ]); 
     }
     if (widget.readOnly && !widget.empty) {
-      return SizedBox(
-        width: 400, 
-        height: 30, 
-        child: TextFormField(
+      var focusNode = FocusNode();
+        return GestureDetector( onLongPress:  () {
+          FocusScope.of(context).requestFocus(focusNode);
+          copyToClipboard("$val", context);
+        }, child: SizedBox(width: 400, height: 30, 
+          child: Tooltip( message: "${widget.value ?? widget.autofill}", child:  TextFormField( focusNode: focusNode,
                       readOnly: true,
                       initialValue: widget.value ?? widget.autofill,
                       style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
@@ -256,7 +263,7 @@ class DropDownState extends State<DropDownWidget> {
                         contentPadding: const EdgeInsets.only(top: 17, left: 20.0),
                         hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                         labelText: label.toLowerCase(),
-                      ) ));
+                      ) ))));
     }
     if ((val ?? "") != "") {
       return FutureBuilder<APIResponse<model.Shallowed>>(
