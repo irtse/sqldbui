@@ -14,7 +14,6 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
-import 'dart:html' if (kIsWeb) '' as html2;
 
 
 // ignore: must_be_immutable
@@ -24,39 +23,7 @@ class HomeViewWidget extends StatefulWidget{
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
-  @override
-  void initState() {
-    super.initState();
-    if (kIsWeb) {
-      // Listen for postMessage events from Grafana iframe
-      html2.window.onMessage.listen((event) {
-        final data = event.data;
-        final iframe = html2.document.querySelector('iframe') as html2.IFrameElement;
-        // Debug print the raw event
-        print("Received postMessage: $data ${iframe.contentWindow?.location.toString()}");
 
-        // Grafana wraps useful information in data.payload
-        if (data is Map && data['payload'] != null) {
-          final payload = data['payload'];
-
-          // Variables changed inside Grafana
-          if (payload['vars'] != null) {
-            final vars = payload['vars']; // Map<String, dynamic>
-
-            print("Grafana variables updated → $vars");
-
-            // Example: update UI or store values
-            setState(() {
-              // store vars if you want
-            });
-          }
-        }
-      });
-    }
-  }
-
-
- 
   final Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
@@ -71,17 +38,18 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     List<Widget> comps = [];
     List<Widget> views = [];
     Widget? web;
-      web= FutureBuilder(future: APIService().get<model.View>(
+      web = FutureBuilder(future: APIService().get<model.View>(
         "${APIConstants.genericEndpost}/dbdashboard?rows=all&is_selected=true", false, context), 
         builder: (s,a){
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            return html.HtmlWidget( 
-              key: htmlKey,
-              '''
-                <iframe src="${ v.values["url"]! }"</iframe>
-              ''',
+            return WebView(
+              initialUrl: v.values["url"]!,
+              onWebViewCreated: (WebViewController webViewController) {
+                _controller.complete(webViewController);
+              },
+              javascriptMode: JavascriptMode.unrestricted,
             );
           }
           return SizedBox(
@@ -89,7 +57,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             height: currentHeigth - 120,
             child: Wrap( alignment: WrapAlignment.center, children: [
               Container(
-                height: ((currentHeigth - 120) / 2) - 40,
+               height: ((currentHeigth - 120) / 2) - 40,
                 width: ((currentWidth - menuSize) / 4) - 60,
                 margin: EdgeInsets.all(20), 
                 decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
@@ -115,8 +83,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                 decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
             ]),
           );
-        }); 
-    
+        });
     for (var cat in categories.keys) {
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),

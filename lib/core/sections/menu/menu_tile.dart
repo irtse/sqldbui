@@ -1,6 +1,7 @@
 
 // ignore: must_be_immutable
-import 'package:sqldbui2/core/sections/homeview.dart';
+import 'package:sqldbui2/core/sections/homeview_linux.dart'
+    if (kIsWeb) 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
