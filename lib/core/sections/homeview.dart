@@ -15,8 +15,6 @@ import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
-import 'iframe_stub.dart'
-    if (dart.library.html) 'iframe_web.dart';
 
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
@@ -47,7 +45,12 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            return getIframe(v.values["url"]!);
+            return html.HtmlWidget( 
+              key: htmlKey,
+              '''
+                <iframe src="${ v.values["url"]! }"</iframe>
+              ''',
+            );
           }
           return SizedBox(
             width: currentWidth - menuSize,

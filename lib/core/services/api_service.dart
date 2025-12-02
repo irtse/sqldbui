@@ -183,6 +183,10 @@ class APIService {
         filter = "&filter_line=";
         for (var f in filters.sort()) {  
           if ((f.realName ?? "") == "" && (f.column ?? "") == "") { continue; } 
+          print("${f.realName} ${f.column}");
+          if (f.realName == "") {
+            f.realName = null;
+          }
           if (f.comparator == "=") { filter += "${f.realName ?? f.column}%3A${f.value}"; 
           } else if (f.comparator == "!=") { filter += "${f.realName ?? f.column}%3C%3E${f.value}"; 
           } else if (f.comparator == "like") { filter += "${f.realName ?? f.column}~%25${f.value}%25"; 
