@@ -14,7 +14,7 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
-import 'dart:html' if (kIsWeb) '' as html2;
+import 'dart:html' as html2;
 
 
 // ignore: must_be_immutable
@@ -71,6 +71,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     List<Widget> comps = [];
     List<Widget> views = [];
     Widget? web;
+    if (kIsWeb) {
       web= FutureBuilder(future: APIService().get<model.View>(
         "${APIConstants.genericEndpost}/dbdashboard?rows=all&is_selected=true", false, context), 
         builder: (s,a){
@@ -116,7 +117,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             ]),
           );
         }); 
-    
+    }
     for (var cat in categories.keys) {
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [
         Row(children: [  Padding( padding: const EdgeInsets.only(right: 10), child: Icon(Icons.bookmark, color: Theme.of(context).splashColor, size: 25)),
