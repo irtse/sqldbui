@@ -301,10 +301,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
     var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
     var e = await APIService().getWithOffset<model.View>(globalGridKey.currentState?.widget.view?.linkPath ?? defaultPath, true, context);
     globalGridKey.currentState?.widget.view?.items = [];
-    print("FILTER ${e.data}");
     for (var view in e.data ?? []) { 
       globalGridKey.currentState?.widget.view?.max = view?.max;
-      print("FILTER ${view.items}");
       for (var item in view.items) { 
         if ((globalGridKey.currentState?.widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
           globalGridKey.currentState?.widget.view?.items.add(item); 
@@ -415,7 +413,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           labelStyle: TextStyle(fontSize: 0),
-          hintText: (await getOnFlow("select an option")).toLowerCase(),
+          hintText: (await getOnFlow("select a saved filter")).toLowerCase(),
           hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
           showClearIcon: false,
