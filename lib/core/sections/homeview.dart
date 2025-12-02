@@ -41,22 +41,13 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     List<Widget> views = [];
     Widget? web;
     if (kIsWeb) {
-      Future.delayed(Duration(minutes: 1), () {
-        final currentPath = getIframeUrl();
-        print(currentPath);
-      });
       web= FutureBuilder(future: APIService().get<model.View>(
         "${APIConstants.genericEndpost}/dbdashboard?rows=all&is_selected=true", false, context), 
         builder: (s,a){
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            return html.HtmlWidget( 
-              key: htmlKey,
-              '''
-                <iframe src="${ v.values["url"]! }"</iframe>
-              ''',
-            );
+            return getIframe(v.values["url"]!);
           }
           return SizedBox(
             width: currentWidth - menuSize,
