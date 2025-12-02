@@ -23,7 +23,7 @@ String? isNew;
 double refWidth = 0;
 double maxWidth = 0;
 Map<String?, Map<String, String>?> colFunction = {};
-int modeIndex = 0;
+Map<String, int> modeIndex  = {};
 Map<String?, List<String>> notNew = {};
 Map<String?, Map<String, Rect>> rects = {};
 List<GridRowWidget> rows = [];
@@ -122,6 +122,9 @@ class GridWidgetState extends State<GridWidget> {
 
   @override Widget build(BuildContext context) {
     if (viewID == null) { return Container(); }
+    if (modeIndex[viewID] == null) {
+      modeIndex[viewID ?? ""] = 0;
+    }
     columns = [];
     if (widget.view != null) {
       var order = realOrder(widget.view, widget.subTable, false, widget.forceOrder, null);
@@ -143,7 +146,7 @@ class GridWidgetState extends State<GridWidget> {
 
     if (widget.showCheckboxColumn) {
       allSelected = widget.isSelected;
-      if (modeIndex == 1 && showFunctions[viewID] == true) {
+      if (modeIndex[viewID] == 1 && showFunctions[viewID] == true) {
         bottomColumns.add(Container( decoration: BoxDecoration(border: Border(right: BorderSide(color: Theme.of(context).splashColor)), 
         color: Theme.of(context).primaryColorLight), width: 79, height: 40, child: null));
       }
@@ -163,7 +166,7 @@ class GridWidgetState extends State<GridWidget> {
     List<Widget> bottom = [];
     bottom.add(Positioned( bottom: 0, right: 0, 
       child: Column( children: [
-        if (modeIndex == 1 && showFunctions[viewID] == true) 
+        if (modeIndex[viewID]  == 1 && showFunctions[viewID] == true) 
           Row(children: bottomColumns),
         if (!widget.subTable)
           getBottomBar(widget.schema),
@@ -205,7 +208,7 @@ class GridWidgetState extends State<GridWidget> {
               child: Stack(children: [
                 
                 Container(
-                  margin: EdgeInsets.only(top: modeIndex == 1 && showFunctions[viewID] == true ? 95 : 55),
+                  margin: EdgeInsets.only(top: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 95 : 55),
                   child:ScrollbarTheme(
                     data: ScrollbarThemeData(
                       thumbColor: WidgetStateProperty.all(Colors.grey),
@@ -251,8 +254,8 @@ class GridWidgetState extends State<GridWidget> {
     if (widget.view?.actions.contains("delete") ?? false) {
       toggles.add(Icons.delete);
     } 
-    if (toggles.length <= modeIndex) {
-      modeIndex = 0;
+    if (toggles.length <= (modeIndex[viewID ?? ""] ?? 0) ) {
+      modeIndex[viewID ?? ""]  = 0;
     }
       var w = Padding( 
       padding: const EdgeInsets.only(right: 10), 
@@ -262,13 +265,13 @@ class GridWidgetState extends State<GridWidget> {
         minWidth: 50, 
         fontSize: 12, 
         cornerRadius: 5,
-        initialLabelIndex: modeIndex,
+        initialLabelIndex: modeIndex[viewID] ,
         dividerColor: Colors.white, 
         inactiveFgColor: Theme.of(context).splashColor,
         totalSwitches: toggles.length, 
         inactiveBgColor: Theme.of(context).secondaryHeaderColor,
         onToggle: (index) async {
-          modeIndex = index ?? 0;
+          modeIndex[viewID ?? ""]  = index ?? 0;
           globalOffset = 0;
           filterTempOrderView.remove(viewID);
           var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
@@ -286,12 +289,15 @@ class GridWidgetState extends State<GridWidget> {
             globalActionBar.currentState?.setState(() {
               globalActionBar.currentState?.widget.view = widget.view;
             });
-            setState(() { });
+            if (mounted) {
+              setState(() { });
+            }
+            
           }); 
         }
       ))
     );
-    if (modeIndex != 1) {
+    if (modeIndex[viewID]  != 1) {
       return Container( 
         padding: EdgeInsets.symmetric(horizontal: 20),
         color: Colors.transparent, 
@@ -341,9 +347,9 @@ class GridWidgetState extends State<GridWidget> {
         context: context, 
         width: double.nan,
         items: schemeItems, 
-        maxLength: order.length + (modeIndex == 1 && editMode[viewID] == "math" ? 1 : 0),
+        maxLength: order.length + (modeIndex[viewID]  == 1 && editMode[viewID] == "math" ? 1 : 0),
         borderColor: Theme.of(context).splashColor, 
-        allowSorting: !(datas.isEmpty && !isFilter()) && modeIndex != 1,
+        allowSorting: !(datas.isEmpty && !isFilter()) && modeIndex[viewID]  != 1,
         columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
         allowFiltering: !(schema[fieldName]?.type.contains("many") ?? false), 
         type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
@@ -437,8 +443,8 @@ class SubGridWidgetState extends State<SubGridWidget> {
     }
     
     var t = showMore ? (filterRowsWidget.length * 44 < 138 ? filterRowsWidget.length * 44 : 138) : 0;
-    t += modeIndex == 1 ? 40 : 0;
-    t += modeIndex == 1 && showFunctions[viewID] == true ? ( editMode[viewID] == "math" ? 115 : 70 ) : 0;
+    t += modeIndex[viewID]  == 1 ? 40 : 0;
+    t += modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? ( editMode[viewID] == "math" ? 115 : 70 ) : 0;
     
     return Scrollbar(
       controller: _vertical,
@@ -592,7 +598,7 @@ class MainCheckWidgetState extends State<MainCheckWidget>  {
   
   @override Widget build(BuildContext context) { 
     return Padding(padding: const EdgeInsets.only(left: 5), child: Container(
-          width: 75, height: modeIndex == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
+          width: 75, height: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(right: BorderSide( 
             color:  globalGridKey.currentState?.widget.borderColor ?? Colors.grey, 
             width:  globalGridKey.currentState?.widget.borderWidth ?? 1 ),)),

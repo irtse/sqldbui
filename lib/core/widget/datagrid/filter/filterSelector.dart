@@ -286,7 +286,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               child: SingleChildScrollView( 
                 child: Column( 
                   children : [  
-                    modeIndex != 1 ? (filterRowsWidget.isEmpty ?  Container() 
+                    modeIndex[viewID]  != 1 ? (filterRowsWidget.isEmpty ?  Container() 
                     : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)) : ( 
                   editMode[viewID] != "math" || functionMathRowsWidget.isEmpty ? 
                   Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)

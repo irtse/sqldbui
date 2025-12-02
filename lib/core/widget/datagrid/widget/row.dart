@@ -56,7 +56,7 @@ class GridRowWidget extends StatefulWidget {
 class GridRowWidgetState extends State<GridRowWidget> {
   @override Widget build(BuildContext context) { 
     widget.state = this;
-    return modeIndex == 1 ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
+    return modeIndex[viewID]  == 1 ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
       if (s.data != null) {
         return s.data!;
       }
@@ -216,7 +216,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
             height: maxheight,
             alignment: Alignment.center, 
             decoration: BoxDecoration( color: widget.news 
-            || (modeIndex == 1 && (e.readOnly || readOnly || ["id", "description", mathColName[viewID] ?? "total"].contains(e.columnName))) ? 
+            || (modeIndex[viewID]  == 1 && (e.readOnly || readOnly || ["id", "description", mathColName[viewID] ?? "total"].contains(e.columnName))) ? 
               (widget.isHovered ? Colors.grey : Theme.of(context).splashColor) : (widget.isHovered ? Theme.of(context).splashColor  : Colors.white),
             border: Border(left: BorderSide( color: e.borderColor, width: e.borderWidth), bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
             width: currentView != null && rects.containsKey(viewID) && rects[viewID]!.containsKey(e.columnName) ? rects[viewID]![e.columnName]!.width : 200, 

@@ -104,7 +104,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
     if ( widget.shal != null && widget.value == "") {
       widget.value = widget.shal!.id;
     }
-    var edit = modeIndex == 1 && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
+    var edit = modeIndex[viewID]  == 1 && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
                 && !widget.cell.readOnly && !widget.readOnly;
     if (edit && widget.shal != null) {
       widget.value = "${widget.shal!.id ?? widget.value}";
@@ -185,10 +185,10 @@ class GridCellWidgetState extends State<GridCellWidget> {
           return Container();
         })) : 
       ListTile( 
-        mouseCursor: modeIndex == 1 || !widget.isLink ? MouseCursor.defer : null, 
+        mouseCursor: modeIndex[viewID]  == 1 || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 
         onTap: () {
-          if (modeIndex == 1 || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
+          if (modeIndex[viewID]  == 1 || !widget.isLink || (currentView?.isEnum ?? false)) { return; }
           try {
             List<model.View> v = [];
             for (var cat in categories.values) { v = cat.where( (v) => "${v.id}" == viewID?.substring(1)).toList(); }

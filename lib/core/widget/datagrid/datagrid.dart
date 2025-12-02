@@ -152,9 +152,9 @@ class DatagridWidgetState extends State<DatagridWidget> {
 
 Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaField>? schema,  bool subtable) {
     if (schema == null) { return {}; }
-    bool isMath =modeIndex == 1 && editMode[viewID] == "math";
+    bool isMath =modeIndex[viewID]  == 1 && editMode[viewID] == "math";
     List<String> seen = [];
-    if (!(filterTempOrderView[viewID] != null && modeIndex == 1 && editMode[viewID] == "math")
+    if (!(filterTempOrderView[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math")
     && filterOrderView[viewID] == null) {
       var newOrder = schema.keys.where( (e) {
         return schema[e]?.inResume != null; 
@@ -182,7 +182,7 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (active && f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
-      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex == 1) {
+      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex[viewID]  == 1) {
         return false;
       }
       return ok;
@@ -200,9 +200,9 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
 List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dynamic>? forceOrder, int? max) {
     if (view == null) { return []; }
     var schema = view.schema;
-    bool isMath = forceMath || (modeIndex == 1 && editMode[viewID] == "math");
+    bool isMath = forceMath || (modeIndex[viewID]  == 1 && editMode[viewID] == "math");
     List<String> seen = [];
-    if (!(filterTempOrderView[viewID] != null && modeIndex == 1 && editMode[viewID] == "math")
+    if (!(filterTempOrderView[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math")
     && filterOrderView[viewID] == null) {
       var newOrder = view.schema.keys.where( (e) {
         return view.schema[e]?.inResume != null; 
@@ -236,7 +236,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));
       seen.add(f);
-      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex == 1) {
+      if ((schema[f]?.type.contains("onetomany") ?? false) && modeIndex[viewID]  == 1) {
         return false;
       }
       return !(schema[f]?.hidden ?? false) && (ok);

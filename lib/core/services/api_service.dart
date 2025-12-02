@@ -82,7 +82,7 @@ class APIService {
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter, globalFilter[viewID]);
       var command = "";
-      if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
+      if (commands[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
       if (isWeb) { 
         dio.get("$url${extend ?? ""}$columns$cmdCol$command$orderBy$filter", options: Options(responseType: ResponseType.bytes)).then((value) async {
           var url = http.Url.createObjectUrlFromBlob(http.Blob([value.data]));
@@ -147,13 +147,13 @@ class APIService {
   String getCmdCol() {
     var command = "";
     for (var column in (filterTempOrderView[viewID] ?? [])) {
-      if (colFunction[viewID] != null && modeIndex == 1) {
+      if (colFunction[viewID] != null && modeIndex[viewID]  == 1) {
         if (colFunction[viewID]![column] != null && colFunction[viewID]![column] != "") {
           command += "$column:${colFunction[viewID]![column]},";
         }
       }
     }
-    if (modeIndex == 1) {
+    if (modeIndex[viewID]  == 1) {
       var col = mathColName[viewID] ?? "total";
       if (colFunction[viewID] != null && colFunction[viewID]![col] != null && colFunction[viewID]![col] != "") {
         command += "$col:${colFunction[viewID]![col]},";
@@ -224,10 +224,10 @@ class APIService {
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
         var cols = getColumns(url, offset != null);
         var command = "";
-        if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { 
+        if (commands[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}";
+        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex[viewID]  == 1 ? "&filter_mode=edit" : (modeIndex[viewID]  == 2 ? "&filter_mode=delete" : "" )) : ""}";
         if (method == "get") {
           if (!force && cache.containsKey(url) && cache[url] != null && cache[url]!.data != null && cache[url]!.data!.isNotEmpty ) { 
             return cache[url]! as APIResponse<T>;
@@ -297,8 +297,8 @@ class APIService {
         dio.options.headers["authorization"] = auth;
         dio.interceptors.clear(); 
         var command = "";
-        if (commands[viewID] != null && modeIndex == 1 && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
-        var response = await request("$url$command&rawview=enable${ modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )}", method, body, null);
+        if (commands[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math") { command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; }
+        var response = await request("$url$command&rawview=enable${ modeIndex[viewID]  == 1 ? "&filter_mode=edit" : (modeIndex[viewID]  == 2 ? "&filter_mode=delete" : "" )}", method, body, null);
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {

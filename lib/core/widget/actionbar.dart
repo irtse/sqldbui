@@ -83,9 +83,9 @@ class ActionBarState extends State<ActionBarWidget> {
       if (viewID != null && widget.view != null) {
         if (widget.view!.isList) {
           if (allSelected || selectedGrid.isNotEmpty) {
-            if (modeIndex == 1) {
+            if (modeIndex[viewID]  == 1) {
               actions.add(DatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {}, mode: "update"));
-            } else if (modeIndex == 2) {
+            } else if (modeIndex[viewID]  == 2) {
               actions.add(DatagridButtonWidget(selectedGrid: selectedGrid, schema: widget.view?.schema ?? {}, mode: "delete"));
             } else {        
               actions.addAll([
