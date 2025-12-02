@@ -108,16 +108,22 @@ class _TextState extends State<TextWidget> {
           top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
           bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
         suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
-          : ( widget.type.contains("url") ? InkWell( 
-          onTap: () async => showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "navigate to ${widget.value}", 
-          validate: () {
-            if ("${widget.value}".substring(0,7) == "http://") {
-              launchUrl(widget.value, webOnlyWindowName:'_blank');
-            } else {
-              OpenFile.open("${widget.value}", type: getTypes("${widget.value}".split(".")[-1]));
+          : ( widget.readOnly && widget.type.contains("url") ? InkWell( 
+          onTap: () async => showDialog(context: context, builder: (builder) {
+            if ("${widget.value}".substring(0,7) == "http") {
+              return ConfirmBoxWidget(purpose: "navigate to ${widget.value}", 
+                validate: () {
+                  if ("${widget.value}".substring(0,7) == "http") {
+                    launchUrl(widget.value, webOnlyWindowName:'_blank');
+                  } else {
+                    OpenFile.open("${widget.value}", type: getTypes("${widget.value}".split(".")[-1]));
+                  }
+                });
             }
-          })),
-        child: Icon(Icons.link, size: 20)) : Icon(Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
+            return Container();
+          }),
+        child: Icon(Icons.link, size: 20)) 
+        : Icon(widget.type.contains("url") ? Icons.link : Icons.text_fields, color:  widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor)),
         hintText: TranslateConstants.writeValue.toLowerCase(),
         labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
         labelText: label.toLowerCase(),

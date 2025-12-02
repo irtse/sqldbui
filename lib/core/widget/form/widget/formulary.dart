@@ -108,7 +108,9 @@ class FormularyWidgetState extends State<FormularyWidget> {
             cacheForm[widget.view.name]?[fieldName] = v.id;
             path = v.ref ?? "";
           }
-          if (widget.refItem.valuesMany.containsKey(fieldName)) { value = widget.refItem.valuesMany[fieldName]!; }
+          if (widget.refItem.valuesMany.containsKey(fieldName)) { 
+            value = widget.refItem.valuesMany[fieldName]!; 
+          }
           if (widget.refItem.valuesManyPath.containsKey(fieldName)) { 
             value = widget.refItem.valuesManyPath[fieldName]!; }
           if ((fieldName == "name" && field.readonly && (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null))) { 

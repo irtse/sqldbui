@@ -36,18 +36,11 @@ class ManyToManyWidget extends StatefulWidget {
 class ManyToManyState extends State<ManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     var actions = widget.component?.widget.view?.actions ?? currentView?.actions ?? [];
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
     var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || (mainForm.currentState?.widget.view?.readOnly ?? false);
+    print("${widget.url} ${widget.name}");
     if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
@@ -61,6 +54,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
           } catch(e) {}
         }
         if (ids.isNotEmpty) {
+          print(widget.url);
           return FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), false, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {

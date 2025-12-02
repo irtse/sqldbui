@@ -14,6 +14,8 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
+import 'dart:html' if (kIsWeb) '' as html;
+
 
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
@@ -22,6 +24,40 @@ class HomeViewWidget extends StatefulWidget{
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
+
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      // Listen for postMessage events from Grafana iframe
+      html.window.onMessage.listen((event) {
+        final data = event.data;
+
+        // Debug print the raw event
+        print("Received postMessage: $data");
+
+        // Grafana wraps useful information in data.payload
+        if (data is Map && data['payload'] != null) {
+          final payload = data['payload'];
+
+          // Variables changed inside Grafana
+          if (payload['vars'] != null) {
+            final vars = payload['vars']; // Map<String, dynamic>
+
+            print("Grafana variables updated → $vars");
+
+            // Example: update UI or store values
+            setState(() {
+              // store vars if you want
+            });
+          }
+        }
+      });
+    }
+  }
+
+
  
   final Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {

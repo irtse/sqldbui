@@ -301,8 +301,10 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
     var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
     var e = await APIService().getWithOffset<model.View>(globalGridKey.currentState?.widget.view?.linkPath ?? defaultPath, true, context);
     globalGridKey.currentState?.widget.view?.items = [];
+    print("FILTER ${e.data}");
     for (var view in e.data ?? []) { 
       globalGridKey.currentState?.widget.view?.max = view?.max;
+      print("FILTER ${view.items}");
       for (var item in view.items) { 
         if ((globalGridKey.currentState?.widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
           globalGridKey.currentState?.widget.view?.items.add(item); 
