@@ -118,7 +118,7 @@ class _TextState extends State<TextWidget> {
               return ConfirmBoxWidget(purpose: "navigate to ${widget.value}", 
                 validate: () {
                   if ("${widget.value}".contains("http")) {
-                    launchUrl(widget.value, webOnlyWindowName:'_blank');
+                    launchUrl(Uri.parse(widget.value), webOnlyWindowName:'_blank');
                   } else {
                     OpenFile.open("${widget.value}", type: getTypes("${widget.value}".split(".")[-1]));
                   }
