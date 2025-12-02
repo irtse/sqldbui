@@ -225,6 +225,7 @@ class APIService {
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
         url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex == 1 ? "&filter_mode=edit" : (modeIndex == 2 ? "&filter_mode=delete" : "" )) : ""}";
+        print(url);
         if (method == "get") {
           if (!force && cache.containsKey(url) && cache[url] != null && cache[url]!.data != null && cache[url]!.data!.isNotEmpty ) { 
             return cache[url]! as APIResponse<T>;

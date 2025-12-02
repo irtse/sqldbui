@@ -179,7 +179,6 @@ class ActionService {
             await submitFile(pathFile, files[pathFile]!, context);
           }
         }
-        print(body);
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
             views.add(value.data!.first);

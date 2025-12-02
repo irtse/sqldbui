@@ -1,21 +1,22 @@
 import 'dart:async';
-import 'package:sqldbui2/core/sections/view.dart';
-import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/model/view.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/response.dart';
+import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
+import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
-import 'dart:html' as html2;
+import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
+import 'iframe_stub.dart'
+    if (dart.library.html) 'iframe_web.dart';
 
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
@@ -24,39 +25,7 @@ class HomeViewWidget extends StatefulWidget{
   @override HomeViewWidgetState createState() => HomeViewWidgetState();
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
-  @override
-  void initState() {
-    super.initState();
-    if (kIsWeb) {
-      // Listen for postMessage events from Grafana iframe
-      html2.window.onMessage.listen((event) {
-        final data = event.data;
-        final iframe = html2.document.querySelector('iframe') as html2.IFrameElement;
-        // Debug print the raw event
-        print("Received postMessage: $data ${iframe.contentWindow?.location.toString()}");
-
-        // Grafana wraps useful information in data.payload
-        if (data is Map && data['payload'] != null) {
-          final payload = data['payload'];
-
-          // Variables changed inside Grafana
-          if (payload['vars'] != null) {
-            final vars = payload['vars']; // Map<String, dynamic>
-
-            print("Grafana variables updated → $vars");
-
-            // Example: update UI or store values
-            setState(() {
-              // store vars if you want
-            });
-          }
-        }
-      });
-    }
-  }
-
-
- 
+  String currentUrl = "";
   final Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
@@ -72,6 +41,10 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     List<Widget> views = [];
     Widget? web;
     if (kIsWeb) {
+      Future.delayed(Duration(minutes: 1), () {
+        final currentPath = getIframeUrl();
+        print(currentPath);
+      });
       web= FutureBuilder(future: APIService().get<model.View>(
         "${APIConstants.genericEndpost}/dbdashboard?rows=all&is_selected=true", false, context), 
         builder: (s,a){
@@ -117,6 +90,61 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             ]),
           );
         }); 
+    } else {
+      web = FutureBuilder(future: APIService().get<model.View>(
+        "${APIConstants.genericEndpost}/dbdashboard?rows=all&is_selected=true", false, context), 
+        builder: (s,a){
+          if (a.data?.data != null && a.data!.data!.isNotEmpty 
+          && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
+            var v = a.data!.data![0].items[0];
+            return WebView(
+              initialUrl: v.values["url"]!,
+              onPageStarted: (v) {
+                currentUrl = v;
+                print(currentUrl);
+              },
+              onPageFinished: (v) {
+                currentUrl = v;
+                print(currentUrl);
+              },
+              onWebViewCreated: (WebViewController webViewController) {
+                _controller.complete(webViewController);
+              },
+              javascriptMode: JavascriptMode.unrestricted,
+            );
+          }
+          return SizedBox(
+            width: currentWidth - menuSize,
+            height: currentHeigth - 120,
+            child: Wrap( alignment: WrapAlignment.center, children: [
+              Container(
+               height: ((currentHeigth - 120) / 2) - 40,
+                width: ((currentWidth - menuSize) / 4) - 60,
+                margin: EdgeInsets.all(20), 
+                decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
+              Container(
+               height: ((currentHeigth - 120) / 2) - 40,
+                width: ((currentWidth - menuSize) / 4) - 40,
+                margin: EdgeInsets.all(20), 
+                decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
+              Container(
+               height: ((currentHeigth - 120) / 2) - 40,
+                width: ((currentWidth - menuSize) / 4) - 40,
+                margin: EdgeInsets.all(20), 
+                decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
+              Container(
+               height: ((currentHeigth - 120) / 2) - 40,
+                width: ((currentWidth - menuSize) / 4) - 60,
+                margin: EdgeInsets.all(20), 
+                decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
+              Container(
+               height: ((currentHeigth - 120) / 2) - 40,
+                width: currentWidth - menuSize - 80,
+                margin: EdgeInsets.all(20), 
+                decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
+            ]),
+          );
+        });
     }
     for (var cat in categories.keys) {
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [

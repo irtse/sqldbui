@@ -3,8 +3,7 @@ import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
-import 'package:sqldbui2/core/sections/homeview_linux.dart'
-    if (kIsWeb) 'package:sqldbui2/core/sections/homeview.dart';
+import 'package:sqldbui2/core/sections/homeview.dart';
 import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/services/router.dart';
