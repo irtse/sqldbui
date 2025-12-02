@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
-import 'package:sqldbui2/core/widget/form/form.dart';
 import 'package:sqldbui2/core/widget/utils/alert.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:sqldbui2/model/view.dart';
@@ -61,7 +60,7 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
         Text(await getOnFlow(TranslateConstants.undoAction), 
         style: TextStyle(fontSize: 12.5, color: Colors.grey))
       ]),
-      widgets.isEmpty ? Container() : Center( child: SingleChildScrollView( child: SizedBox( height: currentHeigth / 2, child: Row(children: widgets)))),
+      widgets.isEmpty ? Container() : Center( child: SingleChildScrollView( child: SizedBox( height: currentHeigth / 5, child: Row(children: widgets)))),
       Padding( padding: EdgeInsets.only(top: 20), child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
         Padding( padding: EdgeInsets.only(right: 10), child: TextButton(onPressed: () {
           widget.validate();

@@ -114,10 +114,10 @@ class _TextState extends State<TextWidget> {
         suffixIcon: widget.type.contains("time") || widget.type.contains("date") ? const Icon(Icons.calendar_month, size: 20) 
           : ( widget.readOnly && widget.type.contains("url") ? InkWell( 
           onTap: () async => showDialog(context: context, builder: (builder) {
-            if ("${widget.value}".substring(0,7) == "http") {
+            if ("${widget.value}".contains("http")) {
               return ConfirmBoxWidget(purpose: "navigate to ${widget.value}", 
                 validate: () {
-                  if ("${widget.value}".substring(0,7) == "http") {
+                  if ("${widget.value}".contains("http")) {
                     launchUrl(widget.value, webOnlyWindowName:'_blank');
                   } else {
                     OpenFile.open("${widget.value}", type: getTypes("${widget.value}".split(".")[-1]));

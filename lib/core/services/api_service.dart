@@ -183,7 +183,6 @@ class APIService {
         filter = "&filter_line=";
         for (var f in filters.sort()) {  
           if ((f.realName ?? "") == "" && (f.column ?? "") == "") { continue; } 
-          print("column ${f.realName} ${f.column}");
           if (f.realName == "") {
             f.realName = null;
           }

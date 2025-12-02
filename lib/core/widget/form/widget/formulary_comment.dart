@@ -75,7 +75,7 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
               margin: EdgeInsets.only(left: 20),
               child: TextFormField(
                 key: k,
-                readOnly: false,
+                readOnly: widget.view.readOnly,
                 maxLines: 5,
                 controller: ctrl,
                 style: TextStyle( fontSize: 14, color: Theme.of(context).secondaryHeaderColor),
@@ -106,23 +106,27 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
                   },
                 )
               ),
-              InkWell(
-                onTap: () {
-                  if (!(k.currentState?.validate() ?? true) || (widget.view.commentBody["content"] ?? "") == "") {
-                    return;
-                  }
-                  APIService().post(path, widget.view.commentBody, context).then( (e) {
-                    widget.view.commentBody["content"] = null;
-                    setState(() { });
-                  });
-                },
-                child: Container(
-                  height: 135,
-                  margin: EdgeInsets.only(left: 10),
-                  decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: Center(child: Icon(Icons.add, color: Colors.white))
+              
+                InkWell(
+                  onTap: () {
+                    if (widget.view.readOnly) {
+                      return;
+                    }
+                    if (!(k.currentState?.validate() ?? true) || (widget.view.commentBody["content"] ?? "") == "") {
+                      return;
+                    }
+                    APIService().post(path, widget.view.commentBody, context).then( (e) {
+                      widget.view.commentBody["content"] = null;
+                      setState(() { });
+                    });
+                  },
+                  child: Container(
+                    height: 135,
+                    margin: EdgeInsets.only(left: 10),
+                    decoration: BoxDecoration(color: widget.view.readOnly ? Colors.grey : Theme.of(context).primaryColor, borderRadius: BorderRadius.all(Radius.circular(5))),
+                    child: Center(child: Icon(Icons.add, color: Colors.white))
+                  )
                 )
-              )
             ]))
         ]));
     }

@@ -1,5 +1,6 @@
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
+import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
@@ -264,13 +265,15 @@ class SubSubOneToManyState extends State<SubSubOneToManyWidget> {
           if (!widget.readOnly && (currentView?.actions.contains("put") ?? false)) {
             var w = Stack( children: [ 
               widget.dataForm!,
-              Positioned(top: 30,  right: 30,  child: IconButton(onPressed: () {
+              Positioned(top: 30,  right: 30,  child: IconButton(onPressed: (
+
+              ) => showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete element", validate: () async {
                 try{
                   oneToManiesForm[widget.viewName]?[widget.name]?.removeWhere( (d) => d.key == widget.k);
                   widget.show = false;
                   setState(() { });
                 } catch(e) { print(e); }
-              }, 
+              })), 
               icon: const Icon(Icons.delete, color: Colors.grey)))
             ]);
             return w;

@@ -79,7 +79,7 @@ class FormularyAccessHistory extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: SingleChildScrollView(
                       child: SelectableText(
-                        patchNote.replaceAll("->", "⮕"),
+                        patchNote,
                         style: const TextStyle(fontSize: 14, height: 1.4),
                       ),
                     ),

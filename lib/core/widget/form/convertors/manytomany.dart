@@ -40,7 +40,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
     var scheme = widget.schema[widget.name];
     if (scheme == null) { return Container(); }
     var readOnly = widget.readOnly || (!actions.contains("post") && !actions.contains("put")) || (mainForm.currentState?.widget.view?.readOnly ?? false);
-    print("${widget.url} ${widget.name}");
     if ((widget.url ?? "") != "") {
       if (widget.value != null && widget.value is List && widget.value.isNotEmpty) {
         List<String> ids = [];
@@ -54,7 +53,6 @@ class ManyToManyState extends State<ManyToManyWidget> {
           } catch(e) {}
         }
         if (ids.isNotEmpty) {
-          print(widget.url);
           return FutureBuilder<APIResponse<model.Shallowed>>(
           future: APIService().get(widget.url!.replaceAll("rows=all", "rows=${ids.join(",")}"), false, null), 
           builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.Shallowed>> s) {
@@ -193,7 +191,9 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               if (widget.value == null) {
                 return Container();
               }
-              return SizedBox(width: 400, height: 30, 
+              return GestureDetector( onLongPress:  () {
+          copyToClipboard("${widget.value}", context);
+        }, child:  Tooltip( message: "${widget.value}", child: SizedBox(width: 400, height: 30, 
                 child: TextFormField(
                   readOnly: true,
                   initialValue: widget.value,
@@ -219,7 +219,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                     labelText: l.toLowerCase(),
                     errorStyle: const TextStyle(fontSize: 0,),
                   ),
-                )
+                )))
               );
             }
           } else {
@@ -264,13 +264,13 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                     hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
                     labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                     labelText: l.toLowerCase(),
-                    errorStyle: const TextStyle(fontSize: 0,),
+                    errorStyle: const TextStyle(fontSize: 0),
                   )
                 )
               );
             }
           }
-        } catch(e) {}
+        } catch(e) { print(e); }
         
         try {
           if (widget.translatable) {
@@ -311,7 +311,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         chipDecoration: ChipDecoration(
                           deleteIcon: Icon(Icons.close, size: 15, color: Colors.white),
                           backgroundColor: Theme.of(context).primaryColor,
-                          labelStyle: TextStyle(color: Colors.white),
+                          labelStyle: TextStyle(color: widget.readOnly ? Colors.black : Colors.white),
                           wrap: true,
                           runSpacing: 2,
                           spacing: 10,

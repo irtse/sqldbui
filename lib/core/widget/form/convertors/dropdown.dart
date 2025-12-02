@@ -243,7 +243,7 @@ class DropDownState extends State<DropDownWidget> {
       var focusNode = FocusNode();
         return GestureDetector( onLongPress:  () {
           FocusScope.of(context).requestFocus(focusNode);
-          copyToClipboard("$val", context);
+          copyToClipboard( "${widget.value ?? widget.autofill}", context);
         }, child: SizedBox(width: 400, height: 30, 
           child: Tooltip( message: "${widget.value ?? widget.autofill}", child:  TextFormField( focusNode: focusNode,
                       readOnly: true,

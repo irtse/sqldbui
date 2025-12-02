@@ -95,11 +95,9 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
               initialUrl: v.values["url"]!,
               onPageStarted: (v) {
                 currentUrl = v;
-                print(currentUrl);
               },
               onPageFinished: (v) {
                 currentUrl = v;
-                print(currentUrl);
               },
               onWebViewCreated: (WebViewController webViewController) {
                 _controller.complete(webViewController);
