@@ -88,7 +88,7 @@ class DropDownState extends State<DropDownWidget> {
         } else {
           val = val.toLowerCase();
         }
-      } catch(e) { print("3 ${widget.name} $e"); }
+      } catch(e) { print(e); }
     }
     if (widget.type.contains("enum")) {
       if (widget.readOnly) {
@@ -98,7 +98,7 @@ class DropDownState extends State<DropDownWidget> {
           copyToClipboard("$val", context);
         }, child: SizedBox(width: 400, height: 30, 
           
-          child: Tooltip( message: "${val ?? ""}", child: TextFormField( focusNode: focusNode,
+          child: Tooltip( message: val ?? "", child: TextFormField( focusNode: focusNode,
             readOnly: true,
             initialValue: val,
             style: TextStyle(fontSize: 14, color: widget.isDark ? Theme.of(context).highlightColor : Colors.black),
@@ -532,7 +532,6 @@ class SubDropDownState extends State<SubDropDownWidget> {
                         
                         onSelectionChange: (values) {
                           if (values.isEmpty) { return; }
-                          print("${widget.name} ${mapped[values[0]]?.id} ${values[0]}");
                           saveChange(widget.component?.widget.view, widget.form, widget.name,mapped[values[0]]?.id ?? values[0]); // PB FOR LINK ADD 
                           try {
                             var item = mapped[values[0]];

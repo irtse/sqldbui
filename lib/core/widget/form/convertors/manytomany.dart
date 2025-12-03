@@ -170,6 +170,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     } catch(e) {}
     int max = 0;
     if (widget.datas != null) {
+      
       for (var item in widget.datas!) {
         if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
           continue;
@@ -232,7 +233,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 
               } else if (val.id == item.id) {
                 select = true;
-                saveChange(widget.component?.widget.view, widget.form, widget.name, <dynamic>[...( widget.value as List), val.serialize()]);
                 break;
               }
             }

@@ -154,7 +154,6 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       removeFilter(); 
                       confirmCache = {};
                       var id = filterRestr[viewID];
-                      filterRestr[viewID] = ""; 
                       globalFilter.remove(viewID);
                       try {
                         if (int.parse(filterRestr[viewID]!) > 0) {
@@ -162,7 +161,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                           forceFilter = true; 
                          });
                         } 
-                      } catch(e) { }
+                      } catch(e) { print(e); }
+                      filterRestr[viewID] = ""; 
                     })) : Container() ,
                     currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", firstAPI || forceFilter, null), 
                       builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {

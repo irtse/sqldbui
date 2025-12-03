@@ -1,3 +1,4 @@
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/response.dart';
@@ -69,7 +70,7 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-      var dpItems = <DropdownMenuItem<String>>[];
+      var dpItems = <DropdownItem<String>>[];
         for (var i in widget.datas) { 
           if (setLatest) {
             filterView[viewID] = i.id.toString();
@@ -88,8 +89,7 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
             filterTempOrderView[viewID] = i.fields.map((e) => e.column).toList();
           }
           var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
-          dpItems.add(DropdownMenuItem<String>(value: i.id.toString(), 
-            child: Text(filterLabel.toLowerCase(), overflow: TextOverflow.ellipsis)));
+          dpItems.add(DropdownItem<String>(value: i.id.toString(), label: filterLabel.toLowerCase()));
         }
       return PopupButtonWidget(
         color: Colors.white,
@@ -103,14 +103,16 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
 
 // ignore: must_be_immutable
 class MenuColsPopUpWidget extends StatefulWidget{
+  String value = "";
   FilterColsPopUpState comp;
-  List<DropdownMenuItem<String>> items = [];
+  List<DropdownItem<String>> items = [];
   Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
   MenuColsPopUpWidget ({ 
     super.key, 
     required this.comp,
     required this.schema, 
-    required this.items });
+    required this.items,
+    this.value = "", });
   @override
   MenuColsPopUpState createState() => MenuColsPopUpState();
 }
@@ -158,14 +160,16 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                   filterView[viewID] != null && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () async { 
+                      
                     await APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", 
                       "rows=${filterView[viewID]}"), <String, dynamic> { "is_selected" : false }, null);
-                      filterView[viewID] = null;
+                      widget.value = "";
                       filterOrderView.remove(viewID);
                       filterTempOrderView.remove(viewID);  
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);    
                       Future.delayed(const Duration(seconds: 1), () {
                         setState((){});
+                        Navigator.pop(context);
                       });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), 
@@ -176,8 +180,8 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       fields.add(<String, dynamic>{ "name" : fieldName, "index" : index, "width" : rects[viewID]?[fieldName]?.width, });
                     }
                     filterOrderView[viewID] = filterTempOrderView[viewID]!;
-                    var body = <String, dynamic>{ "link" : currentView!.schemaName, "is_selected" : true, "view_fields" : fields  };
-                    APIService().post<model.Shallowed>(currentView!.filterPath, body, null).then((v) async { 
+                    var body = <String, dynamic>{ "link" : currentView!.schemaName, "is_selected" : true, "view_fields" : fields, "name": widget.value,  };
+                    APIService().post<model.Shallowed>(currentView!.filterPath, body, context).then((v) async { 
                         forceViewFilter = true;
                         globalOffset = 0; 
                         setLatest = true;
@@ -185,13 +189,8 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                           var i = v.data?[0];
                           filterView[viewID] = i!.id.toString();
                           var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
-                          widget.items.add(DropdownMenuItem<String>(value: i.id.toString(), 
-                            child: FutureBuilder(future: getOnFlow(filterLabel), builder: (a,s) {
-                              if (s.data != null) {
-                                return Text( s.data?.toLowerCase() ?? "", overflow: TextOverflow.ellipsis);
-                              }
-                              return Text( filterLabel.toLowerCase(), overflow: TextOverflow.ellipsis);
-                            })));
+                          var l = await getOnFlow(filterLabel);
+                          widget.items.add(DropdownItem<String>(value: i.id.toString(), label: l));
                         }
                         setState((){});
                         widget.comp.setState((){});
@@ -210,7 +209,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
 // ignore: must_be_immutable
 class ColsPopUpWidget extends StatefulWidget{
   Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
-  List<DropdownMenuItem<String>> items = [];
+  List<DropdownItem<String>> items = [];
   MenuColsPopUpState comp;
   ColsPopUpWidget ({ super.key, required this.schema, required this.items, required this.comp });
   @override
@@ -232,10 +231,9 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     String? fView;
     if (filterView[viewID] != null) {
-      var f = await getOnFlow(filterView[viewID]!);
-      fView = f.toLowerCase();
+      var f = filterView[viewID];
+      fView = f?.toLowerCase();
     }
-    
     List<Widget> items = [];
     if (filterTempOrderView[viewID] == null) { 
       filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; 
@@ -306,18 +304,99 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
           }, child: const Icon(Icons.arrow_downward))),
         ]))));
       }
+    var ctrls = MultiSelectController<String>();
+    for (var item in widget.items) {
+      item.selected = false;
+      if (fView == item.value) {
+        item.selected = true;
+      }
+      ctrls.addItem(item);
+    }
     return Column(children: [
       Padding(padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Container( child: DropdownButtonFormField<String>( isExpanded: true,
-                    items: widget.items, 
-                    value: fView,
-                    hint: Text((await getOnFlow(TranslateConstants.filterPlaceholder)).toLowerCase(), overflow: TextOverflow.ellipsis),
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                    onChanged: (value) async {
-                      await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
-                        "rows=all", "rows=$value"), <String, dynamic> { "is_selected" : true }, null).then((v) {
+        child: Container( height: 30, child: MultiDropdown<String>(
+        label: "drp",
+        addFunction: (String value) {
+          for (var e in ctrls.items) {
+            e.selected = false;
+          }
+          filterRestr[viewID] = value; 
+          if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
+            ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+          }
+          widget.items = ctrls.items;
+          ctrls.openDropdown("", value, true);
+          setState(() {});
+        },
+        controller: ctrls,
+        singleSelect: true,
+        items: widget.items,
+        forceVerticalAlignment: true,
+        textAlignVertical: TextAlignVertical.center,
+        searchEnabled: true,
+        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
+        ),
+        fieldDecoration: FieldDecoration(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(fontSize: 0),
+          hintText: (await getOnFlow("select a filter")).toLowerCase(),
+          hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+          prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
+          showClearIcon: false,
+          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+        ),
+        searchDecoration: SearchFieldDecoration(
+          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+          border : const OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          focusedBorder : const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+            borderRadius: BorderRadius.all(Radius.circular(5))
+          )
+        ),
+        dropdownDecoration: DropdownDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          marginTop: 2,
+          maxHeight: 400,
+          header: Padding(
+            padding: EdgeInsets.all(8),
+              child: Text(
+                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          dropdownItemDecoration: DropdownItemDecoration(
+            backgroundColor: Theme.of(context).highlightColor,
+            selectedIcon: const Icon(Icons.check_box, color: Colors.green),
+            disabledIcon: Icon( Icons.lock, color: Colors.grey.shade300) ),
+            validator: (value) {
+              if ((value == null || value.isEmpty)) {
+                return '';
+              }
+              return null;
+            },
+            onSelectionChange: (values) async {
+              widget.comp.widget.value = values[0];
+              await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
+                        "rows=all", "rows=${values[0]}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
                         globalOffset = 0; 
-                        filterView[viewID] = value;
+                        filterView[viewID] = values[0];
                         filterTempOrderView.remove(viewID);
                         noSelection=false;
                         if (v.data != null && v.data!.isNotEmpty) { 
@@ -328,23 +407,8 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                         widget.comp.setState((){});
                         globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                       });
-                    },
-                    dropdownColor: Theme.of(context).highlightColor,
-                    decoration: InputDecoration(
-                      suffixIconColor: Theme.of(context).primaryColor,
-                      errorStyle: const TextStyle(height: -2),
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      filled: true,
-                      labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.grey, width: 1.0)),
-                      fillColor: (Colors.white),
-                      hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
-                      labelText: (await getOnFlow(TranslateConstants.filterLabel)).toLowerCase(),
-                    ),
-                    validator: (String? value) { return null; },
-                  ))),
+              },
+            ))),
                   Row(mainAxisAlignment: MainAxisAlignment.center, 
                     children: filterView[viewID] != null && filterView[viewID] != "" ? [
                     IconButton(onPressed: () {
