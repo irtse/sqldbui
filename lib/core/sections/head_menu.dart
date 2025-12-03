@@ -114,6 +114,7 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
     consentCache = {};
     oneToManiesForm = {};
     oneToManiesStateForm = {};
+    subMenuIndex = 0;
     globalMainViewKey.currentState?.setState(() {
       currentView = null;
       viewID = "dashboard";

@@ -47,6 +47,7 @@ class MenuTileWidgetState extends State<MenuTileWidget> {
                     consentCache = {};
                     oneToManiesForm = {};
                     oneToManiesStateForm= {};
+                    subMenuIndex = 0;
                     //navigate = true;
                     for (var t in tiles) {
                       t.currentState?.setState(() {

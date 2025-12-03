@@ -20,6 +20,7 @@ import 'package:sqldbui2/core/widget/form/convertors/onetomany.dart';
 
 Map<String, Map<String, List<DataFormWidget>>> oneToManiesForm = {};
 Map<String, List<OneToManyState>> oneToManiesStateForm = {};
+int subMenuIndex = 0;
 
 GlobalKey<FormWidgetState> mainForm = GlobalKey<FormWidgetState>();
 Map<String, Map<String, dynamic>> cacheForm = <String, Map<String, dynamic>>{};
@@ -40,7 +41,6 @@ class DataFormWidget extends StatefulWidget {
   GlobalKey<FormularyHeaderWidgetState> headerKey = GlobalKey<FormularyHeaderWidgetState>();
   List<GlobalKey<FormWidgetState>>wrappersGlobalKey = <GlobalKey<FormWidgetState>>[];
   
-  int subMenuIndex = 0;
   final formKey = GlobalKey<FormState>();
   DataFormWidget ({ super.key, 
     this.view, 
@@ -69,7 +69,7 @@ class FormWidgetState extends State<DataFormWidget> {
       List<Widget> fields = <Widget>[];
       List<Widget> subMenu = [];
       
-      bool isSplitted = (widget.isSplitted || (widget.view?.isWrapper ?? false)) && !currentView!.isEmpty && widget.subMenuIndex == 0;
+      bool isSplitted = (widget.isSplitted || (widget.view?.isWrapper ?? false)) && !currentView!.isEmpty && subMenuIndex == 0;
       bool isLower = currentWidth < 1200;
       double ratioSplit = isSplitted && !isLower ? 0.75 : 1;
       Widget? content;
@@ -105,7 +105,7 @@ class FormWidgetState extends State<DataFormWidget> {
         }
         cacheForm[widget.view?.name ?? ""] = cacheForm[widget.view?.name ?? ""] ?? <String,dynamic>{}; 
         cacheForm[widget.view?.name ?? ""]?["id"] = refItem.values["id"];
-        if (TranslateConstants.formulary == menuItems[widget.subMenuIndex]) {
+        if (TranslateConstants.formulary == menuItems[subMenuIndex]) {
           GlobalKey<FormularyWidgetState> key = GlobalKey<FormularyWidgetState>();
           content = FormularyWidget(   
               key: key,
@@ -124,20 +124,20 @@ class FormWidgetState extends State<DataFormWidget> {
               formIsEmpty: widget.formIsEmpty,
               superFormSchemaName: widget.superFormSchemaName,
             );
-          } else if (TranslateConstants.comments == menuItems[widget.subMenuIndex]) {
+          } else if (TranslateConstants.comments == menuItems[subMenuIndex]) {
             content = FormularyCommentsWidget(
               height: mainHeight,
               width: widget.view!.isEmpty ? mainWidth : (mainWidth - 200 > (mainWidth / 2) ? mainWidth - 200 : mainWidth - 40),
               refItem: refItem,
               view: widget.view!);
-          } else if (TranslateConstants.synthesis == menuItems[widget.subMenuIndex]) {
+          } else if (TranslateConstants.synthesis == menuItems[subMenuIndex]) {
             content = FutureBuilder(future: getSynthesis(refItem.synthesisPath ?? "", mainHeight), builder: (a,s) {
               if (s.data != null) {
                 return s.data!;
               }
               return Container();
             });
-          } else if (TranslateConstants.history == menuItems[widget.subMenuIndex]) {
+          } else if (TranslateConstants.history == menuItems[subMenuIndex]) {
             content = FutureBuilder(future: getHistory(refItem.historyPath ?? "", mainHeight, mainWidth), builder: (a,s) {
               if (s.data != null) {
                 return s.data!;
@@ -148,22 +148,22 @@ class FormWidgetState extends State<DataFormWidget> {
       for (var (i, menu) in menuItems.indexed) {
         subMenu.add(InkWell(
           onTap: () => setState(() {
-              widget.subMenuIndex = i;
+              subMenuIndex = i;
             }),
-            child: Container( margin: EdgeInsets.only(top: 10, right: subMenu.length == widget.subMenuIndex ? 0 : 10),
+            child: Container( margin: EdgeInsets.only(top: 10, right: subMenu.length == subMenuIndex ? 0 : 10),
               decoration: BoxDecoration( 
                 // ignore: use_build_context_synchronously
                 color: Theme.of(context).
-                highlightColor, borderRadius: subMenu.length == widget.subMenuIndex ? 
+                highlightColor, borderRadius: subMenu.length == subMenuIndex ? 
                   BorderRadius.only(topLeft: Radius.circular(5), bottomLeft: Radius.circular(5))
                   : BorderRadius.all(Radius.circular(5))
               ),
-              height: 40, width: subMenu.length == widget.subMenuIndex ? 190 : 180,  
+              height: 40, width: subMenu.length == subMenuIndex ? 190 : 180,  
               child: Center( child: FutureBuilder(future: getOnFlow(menu), builder: (a,s) {
                 if (s.data != null) {
                   return Text(s.data!.toLowerCase(), overflow: TextOverflow.ellipsis, style: TextStyle( 
                 // ignore: use_build_context_synchronously
-                color: subMenu.length == widget.subMenuIndex ? Theme.of(context).primaryColor : Colors.grey));
+                color: subMenu.length == subMenuIndex ? Theme.of(context).primaryColor : Colors.grey));
                 }
                 return Container();
               }))),

@@ -44,6 +44,7 @@ class RedirectButtonWidgetState extends State<RedirectButtonWidget> {
         consentCache = {};
         oneToManiesForm = {};
         oneToManiesStateForm = {};
+        subMenuIndex = 0;
         globalMenuKey.currentState?.refreshView("#${widget.id}", widget.category, false, false, false); 
       },
       child: Container(

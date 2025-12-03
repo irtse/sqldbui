@@ -95,6 +95,7 @@ class AppRouter {
     consentCache = {};
     oneToManiesForm = {};
     oneToManiesStateForm= {};
+    subMenuIndex = 0;
     cacheChanges = {};
     detectChanges = {};
     globalLoading = true;
@@ -146,6 +147,7 @@ class AppRouter {
       consentCache = {};
       oneToManiesForm = {};
       oneToManiesStateForm= {};
+      subMenuIndex = 0;
       cacheChanges = {};
       detectChanges = {};
       globalLoading = true;
@@ -223,6 +225,7 @@ class AppRouter {
     consentCache = {};
     oneToManiesForm = {};
     oneToManiesStateForm = {};
+    subMenuIndex = 0;
     cacheChanges = {};
     detectChanges = {};
     currentView = null;

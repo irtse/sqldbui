@@ -235,6 +235,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                         consentCache = {};
                         oneToManiesForm = {};
                         oneToManiesStateForm = {};
+                        subMenuIndex = 0;
                         globalMainViewKey.currentState?.setState(() { viewID = null; });
                         Future.delayed(Duration(milliseconds: 50), () {
                           globalMainViewKey.currentState?.setState(() {
