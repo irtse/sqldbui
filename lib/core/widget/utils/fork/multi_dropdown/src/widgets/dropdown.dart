@@ -249,7 +249,7 @@ class _SearchField extends StatelessWidget {
       searchCtrl[label] =TextEditingController();
     }
     if ((searchCtrl[label]?.text ?? "") != "" ) {
-      Future.delayed(Duration(microseconds: 500), () {
+      Future.delayed(Duration(seconds: 1), () {
         if (search[label] == null) {
           search[label]=[];
         }
@@ -274,7 +274,7 @@ class _SearchField extends StatelessWidget {
         onChanged: (String v) {
           search[label] = (searchCtrl[label]?.text ?? "").split(" ");
           if (changeFunction != null) {
-            Future.delayed(Duration(microseconds: 700), () {
+            Future.delayed(Duration(seconds: 1), () {
               if (searchCtrl[label]?.text == v) {
                 changeFunction!(searchCtrl[label]?.text ?? "");
                 onChanged(search[label] ??  []);
