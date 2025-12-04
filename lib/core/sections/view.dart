@@ -134,19 +134,20 @@ class ViewWidgetState extends State<ViewWidget> {
         Stack( children: [...comps] );
       }
     }
-    List<Widget> childs = [];
-    if (viewID == null || widget.view == null) {
-      return Stack(children: [ 
-        HomeViewWidget(), 
-        ActionBarWidget(key: globalActionBar, view: widget.view ) 
-      ]);
-    }
     return Stack( children: [ 
-      Container(margin: const EdgeInsets.only(top: 40),
+      Container(
+        margin: const EdgeInsets.only(top: 40),
         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
         height: currentHeigth - 65 > 0 ? currentHeigth - 65 : 0, 
-        decoration: BoxDecoration(color: Theme.of(context).splashColor),
-        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : childs))),
+        decoration: BoxDecoration(color: Colors.grey.shade300),
+        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : [
+           /*Center( child: FutureBuilder(future: getOnFlow("loading... but if you read this, you are probably lost."), builder: (a,s) {
+              if (s.data != null) {
+                return Text(s.data!, style: TextStyle(fontSize: 50, color: Colors.white), textAlign: TextAlign.center);
+              }
+              return Text("loading... but if you read this, you are probably lost.", textAlign: TextAlign.center, style: TextStyle(fontSize: 50, color: Colors.white ));
+            }))*/
+        ]))),
       ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]); 
   }
 }
