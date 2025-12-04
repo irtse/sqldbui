@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/form/widget/empty_formulary.dart';
 import 'package:sqldbui2/page/translate.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 // ignore: must_be_immutable
 class FormularyCommentsWidget extends StatefulWidget {
@@ -23,8 +26,48 @@ class FormularyCommentsWidget extends StatefulWidget {
   });
   @override FormularyCommentsWidgetState createState() => FormularyCommentsWidgetState();
 }
+
+
+
+
 class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
-    @override Widget build(BuildContext context) {
+  /*WebSocketChannel? channel;
+
+
+  @override
+  void initState() {
+    super.initState();
+    if (channel == null &&  widget.refItem.commentsPath != null) {
+      
+      var url =  Uri.parse(baseURL);
+      var uri = Uri(
+        scheme: baseURL.contains("https") ? "wss" : "ws",
+        host: url.host, 
+        port: baseURL.contains("https") ? 443 : 80,
+        path:"${url.path}/websocket/dbcomment?rows=all",
+      );
+      print(uri.toString());
+      channel = WebSocketChannel.connect(uri);
+    }
+    channel?.stream.listen(
+      (data) {
+        try {
+          jsonDecode(data);
+          setState(() {});
+        } catch (e) {
+          print("Error decoding data: $e");
+        }
+      },
+      onDone: () {
+        print("Disconnected");
+      },
+      onError: (error) {
+        print("WebSocket error: $error");
+      },
+    );
+  }*/
+
+  @override Widget build(BuildContext context) {
       return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -32,6 +75,7 @@ class FormularyCommentsWidgetState extends State<FormularyCommentsWidget> {
       return Container();
     });
   }
+
   Future<Widget> futureBuild(BuildContext context) async {
       List<Widget> widgets = [];
       var path = "";

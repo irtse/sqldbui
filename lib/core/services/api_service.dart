@@ -241,7 +241,6 @@ class APIService {
           }
         }
         if (response.statusCode != null && response.statusCode! < 400 && response.statusCode != 302) {
-          
           APIResponse<T> resp = APIResponse<T>().deserialize(response.data as Map<String, dynamic>); 
           if (resp.error == "") {    
             if (method == "get") { 
@@ -272,21 +271,22 @@ class APIService {
         if (e.toString().contains("connection error")) {
           err = "server unreachable";
         } else {
-          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; }
+          err = "${e.toString()} ${const String.fromEnvironment('HOST', defaultValue: 'http://10.1.99.19')}"; 
+        }
       }
     } else { 
-      
       err = "no url"; 
     }
     if (err.contains("token") && err.contains("expired")) {  AuthService().unAuthenticate();  }
     if (context != null && err != "no url") {
       // ignore: use_build_context_synchronously
+      if (err.contains("this exception was thrown") ) {
+        err = "server unreachable";
+      }
       Future.delayed(Duration(milliseconds: 100), () => showAlertBanner( context, durationOfStayingOnScreen: Duration(minutes: 1), () {}, AlertAlertBannerChild(text: err),// <-- Put any widget here you want!
                        alertBannerLocation:  AlertBannerLocation.bottom))
       ;
     } 
-    print(err);
-
     throw Exception(err);
   }
 
