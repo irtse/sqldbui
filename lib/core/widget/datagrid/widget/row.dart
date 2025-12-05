@@ -247,7 +247,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           ), 
       );
     }  
-    List<Widget> badges = [Positioned(left: 30, top: 5, child: Row( children: bs ))];
+    List<Widget> badges = [Positioned(left: 40, top: 5, child: Row( children: bs ))];
     return Stack( children: [ Row(children: widgets), ...badges ]);
   }
 }
