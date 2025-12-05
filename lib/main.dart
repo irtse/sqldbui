@@ -22,6 +22,8 @@ final ThemeData myTheme = ThemeData(
 );
 
 class BuildInfo {
+  static const String appName = String.fromEnvironment('APP_NAME', defaultValue: 'OPPS');
+  static const String version = String.fromEnvironment('VERSION', defaultValue: 'v0');
   static const String buildDate = String.fromEnvironment('BUILD_DATE', defaultValue: 'dd/MM/YYYY-HH:mm');
   static String buildId   = String.fromEnvironment('BUILD_ID', defaultValue: '89c3970a-0416-48ec-8311-eb6130b649a7');
 }
@@ -75,7 +77,7 @@ class MyApp extends StatelessWidget {
     }
     TranslateConstants.lang = const String.fromEnvironment("LANG", defaultValue: "fr");
     return MaterialApp.router(
-      title: 'OPPS',
+      title: BuildInfo.appName.toUpperCase(),
       theme: myTheme,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -209,7 +211,7 @@ class NotificationWidgetState extends State<NotificationWidget> {
 void printWelcome() {
   print('''
 ────────────────────────────────────────
-   🧪  Welcome to OPPS  
+   🧪  Welcome to ${BuildInfo.appName.toUpperCase()} ${BuildInfo.version.toLowerCase()}  
    Your companion for scientific publications
 ────────────────────────────────────────
 ''');

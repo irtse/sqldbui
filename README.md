@@ -16,6 +16,4 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 
-flutter build web --dart-define=HOST="http://capitalisation.irt-aese.local" --dart-define=BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --dart-define=BUILD_ID=$(uuidgen) --release --build-number 1
-
-flutter build web --dart-define=HOST="http://capitalisation.irt-aese.local" --dart-define=BUILD_DATE=$(date -u +"%d/%m/%Y-%H:%M") --dart-define=BUILD_ID=$(uuidgen) --release --build-number 1
+flutter build web --dart-define=APP_NAME="OPPS" --dart-define=VERSION="v1"  --dart-define=HOST="http://capitalisation.irt-aese.local" --dart-define=BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --dart-define=BUILD_ID=$(uuidgen) --release --build-number 1

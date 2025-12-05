@@ -43,8 +43,11 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
           Tooltip( message: (await getOnFlow(TranslateConstants.home)).toLowerCase(), child:  InkWell( onTap: () { clear(); }, 
             child:Container(
               padding: EdgeInsets.only(left: currentWidth > 600 ? 30 : 0), 
-              child: currentWidth > 1000 ? Text("OPPS", overflow: TextOverflow.ellipsis,
-                style: TextStyle( color: Theme.of(context).highlightColor)) : null))),
+              child: currentWidth > 1000 ? Row( children: [ Text(BuildInfo.appName.toUpperCase(), overflow: TextOverflow.ellipsis,
+                style: TextStyle( color: Theme.of(context).highlightColor)),
+              Padding(padding: EdgeInsets.only(left: 10), child: Text(BuildInfo.version.toLowerCase(), overflow: TextOverflow.ellipsis,
+                style: TextStyle( fontSize: 12, color: Colors.grey))), 
+            ]): null))),
           Padding(
             padding: EdgeInsets.only(left: currentWidth > 600 ?  50 : 0, 
               right: currentWidth > 600 ?  10 : 0), 
