@@ -159,6 +159,7 @@ class HomeScreenState extends State<HomeScreen> {
         f.isEmpty = true;
         if (viewID != null) { 
           if (globalNew[viewID] == null) { globalNew[viewID] = "all"; }
+          if (globalShare[viewID] == null) { globalShare[viewID] = "all"; }
           if (globalFilter[viewID] == null) {
             globalFilter[viewID] = f; 
           }

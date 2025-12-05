@@ -158,7 +158,6 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
         controller: ctrls,
         singleSelect: true,
         items: items,
-        textAlignVertical: TextAlignVertical.center,
         searchEnabled: true,
         style: TextStyle(color: Colors.white ),
         chipDecoration: ChipDecoration(
@@ -175,7 +174,7 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
                           backgroundColor: Theme.of(context).secondaryHeaderColor,
                           labelStyle: TextStyle(fontSize: 0),
                           hintText: (await getOnFlow("select an option")).toLowerCase(),
-                          hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+                          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
                           showClearIcon: false,
                           border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),

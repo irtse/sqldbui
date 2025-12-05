@@ -331,8 +331,6 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
         controller: ctrls,
         singleSelect: true,
         items: widget.items,
-        forceVerticalAlignment: true,
-        textAlignVertical: TextAlignVertical.center,
         searchEnabled: true,
         chipDecoration: ChipDecoration(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -348,7 +346,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
           backgroundColor: Colors.white,
           labelStyle: TextStyle(fontSize: 0),
           hintText: (await getOnFlow("select a filter")).toLowerCase(),
-          hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
           showClearIcon: false,
           border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),

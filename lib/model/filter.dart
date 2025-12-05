@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:sqldbui2/core/services/api_service.dart';
-import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
@@ -11,6 +8,8 @@ import 'package:sqldbui2/model/view.dart' as models;
 import 'package:sqldbui2/page/translate.dart';
 
 Map<String?, String> globalNew = {};
+Map<String?, String> globalShare = {};
+
 Map<String?, Filters> globalFilter = {};
 Map<String?, Map<String,String>> globalOrder = {};
 

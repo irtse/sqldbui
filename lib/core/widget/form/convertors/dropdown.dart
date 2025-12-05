@@ -459,7 +459,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
                           hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
-                          hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                          hintStyle: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
                           showClearIcon: false,
                           border: OutlineInputBorder(

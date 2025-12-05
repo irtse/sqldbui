@@ -230,7 +230,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                   disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                   backgroundColor:Theme.of(context).splashColor,
                   hintText: shared.toLowerCase(),
-                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                    hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12, color: Colors.grey),
                       prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
                       showClearIcon: false,
                       border: OutlineInputBorder(

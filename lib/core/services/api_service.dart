@@ -197,7 +197,14 @@ class APIService {
           filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "");
         }
       }
-      if (globalNew[viewID] != null && globalNew[viewID] != "all") { filter += "&filter_status=${globalNew[viewID]}"; }
+      if (globalNew[viewID] != null && globalNew[viewID] != "all") { 
+        filter += "&filter_status=${globalNew[viewID]}"; 
+        if (globalShare[viewID] != null && globalShare[viewID] != "all" && globalShare[viewID] != "") {
+          filter += "&filter_status=${globalNew[viewID]},${globalShare[viewID]}";
+        }
+      } else if (globalShare[viewID] != null && globalShare[viewID] != "" && globalShare[viewID] != "all") {
+        filter += "&filter_status=${globalShare[viewID]}";
+      }
     }
     if (APIConstants.filterLine != "") {
       filter = "&filter_line=${APIConstants.filterLine}";

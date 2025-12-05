@@ -82,6 +82,9 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
       index++;
     }
     var toggles = ["new", "old", "draft"];
+    var togglesShare = ["shared_by", "shared_to"];
+    var togglesShareIcons = [Icons.share, Icons.folder_shared];
+
     return Column( children : [ 
       Stack( children: [ 
             currentWidth > 1000 ? 
@@ -219,7 +222,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                           noFilterRetrieval = true;
                           confirmCache = {};
                       }, icon: Icons.check, tooltip: await getOnFlow(TranslateConstants.filterApplyT), parent: this)),
-                    filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" ) || (globalNew[viewID] != null && globalNew[viewID] != "all") ? Padding(padding: const EdgeInsets.only(left: 5), 
+                    filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" )  ? Padding(padding: const EdgeInsets.only(left: 5), 
                     child: FilterSelectorButtonWidget(function: () async {
                         removeFilter();
                         filterRestr[viewID] = ""; 
@@ -227,7 +230,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
                           <String, dynamic> { "is_selected" : false }, null);
                       }, icon: Icons.filter_alt_off, tooltip: await getOnFlow(TranslateConstants.filterResetT), parent: this)) : Container(),
-                      Padding(padding: const EdgeInsets.only(left: 10), 
+                      Tooltip( message: await getOnFlow("<state> quick filter"),
+                        child: Padding(padding: const EdgeInsets.only(left: 10, right: 10), 
                         child: FutureBuilder(future: getLabels(toggles), builder: (a,s) {
                           if (s.data != null) {
                             return ToggleSwitch( labels: s.data, minHeight: 27.5, minWidth: 90, fontSize: 12, cornerRadius: 5,
@@ -257,12 +261,29 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                                   globalNew[viewID] = toggles[index]; 
                                 }
                                 confirmCache = {};
-                                resetList();
+                                navigate = true;
+                                globalMainViewKey.currentState?.setState(() {});
                               },
                             );
                           }
                         }),
-                    )
+                      )),
+                    Tooltip( message: await getOnFlow("<sharing> quick filter"),
+                        child:ToggleSwitch( icons: togglesShareIcons, minHeight: 27.5, minWidth:40, fontSize: 12, cornerRadius: 5,
+                          initialLabelIndex: togglesShare.indexWhere((element) => element.toLowerCase() == globalShare[viewID]?.toLowerCase()),
+                          dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
+                              totalSwitches: togglesShare.length, inactiveBgColor: Theme.of(context).secondaryHeaderColor,
+                              onToggle: (index) { 
+                                if (globalShare[viewID] == togglesShare[index ?? 0] || index == null) {
+                                  globalShare[viewID]="all";
+                                } else {
+                                  globalShare[viewID] = togglesShare[index]; 
+                                }
+                                confirmCache = {};
+                                navigate = true;
+                                globalMainViewKey.currentState?.setState(() {});
+                              },
+                        ))
                   ] )
               ) : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
@@ -379,7 +400,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
       return Container(
         padding: EdgeInsets.only(left: 10),
         height: 25,  
-        width: (MediaQuery.of(context).size.width - menuSize) / 3, 
+        width: (MediaQuery.of(context).size.width - menuSize) / 3.5, 
         child: MultiDropdown<String>(
         label: "drp",
         addFunction: (String value) {
@@ -396,8 +417,6 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
         controller: ctrls,
         singleSelect: true,
         items: dpItems,
-        forceVerticalAlignment: true,
-        textAlignVertical: TextAlignVertical.center,
         searchEnabled: true,
         style: TextStyle( color: Colors.white ),
         chipDecoration: ChipDecoration(
@@ -414,7 +433,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           labelStyle: TextStyle(fontSize: 0),
           hintText: (await getOnFlow("select a saved filter")).toLowerCase(),
-          hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
           showClearIcon: false,
           border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),

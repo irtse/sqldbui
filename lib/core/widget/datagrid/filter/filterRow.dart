@@ -204,7 +204,6 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
         singleSelect: true,
         items: items,
         label: "tp",
-        forceVerticalAlignment: true,
         searchEnabled: true,
         style: TextStyle(color: Colors.white ),
         chipDecoration: ChipDecoration(
@@ -221,7 +220,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           labelStyle: TextStyle(fontSize: 0),
           hintText: (await getOnFlow("select a field")).toLowerCase(),
-          hintStyle: TextStyle(fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
           showClearIcon: false,
           border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),

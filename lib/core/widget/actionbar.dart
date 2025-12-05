@@ -337,7 +337,7 @@ class ActionBarState extends State<ActionBarWidget> {
                           backgroundColor: _theme.secondaryHeaderColor,
                           labelStyle: TextStyle(fontSize: 0),
                           hintText: await getOnFlow(TranslateConstants.url.toLowerCase()),
-                          hintStyle: TextStyle(color: _theme.splashColor, fontSize: 15),
+                          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, color: _theme.splashColor, fontSize: 15),
                           prefixIcon: Icon(Icons.account_tree, size: 18,  color: _theme.splashColor),
                           showClearIcon: false,
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 

@@ -137,6 +137,7 @@ class MenuWidgetState extends State<MenuWidget> {
   void refreshView(String? id, String? cat, bool isFirst, bool nullable, bool full) {
     if (id != null && !globalFilter.containsKey(id)) { 
       globalNew[id] = "all";
+      globalShare[id] = "all";
       globalFilter[id] = Filters(); 
       globalOrder[id] = <String, String>{};
     }
