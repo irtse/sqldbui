@@ -180,7 +180,11 @@ class Item extends SerializerDeserializer<Item> {
     this.dataRef,
     this.historyPath = '',
     this.metadata,
+    this.sharedBy = const [],
+    this.sharedTo = const [],
   });
+  List<dynamic> sharedBy = [];
+  List<dynamic> sharedTo = [];
   Metadata? metadata;
   String schemaID;
   bool news;
@@ -203,6 +207,8 @@ class Item extends SerializerDeserializer<Item> {
 
   @override deserialize(Map<String, dynamic> json) {
     return  Item(
+      sharedBy: json.containsKey("shared_by") ? json["shared_by"] : [],
+      sharedTo: json.containsKey("shared_to") ? json["shared_to"] : [],
       metadata: json.containsKey("metadata") && json["metadata"] != null ? Metadata().deserialize(json["metadata"]) : null,
       dataRef: json.containsKey("data_ref") && json["data_ref"] != null ? "${json["data_ref"]}" : null,
       schemaID: json.containsKey("schema_id") && json["schema_id"] != null ? "${json["schema_id"]}" : "",

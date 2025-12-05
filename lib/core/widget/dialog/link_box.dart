@@ -299,6 +299,10 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                             widget.sharing!.body, context
                         )).then( (value) { 
                           setState(() { Navigator.pop(context); }); 
+                          Future.delayed(Duration(seconds: 1), () {
+                            globalMainViewKey.currentState?.setState(() {});
+                          });
+                          
                         });
                       }, icon: Icon(
                         widget.isDelete ? Icons.delete : Icons.share, 

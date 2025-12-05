@@ -116,6 +116,22 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
       padding: const EdgeInsets.only(left: 53), 
       child: Row( 
         children: [ 
+           if (widget.refItem.sharedTo.isNotEmpty)
+            Padding(  padding: const EdgeInsets.only(right: 10), 
+              child: FutureBuilder(future: getOnFlow("shared to "), builder: (a,s) {
+                if (s.data != null) {
+                   return Tooltip( message: "${s.data} ${widget.refItem.sharedTo.join(",")}", child: Icon(Icons.share, size: 18, color: Theme.of(context).primaryColor));
+                }
+                return  Tooltip( message: widget.refItem.sharedTo.join(","), child: Icon(Icons.share, size: 18, color: Theme.of(context).primaryColor));
+              })),
+          if (widget.refItem.sharedBy.isNotEmpty)
+            Padding(  padding: const EdgeInsets.only(right: 10), 
+              child: FutureBuilder(future: getOnFlow("shared by "), builder: (a,s) {
+                if (s.data != null) {
+                   return Tooltip( message: "${s.data} ${widget.refItem.sharedBy.join(",")}", child: Icon(Icons.share, size: 18, color: Colors.grey)); 
+                }
+                return  Tooltip( message: widget.refItem.sharedBy.join(","), child: Icon(Icons.share, size: 18, color: Colors.grey));
+              })),
           Container( constraints:  BoxConstraints(maxWidth: widget.width / 2), 
           child : Text( name.toUpperCase(), overflow: TextOverflow.ellipsis,
             style: TextStyle(color: _theme.primaryColor, 
@@ -276,12 +292,29 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               
             ]
           )),
-          name2.toLowerCase() != name.toLowerCase() ? Text(
-              name2.toLowerCase(), 
-              overflow: TextOverflow.ellipsis,
-              // ignore: use_build_context_synchronously
-              style: TextStyle(color: Colors.grey, fontSize: 12)) : Container(),
-          
+          Row( children: [
+            if (widget.refItem.sharedTo.isNotEmpty)
+            Padding(  padding: const EdgeInsets.only(right: 10), 
+              child: FutureBuilder(future: getOnFlow("shared to "), builder: (a,s) {
+                if (s.data != null) {
+                   return Tooltip( message: "${s.data} ${widget.refItem.sharedTo.join(",")}", child: Icon(Icons.share, size: 18, color: Theme.of(context).primaryColor));
+                }
+                return  Tooltip( message: widget.refItem.sharedTo.join(","), child: Icon(Icons.share, size: 18, color: Theme.of(context).primaryColor));
+              })),
+          if (widget.refItem.sharedBy.isNotEmpty)
+            Padding(  padding: const EdgeInsets.only(right: 10), 
+              child: FutureBuilder(future: getOnFlow("shared by "), builder: (a,s) {
+                if (s.data != null) {
+                   return Tooltip( message: "${s.data} ${widget.refItem.sharedBy.join(",")}", child: Icon(Icons.share, size: 12, color: Colors.grey)); 
+                }
+                return  Tooltip( message: widget.refItem.sharedBy.join(","), child: Icon(Icons.share, size: 12, color: Colors.grey));
+              })),
+             name2.toLowerCase() != name.toLowerCase() ? Text(
+                name2.toLowerCase(), 
+                overflow: TextOverflow.ellipsis,
+                // ignore: use_build_context_synchronously
+                style: TextStyle(color: Colors.grey, fontSize: 12)) : Container(),
+          ]),
       ])));
     }
     return Stack( children: widgets);

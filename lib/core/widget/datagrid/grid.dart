@@ -528,6 +528,8 @@ class SubGridWidgetState extends State<SubGridWidget> {
         } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
         if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
         datas.add(Value(
+          sharedBy: item.sharedBy,
+          sharedTo: item.sharedTo,
           dataRef: item.dataRef,
           schemaID: item.schemaID,
           schema: widget.schema,
@@ -551,6 +553,8 @@ class SubGridWidgetState extends State<SubGridWidget> {
       bool found = selectedGrid.where((cellID) => cellID == mapped.values["id"]).isNotEmpty;
       return GridRowWidget( 
         news: mapped.isNew,
+        sharedBy: mapped.sharedBy,
+        sharedTo: mapped.sharedTo,
         cellID: "${mapped.values["id"]}",
         sharing: mapped.sharing,
         borderWidth: widget.borderWidth, 

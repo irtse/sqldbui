@@ -21,6 +21,8 @@ bool isFilter() {
   && (globalOrder[viewID]!.isNotEmpty || (globalFilter[viewID] != null && globalFilter[viewID]!.size() > 0));
 }
 class Value {
+  List<dynamic> sharedBy = [];
+  List<dynamic> sharedTo = [];
   Map<String, model.SchemaField> schema = {};
   String cellID;
   String? dataRef;
@@ -38,6 +40,8 @@ class Value {
     required this.cellID, 
     required this.isDraft, 
     required this.schemaID,
+    required this.sharedBy,
+    required this.sharedTo,
     this.valuesMany = const {},
     this.values = const {}, 
     this.isLink = true, 

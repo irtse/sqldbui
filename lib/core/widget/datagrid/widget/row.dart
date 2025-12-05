@@ -22,6 +22,8 @@ class GridRowWidget extends StatefulWidget {
   int maxLength; 
   double contextWidth;
   model.Sharing? sharing;
+  List<dynamic> sharedBy;
+  List<dynamic> sharedTo;
   GlobalKey<ViewWidgetState>? viewKey; 
   double borderWidth; 
   String schemaID; 
@@ -44,6 +46,8 @@ class GridRowWidget extends StatefulWidget {
     required this.maxLength, 
     required this.contextWidth, 
     required this.sharing,
+    required this.sharedBy,
+    required this.sharedTo,
     this.isEnum = false, 
     this.showCheckboxColumn = false, 
     this.viewKey, 
@@ -71,6 +75,20 @@ class GridRowWidgetState extends State<GridRowWidget> {
           }
           return Container();
         })]),
+        if (widget.sharedTo.isNotEmpty)
+          Positioned(left: 65, top: 30, child: FutureBuilder(future: getOnFlow("shared to :"), builder: (a,s) {
+            if(s.data != null) {
+              return Tooltip( message: "${s.data} ${widget.sharedTo.join(",")}", child: Icon(Icons.share, color: Theme.of(context).primaryColor));
+            }
+            return Tooltip( message:  widget.sharedTo.join(","), child: Icon(Icons.share, color: Theme.of(context).primaryColor));
+          }) ),
+        if (widget.sharedBy.isNotEmpty)
+           Positioned(left: 65, top: 30, child: FutureBuilder(future: getOnFlow("shared by :"), builder: (a,s) {
+            if(s.data != null) {
+              return Tooltip( message: "${s.data} ${widget.sharedBy.join(",")}", child: Icon(Icons.share, color: Colors.grey));
+            }
+            return Tooltip( message:  widget.sharedBy.join(","), child: Icon(Icons.share, color: Colors.grey));
+          }) )
       ])
     );
   }
