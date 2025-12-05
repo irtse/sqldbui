@@ -216,7 +216,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                       bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
                     suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
                     hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
-                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
                     labelText: l.toLowerCase(),
                     errorStyle: const TextStyle(fontSize: 0,),
                   ),
@@ -262,7 +262,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                       bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
                     suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
                     hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
-                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
                     labelText: l.toLowerCase(),
                     errorStyle: const TextStyle(fontSize: 0),
                   )
@@ -319,7 +319,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                         fieldDecoration: FieldDecoration(
                           backgroundColor: Colors.white,
                           labelText: "${l.toLowerCase()}${widget.require ? "*" : ""}",
-                          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+                          labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
                           hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
                           hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.checklist_rtl, color: Colors.grey.shade200),

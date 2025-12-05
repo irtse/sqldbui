@@ -120,7 +120,7 @@ class _DateState extends State<DateWidget> {
             fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
             hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
             border: const OutlineInputBorder(),
-            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
             focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
             errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
             enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
@@ -154,7 +154,7 @@ class _DateState extends State<DateWidget> {
             border: OutlineInputBorder(borderSide: BorderSide(color:Theme.of(context).splashColor, width: 1.0)),
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
             hintText: (await getOnFlow(TranslateConstants.selectDate)).toLowerCase(),
-            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontWeight: FontWeight.bold),
+            labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
             labelText: label.toLowerCase(),
           ),
         onShowPicker: (context, currentValue) { return showDatePicker(

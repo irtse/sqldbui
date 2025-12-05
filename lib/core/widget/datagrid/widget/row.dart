@@ -150,6 +150,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
       
       if (first) {
         if (widget.news) {
+          var i = Icons.new_releases;
           bs.add(Container(
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
             child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
@@ -171,9 +172,13 @@ class GridRowWidgetState extends State<GridRowWidget> {
           ));
         }
         if ((state ?? "") != "") {
+          var s = state!.split(" ");
+          if (s.length > 1) {
+            s = s.sublist(0, 2);
+          }
           try {
             bs.add(
-              FutureBuilder(future: getOnFlow(state!.replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "")), 
+              FutureBuilder(future: getOnFlow(s.join(" ").replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "")), 
               builder: (a, s) {
                 if (s.data != null) {
                   return Container(
@@ -242,7 +247,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           ), 
       );
     }  
-    List<Widget> badges = [Positioned(left: 90, top: 5, child: Row( children: bs ))];
+    List<Widget> badges = [Positioned(left: 30, top: 5, child: Row( children: bs ))];
     return Stack( children: [ Row(children: widgets), ...badges ]);
   }
 }
