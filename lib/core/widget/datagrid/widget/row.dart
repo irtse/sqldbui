@@ -176,6 +176,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           if (s.length > 1) {
             s = s.sublist(0, 2);
           }
+          print(state);
           try {
             bs.add(
               FutureBuilder(future: getOnFlow(s.join(" ").replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "")), 

@@ -4,7 +4,7 @@ import 'package:sqldbui2/core/widget/dialog/mapping_popup.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sqldbui2/model/view.dart';
+import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
@@ -25,12 +25,14 @@ class FilterRowWidget extends StatefulWidget implements ConvertorWidget {
   @override dynamic value;
   int index; int? ref;
   bool isNull = false;
-  Map<String, SchemaField> schema;
+  model.View? view;
+  Map<String, model.SchemaField> schema;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   FilterRowWidget ({ 
     required this.schema, 
     this.label, 
+    required this.view,
     this.type = "text", 
     this.ref, 
     this.beforeColumn = const [],
@@ -64,6 +66,7 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
                 child: Text("${widget.index}", style : TextStyle( color: Theme.of(context).splashColor, fontSize: 15))),
               Padding( padding: const EdgeInsets.only(left: 0, right: 20, top: 0), child: Icon(Icons.circle, color: Theme.of(context).splashColor, size: 15)),
               FilterSubRowWidget(
+                view: widget.view,
                 widget: this,
                 schema: widget.schema,
                 label: widget.label,
@@ -88,6 +91,7 @@ class FilterSubRowWidget extends StatefulWidget implements ConvertorWidget {
   String connector = ""; 
   String type = "text"; 
   String dir = "asc";
+  model.View? view;
   String? columnName, label;
   @override dynamic value;
   int? ref;
@@ -95,11 +99,12 @@ class FilterSubRowWidget extends StatefulWidget implements ConvertorWidget {
   bool isNull = false;
   int index;
   bool isSub = false;
-  Map<String, SchemaField> schema;
+  Map<String, model.SchemaField> schema;
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   FilterSubRowWidget ({ 
     super.key,
+    required this.view,
     this.depth = 0,
     required this.widget,
     this.index = 1,
@@ -146,14 +151,17 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
         return Container();
     });
     Widget? w2;
-    List<String> order = (widget.isSub ? widget.schema : realOrderMap(widget.schema.keys.toList(), widget.schema, false)).keys.where(
-      (e) => !(widget.schema[e]?.hidden ?? false) ).toList();
+    List<dynamic> order = widget.isSub ? widget.schema.keys.toList() : realOrder(widget.view, false, false, null, widget.view!.max);
+    if (order.isEmpty) {
+      order = realOrderMap(widget.schema.keys.toList(), widget.schema, false).keys.where( (e) => !(widget.schema[e]?.hidden ?? false) ).toList();
+    }
     if (widget.schema[widget.columnName] != null && widget.schema[widget.columnName]!.type.contains("onetomany")) {
       String? column;
       if (widget.widget.widget.beforeColumn.length > widget.depth + 1) {
         column = widget.widget.widget.beforeColumn[ widget.depth + 1];
       }
       w2 = Padding( padding: EdgeInsets.only(left: 10), child: FilterSubRowWidget(
+        view: widget.view,
         widget: widget.widget,
         columnName: column,
         schema: widget.schema[widget.columnName]?.schema ?? {},
@@ -367,7 +375,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   confirmCache = {};
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
-                    if (widget.connector == "") {  filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); }
+                    if (widget.connector == "") {  filterRowsWidget[viewID ?? ""] = (filterRowsWidget[viewID] ?? []).sublist(0, widget.index + 1); }
                   });
                 }); 
               },
@@ -382,7 +390,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
                   navigate = true;
                   globalMainViewKey.currentState?.setState(() { 
                     if (widget.connector == "") {
-                      filterRowsWidget = filterRowsWidget.sublist(0, widget.index + 1); 
+                      filterRowsWidget[viewID ?? ""] = (filterRowsWidget[viewID] ?? []).sublist(0, widget.index + 1); 
                     }
                   });
                 }); 

@@ -64,7 +64,7 @@ GlobalKey<GridWidgetState> globalGridKey = GlobalKey<GridWidgetState>();
 GlobalKey<DatagridWidgetState> globalGridWidgetKey = GlobalKey<DatagridWidgetState>();
 // ignore: must_be_immutable
 List<FunctionMathRowWidget> functionMathRowsWidget = [];
-List<FilterRowWidget> filterRowsWidget = [];
+Map<String, List<FilterRowWidget>> filterRowsWidget = {};
 // ignore: must_be_immutable
 class DatagridWidget extends StatefulWidget {
   final model.View? view; 
@@ -82,6 +82,9 @@ class DatagridWidgetState extends State<DatagridWidget> {
   List<DropdownMenuItem<String>> dpItems = <DropdownMenuItem<String>>[];
 
   @override Widget build(BuildContext context) {
+    if (filterRowsWidget[viewID] == null) {
+      filterRowsWidget[viewID!] = [];
+    }
     return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -91,6 +94,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     searchCtrl = {};
+    realOrderMap(widget.view?.schema.keys.toList(), widget.view?.schema, false);
     await fillSchemeItem();
     Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
     List<Value> datas = <Value>[];
@@ -110,6 +114,7 @@ class DatagridWidgetState extends State<DatagridWidget> {
         child: Column( children: [
           FilterSelectorWidget(
             schema: schema, 
+            view: widget.view!,
             filterMain: globalFilter[viewID], 
             schemaName: widget.view?.schemaName ?? ""
           ),
@@ -206,8 +211,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     var schema = view.schema;
     bool isMath = forceMath || (modeIndex[viewID]  == 1 && editMode[viewID] == "math");
     List<String> seen = [];
-    if (!(filterTempOrderView[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math")
-    && filterOrderView[viewID] == null) {
+    if (filterTempOrderView[viewID] != null  && filterOrderView[viewID] == null) {
       var newOrder = view.schema.keys.where( (e) {
         return view.schema[e]?.inResume != null; 
       }).toList();
@@ -224,7 +228,6 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
       }
       if (newOrder.isEmpty) {
         filterTempOrderView[viewID] = (forceOrder ?? view.order).sublist(0, (forceOrder ?? view.order).length < (max ?? 1000) ? (forceOrder ?? view.order).length : max);
-
       } else {
         if (view.order.contains("type") && !newOrder.contains("type")) {
           newOrder = ["type", ...newOrder];
@@ -232,6 +235,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
         filterTempOrderView[viewID] = forceOrder ?? newOrder;
       }
     }
+
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
     
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {

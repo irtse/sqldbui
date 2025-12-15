@@ -168,7 +168,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           } 
         } 
       }
-      if (dd.length > 3) {
+      if (dd.length > 4) {
         List<PopupMenuItem<String>> item = [];
         for (var d in dd) {
           item.add(PopupMenuItem(value: "${d.id}", child: FutureBuilder(future: getOnFlow(d.label ?? d.name ?? ""), builder: (a,s) {

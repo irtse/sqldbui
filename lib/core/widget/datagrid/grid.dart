@@ -142,7 +142,7 @@ class GridWidgetState extends State<GridWidget> {
 
     List<Widget> bottomColumns = [];
     List<Widget> additionnalContent = [];
-    var subSize = showMore ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
+    var subSize = showMore ? ((filterRowsWidget[viewID] ?? []).length * 45 < 138 ? (filterRowsWidget[viewID] ?? []).length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
 
     if (widget.showCheckboxColumn) {
       allSelected = widget.isSelected;
@@ -344,6 +344,7 @@ class GridWidgetState extends State<GridWidget> {
     schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
       realLabel.toLowerCase(), overflow: TextOverflow.ellipsis)));
       columns.add( GridColumnWidget(
+        view: widget.view!,
         context: context, 
         width: double.nan,
         items: schemeItems, 
@@ -442,7 +443,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
       for (var col in columns) { col.prefetch(); }
     }
     
-    var t = showMore ? (filterRowsWidget.length * 44 < 138 ? filterRowsWidget.length * 44 : 138) : 0;
+    var t = showMore ? ((filterRowsWidget[viewID] ?? []).length * 44 < 138 ? (filterRowsWidget[viewID] ?? []).length * 44 : 138) : 0;
     t += modeIndex[viewID]  == 1 ? 40 : 0;
     t += modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? ( editMode[viewID] == "math" ? 115 : 70 ) : 0;
     
@@ -518,7 +519,9 @@ class SubGridWidgetState extends State<SubGridWidget> {
     List<Value> datas = <Value>[];
     if (widget.view != null) {
       for (var item in (widget.view?.items ?? [] as List<model.Item>)) {
-        if (!widget.cache.containsKey(widget.view!.schemaName)) { widget.cache[widget.view!.schemaName]=<String,dynamic>{}; } 
+        if (!widget.cache.containsKey(widget.view!.schemaName)) { 
+          widget.cache[widget.view!.schemaName]=<String,dynamic>{}; 
+        } 
         if (!widget.cache.containsKey("id")) { 
           widget.cache[widget.view!.schemaName]!["id"]=item.values["id"];
           if (item.linkPath != "") {  widget.links[item.values['id']] = item.linkPath; }
@@ -526,7 +529,9 @@ class SubGridWidgetState extends State<SubGridWidget> {
            widget.contentShallowed['$key:${item.values["id"]}'] = item.valuesShallow[key]!; 
           }
         } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
-        if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { continue; }
+        if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { 
+          continue; 
+        }
         datas.add(Value(
           sharedBy: item.sharedBy,
           sharedTo: item.sharedTo,

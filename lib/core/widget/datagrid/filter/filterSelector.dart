@@ -23,8 +23,10 @@ import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 class FilterSelectorWidget extends StatefulWidget {
   Filters? filterMain;
   String schemaName;
+  model.View view;
   Map<String, model.SchemaField> schema = {};
   FilterSelectorWidget ({ super.key, required this.filterMain, 
+  required this.view,
   required this.schema, required this.schemaName
 });
   @override FilterSelectorWidgetState createState() => FilterSelectorWidgetState();
@@ -33,43 +35,37 @@ bool check = true;
 bool forceFilter = false;
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
   @override Widget build(BuildContext context) {
-  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
     if (filterRestr[viewID] != null && !tempRemoval && check) {
       check = false;
       if ((globalFilter[viewID]?.filters ?? {}).isNotEmpty) {
-        filterRowsWidget = globalFilter[viewID]?.toRow(widget.schema) ?? [];
+        filterRowsWidget[viewID ?? ""] = globalFilter[viewID]?.toRow(widget.schema, widget.view) ?? [];
         resetList();
       } else {
         try {
           if (int.parse(filterRestr[viewID]!) > 0) {
-             var resp = await APIService().get<model.Shallowed>("${currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}")}&is_view=false", true, null);
-            if ((resp.data ?? []).isNotEmpty) {
-              var i = resp.data![0];
-              if ((i.selected && !noFilterRetrieval) || (filterRowsWidget.isEmpty && i.fields.isNotEmpty)) { 
-                globalNew[viewID] = i.elder;
-                refreshFilter(i.fields);
-                filterRowsWidget = globalFilter[viewID]?.toRow(widget.schema) ?? [];
-                resetList();
+            APIService().get<model.Shallowed>("${currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}")}&is_view=false", true, null).then( (resp) {
+              if ((resp.data ?? []).isNotEmpty) {
+                var i = resp.data![0];
+                if ((i.selected && !noFilterRetrieval) || ((filterRowsWidget[viewID] ?? []).isEmpty && i.fields.isNotEmpty)) { 
+                  globalNew[viewID] = i.elder;
+                  refreshFilter(i.fields);
+                  filterRowsWidget[viewID ?? ""] = globalFilter[viewID]?.toRow(widget.schema, widget.view) ?? [];
+                  resetList();
+                }
               }
-            }
+            });
           }
         } catch(e) {}
       }
     } else if (tempRemoval) { tempRemoval = false; }
     var index = 0;    
-    var subSize = showMore ? (filterRowsWidget.length * 45 < 138 ? filterRowsWidget.length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
+    var subSize = showMore ? ((filterRowsWidget[viewID] ?? []).length * 45 < 138 ? (filterRowsWidget[viewID] ?? []).length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
     if (currentWidth <= 1000) { subSize = 0; }
-    for (var i in filterRowsWidget) { 
-      if (filterRowsWidget.length - 1 > index && i.connector == "") { 
-        filterRowsWidget[index] = FilterRowWidget(
+    for (var i in filterRowsWidget[viewID] ?? []) { 
+      if ((filterRowsWidget[viewID] ?? []).length - 1 > index && i.connector == "") { 
+        filterRowsWidget[viewID]?[index] = FilterRowWidget(
           schema: widget.schema, 
+          view: widget.view,
           index: i.index, 
           connector: "and", 
           label: i.label, 
@@ -93,26 +89,29 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                 child: Row( children: [ 
                   Padding( 
                     padding: const EdgeInsets.only(right: 10), 
-                    child : Tooltip( 
-                      message : (await getOnFlow(showMore ? TranslateConstants.filterHide.toLowerCase() : TranslateConstants.filterShow)).toLowerCase(),
-                      child: InkWell( 
-                        child : Icon( showMore ? Icons.filter_alt : Icons.filter_alt_outlined, 
-                          color: showMore ? Colors.white : Theme.of(context).splashColor, size: 20), 
-                        onTap: () { 
-                          confirmCache = {};
-                          globalGridKey.currentState?.setState(() { showMore = !showMore; }); }
-                      )),
+                    child: FutureBuilder(future: getOnFlow(showMore ? TranslateConstants.filterHide: TranslateConstants.filterShow), builder: (a,s) {
+                        return Tooltip( 
+                        message : (s.data ?? (showMore ? TranslateConstants.filterHide: TranslateConstants.filterShow)).toLowerCase(),
+                        child: InkWell( 
+                          child : Icon( showMore ? Icons.filter_alt : Icons.filter_alt_outlined, 
+                            color: showMore ? Colors.white : Theme.of(context).splashColor, size: 20), 
+                          onTap: () { 
+                            confirmCache = {};
+                            globalGridKey.currentState?.setState(() { showMore = !showMore; }); }
+                        ));
+                      }),
                     ),
-                    filterRowsWidget.isNotEmpty ? Container(
+                    (filterRowsWidget[viewID]?.isNotEmpty ?? false)  ? Container(
                       margin: const EdgeInsets.only(right: 5), 
                       padding: const EdgeInsets.only(left: 5), 
-                      child:  IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterSaveT)).toLowerCase(), 
+                      child:  FutureBuilder(future: getOnFlow(TranslateConstants.filterSaveT), builder: (a,s) {
+                        return IconButton( constraints: const BoxConstraints(), tooltip: ( s.data ?? TranslateConstants.filterSaveT).toLowerCase(), 
                       style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
                       return Theme.of(context).primaryColor; }) ),
                       icon: Icon( Icons.save, size: 18, color: Theme.of(context).splashColor ),
                       onPressed: () async { 
                         globalFilter[viewID] = Filters(); // empty filter to refill with new
-                        for (var filter in filterRowsWidget) {
+                        for (var filter in filterRowsWidget[viewID] ?? []) {
                           if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) { return; }
                           globalFilter[viewID]?.add(filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName ?? "", Filter(
                             column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, label: filter.label ?? filter.columnName, realName: filter.beforeColumn.join("."),
@@ -149,23 +148,27 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                             });
                           });
                         }
-                      })) : Container(),
+                      });
+                    })) : Container(),
                     filterRestr[viewID] != null && filterRestr[viewID] != "" ? Padding(padding: const EdgeInsets.only(right: 5), 
-                    child: FilterSelectorButtonWidget(parent: this, tooltip: await getOnFlow(TranslateConstants.filterDeleteT), icon: Icons.delete,
-                    showDialog: "delete filter", 
-                    function: () async {
-                      removeFilter(); 
-                      confirmCache = {};
-                      var id = filterRestr[viewID];
-                      globalFilter.remove(viewID);
-                      try {
-                        if (int.parse(filterRestr[viewID]!) > 0) {
-                          await APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=$id"), context).then((value) {
-                          forceFilter = true; 
-                         });
-                        } 
-                      } catch(e) { print(e); }
-                      filterRestr[viewID] = ""; 
+                    child: FutureBuilder(future: getOnFlow(TranslateConstants.filterDeleteT), builder: (a,s) {
+                      return FilterSelectorButtonWidget(parent: this, tooltip: s.data ?? TranslateConstants.filterDeleteT, 
+                      icon: Icons.delete,
+                      showDialog: "delete filter", 
+                      function: () async {
+                        removeFilter(); 
+                        confirmCache = {};
+                        var id = filterRestr[viewID];
+                        globalFilter.remove(viewID);
+                        try {
+                          if (int.parse(filterRestr[viewID]!) > 0) {
+                            await APIService().delete(currentView!.filterPath.replaceAll("rows=all", "rows=$id"), context).then((value) {
+                            forceFilter = true; 
+                          });
+                          } 
+                        } catch(e) { print(e); }
+                        filterRestr[viewID] = ""; 
+                      }); 
                     })) : Container() ,
                     currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", firstAPI || forceFilter, null), 
                       builder: (BuildContext context, AsyncSnapshot<APIResponse<model.Shallowed>> snapshot) {
@@ -176,36 +179,42 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       return SubFilterSelectorWidget(  state: this,  filterMain: widget.filterMain, schema: widget.schema, datas: []);
                     }) : Container(), 
                     Padding(padding: const EdgeInsets.only(left: 5), 
-                    child: IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterNew)).toLowerCase(), 
+                    child: FutureBuilder(future: getOnFlow(TranslateConstants.filterNew), builder: (a, s) {
+                    return IconButton( constraints: const BoxConstraints(), tooltip: (s.data ?? TranslateConstants.filterNew).toLowerCase(), 
                     style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
                       return Theme.of(context).primaryColor; }), ),
                       icon: Icon( Icons.add, size: 17, color: Theme.of(context).highlightColor, ),
                       onPressed: () { 
                         showMore = true;
                         confirmCache = {};
-                        filterRowsWidget.add(FilterRowWidget(schema: widget.schema, index: filterRowsWidget.length)); 
+                        filterRowsWidget[viewID]?.add(FilterRowWidget( view: widget.view,
+                          schema: widget.schema, index: (filterRowsWidget[viewID] ?? [] ).length)); 
                         globalGridKey.currentState?.setState(() { });
                         setState(() { });
-                      })),
-                    if (filterRowsWidget.length > 1)
+                      });
+                    })),
+                    if ((filterRowsWidget[viewID] ?? []).length > 1)
                       Padding(padding: const EdgeInsets.only(left: 5), 
-                      child: IconButton( constraints: const BoxConstraints(), tooltip: (await getOnFlow(TranslateConstants.filterRM)).toLowerCase(), 
+                      child: FutureBuilder(future: getOnFlow(TranslateConstants.filterRM), builder: (a, s) {
+                        return IconButton( constraints: const BoxConstraints(), tooltip: (s.data ?? TranslateConstants.filterRM).toLowerCase(), 
                       style: ButtonStyle( overlayColor: WidgetStateProperty.resolveWith((states) {
                         return Theme.of(context).primaryColor; }), ),
                         icon: Icon( Icons.remove, size: 17, color: Theme.of(context).highlightColor, ),
                         onPressed: () { 
                           showMore = true;
                           confirmCache = {};
-                          filterRowsWidget.removeLast(); 
+                          filterRowsWidget[viewID]?.removeLast(); 
                           globalGridKey.currentState?.setState(() { });
                           setState(() { });
-                        })),
-                    if (filterRowsWidget.isNotEmpty)
+                        });
+                      })),
+                    if ((filterRowsWidget[viewID]?.isNotEmpty ?? false) )
                       Padding(padding: const EdgeInsets.only(left: 5), 
-                      child: FilterSelectorButtonWidget(function: () async {
+                      child: FutureBuilder(future: getOnFlow(TranslateConstants.filterApplyT), builder: (a, s) {
+                        return FilterSelectorButtonWidget(function: () async {
                         if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
                           globalFilter[viewID] = Filters(); // empty filter to refill with new
-                          for (var filter in filterRowsWidget) {
+                          for (var filter in filterRowsWidget[viewID] ?? []) {
                             if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
                               return; 
                             }
@@ -221,16 +230,20 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                           }
                           noFilterRetrieval = true;
                           confirmCache = {};
-                      }, icon: Icons.check, tooltip: await getOnFlow(TranslateConstants.filterApplyT), parent: this)),
-                    filterRowsWidget.isNotEmpty || (filterRestr[viewID] != null && filterRestr[viewID] != "" )  ? Padding(padding: const EdgeInsets.only(left: 5), 
-                    child: FilterSelectorButtonWidget(function: () async {
+                      }, icon: Icons.check, tooltip: (s.data ?? TranslateConstants.filterApplyT).toLowerCase(), parent: this);
+                    })),
+                    (filterRowsWidget[viewID]?.isNotEmpty ?? false) || (filterRestr[viewID] != null && filterRestr[viewID] != "" )  ? Padding(padding: const EdgeInsets.only(left: 5), 
+                    child: FutureBuilder(future: getOnFlow(TranslateConstants.filterResetT), builder: (a, s) {
+                      return FilterSelectorButtonWidget(function: () async {
                         removeFilter();
                         filterRestr[viewID] = ""; 
                         confirmCache = {};
                         await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
                           <String, dynamic> { "is_selected" : false }, null);
-                      }, icon: Icons.filter_alt_off, tooltip: await getOnFlow(TranslateConstants.filterResetT), parent: this)) : Container(),
-                      Tooltip( message: await getOnFlow("<state> quick filter"),
+                      }, icon: Icons.filter_alt_off, tooltip: s.data ?? TranslateConstants.filterResetT, parent: this);
+                    })) : Container(),
+                      FutureBuilder(future: getOnFlow("<state> quick filter"), builder: (a, s) { 
+                        return Tooltip( message: s.data ??  "<state> quick filter",
                         child: Padding(padding: const EdgeInsets.only(left: 10, right: 10), 
                         child: FutureBuilder(future: getLabels(toggles), builder: (a,s) {
                           if (s.data != null) {
@@ -267,8 +280,10 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                             );
                           }
                         }),
-                      )),
-                    Tooltip( message: await getOnFlow("<sharing> quick filter"),
+                      ));
+                    }),
+                    FutureBuilder(future: getOnFlow("<state> quick filter"), builder: (a, s) {
+                      return Tooltip( message: s.data ?? "<sharing> quick filter",
                         child:ToggleSwitch( icons: togglesShareIcons, minHeight: 27.5, minWidth:40, fontSize: 12, cornerRadius: 5,
                           initialLabelIndex: togglesShare.indexWhere((element) => element.toLowerCase() == globalShare[viewID]?.toLowerCase()),
                           dividerColor: Colors.white, inactiveFgColor: Theme.of(context).splashColor,
@@ -283,7 +298,8 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                                 navigate = true;
                                 globalMainViewKey.currentState?.setState(() {});
                               },
-                        ))
+                        ));
+                      })
                   ] )
               ) : Container(),
             Row( mainAxisAlignment: MainAxisAlignment.end, children : [ 
@@ -307,12 +323,12 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
               child: SingleChildScrollView( 
                 child: Column( 
                   children : [  
-                    modeIndex[viewID]  != 1 ? (filterRowsWidget.isEmpty ?  Container() 
+                    modeIndex[viewID]  != 1 ? ((filterRowsWidget[viewID]?.isNotEmpty ?? false)  ?  Container() 
                     : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)) : ( 
                   editMode[viewID] != "math" || functionMathRowsWidget.isEmpty ? 
                   Container() : Divider(height: 1, color: Theme.of(context).secondaryHeaderColor)
                 ),  
-              ...(showMore ? filterRowsWidget :  []) ,
+              ...(showMore ? (filterRowsWidget[viewID] ?? []) :  []) ,
               ...(editMode[viewID] == "math" ? functionMathRowsWidget : [])
             ] 
           )))
@@ -382,7 +398,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           }
           if ((i.selected && ( widget.filterMain == null || widget.filterMain!.isEmpty) && filterRestr[viewID] != ""
             && filterRestr[viewID] != null && !noFilterRetrieval)
-            || (filterRowsWidget.isEmpty && i.fields.isNotEmpty && filterRestr[viewID] != "" && filterRestr[viewID] != null)) { 
+            || ((filterRowsWidget[viewID]?.isNotEmpty ?? false)  && i.fields.isNotEmpty && filterRestr[viewID] != "" && filterRestr[viewID] != null)) { 
               globalNew[viewID] = i.elder;
               refreshFilter(i.fields);
               check = true;

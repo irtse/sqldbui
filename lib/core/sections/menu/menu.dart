@@ -151,8 +151,6 @@ class MenuWidgetState extends State<MenuWidget> {
     subViewID=null;
     widget.url = null;
     currentView = null;
-    filterRowsWidget = []; 
-    functionMathRowsWidget = [];
     AppRouter.setRouteCookie("${viewID ?? ""}${subViewID != null ? ":$subViewID" : ""}", context);
     globalLoading = globalFilter.containsKey(id) && globalFilter[id]!.size() > 0 
       || globalOrder.containsKey(id) && globalFilter[id]!.size() > 0 ;

@@ -151,7 +151,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
                       globalOffset = 0; 
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-                      for (var row in filterRowsWidget) {
+                      for (var row in filterRowsWidget[viewID] ?? []) {
                         row.rowKey.currentState?.setState(() {});
                       }
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 

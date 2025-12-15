@@ -6,12 +6,14 @@ import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:sqldbui2/core/sections/view.dart';
+import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 // ignore: must_be_immutable
 class FilterPopUpWidget extends StatefulWidget {
+  model.View view;
   String columnName; 
   String label;
   String type;
@@ -21,6 +23,7 @@ class FilterPopUpWidget extends StatefulWidget {
   List<DropdownMenuItem<String>> items;
   FilterPopUpWidget ({ 
     super.key, 
+    required this.view,
     required this.items,
     required this.columnName, 
     required this.component, 
@@ -127,21 +130,24 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       if (widget.ascOrder != null) { globalOrder[viewID]![widget.columnName]=widget.ascOrder! ? "asc" : "desc"; }
                       if (widget.ascOrder == null) { globalOrder[viewID]?.remove(widget.columnName); }
                       globalFilter[viewID]?.remove(widget.columnName);
-                      var founded = filterRowsWidget.where((element) => element.columnName == widget.columnName).toList();
+                      var founded = filterRowsWidget[viewID]?.where((element) => element.columnName == widget.columnName).toList() ?? [];
                       for (var search in advancedSearch) { 
                         if (search.globalKey.currentState!.validate() && search.value != null && search.value != "") {
-                          if (filterRowsWidget.length > 1 && filterRowsWidget.last.connector == "") { filterRowsWidget.last.connector = "and"; }
+                          if ((filterRowsWidget[viewID] ?? []).length > 1 && filterRowsWidget[viewID]?.last.connector == "") { filterRowsWidget[viewID]?.last.connector = "and"; }
                           if (founded.isEmpty) { 
-                            filterRowsWidget.add(FilterRowWidget(
+                            filterRowsWidget[viewID]?.add(FilterRowWidget(
+                              view: widget.view,
                               schema: currentView!.schema, 
                               columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
-                              label:  search.label == "" ? search.columnName : search.label, index: filterRowsWidget.length));
+                              label:  search.label == "" ? search.columnName : search.label, index: (filterRowsWidget[viewID] ?? []).length));
                             globalFilter[viewID]?.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = globalFilter[viewID]?.size();
                           } else {
-                            filterRowsWidget[founded.first.index] = FilterRowWidget(schema: currentView!.schema, columnName: search.columnName, type: search.type,
+                            filterRowsWidget[viewID]?[founded.first.index] = FilterRowWidget(
+                              view: widget.view,
+                              schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);
                             globalFilter[viewID]?.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 

@@ -1,5 +1,6 @@
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/model/view.dart' as mod;
 import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
@@ -16,6 +17,7 @@ import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart'
 class GridColumnWidget extends StatefulWidget {
   GlobalKey<GridBottomColumnResultWidgetState>? resultKey;
   final BuildContext context;
+  mod.View view;
   List<DropdownMenuItem<String>> items = [];
   GlobalKey<GridColumnWidgetState>? nextColumn;
   
@@ -39,6 +41,7 @@ class GridColumnWidget extends StatefulWidget {
   Color backgroundColor;
 
   GridColumnWidget ({ 
+    required this.view,
     required this.columnName, 
     required this.type, 
     this.width = 300.0, 
@@ -126,6 +129,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
     } 
     if (widget.allowFiltering) { 
       buttons.add(SizedBox( width: 30, height: 30.0,  child: FilterPopUpWidget(
+        view: widget.view,
         items: widget.items, label: widget.label.value, 
         columnName: widget.columnName, type: widget.type, component: this, ))); }
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {

@@ -62,10 +62,11 @@ class Filters {
     return orderedFilters;
   }
 
-  List<FilterRowWidget> toRow(Map<String, models.SchemaField> schema) {
+  List<FilterRowWidget> toRow(Map<String, models.SchemaField> schema, models.View view) {
     List<FilterRowWidget> rows = [];
     for (var filter in sort()) {
       rows.add(FilterRowWidget(
+        view: view,
         schema: schema, columnName: filter.column, beforeColumn: (filter.realName ?? filter.column ?? "").split("."), 
         label: filter.label ?? filter.column, index: filter.index, 
         type: filter.type, comparator: filter.comparator, 
@@ -84,7 +85,7 @@ class Filters {
 
   void removeFilter() {
     forceFilter = true;
-    filterRowsWidget = [];
+    filterRowsWidget[viewID ?? ""] = [];
     globalOffset = 0;
     noFilterRetrieval = true;
     globalNew[viewID] = "all";
@@ -97,12 +98,12 @@ class Filters {
     globalFilter[viewID]?.remove(columnName);  
     globalOffset = 0;
     noFilterRetrieval = true;
-    List<FilterRowWidget> toRemove = filterRowsWidget.where((element) => element.columnName == columnName).toList();
-    for (var filter in toRemove) { filterRowsWidget.remove(filter); }
+    List<FilterRowWidget> toRemove = (filterRowsWidget[viewID] ?? []).where((element) => element.columnName == columnName).toList();
+    for (var filter in toRemove) { (filterRowsWidget[viewID] ?? []).remove(filter); }
   }
 
   void clearFilter() {
-    filterRowsWidget = [];
+    filterRowsWidget[viewID]?.remove(viewID);
     globalOffset = 0;
     globalNew = {};
     globalFilter = {}; 
@@ -119,7 +120,7 @@ class Filters {
       );
       globalOrder[viewID]![field.column!] = field.dir;
     }
-    filterRowsWidget = [];
+    filterRowsWidget[viewID ?? ""] = [];
     noFilterRetrieval = true;
     confirmCache = {};
   }
