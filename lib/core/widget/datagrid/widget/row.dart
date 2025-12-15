@@ -29,7 +29,7 @@ class GridRowWidget extends StatefulWidget {
   String schemaID; 
   String cellID;
   bool news = false;
-  Map<String, model.Shallowed> contentShallowed;
+  Map<String, String> contentShallowed;
   List<GridCell> cells;  
   List<GridCellWidget> widgetCells = [];  
   bool showCheckboxColumn; 
@@ -138,7 +138,9 @@ class GridRowWidgetState extends State<GridRowWidget> {
     String? state;
     for (var e in widget.cells) {
       if (e.columnName == "state") {
-        state = widget.contentShallowed["${e.columnName}:$cellID"]?.label ?? widget.contentShallowed["${e.columnName}:$cellID"]?.name ??  e.value;
+        print(widget.contentShallowed);
+        print("${e.columnName}:${widget.schemaID}:$cellID");
+        state = widget.contentShallowed["${e.columnName}:${widget.schemaID}:$cellID"];
         break;
       }
     }
@@ -150,7 +152,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
       
       if (first) {
         if (widget.news) {
-          var i = Icons.new_releases;
           bs.add(Container(
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
             child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
@@ -232,7 +233,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
           schemaID: e.schemaID, 
           schemaField: e.schemaField,
           translatable: e.translatable,
-          shal: widget.contentShallowed["${e.columnName}:$cellID"], 
+          shal: widget.contentShallowed["${e.columnName}:${widget.schemaID}:$cellID"], 
         )
       );
       widgets.add(

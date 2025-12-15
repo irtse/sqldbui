@@ -69,7 +69,7 @@ class GridCellWidget extends StatefulWidget implements ConvertorWidget {
   String? dataRef;
 
   GridCell cell;
-  model.Shallowed? shal;
+  String? shal;
   model.SchemaField? schemaField;
   @override dynamic value;
 
@@ -100,21 +100,12 @@ class GridCellWidgetState extends State<GridCellWidget> {
       widget.cell.value = cacheChanges["${widget.cellID}:${widget.cell.columnName}"]; 
     }
     widget.value = widget.cell.value != null ? widget.cell.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...";
-    widget.value = widget.shal != null ? (widget.shal!.label ?? widget.shal!.name ?? "${widget.shal!.id}") : widget.value;
-    if ( widget.shal != null && widget.value == "") {
-      widget.value = widget.shal!.id;
-    }
+    widget.value = widget.shal ?? widget.value;
     var edit = modeIndex[viewID]  == 1 && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
                 && !widget.cell.readOnly && !widget.readOnly;
-    if (edit && widget.shal != null) {
-      widget.value = "${widget.shal!.id ?? widget.value}";
-    }
     String url = currentView?.schema[widget.cell.columnName] == null || currentView!.schema[widget.cell.columnName]?.actionPath == "" ? 
       "" : "${currentView?.schema[widget.cell.columnName]!.actionPath}";
     var v = widget.value;
-    if (widget.shal?.name != null) {
-      widget.translatable = (widget.schemaField?.schema[widget.shal!.name]?.translatable ?? true) && widget.translatable;
-    }
     Widget? wid;
     if (widget.cell.type.contains("upload") && v !=  "no info...") {
       wid = Text.rich(

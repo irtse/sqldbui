@@ -383,7 +383,7 @@ class SubGridWidget extends StatefulWidget {
   bool isEnum;
   double scroll = 0;
 
-  Map<String, model.Shallowed> contentShallowed = {};
+  Map<String, String> contentShallowed = {};
   Map<String, Map<String, dynamic>> cache = <String, Map<String, dynamic>>{};
 
   SubGridWidget({ super.key,
@@ -526,7 +526,13 @@ class SubGridWidgetState extends State<SubGridWidget> {
           widget.cache[widget.view!.schemaName]!["id"]=item.values["id"];
           if (item.linkPath != "") {  widget.links[item.values['id']] = item.linkPath; }
           for (var key in item.valuesShallow.keys) { 
-           widget.contentShallowed['$key:${item.values["id"]}'] = item.valuesShallow[key]!; 
+            if (key == "state") {
+              print("$key:${item.schemaID}:${item.values["id"]} ${item.valuesShallow[key]?.name} ${item.valuesShallow[key]?.label}");
+            }
+            widget.contentShallowed['$key:${item.schemaID}:${item.values["id"]}'] = (item.valuesShallow[key]?.label ?? item.valuesShallow[key]?.name ?? "${item.valuesShallow[key]?.id}");  
+            if (modeIndex[viewID]  == 1 && ["id", "description", mathColName[viewID] ?? "total"].contains(key)  && !item.readonly) {
+              widget.contentShallowed['$key:${item.schemaID}:${item.values["id"]}'] = "${item.valuesShallow[key]?.id}"; 
+            }
           }
         } else { widget.cache[widget.view!.schemaName]!["id"] += ",${item.values['id']}"; }
         if (!widget.view!.isEmpty && item.values.values.where((e) => e != null).toList().isEmpty) { 
@@ -557,6 +563,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
     return datas.map<GridRowWidget>((mapped) {
       bool found = selectedGrid.where((cellID) => cellID == mapped.values["id"]).isNotEmpty;
       return GridRowWidget( 
+        schemaID: mapped.schemaID,
         news: mapped.isNew,
         sharedBy: mapped.sharedBy,
         sharedTo: mapped.sharedTo,
@@ -593,7 +600,6 @@ class SubGridWidgetState extends State<SubGridWidget> {
       }, ).toList(), 
       showCheckboxColumn: widget.showCheckboxColumn, 
       contentShallowed: widget.contentShallowed, 
-      schemaID: widget.schemaID, 
       viewKey: widget.viewKey);
     }).toList();
   }
