@@ -238,8 +238,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
     if (filterTempOrderView[viewID] == null) { 
       filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; 
     }
-    filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( 
-      (fieldName) => !(widget.schema[fieldName] == null)).toList();
+    filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( (fieldName) => !(widget.schema[fieldName] == null)).toList();
     items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), child:  Row( children : [ 
           Container( width: 44),
           Padding( padding: const EdgeInsets.only(right: 10), 

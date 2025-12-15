@@ -138,8 +138,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
     String? state;
     for (var e in widget.cells) {
       if (e.columnName == "state") {
-        print(widget.contentShallowed);
-        print("${e.columnName}:${widget.schemaID}:$cellID");
         state = widget.contentShallowed["${e.columnName}:${widget.schemaID}:$cellID"];
         break;
       }
@@ -177,7 +175,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
           if (s.length > 1) {
             s = s.sublist(0, 2);
           }
-          print(state);
           try {
             bs.add(
               FutureBuilder(future: getOnFlow(s.join(" ").replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "")), 

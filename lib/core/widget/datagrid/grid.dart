@@ -273,7 +273,6 @@ class GridWidgetState extends State<GridWidget> {
         onToggle: (index) async {
           modeIndex[viewID ?? ""]  = index ?? 0;
           globalOffset = 0;
-          filterTempOrderView.remove(viewID);
           var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
           widget.view?.items = [];
           var e = await APIService().getWithOffset<model.View>(widget.view?.linkPath ?? defaultPath, true, context);
@@ -526,9 +525,6 @@ class SubGridWidgetState extends State<SubGridWidget> {
           widget.cache[widget.view!.schemaName]!["id"]=item.values["id"];
           if (item.linkPath != "") {  widget.links[item.values['id']] = item.linkPath; }
           for (var key in item.valuesShallow.keys) { 
-            if (key == "state") {
-              print("$key:${item.schemaID}:${item.values["id"]} ${item.valuesShallow[key]?.name} ${item.valuesShallow[key]?.label}");
-            }
             widget.contentShallowed['$key:${item.schemaID}:${item.values["id"]}'] = (item.valuesShallow[key]?.label ?? item.valuesShallow[key]?.name ?? "${item.valuesShallow[key]?.id}");  
             if (modeIndex[viewID]  == 1 && ["id", "description", mathColName[viewID] ?? "total"].contains(key)  && !item.readonly) {
               widget.contentShallowed['$key:${item.schemaID}:${item.values["id"]}'] = "${item.valuesShallow[key]?.id}"; 

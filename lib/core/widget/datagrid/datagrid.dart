@@ -237,7 +237,6 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     }
 
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
-    
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
