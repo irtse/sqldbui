@@ -168,6 +168,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                           } 
                         } catch(e) { print(e); }
                         filterRestr[viewID] = ""; 
+                        globalMainViewKey.currentState?.setState(() {});
                       }); 
                     })) : Container() ,
                     currentView!.filterPath != "" ? FutureBuilder(future: APIService().get<model.Shallowed>("${currentView!.filterPath}&is_view=false", firstAPI || forceFilter, null), 
@@ -240,6 +241,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         confirmCache = {};
                         await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
                           <String, dynamic> { "is_selected" : false }, null);
+                        globalMainViewKey.currentState?.setState(() {});
                       }, icon: Icons.filter_alt_off, tooltip: s.data ?? TranslateConstants.filterResetT, parent: this);
                     })) : Container(),
                       FutureBuilder(future: getOnFlow("<state> quick filter"), builder: (a, s) { 
