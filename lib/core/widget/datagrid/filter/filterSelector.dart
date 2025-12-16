@@ -168,6 +168,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                           } 
                         } catch(e) { print(e); }
                         filterRestr[viewID] = ""; 
+                        navigate = true;
                         globalMainViewKey.currentState?.setState(() {});
                       }); 
                     })) : Container() ,
@@ -241,6 +242,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         confirmCache = {};
                         await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
                           <String, dynamic> { "is_selected" : false }, null);
+                        navigate = true;
                         globalMainViewKey.currentState?.setState(() {});
                       }, icon: Icons.filter_alt_off, tooltip: s.data ?? TranslateConstants.filterResetT, parent: this);
                     })) : Container(),
@@ -557,9 +559,13 @@ class FilterSelectorButtonWidgetState extends State<FilterSelectorButtonWidget> 
                           });
                           await widget.function();
                           await widget.parent.resetList();
-                          setState(() {
-                            widget.isLoading = false;
-                          });
+                            if (!mounted) {
+                              return;
+                            }
+                            setState(() {
+                              widget.isLoading = false;
+                            });
+                          
                         });
   }
 }
