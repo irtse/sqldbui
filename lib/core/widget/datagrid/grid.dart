@@ -273,25 +273,13 @@ class GridWidgetState extends State<GridWidget> {
         onToggle: (index) async {
           modeIndex[viewID ?? ""]  = index ?? 0;
           globalOffset = 0;
-          var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
           widget.view?.items = [];
-          var e = await APIService().getWithOffset<model.View>(widget.view?.linkPath ?? defaultPath, true, context);
-          for (var view in e.data ?? []) { 
-            widget.view?.max = view?.max;
-            for (var item in view.items) { 
-              if ((widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
-                widget.view?.items.add(item); 
-              }
-            }
-          }
+          navigate = true;
+          globalMainViewKey.currentState?.setState(() {});
           Future.delayed(Duration(seconds: 1), () {
             globalActionBar.currentState?.setState(() {
               globalActionBar.currentState?.widget.view = widget.view;
             });
-            if (mounted) {
-              setState(() { });
-            }
-            
           }); 
         }
       ))
