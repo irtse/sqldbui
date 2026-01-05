@@ -229,12 +229,13 @@ class APIService {
         }
         
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
+        print(cmdCol);
         var cols = getColumns(url, offset != null);
         var command = "";
         if (commands[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
         }
-        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "${url.contains("?") ? "&" : "?"}offset=0"}${ url.contains("dbview") ? (modeIndex[viewID]  == 1 ? "&filter_mode=edit" : (modeIndex[viewID]  == 2 ? "&filter_mode=delete" : "" )) : ""}";
+        url = "$url$cols$command$cmdCol${extend ?? ""}$orderBy$filter${limit != null ? "&limit=$limit" : "${url.contains("?") ? "&" : "?"}limit=10"}${offset != null ? "&offset=$offset" : "&offset=0"}${ url.contains("dbview") ? (modeIndex[viewID]  == 1 ? "&filter_mode=edit" : (modeIndex[viewID]  == 2 ? "&filter_mode=delete" : "" )) : ""}";
         if (method == "get") {
           if (!force && cache.containsKey(url) && cache[url] != null && cache[url]!.data != null && cache[url]!.data!.isNotEmpty ) { 
             return cache[url]! as APIResponse<T>;
