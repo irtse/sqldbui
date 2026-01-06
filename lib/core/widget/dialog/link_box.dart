@@ -130,7 +130,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
     var title = (await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.shareToUser));
     var tooltip =(await getOnFlow(widget.isDelete ?  TranslateConstants.unshare :  TranslateConstants.share));
     if (widget.sharing != null && widget.sharing!.shallowPath.isNotEmpty && !widget.sharing!.shallowPath.keys.first.contains("share")) {
-      tooltip = (await getOnFlow(widget.isDelete ?  TranslateConstants.undelegate :  TranslateConstants.undelegate));
+      tooltip = (await getOnFlow(widget.isDelete ?  TranslateConstants.undelegate :  TranslateConstants.delegate));
       title = (await getOnFlow(widget.isDelete ? TranslateConstants.userDelegated : TranslateConstants.delegateToUser));
     }
 

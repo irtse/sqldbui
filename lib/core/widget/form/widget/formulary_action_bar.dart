@@ -47,7 +47,7 @@ class FormularyActionBarWidgetState extends State<FormularyActionBarWidget> {
       var value = widget.refItem.values["state"];
       if (widget.view.actions.contains("put") && !widget.view.isEmpty && value != "completed" && value != "dismiss" && value != "refused") {
         for (var state in { "completed" : { "purpose": "validate task", "color": Colors.green, "icon": Icons.check },
-                            "dismiss" :  { "purpose": "dismiss task", "color": Colors.orange, "icon": Icons.back_hand_outlined }, 
+                            "dismiss" :  { "purpose": "dismiss task, jump to before", "color": Colors.orange, "icon": Icons.back_hand_outlined }, 
                             "refused":  { "purpose": "refused task", "color": Colors.red, "icon": Icons.close}, }.entries) {
           if ((widget.isFirst || !(widget.workflow?.isDismissable ?? true)) && state.key == "dismiss") {
             continue;

@@ -229,7 +229,6 @@ class APIService {
         }
         
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
-        print(cmdCol);
         var cols = getColumns(url, offset != null);
         var command = "";
         if (commands[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math") { 
