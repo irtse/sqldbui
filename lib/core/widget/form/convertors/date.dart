@@ -104,7 +104,7 @@ class _DateState extends State<DateWidget> {
          FocusScope.of(context).requestFocus(focusNode);
          copyToClipboard(v, context);
        },  child : Tooltip( message:  widget.value != null ? "${widget.value}"
-            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null)), child: SizedBox(width: 400, height: 30, 
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : "")), child: SizedBox(width: 400, height: 30, 
             child: TextFormField( focusNode: focusNode,
           readOnly: true,
           initialValue: widget.value != null ? "${widget.value}" 

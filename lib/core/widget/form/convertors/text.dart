@@ -87,7 +87,7 @@ class _TextState extends State<TextWidget> {
         return GestureDetector( onLongPress:  () {
           FocusScope.of(context).requestFocus(focusNode);
           copyToClipboard("$val", context);
-        }, child:  Tooltip( message: val != null ? "$val" : null, child: TextFormField( focusNode: focusNode,
+        }, child:  Tooltip( message: "${val ?? ""}", child: TextFormField( focusNode: focusNode,
       obscureText: widget.type.contains("password") || widget.label.contains("password") ? true : false,
       readOnly: widget.readOnly,
       initialValue: val,

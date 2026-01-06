@@ -194,7 +194,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               }
               return GestureDetector( onLongPress:  () {
           copyToClipboard("${widget.value}", context);
-        }, child:  Tooltip( message: widget.value != null ? "${widget.value}" : null, child: SizedBox(width: 400, height: 30, 
+        }, child:  Tooltip( message: "${widget.value ?? ""}", child: SizedBox(width: 400, height: 30, 
                 child: TextFormField(
                   readOnly: true,
                   initialValue: widget.value,

@@ -136,6 +136,6 @@ class _NumberState extends State<NumberWidget> {
           copyToClipboard(widget.value != null ? "${widget.value}"
             : (widget.autofill != null ? "${widget.autofill}" : ""), context);
           } : null, child: Tooltip( message:  widget.value != null ? "${widget.value}"
-            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null)), child: w ));
+            : (widget.autofill != null ? "${widget.autofill}" : (widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : "")), child: w ));
   }
 }
