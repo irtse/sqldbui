@@ -258,7 +258,7 @@ class _SearchField extends StatelessWidget {
     FocusNode focusNode = FocusNode();
     focusNode.requestFocus();
     
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(microseconds: 500), () {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchCtrl[label]?.selection = TextSelection.collapsed(
           offset: searchCtrl[label]?.text.length ?? 0,
