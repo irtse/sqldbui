@@ -302,7 +302,7 @@ class _SearchField extends StatelessWidget {
               if (searchCtrl[label]?.text == v) {
                 changeFunction!(searchCtrl[label]?.text ?? "");
                 onChanged(search[label] ??  []);
-                Future.delayed(Duration(microseconds: 100), () {
+                Future.delayed(Duration(microseconds: 500), () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     searchCtrl[label]?.selection = TextSelection.collapsed(
                       offset: searchCtrl[label]?.text.length ?? 0,
