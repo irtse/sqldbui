@@ -250,19 +250,20 @@ class _SearchField extends StatelessWidget {
     }
     if ((searchCtrl[label]?.text ?? "") != "" && (searchCtrl[label]?.text ?? "") != search[label]?.join(" ") ) {
       Future.delayed(Duration(seconds: 1), () {
-        search[label]=[];
-        search[label]!.addAll((searchCtrl[label]?.text ?? "").split(" "));
+        search[label]=(searchCtrl[label]?.text ?? "").split(" ");
         onChanged(search[label]!);
       });
     }
-
+    
     FocusNode focusNode = FocusNode();
     focusNode.requestFocus();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      searchCtrl[label]?.selection = TextSelection.collapsed(
-        offset: searchCtrl[label]?.text.length ?? 0,
-      );
+    
+    Future.delayed(Duration(seconds: 1), () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        searchCtrl[label]?.selection = TextSelection.collapsed(
+          offset: searchCtrl[label]?.text.length ?? 0,
+        );
+      });
     });
 
     return Padding(
