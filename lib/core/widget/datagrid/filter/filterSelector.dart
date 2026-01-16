@@ -215,6 +215,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       child: FutureBuilder(future: getOnFlow(TranslateConstants.filterApplyT), builder: (a, s) {
                         return FilterSelectorButtonWidget(function: () async {
                         if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
+                          globalOffset = 0;
                           globalFilter[viewID] = Filters(); // empty filter to refill with new
                           for (var filter in filterRowsWidget[viewID] ?? []) {
                             if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
@@ -242,6 +243,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                         confirmCache = {};
                         await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll("rows=all", "rows=${filterRestr[viewID]}"), 
                           <String, dynamic> { "is_selected" : false }, null);
+                        globalOffset = 0;
                         navigate = true;
                         globalMainViewKey.currentState?.setState(() {});
                       }, icon: Icons.filter_alt_off, tooltip: s.data ?? TranslateConstants.filterResetT, parent: this);
