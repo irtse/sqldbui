@@ -248,7 +248,7 @@ class _SearchField extends StatelessWidget {
     if (searchCtrl[label] == null) {
       searchCtrl[label] =TextEditingController();
     }
-    if ((searchCtrl[label]?.text ?? "") != "" ) {
+    if ((searchCtrl[label]?.text ?? "") != "" && (searchCtrl[label]?.text ?? "") != search[label]?.join(" ") ) {
       Future.delayed(Duration(seconds: 1), () {
         search[label]=[];
         search[label]!.addAll((searchCtrl[label]?.text ?? "").split(" "));
