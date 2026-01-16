@@ -475,12 +475,12 @@ class SubGridWidgetState extends State<SubGridWidget> {
                                         if ((e.data ?? []).isEmpty) {
                                           widget.view?.max = widget.view?.items.length ?? 0;
                                         }
-                                        for (var view in (e.data ?? [])) { 
+                                        for (var view in ((e.data ?? []) as List<model.View>)) { 
                                           if (view.items.isEmpty || ((widget.view?.max ?? 0) <= globalOffset && (widget.view?.max ?? 0) > (widget.view?.items.length ?? 0))) {
                                             widget.view?.max = widget.view?.items.length ?? 0;
                                           }
                                           for (var item in view.items) { 
-                                            if ((widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
+                                            if ((widget.view?.items.where((element) => element.values['id'] == item.values['id'] && element.schemaID == item.schemaID) ?? []).isEmpty) { 
                                               widget.view?.items.add(item); 
                                             }
                                           }
