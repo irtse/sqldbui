@@ -419,11 +419,13 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
         } catch(e) { }
         
       }
+      var gk = GlobalKey<OptionsListState>();
       return Container(
         padding: EdgeInsets.only(left: 10),
         height: 25,  
         width: (MediaQuery.of(context).size.width - menuSize) / 3.5, 
         child: MultiDropdown<String>(
+          gk: gk,
         label: "drp",
         addFunction: (String value) {
           for (var e in ctrls.items) {
@@ -433,7 +435,9 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
           }
-          ctrls.openDropdown("", value, true);
+          gk.currentState?.setState(() {
+            gk.currentState?.widget.items = ctrls.items;
+          });
           setState(() {});
         },
         controller: ctrls,

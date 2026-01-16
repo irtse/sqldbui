@@ -118,6 +118,7 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.forceVerticalAlignment = false,
     this.style,
     this.closeOnBackButton = false,
+    this.gk,
     Key? key,
   })  : future = null,
         super(key: key);
@@ -177,9 +178,11 @@ class MultiDropdown<T extends Object> extends StatefulWidget {
     this.max = 0,
     this.style,
     this.forceVerticalAlignment = false,
+    this.gk,
     Key? key,
   })  : items = const [],
         super(key: key);
+  final GlobalKey<OptionsListState>? gk;
   final int max;
   final String? label;
   final Future<void> Function(String)? changeFunction;
@@ -456,6 +459,7 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
                       : Offset(0, widget.dropdownDecoration.marginTop),
                   child: RepaintBoundary(
                     child: _Dropdown<T>(
+                      gk: widget.gk,
                       max: widget.max,
                       label: widget.label ?? widget.fieldDecoration.labelText ?? "",
                       changeFunction: widget.changeFunction,

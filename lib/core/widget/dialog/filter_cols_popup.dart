@@ -311,10 +311,13 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
       }
       ctrls.addItem(item);
     }
+
+    var gk = GlobalKey<OptionsListState>();
     return Column(children: [
       Padding(padding: EdgeInsets.symmetric(horizontal: 10),
         child: Container( height: 30, child: MultiDropdown<String>(
         label: "drp",
+        gk: gk,
         addFunction: (String value) {
           for (var e in ctrls.items) {
             e.selected = false;
@@ -324,7 +327,9 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
             ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
           }
           widget.items = ctrls.items;
-          ctrls.openDropdown("", value, true);
+          gk.currentState?.setState(() {
+            gk.currentState?.widget.items = widget.items;
+          });
           setState(() {});
         },
         controller: ctrls,

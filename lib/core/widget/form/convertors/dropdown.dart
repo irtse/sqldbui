@@ -417,8 +417,10 @@ class SubDropDownState extends State<SubDropDownWidget> {
         }
       }
     }
+    var gk = GlobalKey<OptionsListState>();
     return Stack( children: [
       MultiDropdown<String>(
+        gk: gk,
         max: max,
         changeFunction: (dynamic value) async {
           if (value == "") {
@@ -426,7 +428,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
           }
           var filters = Filters();
           filters.add("name", Filter(value: value, column: "name", realName: "name"));
-          load(0, 10, APIService().getFilter(widget.mainUrl, true, filters), value, items);
+          load(0, 10, APIService().getFilter(widget.mainUrl, true, filters), value, items, gk);
         },
         enabled:!widget.readOnly,
         addFunction: widget.type == "link_add" ? (String value) {
@@ -436,7 +438,9 @@ class SubDropDownState extends State<SubDropDownWidget> {
             if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
               ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
             }
-            ctrls.openDropdown(null, widget.label, true);
+            gk.currentState?.setState(() {
+              gk.currentState?.widget.items = ctrls.items;
+            });
         } : null,
                         controller: ctrls,
                         singleSelect: true,
@@ -558,7 +562,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
     }
   }
 
-  Future<void> load(int start, int interval, String filter, String? value, List<DropdownItem<String>> items) async {
+  Future<void> load(int start, int interval, String filter, String? value, List<DropdownItem<String>> items, GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
     var found = false;
       var e = await APIService().get<model.Shallowed>("${widget.mainUrl}$filter&offset=$start&limit=$interval", filter != "", null);
@@ -578,8 +582,8 @@ class SubDropDownState extends State<SubDropDownWidget> {
             }
           }
     } 
-    if (ctrls.isOpen && found) {
-      ctrls.openDropdown(value, widget.label, true);
-    }
+    gk.currentState?.setState(() {
+      gk.currentState?.widget.items = ctrls.items;
+    });
   }
 }

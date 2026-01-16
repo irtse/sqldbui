@@ -285,14 +285,18 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
         items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v, selected: select));
       }
     }
+    var gk = GlobalKey<OptionsListState>();
     return MultiDropdown<Map<String, dynamic>>(
+      gk: gk,
                         addFunction: widget.type == "manytomany_add" ? (String value) {
                           if (ctrls.items.where( (i) => i.label.toString() == value).isEmpty) {
                             ctrls.addItem(DropdownItem<Map<String,dynamic>>(value: {
                               "name": value,
                             }, label: value, selected: true));
                           }
-                          ctrls.openDropdown(null, widget.label, true);
+                          gk.currentState?.setState(() {
+                            gk.currentState?.widget.items = ctrls.items;
+                          });
                         } : null,
                         controller: ctrls,
                         items: items,

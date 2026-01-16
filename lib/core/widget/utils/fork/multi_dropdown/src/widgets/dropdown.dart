@@ -22,7 +22,9 @@ class _Dropdown<T> extends StatelessWidget {
     this.itemBuilder,
     this.itemSeparator,
     this.singleSelect = false,
+    this.gk,
   }) : super(key: key);
+  final GlobalKey<OptionsListState>? gk;
   final void Function(String)? changeFunction;
   final void Function(String)? addFunction;
   /// The decoration of the dropdown.
@@ -125,15 +127,7 @@ class _Dropdown<T> extends StatelessWidget {
                 ),
               if (decoration.header != null)
                 Flexible(child: decoration.header!),
-              Flexible(
-                child: ListView.separated(
-                  separatorBuilder: (_, __) =>
-                      itemSeparator ?? const SizedBox.shrink(),
-                  shrinkWrap: true,
-                  itemCount: items.length,
-                  itemBuilder: (_, int index) => _buildOption(index, theme),
-                ),
-              ),
+              OptionsList( key: gk, buildOption: _buildOption, items: items, theme: theme, itemSeparator: itemSeparator,),
               if (items.isEmpty && searchEnabled)
                 Padding(
                   padding: const EdgeInsets.all(12),
@@ -218,6 +212,33 @@ class _Dropdown<T> extends StatelessWidget {
 Map<String,TextEditingController> searchCtrl = {};
 Map<String, List<String>> search = {};
 Map<String, List<String>> alreadySearch = {};
+
+class OptionsList<T>  extends StatefulWidget {
+  List<DropdownItem<T>> items;
+  Widget Function(int, ThemeData) buildOption;
+  ThemeData theme;
+  Widget? itemSeparator;
+
+  OptionsList({super.key, required this.items, required this.buildOption, required this.theme, required this.itemSeparator});
+
+  @override
+  State<OptionsList> createState() => OptionsListState();
+}
+
+class OptionsListState extends State<OptionsList> {
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+                child: ListView.separated(
+                  separatorBuilder: (_, __) =>
+                      widget.itemSeparator ?? const SizedBox.shrink(),
+                  shrinkWrap: true,
+                  itemCount: widget.items.length,
+                  itemBuilder: (_, int index) => widget.buildOption(index, widget.theme),
+                ),
+              );
+  }
+}
 
 // ignore: must_be_immutable
 class _SearchField extends StatelessWidget {
