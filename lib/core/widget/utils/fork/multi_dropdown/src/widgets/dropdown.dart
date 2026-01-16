@@ -258,7 +258,7 @@ class _SearchField extends StatelessWidget {
     FocusNode focusNode = FocusNode();
     focusNode.requestFocus();
     
-    Future.delayed(Duration(microseconds: 500), () {
+    Future.delayed(Duration(microseconds: 600), () {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchCtrl[label]?.selection = TextSelection.collapsed(
           offset: searchCtrl[label]?.text.length ?? 0,
@@ -283,7 +283,7 @@ class _SearchField extends StatelessWidget {
         onChanged: (String v) {
           search[label] = ((searchCtrl[label]?.text ?? "").trim()).split(" ");
           if (changeFunction != null) {
-            Future.delayed(Duration(seconds: 1), () {
+            Future.delayed(Duration(microseconds: 500), () {
               if (searchCtrl[label]?.text == v) {
                 changeFunction!(searchCtrl[label]?.text ?? "");
                 onChanged(search[label] ??  []);
