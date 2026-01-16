@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"main.dart.js": "68f389073199f1b0296a2b65a1c0a622",
+const RESOURCES = {"main.dart.js": "a1cc6a3a16ba8edea6045b0cbfee7e8b",
 "manifest.json": "7ce3ab057b2d2f5e46534f82455de744",
 "assets/AssetManifest.json": "cff41b1a52d0b9b793d5fe44fa093380",
 "assets/assets/pdf/tutorial.pdf": "c3ce5d088a3447f4915771280e02eca2",
@@ -301,10 +301,10 @@ const RESOURCES = {"main.dart.js": "68f389073199f1b0296a2b65a1c0a622",
 "assets/packages/sign_in_button/assets/logos/google_light.png": "f71e2d0b0a2bc7d1d8ab757194a02cac",
 "assets/FontManifest.json": "1d1b2da5c95cb18a543e121865df72ff",
 "assets/AssetManifest.bin": "b223b7b2eda2fcde310b2c0a98a45e3c",
-"index.html": "ff9a25b013e717a1cda526283eb17659",
-"/": "ff9a25b013e717a1cda526283eb17659",
+"index.html": "93d0fabbac8c6191498f58bd124ab2d4",
+"/": "93d0fabbac8c6191498f58bd124ab2d4",
 "favicon.png": "7acd80e0ce19e8cfc8ab84e17a5609ce",
-"flutter_bootstrap.js": "23c765a781adc4178b36a2aa0833c304",
+"flutter_bootstrap.js": "c9b394690726586c49041291e26f0487",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",

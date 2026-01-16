@@ -118,7 +118,7 @@ class _Dropdown<T> extends StatelessWidget {
                       child: Text((await getOnFlow(TranslateConstants.searchInfoMake)), style: TextStyle(color: Colors.grey)),
                     )),
                   ]),
-                _SearchField(
+                SearchField(
                   label: label,
                   function: addFunction,
                   decoration: searchDecoration,
@@ -241,8 +241,8 @@ class OptionsListState extends State<OptionsList> {
 }
 
 // ignore: must_be_immutable
-class _SearchField extends StatelessWidget {
-   _SearchField({
+class SearchField extends StatefulWidget {
+   SearchField({
     required this.decoration,
     required this.onChanged,
     required this.changeFunction,
@@ -256,7 +256,23 @@ class _SearchField extends StatelessWidget {
   final void Function(String)? function;
   final void Function(String)? changeFunction;
 
+
+
+
+  @override SearchFieldState createState() => SearchFieldState();
+}
+class SearchFieldState extends State<SearchField> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+                    searchCtrl[widget.label]?.selection = TextSelection.collapsed(
+                      offset: searchCtrl[widget.label]?.text.length ?? 0,
+                    );
+                  }); 
+    });
+  }
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -266,51 +282,45 @@ class _SearchField extends StatelessWidget {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    if (searchCtrl[label] == null) {
-      searchCtrl[label] =TextEditingController();
+    if (searchCtrl[widget.label] == null) {
+      searchCtrl[widget.label] =TextEditingController();
     }
-    if ((searchCtrl[label]?.text ?? "") != "" && (searchCtrl[label]?.text ?? "") != search[label]?.join(" ") ) {
+    if ((searchCtrl[widget.label]?.text ?? "") != "" && (searchCtrl[widget.label]?.text ?? "") != search[widget.label]?.join(" ") ) {
       Future.delayed(Duration(microseconds: 100), () {
-        search[label]=(searchCtrl[label]?.text ?? "").split(" ");
-        onChanged(search[label]!);
+        search[widget.label]=(searchCtrl[widget.label]?.text ?? "").split(" ");
+        widget.onChanged(search[widget.label]!);
       });
     }
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-                    searchCtrl[label]?.selection = TextSelection.collapsed(
-                      offset: searchCtrl[label]?.text.length ?? 0,
-                    );
-                  });    
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Wrap( 
       alignment: WrapAlignment.center, 
       children: [ TextField(
         autofocus: true,
-        controller: searchCtrl[label]!,
+        controller: searchCtrl[widget.label]!,
         decoration: InputDecoration(
           isDense: true,
-          hintText: decoration.hintText,
-          border: decoration.border,
-          focusedBorder: decoration.focusedBorder,
-          suffixIcon: decoration.searchIcon,
+          hintText: widget.decoration.hintText,
+          border: widget.decoration.border,
+          focusedBorder: widget.decoration.focusedBorder,
+          suffixIcon: widget.decoration.searchIcon,
         ),
         onChanged: (String v) {
-          search[label] = ((searchCtrl[label]?.text ?? "").trim()).split(" ");
-          if (changeFunction != null) {
+          search[widget.label] = ((searchCtrl[widget.label]?.text ?? "").trim()).split(" ");
+          if (widget.changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
-              if (searchCtrl[label]?.text == v) {
-                changeFunction!(searchCtrl[label]?.text ?? "");
-                onChanged(search[label] ??  []);
+              if (searchCtrl[widget.label]?.text == v) {
+                widget.changeFunction!(searchCtrl[widget.label]?.text ?? "");
+                widget.onChanged(search[widget.label] ??  []);
               } 
             });
           }
         },
-      ), function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
+      ), widget.function == null ? Container() : Padding(padding: EdgeInsets.only(top: 10), 
       child: InkWell( 
         onTap: () {
-          if ((searchCtrl[label]?.text ?? "") != "") {
-            function!(searchCtrl[label]?.text ?? "");
+          if ((searchCtrl[widget.label]?.text ?? "") != "") {
+            widget.function!(searchCtrl[widget.label]?.text ?? "");
           }
         },
         child: Container(
