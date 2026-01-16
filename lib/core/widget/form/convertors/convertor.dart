@@ -458,7 +458,9 @@ class Convertor {
       hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
+    GlobalKey<OptionsListState> gk = GlobalKey<OptionsListState>();
     return MultiDropdown<String>(
+        gk: gk,
         overrideKey: formFieldKey,
         max: max,
         label: label,
@@ -468,7 +470,7 @@ class Convertor {
           }
           var filters = Filters();
           filters.add("name", Filter(value: value, column: "name", realName: "name"));
-          load(url, 0, 10, APIService().getFilter(url, true, filters), value, items, ctrls, mapped, label);
+          load(url, 0, 10, APIService().getFilter(url, true, filters), value, items, ctrls, mapped, label, gk);
         },
         controller: ctrls,
         singleSelect: true,
@@ -694,7 +696,7 @@ class Convertor {
   }
   static Future<void> load(String url, int start, int interval, String filter, 
   String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls, 
-  Map<String, model.Shallowed> mapped, String label) async {
+  Map<String, model.Shallowed> mapped, String label, GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
     var found = false;
       var e = await APIService().get<model.Shallowed>("$url$filter&offset=$start&limit=$interval", filter != "", null);
@@ -714,9 +716,9 @@ class Convertor {
             }
           }
     } 
-    if (ctrls.isOpen && found) {
-      ctrls.openDropdown(value, label, true);
-    }
+    gk.currentState?.setState( () {
+      gk.currentState?.widget.items = ctrls.items;
+    });
   }
 }
 

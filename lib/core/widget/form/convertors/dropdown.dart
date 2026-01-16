@@ -564,12 +564,10 @@ class SubDropDownState extends State<SubDropDownWidget> {
 
   Future<void> load(int start, int interval, String filter, String? value, List<DropdownItem<String>> items, GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
-    var found = false;
       var e = await APIService().get<model.Shallowed>("${widget.mainUrl}$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {
             if (items.where( (e) => e.value == "${item.id}").isEmpty) {
-              found = true;
               var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
               try {
                 if (widget.translatable) {
