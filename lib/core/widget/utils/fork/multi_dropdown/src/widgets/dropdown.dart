@@ -249,7 +249,7 @@ class _SearchField extends StatelessWidget {
       searchCtrl[label] =TextEditingController();
     }
     if ((searchCtrl[label]?.text ?? "") != "" && (searchCtrl[label]?.text ?? "") != search[label]?.join(" ") ) {
-      Future.delayed(Duration(microseconds: 100), () {
+      Future.delayed(Duration(seconds: 1), () {
         search[label]=(searchCtrl[label]?.text ?? "").split(" ");
         onChanged(search[label]!);
       });
@@ -258,7 +258,7 @@ class _SearchField extends StatelessWidget {
     FocusNode focusNode = FocusNode();
     focusNode.requestFocus();
     
-    Future.delayed(Duration(microseconds: 600), () {
+    Future.delayed(Duration(seconds: 1), () {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchCtrl[label]?.selection = TextSelection.collapsed(
           offset: searchCtrl[label]?.text.length ?? 0,
