@@ -250,19 +250,27 @@ class _SearchField extends StatelessWidget {
     }
     if ((searchCtrl[label]?.text ?? "") != "" ) {
       Future.delayed(Duration(seconds: 1), () {
-        if (search[label] == null) {
-          search[label]=[];
-        }
-        search[label]!.add(searchCtrl[label]?.text ?? "");
+        search[label]=[];
+        search[label]!.addAll((searchCtrl[label]?.text ?? "").split(" "));
         onChanged(search[label]!);
       });
     }
+
+    FocusNode focusNode = FocusNode();
+    focusNode.requestFocus();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      searchCtrl[label]?.selection = TextSelection.collapsed(
+        offset: searchCtrl[label]?.text.length ?? 0,
+      );
+    });
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Wrap( 
       alignment: WrapAlignment.center, 
       children: [ TextField(
-        autofocus: true,
+        focusNode: focusNode,
         controller: searchCtrl[label]!,
         decoration: InputDecoration(
           isDense: true,
@@ -272,7 +280,7 @@ class _SearchField extends StatelessWidget {
           suffixIcon: decoration.searchIcon,
         ),
         onChanged: (String v) {
-          search[label] = (searchCtrl[label]?.text ?? "").split(" ");
+          search[label] = ((searchCtrl[label]?.text ?? "").trim()).split(" ");
           if (changeFunction != null) {
             Future.delayed(Duration(seconds: 1), () {
               if (searchCtrl[label]?.text == v) {

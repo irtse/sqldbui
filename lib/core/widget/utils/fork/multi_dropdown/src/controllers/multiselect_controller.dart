@@ -233,7 +233,7 @@ class MultiSelectController<T> extends ChangeNotifier {
     } else {
       _filteredItems = _items
           .where(
-            (item) => _searchQuery.where( (s) => item.label.toLowerCase().contains(s.toLowerCase())).isNotEmpty,
+            (item) => item.label.toLowerCase().contains(_searchQuery.join(" ").toLowerCase()),
           )
           .toList();
     }

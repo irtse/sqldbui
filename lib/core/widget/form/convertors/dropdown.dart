@@ -97,7 +97,6 @@ class DropDownState extends State<DropDownWidget> {
           FocusScope.of(context).requestFocus(focusNode);
           copyToClipboard("$val", context);
         }, child: SizedBox(width: 400, height: 30, 
-          
           child: Tooltip( message: val ?? "", child: TextFormField( focusNode: focusNode,
             readOnly: true,
             initialValue: val,
