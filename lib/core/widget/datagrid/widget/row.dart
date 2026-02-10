@@ -97,27 +97,27 @@ class GridRowWidgetState extends State<GridRowWidget> {
     if (widget.cells.isEmpty) { return Stack(); }
     String cellID = '${widget.cells[0].columnName != "id" ? widget.cells[0].cellID : widget.cells[0].value}';
     List<Widget> widgets = [];
-    double maxheight = 48;
+    double maxheight = 65;
     for (var e in widget.cells) {
       if (currentView == null || !rects.containsKey(viewID)) { continue; }
-      double h = 40;
+      double h = 65;
       var maxLetterPerLine = (rects[viewID]![e.columnName]!.width) / (e.fontSize - 5);
       double textLines = ((e.value?.toString() ?? "").length / maxLetterPerLine).ceilToDouble();
       if (textLines < 1) {
         textLines = 1;
       }
-      h = h + ((textLines * 1.1) * (e.fontSize + 5));
+      h = h + ((textLines * 1.1) * (e.fontSize + 4));
       if (maxheight < h) { maxheight = h; }
     }    
     var first = true;
     if (widget.showCheckboxColumn) {
       widget.isSelected = allSelected ? true : widget.isSelected ;
       widgets.add(
-        Container( width: 73, height: maxheight, alignment: Alignment.center,
+        Container( width: 57, height: maxheight, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(bottom: BorderSide(width: widget.borderWidth, color: widget.borderColor))),
           child: CheckboxListTile(
             dense: true, // réduit la hauteur verticale
-            contentPadding: EdgeInsets.only(right: 10), // retire le padding par défaut
+            contentPadding: EdgeInsets.only(right: 9.5), // retire le padding par défaut
             enabled: !allSelected,
             value: widget.isSelected, 
             onChanged: (value) {
@@ -153,6 +153,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
       if (first) {
         if (widget.news) {
           bs.add(Container(
+            margin: EdgeInsets.only(right: 10),
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
             child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
               child: Text((await getOnFlow(TranslateConstants.newT)).toLowerCase(), 
@@ -163,7 +164,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
         }
         if (e.isDraft) {
           bs.add(Container(
-            margin: EdgeInsets.only(left: 10),
+            margin: EdgeInsets.only(right: 10),
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
             child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
               child: Text((await getOnFlow(TranslateConstants.draftT)).toLowerCase(), 
@@ -183,7 +184,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
               builder: (a, s) {
                 if (s.data != null) {
                   return Container(
-                    margin: EdgeInsets.only(left: 10),
                     decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), 
                     color: state!.contains("pending") || state.contains("progressing") ? Colors.orange : (state.contains("completed") ? Colors.green : (state.contains("refused") || state.contains("dismiss") ? Colors.red : Colors.grey)) ),
                     child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
@@ -194,7 +194,6 @@ class GridRowWidgetState extends State<GridRowWidget> {
                   );
                 }
                 return Container(
-                  margin: EdgeInsets.only(left: 10),
                   decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), 
                   color: state!.contains("pending") || state.contains("progressing") ? Colors.orange : (state.contains("completed") ? Colors.green : (state.contains("refused") || state.contains("dismiss") ? Colors.red : Colors.grey))),
                   child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 

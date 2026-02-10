@@ -28,7 +28,7 @@ Map<String?, List<String>> notNew = {};
 Map<String?, Map<String, Rect>> rects = {};
 List<GridRowWidget> rows = [];
 List<GridColumnWidget> columns = []; 
-// ignore: s
+// ignore: s, must_be_immutable
 class GridWidget extends StatefulWidget {
   final model.View? view; 
   List<dynamic>? forceOrder;
@@ -475,7 +475,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
                                         if ((e.data ?? []).isEmpty) {
                                           widget.view?.max = widget.view?.items.length ?? 0;
                                         }
-                                        for (var view in ((e.data ?? []) as List<model.View>)) { 
+                                        for (var view in (e.data ?? [])) { 
                                           if (view.items.isEmpty || ((widget.view?.max ?? 0) <= globalOffset && (widget.view?.max ?? 0) > (widget.view?.items.length ?? 0))) {
                                             widget.view?.max = widget.view?.items.length ?? 0;
                                           }
@@ -596,8 +596,8 @@ class MainCheckWidget extends StatefulWidget {
 class MainCheckWidgetState extends State<MainCheckWidget>  {
   
   @override Widget build(BuildContext context) { 
-    return Padding(padding: const EdgeInsets.only(left: 5), child: Container(
-          width: 75, height: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
+    return Container(
+          width: 57, height: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(right: BorderSide( 
             color:  globalGridKey.currentState?.widget.borderColor ?? Colors.grey, 
             width:  globalGridKey.currentState?.widget.borderWidth ?? 1 ))),
@@ -618,7 +618,7 @@ class MainCheckWidgetState extends State<MainCheckWidget>  {
               });
             }
           )
-        ));
+        );
   }
 
 }
