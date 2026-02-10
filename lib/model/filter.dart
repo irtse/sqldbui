@@ -67,10 +67,15 @@ class Filters {
     for (var filter in sort()) {
       rows.add(FilterRowWidget(
         view: view,
-        schema: schema, columnName: filter.column, beforeColumn: (filter.realName ?? filter.column ?? "").split("."), 
+        schema: schema, 
+        columnName: filter.column, 
+        beforeColumn: (filter.realName ?? filter.column ?? "").split("."), 
         label: filter.label ?? filter.column, index: filter.index, 
-        type: filter.type, comparator: filter.comparator, 
-        connector: filter.connector, dir: filter.dir, value: filter.value));
+        type: filter.type, 
+        comparator: filter.comparator, 
+        connector: filter.connector, 
+        dir: filter.dir, 
+        value: filter.value));
     }
     return rows;
   }

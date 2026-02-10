@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
+import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/src/multi_dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/text_button.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +24,7 @@ class FilterPopUpWidget extends StatefulWidget {
   String? searchValue;
   GridColumnWidgetState component; 
   List<DropdownMenuItem<String>> items;
+  Map<String, model.SchemaField> schema;
   FilterPopUpWidget ({ 
     super.key, 
     required this.view,
@@ -28,7 +32,8 @@ class FilterPopUpWidget extends StatefulWidget {
     required this.columnName, 
     required this.component, 
     required this.label, 
-    required this.type 
+    required this.type,
+    required this.schema,
   });
   @override FilterPopUpState createState() => FilterPopUpState();
 }
@@ -101,18 +106,47 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
             if (currentView != null && globalFilter.containsKey(viewID)) {
               if (globalFilter[viewID]!.has(widget.columnName) && advancedSearch.isEmpty) { 
                 for (var filter in globalFilter[viewID]!.get(widget.columnName)) {
-                  advancedSearch.add(FilterSearchWidget(innerIndex: advancedSearch.length, state: setState, type: widget.type,
-                    filter: this, columnName: widget.columnName, label: widget.label, value: filter.value, 
-                    connector: filter.connector, comparator: filter.comparator));
+                  List<String> d = filter.realName?.split(".") ?? [];
+                  if (d.length > 1) {
+                    d = d.sublist(1, d.length);
+                  }
+                  print(d);
+                  advancedSearch.add(FilterSearchWidget(
+                    innerIndex: advancedSearch.length, 
+                    state: setState, 
+                    subName: d,
+                    type: widget.type,
+                    filter: this, 
+                    columnName: widget.columnName, 
+                    label: widget.label, 
+                    value: filter.value, 
+                    connector: filter.connector, 
+                    comparator: filter.comparator, 
+                    schema: widget.schema,));
                 }
               }
             }
             if (advancedSearch.isEmpty) {
-              advancedSearch.add(FilterSearchWidget(filter: this, innerIndex: 0, state: setState, 
-                type: widget.type, columnName: widget.columnName, label: widget.label));
+              advancedSearch.add(FilterSearchWidget(
+                filter: this,
+                innerIndex: 0, 
+                subName: [],
+                state: setState, 
+                schema: widget.schema,
+                type: widget.type,
+                columnName: widget.columnName, 
+                label: widget.label));
             } else if (advancedSearch.length == 1) {
-              advancedSearch.add(FilterSearchWidget(filter: this, innerIndex: 0, state: setState, type: widget.type,
-                columnName: widget.columnName, label: widget.label, value: advancedSearch.first.value,
+              advancedSearch.add(FilterSearchWidget(
+                filter: this, 
+                subName: advancedSearch.first.subName,
+                schema: advancedSearch.first.schema, 
+                innerIndex: 0, 
+                state: setState, 
+                type: widget.type,
+                columnName: widget.columnName, 
+                label: widget.label, 
+                value: advancedSearch.first.value,
                 comparator: advancedSearch.first.comparator));
                 advancedSearch.remove(advancedSearch.first);
             }
@@ -131,26 +165,36 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       if (widget.ascOrder == null) { globalOrder[viewID]?.remove(widget.columnName); }
                       globalFilter[viewID]?.remove(widget.columnName);
                       var founded = filterRowsWidget[viewID]?.where((element) => element.columnName == widget.columnName).toList() ?? [];
+                     
                       for (var search in advancedSearch) { 
-                        if (search.globalKey.currentState!.validate() && search.value != null && search.value != "") {
-                          if ((filterRowsWidget[viewID] ?? []).length > 1 && filterRowsWidget[viewID]?.last.connector == "") { filterRowsWidget[viewID]?.last.connector = "and"; }
+                        if ((search.globalKey.currentState?.validate() ?? true) && search.value != null && search.value != "") {
+                          if ((filterRowsWidget[viewID] ?? []).length > 1 && filterRowsWidget[viewID]?.last.connector == "") { 
+                            filterRowsWidget[viewID]?.last.connector = "and"; 
+                          }
                           if (founded.isEmpty) { 
                             filterRowsWidget[viewID]?.add(FilterRowWidget(
                               view: widget.view,
+                              beforeColumn: [search.columnName, ...search.subName],
                               schema: currentView!.schema, 
                               columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: (filterRowsWidget[viewID] ?? []).length));
-                            globalFilter[viewID]?.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
-                              type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
+                            globalFilter[viewID]?.add( 
+                              search.columnName, Filter(
+                                realName: [search.columnName, ...search.subName].join("."),
+                                column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: globalFilter[viewID]!.size(), 
+                                type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = globalFilter[viewID]?.size();
                           } else {
                             filterRowsWidget[viewID]?[founded.first.index] = FilterRowWidget(
                               view: widget.view,
+                              beforeColumn: [search.columnName, ...search.subName],
                               schema: currentView!.schema, columnName: search.columnName, type: search.type,
                               value: search.value, comparator: search.comparator, connector: search.connector,
                               label:  search.label == "" ? search.columnName : search.label, index: founded.first.index);
-                            globalFilter[viewID]?.add( search.columnName, Filter(column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 
+                            globalFilter[viewID]?.add( search.columnName, Filter(
+                              realName: [search.columnName, ...search.subName].join("."),
+                              column: search.columnName, label: search.label == "" ? search.columnName : search.label, index: founded.first.index, 
                               type: search.type, value: search.value, connector: search.connector, comparator: search.comparator)); 
                             search.index = founded.first.index;
                             founded.remove(founded.first); 
@@ -163,6 +207,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                     navigate = true;
                     confirmCache = {};
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                    Navigator.of(context).pop();
                   },
                   style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), child: Padding( padding: EdgeInsets.all(10), 
                     child: Text(apply.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))))),
@@ -186,6 +231,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
 // ignore: must_be_immutable
 class FilterSearchWidget extends StatefulWidget implements ConvertorWidget {
   @override dynamic value;
+  FilterSearchState? comp;
   String columnName; 
   String label;
   String type;
@@ -195,19 +241,28 @@ class FilterSearchWidget extends StatefulWidget implements ConvertorWidget {
   FilterPopUpState filter;
   int innerIndex;
   int? index;
+  Map<String, model.SchemaField> schema;
   StateSetter state;
   var globalKey = GlobalKey<FormState>();
   var fieldText = TextEditingController();
+
+  int depth = 0;
+  List<String> subName = [];
+
   FilterSearchWidget ({ 
     super.key, 
     this.url,
+    this.comp,
     this.value,
+    this.depth = 0,
+    required this.subName,
     required this.type, 
     required this.label,
     required this.state, 
     required this.filter, 
     required this.innerIndex, 
-    required this.columnName, 
+    required this.columnName,
+    required this.schema, 
     
     this.comparator = "=",
     this.connector = "", 
@@ -221,8 +276,12 @@ class FilterSearchState extends State<FilterSearchWidget> {
   Future<Widget> connectorButton(String conn) async {
     return TextButton(onPressed: () {
         if (widget.filter.advancedSearch.length <= widget.innerIndex + 1) { 
-          widget.filter.advancedSearch.add(FilterSearchWidget(filter: widget.filter, state: widget.state,
+          widget.filter.advancedSearch.add(FilterSearchWidget(
+            filter: widget.filter, 
+            state: widget.state,
+            subName: widget.subName,
             innerIndex: widget.filter.advancedSearch.length, 
+            schema: widget.schema,
             type: widget.type, 
             columnName: widget.columnName, 
             label: widget.label));
@@ -247,6 +306,112 @@ class FilterSearchState extends State<FilterSearchWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    if (widget.type.contains("onetomany") && widget.schema[widget.columnName] != null) {
+      MultiSelectController<String> ctrls = MultiSelectController<String>();
+      List<DropdownItem<String>> items = [];
+      for (var o in widget.schema[widget.columnName]!.schema.entries.where( (e) => !e.value.hidden)) {
+        print("SUB ${widget.subName}  ${widget.subName.length > widget.depth && o.key == widget.subName[widget.depth]}" );
+        items.add(DropdownItem<String>(value: o.key, 
+        label: await getOnFlow(o.value.label), 
+        selected: widget.subName.length > widget.depth && o.key == widget.subName[widget.depth] ));
+        ctrls.addItem(items.last);
+      }
+
+      return Column( children: [
+        Padding( padding: EdgeInsets.only(bottom: 20), child: MultiDropdown<String>(
+        controller: ctrls,
+        singleSelect: true,
+        items: items,
+        label: "tp",
+        searchEnabled: true,
+        style: TextStyle(color: Theme.of(context).secondaryHeaderColor ),
+        chipDecoration: ChipDecoration(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          labelStyle: TextStyle(color: Colors.white),
+                          wrap: true,
+                          runSpacing: 2,
+                          spacing: 10,
+        ),
+        fieldDecoration: FieldDecoration(
+          padding: kIsWeb ? EdgeInsets.only(left: 12, right: 12, top: 12) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+          backgroundColor: Colors.white,
+          labelStyle: TextStyle(fontSize: 0),
+          hintText: (await getOnFlow("select a field")).toLowerCase(),
+          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
+          prefixIcon: Icon(Icons.list, color: Colors.grey),
+          showClearIcon: false,
+          border:  OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0)),
+          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0)),
+        ),
+        searchDecoration: SearchFieldDecoration(
+          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+          border : const OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          focusedBorder : const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+            borderRadius: BorderRadius.all(Radius.circular(5))
+          )
+        ),
+        dropdownDecoration: DropdownDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(5)),
+          marginTop: 2,
+          maxHeight: 400,
+          header: Padding(
+            padding: EdgeInsets.all(8),
+              child: Text(
+                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          dropdownItemDecoration: DropdownItemDecoration(
+            backgroundColor: Theme.of(context).highlightColor,
+            selectedIcon: const Icon(Icons.check_box, color: Colors.green),
+            disabledIcon: Icon( Icons.lock, color: Colors.grey.shade300) ),
+            validator: (value) {
+              if ((value == null || value.isEmpty)) {
+                return '';
+              }
+              return null;
+            },
+            onSelectionChange: (values) {
+                if (values.isEmpty)  { return; }
+                setState(() {
+                  if (widget.subName.length <= widget.depth) {
+                    widget.subName.add(values[0]);
+                  } else {
+                    widget.subName[widget.depth] = values[0];
+                  }
+                  widget.value = null;
+                  widget.comp?.widget.value = null;
+                  widget.comp?.widget.subName = widget.subName;
+                });
+              },
+            )),
+        if (widget.subName.isNotEmpty)
+          FilterSearchWidget(
+            comp: widget.comp ?? this,
+            subName: widget.subName,
+            depth: widget.depth + 1,
+            columnName: widget.subName[widget.depth], 
+            type:  widget.schema[widget.columnName]?.schema[widget.subName[widget.depth]]?.type ?? "", 
+            label: widget.schema[widget.columnName]?.schema[widget.subName[widget.depth]]?.label ?? "", 
+            state: widget.state, 
+            value: widget.value,
+            filter: widget.filter, 
+            innerIndex: widget.innerIndex, 
+            schema: widget.schema[widget.columnName]?.schema ?? {})
+        
+      ]);
+    }
     var additionnal = <Widget>[];
     if (widget.innerIndex > 0) {
       additionnal.add(TextButton(onPressed: () {
@@ -258,11 +423,11 @@ class FilterSearchState extends State<FilterSearchWidget> {
         child: Text((await getOnFlow(TranslateConstants.delete)).toUpperCase(),  style: TextStyle(color: Colors.grey, fontSize: 11)))));
     }
     bool isText = widget.type.contains("text") || widget.type.contains("varchar") || widget.type.contains("link") || widget.type.contains("enum") || widget.type.contains("upload");
-    String url = currentView?.schema[widget.columnName] == null ? "" : "${currentView?.schema[widget.columnName]?.actionPath}&shallow=enable";
-    
+    String url = widget.schema[widget.columnName] == null ? "" : "${widget.schema[widget.columnName]?.actionPath}&shallow=enable";
+    String valuesP = widget.schema[widget.columnName] == null ? "" : widget.schema[widget.columnName]!.valuesPath;
     Widget w = await Convertor.filterFieldByType(
-      context, widget as ConvertorWidget, widget.type, "", TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
-      this, false, false, url, url, "", []
+      context, ( widget.comp?.widget ?? widget) as ConvertorWidget, widget.type, "", TranslateConstants.valueFilterPlaceholder.toLowerCase(), 
+      this, false, false, url, valuesP, "", []
     );
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
     var togglesLabels = [(await getOnFlow(TranslateConstants.value)).toUpperCase(), 'NULL'];

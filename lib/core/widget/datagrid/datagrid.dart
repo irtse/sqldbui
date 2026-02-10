@@ -209,6 +209,7 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
 List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dynamic>? forceOrder, int? max) {
     if (view == null) { return []; }
     var schema = view.schema;
+    print(schema.keys.toList());
     bool isMath = forceMath || (modeIndex[viewID]  == 1 && editMode[viewID] == "math");
     List<String> seen = [];
     if (filterTempOrderView[viewID] != null  && filterOrderView[viewID] == null) {

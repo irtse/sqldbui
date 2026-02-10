@@ -331,15 +331,15 @@ class GridWidgetState extends State<GridWidget> {
     schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
       realLabel.toLowerCase(), overflow: TextOverflow.ellipsis)));
       columns.add( GridColumnWidget(
+        schema: widget.view?.schema ?? <String, model.SchemaField>{},
         view: widget.view!,
         context: context, 
         width: double.nan,
         items: schemeItems, 
         maxLength: order.length + (modeIndex[viewID]  == 1 && editMode[viewID] == "math" ? 1 : 0),
         borderColor: Theme.of(context).splashColor, 
-        allowSorting: !(datas.isEmpty && !isFilter()) && modeIndex[viewID]  != 1,
-        columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(),
-        allowFiltering: !(schema[fieldName]?.type.contains("many") ?? false), 
+        allowSorting: datas.isNotEmpty && modeIndex[viewID]  != 1,
+        columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(), 
         type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
         url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
         contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,

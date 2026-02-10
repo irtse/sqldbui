@@ -74,7 +74,7 @@ class Convertor {
                 errorStyle: const TextStyle(fontSize: 0), 
                 isDense: true, 
                 suffixStyle: TextStyle(color: Theme.of(context).splashColor),
-                hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
+                hintStyle: TextStyle(fontSize: 13, color: isDark ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
     bool isText = type.contains("html") || type.contains("text") || type.contains("varchar") || (type.contains("link") && url == "") || type.contains("upload");
@@ -128,11 +128,11 @@ class Convertor {
           maxLines: isGrid ? null : 1,
           decoration: isGrid ? dec : InputDecoration(
             suffixIconColor: Theme.of(context).splashColor,
-            enabledBorder: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 0) ),
+            enabledBorder: OutlineInputBorder( borderSide: BorderSide(color: isDark ? Theme.of(context).secondaryHeaderColor : Colors.grey.shade300, width: 0) ),
             border: OutlineInputBorder( borderRadius: BorderRadius.circular(5),
               borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0)),
             isDense: true, 
-            hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300), // you need this
+            hintStyle: TextStyle(fontSize: 13, color: isDark ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300), // you need this
             floatingLabelBehavior: FloatingLabelBehavior.always, 
             filled: true, fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -236,12 +236,12 @@ class Convertor {
         decoration: isGrid ? dec : InputDecoration(
             suffixIcon: const Icon(Icons.calendar_month, size: 18,),
             suffixIconColor: Theme.of(context).splashColor,
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: isDark ? Theme.of(context).secondaryHeaderColor : Colors.grey.shade300, width: 1.0)),
             helperStyle: const TextStyle(fontSize: 0),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             filled: true,
             errorStyle: const TextStyle(fontSize: 0),
-            hintStyle: TextStyle(fontSize: 13, color: Theme.of(context).splashColor, fontWeight: FontWeight.w300),
+            hintStyle: TextStyle(fontSize: 13, color: isDark ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
             border: OutlineInputBorder( borderSide: BorderSide(color: Theme.of(context).splashColor, width: 0) ),
             fillColor: isDark ? Theme.of(context).secondaryHeaderColor :Colors.white,
             contentPadding: const EdgeInsets.only(top: 1, left: 20.0, right: 20.0, bottom: 20),
@@ -266,7 +266,7 @@ class Convertor {
     } else if (type.contains("enum") ) { // TODO THERE
       var items = <DropdownItem<String>>[];
        var decF = FieldDecoration( 
-      hintStyle: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
+      hintStyle: TextStyle(fontSize: 13, color: isDark ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                 border: const OutlineInputBorder(borderSide: BorderSide(width: 0, style: BorderStyle.none,)),
                 hintText: (await getOnFlow('${type.contains("enum") ? "select" : "enter"} ${type.contains("time") || type.contains("date") ? "date" : ""} value...')).toLowerCase());
       MultiSelectController<String> ctrls = MultiSelectController<String>();
@@ -304,8 +304,8 @@ class Convertor {
                           hintStyle: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
                           showClearIcon: false,
-                          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
-                          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+                          border:  OutlineInputBorder(borderSide: BorderSide(color: isDark ? Theme.of(context).secondaryHeaderColor : Colors.grey.shade300, width: 1.0)),
+                          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: isDark ? Theme.of(context).secondaryHeaderColor : Colors.grey.shade300, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
                           hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
@@ -449,7 +449,7 @@ class Convertor {
         }
       }
     }
-      if (datas.isEmpty || (widget.value ?? "") != "" && !found) {
+    if (datas.isEmpty || (widget.value ?? "") != "" && !found) {
       return Container();
     }
     
@@ -494,8 +494,8 @@ class Convertor {
                           hintStyle: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 13, color: isDark && !isGrid ? Theme.of(context).splashColor : Colors.grey, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: isDark ? Theme.of(context).splashColor : Colors.grey),
                           showClearIcon: false,
-                          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
-                          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
+                          border:  OutlineInputBorder(borderSide: BorderSide(color: isDark ? Theme.of(context).secondaryHeaderColor : Colors.grey.shade300, width: 1.0)),
+                          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: isDark ? Theme.of(context).secondaryHeaderColor : Colors.grey.shade300, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
                           hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",

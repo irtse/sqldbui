@@ -10,7 +10,6 @@ import 'package:sqldbui2/core/services/router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
-import 'package:flutter_linux_webview/flutter_linux_webview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
 
@@ -33,16 +32,6 @@ void main() async {
     // ensureInitialized() is required if the plugin is initialized before runApp()
   WidgetsFlutterBinding.ensureInitialized();
   // Run `LinuxWebViewPlugin.initialize()` first before creating a WebView.
-  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.linux) {
-    LinuxWebViewPlugin.initialize(options: <String, String?>{
-      'user-agent': 'UA String',
-      'remote-debugging-port': '8888',
-      'autoplay-policy': 'no-user-gesture-required',
-    });
-
-    // Configure [WebView] to use the [LinuxWebView].
-    WebView.platform = LinuxWebView();
-  }
   setUpTranslate();
   runApp(const MyApp()); 
 }

@@ -24,7 +24,6 @@ class GridColumnWidget extends StatefulWidget {
   bool show = false;
   bool last = false;
   bool allowSorting; 
-  bool allowFiltering; 
 
   String? url;
   String type; String columnName; 
@@ -39,9 +38,11 @@ class GridColumnWidget extends StatefulWidget {
   Color iconColor;  
   Color borderColor; 
   Color backgroundColor;
+  Map<String, mod.SchemaField> schema;
 
   GridColumnWidget ({ 
     required this.view,
+    required this.schema,
     required this.columnName, 
     required this.type, 
     this.width = 300.0, 
@@ -50,7 +51,6 @@ class GridColumnWidget extends StatefulWidget {
     this.allowSorting = false, 
     required this.maxLength, 
     required this.contextWidth,
-    this.allowFiltering = true, 
     required this.label, 
     this.borderWidth = 1, 
     this.iconColor = Colors.grey,
@@ -127,14 +127,22 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 15,))
       )));
     } 
-    if (widget.allowFiltering) { 
-      buttons.add(SizedBox( width: 30, height: 30.0,  child: FilterPopUpWidget(
-        view: widget.view,
-        items: widget.items, label: widget.label.value, 
-        columnName: widget.columnName, type: widget.type, component: this, ))); }
+      buttons.add(
+        SizedBox( width: 30, height: 30.0, 
+          child: FilterPopUpWidget(
+            view: widget.view, 
+            schema: widget.schema,
+            items: widget.items, 
+            label: widget.label.value, 
+            columnName: widget.columnName, 
+            type: widget.type, 
+            component: this
+          )
+        )
+      ); 
     if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
       if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
-      || (globalFilter[viewID] != null && widget.allowFiltering && (globalFilter[viewID]!.has(widget.columnName))))) { 
+      || (globalFilter[viewID] != null && (globalFilter[viewID]!.has(widget.columnName))))) { 
         buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( 
           message: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(),  
           child: IconButton(
