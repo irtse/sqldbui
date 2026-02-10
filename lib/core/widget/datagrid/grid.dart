@@ -338,7 +338,7 @@ class GridWidgetState extends State<GridWidget> {
         items: schemeItems, 
         maxLength: order.length + (modeIndex[viewID]  == 1 && editMode[viewID] == "math" ? 1 : 0),
         borderColor: Theme.of(context).splashColor, 
-        allowSorting: datas.isNotEmpty && modeIndex[viewID]  != 1,
+        allowSorting: datas.isNotEmpty,
         columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(), 
         type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
         url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,

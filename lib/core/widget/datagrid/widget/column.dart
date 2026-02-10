@@ -104,29 +104,36 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     var width = widget.getWidth(false);
+    List<Widget> showedbuttons = [];
     List<Widget> buttons = [];
-    if (widget.allowSorting) { 
-      buttons.add(SizedBox( 
+      var w = SizedBox( 
         width: 30, 
         height: 30.0, 
         child: Tooltip( message: (await getOnFlow(currentView != null && globalOrder.containsKey(viewID) && (
-        (globalOrder[viewID]![widget.columnName] == "asc" && viewID != null && globalOrder[viewID] != null)
-        || globalOrder[viewID]![widget.columnName] == null) ? TranslateConstants.sortDesc : TranslateConstants.sortDesc)).toLowerCase(), 
+        globalOrder[viewID]?[widget.columnName] == "desc" || globalOrder[viewID]?[widget.columnName] == null) ? 
+          TranslateConstants.sortASC : TranslateConstants.sortDesc)).toLowerCase(), 
         child: IconButton(
           onPressed: () async { 
             if (currentView !=  null && viewID != null) {
               globalOffset = 0;
-              globalOrder[viewID]![widget.columnName] = globalOrder[viewID]![widget.columnName] == "asc"  ? "desc" : "asc";
+              globalOrder[viewID]?[widget.columnName] = globalOrder[viewID]?[widget.columnName] == "asc"  ? "desc" : "asc";
               navigate = true;
               confirmCache = {};
               globalMainViewKey.currentState?.refresh(viewID, subViewID, currentView, false);
             }
           }, 
           icon: Icon( currentView != null && globalOrder.containsKey(viewID) && (
-        (globalOrder[viewID]![widget.columnName] == "asc" && viewID != null && globalOrder[viewID] != null)
-        || globalOrder[viewID]![widget.columnName] == null) ? Icons.arrow_upward : Icons.arrow_downward, color: widget.iconColor, size: 15,))
-      )));
-    } 
+        globalOrder[viewID]?[widget.columnName] == "desc" || globalOrder[viewID]?[widget.columnName] == null) ? 
+          Icons.arrow_upward : Icons.arrow_downward, 
+        color: widget.iconColor, size: 15))
+      ));
+      if (globalOrder[viewID]?[widget.columnName] != null) {
+        showedbuttons.add(w);
+      } else {
+         buttons.add(w);
+      }
+     
+    
       buttons.add(
         SizedBox( width: 30, height: 30.0, 
           child: FilterPopUpWidget(
@@ -140,8 +147,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           )
         )
       ); 
-    if (currentView !=  null && (globalOrder.containsKey(viewID) || globalFilter.containsKey(viewID))) {
-      if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
+    if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
       || (globalFilter[viewID] != null && (globalFilter[viewID]!.has(widget.columnName))))) { 
         buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( 
           message: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(),  
@@ -155,7 +161,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           )
         )));
       } 
-    }
+  
     widget.width = width + 32;
     if (viewID != null && !rects.containsKey(viewID)) { rects[viewID] = {}; }
     late Rect rect = rects[viewID]?[widget.columnName] ?? Rect.fromCenter(
@@ -282,9 +288,15 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
             onEnter: (b) { setState(() { widget.show = true; });}, // todo if datas lenght == 0
             onExit: (b) { setState(() { widget.show = false; });}, // todo if datas lenght == 0
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20,), 
+              padding: const EdgeInsets.symmetric(horizontal: 20), 
               child: Stack( children: [ 
-                ...(size <= 0 ? [] : [ SizedBox( width: size, child: Tooltip( message: widget.label.value, child: Center(child: widget.label)))] ), 
+                ...((size - (showedbuttons.isNotEmpty ? (showedbuttons.length * 30) : 0)) <= 0 ? [] : [ Row(children: [
+                    SizedBox( width: size - (showedbuttons.isNotEmpty ? (showedbuttons.length * 30) : 0), 
+                    child: Tooltip( message: widget.label.value, child: Center(child: widget.label))), 
+                    ...showedbuttons,
+                  ],
+                )] ), 
+                
                 Positioned( right: 0, top: 10, 
                   child: Row( 
                     mainAxisAlignment: MainAxisAlignment.end, 
