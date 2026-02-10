@@ -4,13 +4,8 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_window
-  file_saver
   file_selector_windows
-  flutter_inappwebview_windows
-  gal
-  irondash_engine_context
   pdfx
-  super_native_extensions
   url_launcher_windows
 )
 

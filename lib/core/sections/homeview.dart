@@ -8,7 +8,6 @@ import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/widget/form/form.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
@@ -24,7 +23,6 @@ class HomeViewWidget extends StatefulWidget{
 }
 class HomeViewWidgetState extends State<HomeViewWidget> {
   String currentUrl = "";
-  final Completer<WebViewController> _controller =  Completer<WebViewController>();
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
@@ -85,7 +83,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           );
         }); 
     } else {
-      web = FutureBuilder(future: APIService().get<model.View>(
+      /*web = FutureBuilder(future: APIService().get<model.View>(
         "${APIConstants.genericEndpost}/dbdashboard?rows=all&is_selected=true", false, context), 
         builder: (s,a){
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
@@ -136,7 +134,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
                 decoration: BoxDecoration(color: Colors.grey.shade200,  borderRadius: BorderRadius.all(Radius.circular(5)))),
             ]),
           );
-        });
+        });*/
     }
     for (var cat in categories.keys) {
       comps.add(Padding( padding: const EdgeInsets.symmetric(horizontal: 50), child: Column(children: [

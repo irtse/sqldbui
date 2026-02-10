@@ -80,8 +80,8 @@ class GridWidgetState extends State<GridWidget> {
   Timer? _scrollTimer;
    bool _isMouseDown = false;
   Offset _mousePosition = Offset.zero;
-  final ScrollController _horizontal = ScrollController(), _vertical = ScrollController();
-
+  final ScrollController _horizontal = ScrollController();
+  
   void _startAutoScroll() {
     const scrollSpeed = 10.0;
     const edgeThreshold = 50.0;
@@ -590,7 +590,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
 }
 
 class MainCheckWidget extends StatefulWidget {
-  MainCheckWidget({super.key});
+  const MainCheckWidget({super.key});
   @override MainCheckWidgetState createState() => MainCheckWidgetState();
 }
 class MainCheckWidgetState extends State<MainCheckWidget>  {
@@ -600,9 +600,8 @@ class MainCheckWidgetState extends State<MainCheckWidget>  {
           width: 75, height: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(right: BorderSide( 
             color:  globalGridKey.currentState?.widget.borderColor ?? Colors.grey, 
-            width:  globalGridKey.currentState?.widget.borderWidth ?? 1 ),)),
-          child: CheckboxListTile(
-            enabled: true,
+            width:  globalGridKey.currentState?.widget.borderWidth ?? 1 ))),
+          child: Checkbox(
             value: globalGridKey.currentState?.widget.isSelected ?? true, 
             onChanged: (value) { 
               setState(() {

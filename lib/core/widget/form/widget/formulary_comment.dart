@@ -1,12 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/view.dart' as model;
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:sqldbui2/core/widget/form/widget/empty_formulary.dart';
 import 'package:sqldbui2/page/translate.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 // ignore: must_be_immutable
 class FormularyCommentsWidget extends StatefulWidget {

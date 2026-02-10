@@ -62,14 +62,6 @@ class FutureMenuColsPopUpWidget extends StatefulWidget{
 class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
   bool noSelection =false;
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
-      if (a.hasData && a.data != null) {
-        return a.data!;
-      }
-      return Container();
-    });
-  }
-  Future<Widget> futureBuild(BuildContext context) async {
       var dpItems = <DropdownItem<String>>[];
         for (var i in widget.datas) { 
           if (setLatest) {
@@ -88,16 +80,18 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
             }
             filterTempOrderView[viewID] = i.fields.map((e) => e.column).toList();
           }
-          var filterLabel = await getOnFlow(i.label ?? i.name ?? "");
+          var filterLabel =i.label ?? i.name ?? "";
           dpItems.add(DropdownItem<String>(value: i.id.toString(), label: filterLabel.toLowerCase()));
         }
-      return PopupButtonWidget(
-        color: Colors.white,
-        width: 277,
-        tooltip: (await getOnFlow(TranslateConstants.filterViewPlaceholder)).toLowerCase(), 
-        icon: Icons.settings, 
-        widget: MenuColsPopUpWidget(comp: widget.comp, items: dpItems, schema: widget.schema,),
-      ); 
+      return FutureBuilder(future: getOnFlow(TranslateConstants.filterViewPlaceholder), builder: (a,s) {
+        return PopupButtonWidget(
+          color: Colors.white,
+          width: 277,
+          tooltip: (s.data ?? TranslateConstants.filterViewPlaceholder).toLowerCase(), 
+          icon: Icons.settings, 
+          widget: MenuColsPopUpWidget(comp: widget.comp, items: dpItems, schema: widget.schema,),
+        );
+      }); 
   }
 }
 
@@ -142,7 +136,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
               padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), 
               child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ const Padding( padding: EdgeInsets.only(right: 10), child: Icon(Icons.list)), 
                     Text(title.toUpperCase(), style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
-                  Divider(color: Theme.of(context).splashColor,),
+                  Divider(color: Theme.of(context).splashColor),
                   // select all
                   ColsPopUpWidget(schema: widget.schema, items: widget.items, comp: this),
                   Padding(padding: const EdgeInsets.only(bottom: 10), child: Divider(color: Theme.of(context).splashColor,)),
@@ -160,7 +154,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                   filterView[viewID] != null && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () async { 
-                      
                     await APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", 
                       "rows=${filterView[viewID]}"), <String, dynamic> { "is_selected" : false }, null);
                       widget.value = "";
@@ -211,6 +204,7 @@ class ColsPopUpWidget extends StatefulWidget{
   Map<String, model.SchemaField> schema = <String, model.SchemaField>{};
   List<DropdownItem<String>> items = [];
   MenuColsPopUpState comp;
+  String? search;
   ColsPopUpWidget ({ super.key, required this.schema, required this.items, required this.comp });
   @override
   ColsPopUpState createState() => ColsPopUpState();
@@ -239,69 +233,81 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
       filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; 
     }
     filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( (fieldName) => !(widget.schema[fieldName] == null)).toList();
-    items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), child:  Row( children : [ 
-          Container( width: 44),
-          Padding( padding: const EdgeInsets.only(right: 10), 
-          child: Tooltip( message: "id", child: AdvancedSwitch(
-            initialValue: filterTempOrderView[viewID]!.contains("id"),
-            activeColor: Colors.green, inactiveColor: Colors.grey,
-            activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text("id", overflow: TextOverflow.ellipsis)), 
-            inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text("id", overflow: TextOverflow.ellipsis)), 
-            borderRadius:  const BorderRadius.all(Radius.circular(15)),
-            width: 165, height: 30.0, disabledOpacity: 0.5,
-            onChanged: (value) { 
-              filterTempID[viewID] = value; 
-            }
-          ))),
-          Container()
-        ]))));
+    if ("id".contains(widget.search ?? "")) {
+      items.add(
+        Center( 
+          child: Padding( padding: const EdgeInsets.symmetric(vertical: 10), 
+            child: Row( children : [ 
+              Container( width: 44),
+              Padding( padding: const EdgeInsets.only(right: 10), 
+              child: Tooltip( message: "id", child: AdvancedSwitch(
+                initialValue: filterTempOrderView[viewID]!.contains("id"),
+                activeColor: Colors.green, inactiveColor: Colors.grey,
+                activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text("id", overflow: TextOverflow.ellipsis)), 
+                inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text("id", overflow: TextOverflow.ellipsis)), 
+                borderRadius:  const BorderRadius.all(Radius.circular(15)),
+                width: 165, height: 30.0, disabledOpacity: 0.5,
+                onChanged: (value) { 
+                  filterTempID[viewID] = value; 
+                }
+              ))),
+              Container()
+          ]))));
+    }
     
     for (var (index,fieldName) in (filterIndexOrderView[viewID] ?? []).where( (el) => widget.schema[el] != null).indexed) {
         if (widget.schema[fieldName] == null) { continue; }
         var scheme =  widget.schema[fieldName]!; 
-        var label = await getOnFlow(scheme.label);
-        items.add(Center( child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), child:  Row( children : [ 
-          index == 0 ? Container(width: 44) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
-            onTap: () {
-              var tmp = filterIndexOrderView[viewID]!;
-              var i = tmp.removeAt(index);
-              var b = tmp.sublist(0, index > 0 ? index - 1 : 0);
-              b.add(i);
-              b.addAll(tmp.sublist(index > 0 ? index - 1 : 0, tmp.length));
-              setState(() { 
-                filterIndexOrderView[viewID] = b; 
-                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-              }); 
-            }, child: const Icon(Icons.arrow_upward))),
-          Padding( padding: const EdgeInsets.only(right: 10), 
-          child: Tooltip( message: label.toLowerCase(), child: AdvancedSwitch(
-            initialValue: filterTempOrderView[viewID]!.contains(fieldName),
-            activeColor: Colors.green, inactiveColor: Colors.grey,
-            activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text(label.toLowerCase(), overflow: TextOverflow.ellipsis)), 
-            inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text(label.toLowerCase(), overflow: TextOverflow.ellipsis)), 
-            borderRadius:  const BorderRadius.all(Radius.circular(15)),
-            width: 165, height: 30.0, disabledOpacity: 0.5,
-            onChanged: (value) { 
-              if (value) { 
-                filterTempOrderView[viewID]?.add(fieldName);      
-                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-              } else { 
-                filterTempOrderView[viewID]?.remove(fieldName); 
-              }
-            }
-          ))),
-          index == filterIndexOrderView[viewID]!.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child: InkWell( onTap: () {
-              var tmp = filterIndexOrderView[viewID]!;
-              var i = tmp.removeAt(index);
-              var b = tmp.sublist(0, index + 1);
-              b.add(i);
-              b.addAll(tmp.sublist(index + 1, tmp.length));
-              setState(() { 
-                filterIndexOrderView[viewID] = b; 
-                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-              }); 
-          }, child: const Icon(Icons.arrow_downward))),
-        ]))));
+        items.add(FutureBuilder(future: getOnFlow(scheme.label), builder: (a,s) { 
+          if (!(s.data ?? scheme.label).contains(widget.search ?? "")) {
+            return Container();
+          }
+          return Center( 
+            child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), 
+            child: Row( children : [ 
+            index == 0 ? Container(width: 44) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
+              onTap: () {
+                var tmp = filterIndexOrderView[viewID]!;
+                var i = tmp.removeAt(index);
+                var b = tmp.sublist(0, index > 0 ? index - 1 : 0);
+                b.add(i);
+                b.addAll(tmp.sublist(index > 0 ? index - 1 : 0, tmp.length));
+                setState(() { 
+                  filterIndexOrderView[viewID] = b; 
+                  filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+                }); 
+              }, child: const Icon(Icons.arrow_upward))),
+            Padding( padding: const EdgeInsets.only(right: 10), 
+            child: Tooltip( message: (s.data ?? scheme.label).toLowerCase(), child: AdvancedSwitch(
+                initialValue: filterTempOrderView[viewID]!.contains(fieldName),
+                activeColor: Colors.green, inactiveColor: Colors.grey,
+                activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text((s.data ?? scheme.label).toLowerCase(), overflow: TextOverflow.ellipsis)), 
+                inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text((s.data ?? scheme.label).toLowerCase(), overflow: TextOverflow.ellipsis)), 
+                borderRadius:  const BorderRadius.all(Radius.circular(15)),
+                width: 165, height: 30.0, disabledOpacity: 0.5,
+                onChanged: (value) { 
+                  if (value) { 
+                    filterTempOrderView[viewID]?.add(fieldName);      
+                    filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+                  } else { 
+                    filterTempOrderView[viewID]?.remove(fieldName); 
+                  }
+                }
+              ))
+            ),
+            index == filterIndexOrderView[viewID]!.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child: InkWell( onTap: () {
+                var tmp = filterIndexOrderView[viewID]!;
+                var i = tmp.removeAt(index);
+                var b = tmp.sublist(0, index + 1);
+                b.add(i);
+                b.addAll(tmp.sublist(index + 1, tmp.length));
+                setState(() { 
+                  filterIndexOrderView[viewID] = b; 
+                  filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+                }); 
+            }, child: const Icon(Icons.arrow_downward))),
+          ]))); 
+        }));
       }
     var ctrls = MultiSelectController<String>();
     for (var item in widget.items) {
@@ -315,102 +321,104 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
     var gk = GlobalKey<OptionsListState>();
     return Column(children: [
       Padding(padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Container( height: 30, child: MultiDropdown<String>(
-        label: "drp",
-        gk: gk,
-        addFunction: (String value) {
-          for (var e in ctrls.items) {
-            e.selected = false;
-          }
-          filterRestr[viewID] = value; 
-          if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
-            ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
-          }
-          widget.items = ctrls.items;
-          gk.currentState?.setState(() {
-            gk.currentState?.widget.items = widget.items;
-          });
-          setState(() {});
-        },
-        controller: ctrls,
-        singleSelect: true,
-        items: widget.items,
-        searchEnabled: true,
-        chipDecoration: ChipDecoration(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          labelStyle: TextStyle(color: Colors.white),
-                          wrap: true,
-                          runSpacing: 2,
-                          spacing: 10,
-        ),
-        fieldDecoration: FieldDecoration(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
-          disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-          backgroundColor: Colors.white,
-          labelStyle: TextStyle(fontSize: 0),
-          hintText: (await getOnFlow("select a filter")).toLowerCase(),
-          hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
-          prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
-          showClearIcon: false,
-          border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-          focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-        ),
-        searchDecoration: SearchFieldDecoration(
-          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
-          border : const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFFE0E0E0)),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-          ),
-          focusedBorder : const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-            borderRadius: BorderRadius.all(Radius.circular(5))
-          )
-        ),
-        dropdownDecoration: DropdownDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          marginTop: 2,
-          maxHeight: 400,
-          header: Padding(
-            padding: EdgeInsets.all(8),
-              child: Text(
-                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+        child: SizedBox( height: 30, 
+          child: MultiDropdown<String>(
+            gk: gk,
+            addFunction: (String value) {
+              for (var e in ctrls.items) {
+                e.selected = false;
+              }
+              filterRestr[viewID] = value; 
+              if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
+                ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+              }
+              widget.items = ctrls.items;
+              gk.currentState?.setState(() {
+                gk.currentState?.widget.items = widget.items;
+              });
+              setState(() {});
+            },
+            controller: ctrls,
+            singleSelect: true,
+            items: widget.items,
+            searchEnabled: true,
+            chipDecoration: ChipDecoration(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              labelStyle: TextStyle(color: Colors.white),
+                              wrap: true,
+                              runSpacing: 2,
+                              spacing: 10,
+            ),
+            fieldDecoration: FieldDecoration(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+              disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(fontSize: 0),
+              hintText: (await getOnFlow("select a filter")).toLowerCase(),
+              hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
+              prefixIcon: Icon(Icons.list, color: Colors.grey),
+              showClearIcon: false,
+              border:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+              focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+            ),
+            searchDecoration: SearchFieldDecoration(
+              hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+              border : const OutlineInputBorder(
+                borderSide: BorderSide(color: Color(0xFFE0E0E0)),
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+              ),
+              focusedBorder : const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+                borderRadius: BorderRadius.all(Radius.circular(5))
+              )
+            ),
+            dropdownDecoration: DropdownDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+              marginTop: 2,
+              maxHeight: 400,
+              header: Padding(
+                padding: EdgeInsets.all(8),
+                  child: Text(
+                    "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
+              dropdownItemDecoration: DropdownItemDecoration(
+                backgroundColor: Theme.of(context).highlightColor,
+                selectedIcon: const Icon(Icons.check_box, color: Colors.green),
+                disabledIcon: Icon( Icons.lock, color: Colors.grey.shade300) ),
+                validator: (value) {
+                  if ((value == null || value.isEmpty)) {
+                    return '';
+                  }
+                  return null;
+                },
+                onSelectionChange: (values) async {
+                  widget.comp.widget.value = values[0];
+                  await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
+                            "rows=all", "rows=${values[0]}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
+                            globalOffset = 0; 
+                            filterView[viewID] = values[0];
+                            filterTempOrderView.remove(viewID);
+                            noSelection=false;
+                            if (v.data != null && v.data!.isNotEmpty) { 
+                              filterTempOrderView[viewID] = v.data![0].fields.map((e) => e.column ?? "id").toList();
+                              filterOrderView[viewID] = filterTempOrderView[viewID]!;
+                            } 
+                            setState((){});
+                            widget.comp.setState((){});
+                            globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                          });
+                  },
+                )
+              )
             ),
-          ),
-          dropdownItemDecoration: DropdownItemDecoration(
-            backgroundColor: Theme.of(context).highlightColor,
-            selectedIcon: const Icon(Icons.check_box, color: Colors.green),
-            disabledIcon: Icon( Icons.lock, color: Colors.grey.shade300) ),
-            validator: (value) {
-              if ((value == null || value.isEmpty)) {
-                return '';
-              }
-              return null;
-            },
-            onSelectionChange: (values) async {
-              widget.comp.widget.value = values[0];
-              await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
-                        "rows=all", "rows=${values[0]}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
-                        globalOffset = 0; 
-                        filterView[viewID] = values[0];
-                        filterTempOrderView.remove(viewID);
-                        noSelection=false;
-                        if (v.data != null && v.data!.isNotEmpty) { 
-                          filterTempOrderView[viewID] = v.data![0].fields.map((e) => e.column ?? "id").toList();
-                          filterOrderView[viewID] = filterTempOrderView[viewID]!;
-                        } 
-                        setState((){});
-                        widget.comp.setState((){});
-                        globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
-                      });
-              },
-            ))),
                   Row(mainAxisAlignment: MainAxisAlignment.center, 
                     children: filterView[viewID] != null && filterView[viewID] != "" ? [
                     IconButton(onPressed: () {
@@ -441,8 +449,47 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       }));
                     }, icon: const Icon(Icons.delete), color: Theme.of(context).secondaryHeaderColor),
                   ] : [],),
+                  Divider(color: Theme.of(context).splashColor),
+                  FutureBuilder(future: getOnFlow("search in names"), builder: (a,s) {
+                    return Container( height: 30, padding: EdgeInsets.only(left: 10, right: 10), child: TextFormField(
+                      initialValue: widget.search,
+                      style: TextStyle( fontSize: 13, color: Theme.of(context).secondaryHeaderColor),
+                      enabled: true,
+                      autocorrect: true,
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(
+                        focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                        border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                        isDense: true,
+                        suffixIconColor: Theme.of(context).primaryColor,
+                        hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        filled: true,
+                        fillColor:  Colors.white,
+                        contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, top: 0, bottom:0),
+                        suffixIcon: Icon(Icons.search, color:  Theme.of(context).secondaryHeaderColor),
+                        hintText: s.data ?? TranslateConstants.search.toLowerCase(),
+                        errorStyle: const TextStyle(fontSize: 0,),
+                      ),
+                      onChanged: (String? value) {
+                        setState(() {
+                          widget.search = value;
+                        });
+                      },
+                      validator: (String? value) {
+                        return null;
+                      },
+                    )); 
+                  }),
                   Divider(color: Theme.of(context).splashColor,),
-                  Container( constraints: const BoxConstraints(maxHeight: 200), child: SingleChildScrollView( child: Column(children: items,))),
+                  Container( constraints: const BoxConstraints(maxHeight: 200), 
+                    child: SingleChildScrollView( 
+                      child: Column(children: items)
+                    )
+                  ),
     ]);
   }
 }

@@ -7,7 +7,6 @@ import 'package:sqldbui2/model/filter.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/services/router.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

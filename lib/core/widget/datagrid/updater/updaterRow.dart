@@ -226,7 +226,7 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
                             cacheChanges[widget.columnName ?? ""] = null;
                             detectChanges[widget.columnName ?? ""] = GlobalKey();
                             widget.label = widget.schema[values.first]?.label;
-                            widget.type = values.first == "id" ? "integer" : widget.schema[values.first ?? ""]?.type ?? "text";
+                            widget.type = values.first == "id" ? "integer" : widget.schema[values.first]?.type ?? "text";
                           });
                         },
             )),

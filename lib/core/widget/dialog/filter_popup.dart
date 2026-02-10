@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:sqldbui2/core/services/router.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/src/multi_dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/text_button.dart';
@@ -310,7 +309,6 @@ class FilterSearchState extends State<FilterSearchWidget> {
       MultiSelectController<String> ctrls = MultiSelectController<String>();
       List<DropdownItem<String>> items = [];
       for (var o in widget.schema[widget.columnName]!.schema.entries.where( (e) => !e.value.hidden)) {
-        print("SUB ${widget.subName}  ${widget.subName.length > widget.depth && o.key == widget.subName[widget.depth]}" );
         items.add(DropdownItem<String>(value: o.key, 
         label: await getOnFlow(o.value.label), 
         selected: widget.subName.length > widget.depth && o.key == widget.subName[widget.depth] ));
