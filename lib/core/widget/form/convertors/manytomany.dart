@@ -138,6 +138,7 @@ class SubManyToManyWidget extends StatefulWidget {
 }
 class _SubManyToManyState extends State<SubManyToManyWidget> {
   List<DataFormWidget> widgets = <DataFormWidget>[];
+  MultiSelectController<Map<String, dynamic>> ctrls = MultiSelectController<Map<String, dynamic>>();
   @override Widget build(BuildContext context) {
     if ((widget.component?.widget.view?.rules ?? []).where( (r) => r.trigger == widget.name).isNotEmpty) {
       for (var r in (widget.component?.widget.view?.rules ?? [])) {
@@ -157,7 +158,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     });
   }
 
-  MultiSelectController<Map<String, dynamic>> ctrls = MultiSelectController<Map<String, dynamic>>();
 
   Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
@@ -165,12 +165,10 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     widget.value = (widget.form[widget.name]) ?? widget.value ?? []; 
     saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
     var l = widget.label;
-    try {
-      l = await getOnFlow(widget.label);
+    try { l = await getOnFlow(widget.label);
     } catch(e) {}
     int max = 0;
     if (widget.datas != null) {
-      
       for (var item in widget.datas!) {
         if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
           continue;
@@ -281,7 +279,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               v = v.toLowerCase();
             }
           }
-        } catch(e) {}
+        } catch(e) { print("qldsl $e"); }
         items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v, selected: select));
       }
     }
