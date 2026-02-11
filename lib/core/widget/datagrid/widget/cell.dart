@@ -99,7 +99,7 @@ class GridCellWidgetState extends State<GridCellWidget> {
     if (cacheChanges["${widget.cellID}:${widget.cell.columnName}"] != null) { 
       widget.cell.value = cacheChanges["${widget.cellID}:${widget.cell.columnName}"]; 
     }
-    widget.value = widget.cell.value != null ? widget.cell.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...";
+    widget.value = (widget.cell.value ?? "") != "" ? widget.cell.value.toString().replaceAll("true", "yes").replaceAll("false", "no") : "no info...";
     widget.value = widget.shal ?? widget.value;
     var edit = modeIndex[viewID]  == 1 && !["id", "description", mathColName[viewID] ?? "total"].contains(widget.cell.columnName)
                 && !widget.cell.readOnly && !widget.readOnly;

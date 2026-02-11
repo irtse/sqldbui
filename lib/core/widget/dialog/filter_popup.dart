@@ -109,7 +109,6 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                   if (d.length > 1) {
                     d = d.sublist(1, d.length);
                   }
-                  print(d);
                   advancedSearch.add(FilterSearchWidget(
                     innerIndex: advancedSearch.length, 
                     state: setState, 
@@ -449,7 +448,6 @@ class FilterSearchState extends State<FilterSearchWidget> {
     try {
       index = togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase()));
     } catch(e){}
-    print("$index $togglesMode");
     return Column(children: [ 
       Container( 
       margin: const EdgeInsets.only(bottom: 20, top: 10),  

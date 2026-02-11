@@ -167,25 +167,24 @@ class FormularyWidgetState extends State<FormularyWidget> {
                         height: field.type.contains("text") ? 100 : ( 
                           field.type.contains("bool") && field.label.length > 10 ? 30 : 40), child: f)
                       ),
-                      Positioned(
-                        top: field.type.contains("bool") ? 19 : 0, 
-                        right:field.type.contains("bool") ? null : 10,
-                        left:field.type.contains("bool") ? 0 : null,
-                        child: Tooltip( 
-                          constraints: BoxConstraints(maxWidth: 250),
-                          richMessage: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: "Information:\n",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(
-                                text: field.info,
-                              ),
-                            ],
-                          ),
-                          child: Icon(Icons.info, size: 18, color: Colors.grey))
-                      ),
+                      if (field.info != null)
+                        Positioned(
+                          top: field.type.contains("bool") ? 19 : 0, 
+                          right:field.type.contains("bool") ? null : 10,
+                          left:field.type.contains("bool") ? 0 : null,
+                          child: FutureBuilder(future: getOnFlow(field.info!), builder: (a,s) {
+                            return Tooltip( 
+                            constraints: BoxConstraints(maxWidth: 250),
+                            richMessage: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: s.data ?? field.info,
+                                ),
+                              ],
+                            ),
+                            child: Icon(Icons.info, size: 18, color: Colors.grey)
+                          );
+                    })),
                   ])
                 : SizedBox( 
                   width: field.type.contains("bool") && field.label.length <= 10 ? 200 : (widget.subForm ? max - 50 : max), 

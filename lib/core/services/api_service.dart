@@ -79,7 +79,6 @@ class APIService {
       dio.options.headers["authorization"] = auth;
       var cmdCol = getCmdCol();
       var columns = getColumns(url, true);
-      print(columns);
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter, globalFilter[viewID]);
       var command = "";
@@ -174,7 +173,6 @@ class APIService {
       for (var column in (filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? [])) { columns += "$column,"; }
       columns = columns.substring(0, columns.length - 1);
     }
-    print(columns);
     return columns;
   }
 
