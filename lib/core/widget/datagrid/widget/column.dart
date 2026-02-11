@@ -127,12 +127,17 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           Icons.arrow_upward : Icons.arrow_downward, 
         color: widget.iconColor, size: 15))
       ));
-      if (globalOrder[viewID]?[widget.columnName] != null) {
-        showedbuttons.add(w);
-      } else {
-         buttons.add(w);
+      if (widget.columnName != "type" && (widget.type == "text" || widget.type.contains("enum") || widget.type.contains("int") 
+      || widget.type.contains("date")  || widget.type.contains("html")
+      || widget.type.contains("time") || widget.type.contains("upload") || widget.type.contains("url") 
+      || widget.type.contains("varchar") || widget.type.contains("double") || widget.type.contains("decimal"))) {
+              if (globalOrder[viewID]?[widget.columnName] != null) {
+                showedbuttons.add(w);
+              } else {
+                buttons.add(w);
+              }
       }
-     
+
     
       buttons.add(
         SizedBox( width: 30, height: 30.0, 
