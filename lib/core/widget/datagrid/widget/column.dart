@@ -147,8 +147,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
           )
         )
       ); 
-    if (((globalOrder[viewID] != null && widget.allowSorting && globalOrder[viewID]!.containsKey(widget.columnName))
-      || (globalFilter[viewID] != null && (globalFilter[viewID]!.has(widget.columnName))))) { 
+    if ((globalOrder[viewID]?[widget.columnName] != null || (globalFilter[viewID] != null && (globalFilter[viewID]!.has(widget.columnName))))) { 
         buttons.add(SizedBox( width: 30, height: 30.0, child: Tooltip( 
           message: (await getOnFlow(TranslateConstants.filterResetT)).toLowerCase(),  
           child: IconButton(

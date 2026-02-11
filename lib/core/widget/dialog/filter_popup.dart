@@ -314,7 +314,21 @@ class FilterSearchState extends State<FilterSearchWidget> {
         selected: widget.subName.length > widget.depth && o.key == widget.subName[widget.depth] ));
         ctrls.addItem(items.last);
       }
-
+      Widget w = Container();
+      if (widget.subName.isNotEmpty) {
+         w = FilterSearchWidget(
+            comp: widget.comp ?? this,
+            subName: widget.subName,
+            depth: widget.depth + 1,
+            columnName: widget.subName[widget.depth], 
+            type:  widget.schema[widget.columnName]?.schema[widget.subName[widget.depth]]?.type ?? "", 
+            label: widget.schema[widget.columnName]?.schema[widget.subName[widget.depth]]?.label ?? "", 
+            state: widget.state, 
+            value: widget.value,
+            filter: widget.filter, 
+            innerIndex: widget.innerIndex, 
+            schema: widget.schema[widget.columnName]?.schema ?? {});
+      }
       return Column( children: [
         Padding( padding: EdgeInsets.only(bottom: 20), child: MultiDropdown<String>(
         controller: ctrls,
@@ -382,11 +396,21 @@ class FilterSearchState extends State<FilterSearchWidget> {
             },
             onSelectionChange: (values) {
                 if (values.isEmpty)  { return; }
+                Future.delayed(Duration(milliseconds: widget.subName.length - 1 == widget.depth ? 100 : 0), () {
+                  setState(() {
+                    if (widget.subName.length <= widget.depth) {
+                      widget.subName.add(values[0]);
+                    } else {
+                      widget.subName[widget.depth] = values[0];
+                    }
+                    widget.value = null;
+                    widget.comp?.widget.value = null;
+                    widget.comp?.widget.subName = widget.subName;
+                  });
+                });
                 setState(() {
-                  if (widget.subName.length <= widget.depth) {
-                    widget.subName.add(values[0]);
-                  } else {
-                    widget.subName[widget.depth] = values[0];
+                  if (widget.subName.length - 1 == widget.depth) {
+                    widget.subName.removeLast();
                   }
                   widget.value = null;
                   widget.comp?.widget.value = null;
@@ -394,19 +418,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                 });
               },
             )),
-        if (widget.subName.isNotEmpty)
-          FilterSearchWidget(
-            comp: widget.comp ?? this,
-            subName: widget.subName,
-            depth: widget.depth + 1,
-            columnName: widget.subName[widget.depth], 
-            type:  widget.schema[widget.columnName]?.schema[widget.subName[widget.depth]]?.type ?? "", 
-            label: widget.schema[widget.columnName]?.schema[widget.subName[widget.depth]]?.label ?? "", 
-            state: widget.state, 
-            value: widget.value,
-            filter: widget.filter, 
-            innerIndex: widget.innerIndex, 
-            schema: widget.schema[widget.columnName]?.schema ?? {})
+            w,
         
       ]);
     }
@@ -428,29 +440,36 @@ class FilterSearchState extends State<FilterSearchWidget> {
       this, false, false, url, valuesP, "", []
     );
     var togglesMode = [TranslateConstants.value.toUpperCase(), 'NULL'];
-    var togglesLabels = [(await getOnFlow(TranslateConstants.value)).toUpperCase(), 'NULL'];
     if (!isText) { 
       togglesMode.add("MATH"); 
-      togglesLabels.add(await getOnFlow("MATH")); 
     }
     var toggles = isMath ? [">", "<", '<=', ">=" ] : (widget.type.contains("enum") || widget.type.contains("link") ? ['=', "!=" ] : ( widget.type.contains("upload") ? ["LIKE", "!LIKE"] : ["LIKE", "!LIKE", '=', "!=" ]));
     if (widget.comparator == "") { widget.comparator = widget.type.contains("enum") || widget.type == "link" ? "=" : "like"; }
+    var index = 0; 
+    try {
+      index = togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase()));
+    } catch(e){}
+    print("$index $togglesMode");
     return Column(children: [ 
-      Container( margin: const EdgeInsets.only(bottom: 20, top: 10),  
+      Container( 
+      margin: const EdgeInsets.only(bottom: 20, top: 10),  
       child: ToggleSwitch( 
         minHeight: 25,
-          initialLabelIndex: togglesMode.indexWhere((element) => element.toLowerCase().contains(isMath ? "math" : isNull ? "null" : TranslateConstants.value.toLowerCase())),
-          fontSize: 11, dividerColor: Colors.white, 
-          inactiveFgColor: Colors.grey, 
-          minWidth: 220 / togglesLabels.length,
-          totalSwitches: togglesLabels.length, 
-          labels: togglesLabels, 
-          inactiveBgColor: Theme.of(context).splashColor,
-          onToggle: (index) { setState(() {
+        initialLabelIndex: index,
+        fontSize: 11, 
+        totalSwitches: togglesMode.length,
+        dividerColor: Colors.white, 
+        inactiveFgColor: Colors.grey, 
+        minWidth: 220 / togglesMode.length,
+        labels: togglesMode, 
+        inactiveBgColor: Theme.of(context).splashColor,
+        onToggle: (index) { setState(() {
+          if (togglesMode.length < (index ?? 0)) {
             isNull = togglesMode[index ?? 0].toLowerCase().contains("null");
             isMath = togglesMode[index ?? 0].toLowerCase().contains("math");
-          });  
-        })),
+          }
+        });  
+      })),
       Form( key: widget.globalKey, child: Row( children : [
         SizedBox( width: 255, child: Padding(
           padding: const EdgeInsets.only(left: 20, right: 20 , bottom: 20.0), 
