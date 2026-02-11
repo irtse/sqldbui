@@ -79,6 +79,7 @@ class APIService {
       dio.options.headers["authorization"] = auth;
       var cmdCol = getCmdCol();
       var columns = getColumns(url, true);
+      print(columns);
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter, globalFilter[viewID]);
       var command = "";
@@ -168,9 +169,9 @@ class APIService {
   String getColumns(String url, bool isFilter) {
     if (!isFilter || subViewID != null) { return ""; }
     var columns = ""; 
-    if (url.contains("?") && filterOrderView.containsKey(viewID)) {
+    if (url.contains("?") && (filterTempOrderView.containsKey(viewID)|| filterOrderView.containsKey(viewID))) {
       columns += "&columns=";
-      for (var column in (filterOrderView[viewID] ?? [])) { columns += "$column,"; }
+      for (var column in (filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? [])) { columns += "$column,"; }
       columns = columns.substring(0, columns.length - 1);
     }
     return columns;
