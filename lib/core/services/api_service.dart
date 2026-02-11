@@ -169,11 +169,12 @@ class APIService {
   String getColumns(String url, bool isFilter) {
     if (!isFilter || subViewID != null) { return ""; }
     var columns = ""; 
-    if (url.contains("?") && (filterTempOrderView.containsKey(viewID)|| filterOrderView.containsKey(viewID))) {
+    if ((filterTempOrderView.containsKey(viewID)|| filterOrderView.containsKey(viewID))) {
       columns += "&columns=";
       for (var column in (filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? [])) { columns += "$column,"; }
       columns = columns.substring(0, columns.length - 1);
     }
+    print(columns);
     return columns;
   }
 
