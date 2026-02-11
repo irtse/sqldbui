@@ -78,7 +78,7 @@ class APIService {
       downloadProgressNotifier.value = 0;
       dio.options.headers["authorization"] = auth;
       var cmdCol = getCmdCol();
-      var columns = ""; // getColumns(url, true);
+      var columns = getColumns(url, true);
       var orderBy = getOrderDir(url);
       var filter = getFilter(url, isFilter, globalFilter[viewID]);
       var command = "";
@@ -229,7 +229,7 @@ class APIService {
         }
         
         var filter = getFilter(url, isFilter, globalFilter[viewID]);
-        var cols = ""; // getColumns(url, offset != null);
+        var cols = getColumns(url, offset != null);
         var command = "";
         if (commands[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math") { 
           command = "&command_row=${cmdToSQLRow(commands[viewID]!)}"; 
@@ -343,7 +343,6 @@ class APIService {
   Future getWithDownload<T extends SerializerDeserializer>(String url, String format, Map<String,dynamic> cache, String savePath, bool isWeb, BuildContext? context) async {
     String asLabel = "";
     for (var key in cache.keys) {
-      print(key);
       if (!asLabel.contains(key)) { asLabel += "&${key}_aslabel=${cache[key]!}"; }
     }
     try { mainDownload(url, format, "get", true, 
