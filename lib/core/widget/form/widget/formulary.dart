@@ -159,7 +159,35 @@ class FormularyWidgetState extends State<FormularyWidget> {
             });
             if (!field.type.contains("onetomany") && widget.show) {
                 var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: field.type.contains("bool") && field.label.length > 10 ? 0 : 10, bottom: 10),
-                child: SizedBox( 
+                child: (field.info ?? "") != "" ? 
+                Stack(children: [  
+                      Padding(padding: EdgeInsetsGeometry.only(top: 8), child:
+                      SizedBox( 
+                        width: field.type.contains("bool") && field.label.length <= 10 ? 200 : (widget.subForm ? max - 50 : max), 
+                        height: field.type.contains("text") ? 100 : ( 
+                          field.type.contains("bool") && field.label.length > 10 ? 30 : 40), child: f)
+                      ),
+                      Positioned(
+                        top: field.type.contains("bool") ? 19 : 0, 
+                        right:field.type.contains("bool") ? null : 10,
+                        left:field.type.contains("bool") ? 0 : null,
+                        child: Tooltip( 
+                          constraints: BoxConstraints(maxWidth: 250),
+                          richMessage: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Information:\n",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(
+                                text: field.info,
+                              ),
+                            ],
+                          ),
+                          child: Icon(Icons.info, size: 18, color: Colors.grey))
+                      ),
+                  ])
+                : SizedBox( 
                   width: field.type.contains("bool") && field.label.length <= 10 ? 200 : (widget.subForm ? max - 50 : max), 
                   height: field.type.contains("text") ? 100 : ( 
                     field.type.contains("bool") && field.label.length > 10 ? 30 : 40), child: f));
@@ -175,7 +203,8 @@ class FormularyWidgetState extends State<FormularyWidget> {
                       // ignore: use_build_context_synchronously
                       color: Theme.of(context).splashColor,
                     ), 
-                    child: Padding(padding: const EdgeInsets.all(10), child: f)
+                    child: Padding(padding: const EdgeInsets.all(10), 
+                      child: f)
                   )
                 )
               ); 

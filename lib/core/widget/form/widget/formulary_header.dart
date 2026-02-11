@@ -155,14 +155,19 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                     overflow: TextOverflow.ellipsis,  
                     style: const TextStyle(color: Colors.grey, fontSize: 11))
               ] )),
-              widget.refItem.metadata?.updateUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
-              children: [ 
-                if (widget.refItem.metadata != null)
-                  Text("${await getOnFlow("last update : ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
-                      overflow: TextOverflow.ellipsis,  
-                      style: const TextStyle(color: Colors.grey, fontSize: 11))
-                
-              ] ))
+              widget.refItem.metadata?.updateUser == "" ? Container() 
+              : Padding( 
+                padding: const EdgeInsets.only(left: 20), 
+                child: Row( 
+                  children: [ 
+                    if (widget.refItem.metadata != null)
+                      Text("${await getOnFlow("last update : ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
+                          overflow: TextOverflow.ellipsis,  
+                          style: const TextStyle(color: Colors.grey, fontSize: 11))
+                    
+                  ] 
+                )
+              )
             ]))
         ])
       )

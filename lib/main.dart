@@ -11,6 +11,7 @@ import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/auth_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:desktop_window/desktop_window.dart' if (kIsWeb) '';
+import 'package:flutter_quill/flutter_quill.dart';
 
 final ThemeData myTheme = ThemeData(
   secondaryHeaderColor: const Color.fromRGBO(40, 42, 54, 1),
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
       title: BuildInfo.appName.toUpperCase(),
       theme: myTheme,
       localizationsDelegates: const [
+        FlutterQuillLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

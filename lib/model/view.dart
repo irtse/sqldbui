@@ -29,7 +29,9 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
     this.subsection,
     this.manyValuesPath = "",
     this.forceNotReadOnly = false,
+    this.info,
   });
+  String? info;
   bool translatable;
   bool forceNotReadOnly = false;
   String? subsection;
@@ -55,6 +57,7 @@ class SchemaField extends SerializerDeserializer<SchemaField> {
 
   @override SchemaField deserialize(Map<String, dynamic> json) {
     return SchemaField(
+    info: json.containsKey("info") && json["info"] != null ? json["info"] : null,
     manyValuesPath: json.containsKey("values_path_many") && json["values_path_many"] != null ? json["values_path_many"] : "",
     subsection: json.containsKey("subsection") && json["subsection"] != null ? json["subsection"] : null,
     forceNotReadOnly: json.containsKey("force_not_readonly") && json["force_not_readonly"] != null ? bool.parse("${json["force_not_readonly"]}") : false,
