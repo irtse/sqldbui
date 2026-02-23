@@ -292,9 +292,11 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                               "name": value,
                             }, label: value, selected: true));
                           }
-                          gk.currentState?.setState(() {
-                            gk.currentState?.widget.items = ctrls.items;
-                          });
+                          Future.delayed(Duration(milliseconds: 500), () {
+                            gk.currentState?.setState(() {
+                              gk.currentState?.widget.items = ctrls.items;
+                            });
+                          }); 
                         } : null,
                         controller: ctrls,
                         items: items,

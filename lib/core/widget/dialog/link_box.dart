@@ -199,11 +199,13 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
               }
             }
           }
+          var gk = GlobalKey<OptionsListState>();
           return Row( children : [  
             SizedBox( 
             width: 250,   
             height: 25, 
             child: MultiDropdown<String>(
+              gk: gk,
               max: max,
               changeFunction: (dynamic value) async {
                 if (value == "") {
@@ -211,7 +213,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                 }
                 var filters = Filters();
                 filters.add("name", Filter(value: value, column: "name"));
-                load("${widget.url}&shallow=enable", 0, 10, APIService().getFilter("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", true, filters), value, dpItems, ctrls);
+                load("${widget.url}&shallow=enable", 0, 10, APIService().getFilter("${widget.sharing?.sharedWithPath ?? ""}&shallow=enable", true, filters), value, dpItems, ctrls, gk);
               },
               enabled: true,
               controller: ctrls,
@@ -291,7 +293,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                           return;
                         }
                         widget.sharing!.body[key] = int.parse(widget.values[widget.name] ?? "");
-
+                        print("${widget.isDelete} ${widget.sharing!.sharePath!}&$key=${widget.values[widget.name] ?? ""}");
                         (widget.isDelete ? APIService().delete<model.Shallowed>(
                           "${widget.sharing!.sharePath!}&$key=${widget.values[widget.name] ?? ""}", context
                         ) : APIService().post<model.Shallowed>(
@@ -314,14 +316,12 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
             );
   }
 
-  Future<void> load(String url, int start, int interval, String filter, String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls) async {
+  Future<void> load(String url, int start, int interval, String filter, String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls,  GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
-    var found = false;
       var e = await APIService().get<model.Shallowed>("$url$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {
             if (items.where( (e) => e.value == "${item.id}").isEmpty) {
-              found = true;
               var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
               try {
                 if (item.translatable) {
@@ -333,8 +333,8 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
             }
           }
     } 
-    if (ctrls.isOpen && found) {
-      ctrls.openDropdown(value, "", true);
-    }
+    gk.currentState?.setState(() {
+      gk.currentState?.widget.items = ctrls.items;
+    });
   }
 }

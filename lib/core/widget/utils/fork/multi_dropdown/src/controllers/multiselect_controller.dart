@@ -216,12 +216,12 @@ class MultiSelectController<T> extends ChangeNotifier {
 
   // ignore: use_setters_to_change_properties
   void _setOnSelectionChange(OnSelectionChanged<T>? onSelectionChanged) {
-    this._onSelectionChanged = onSelectionChanged;
+    _onSelectionChanged = onSelectionChanged;
   }
 
   // ignore: use_setters_to_change_properties
   void _setOnSearchChange(OnSearchChanged? onSearchChanged) {
-    this._onSearchChanged = onSearchChanged;
+    _onSearchChanged = onSearchChanged;
   }
 
   // sets the search query.
@@ -233,11 +233,19 @@ class MultiSelectController<T> extends ChangeNotifier {
     } else {
       _filteredItems = _items
           .where(
-            (item) => item.label.toLowerCase().contains(_searchQuery.join(" ").toLowerCase()),
-          )
-          .toList();
+            (item) {
+              return _searchQuery.where( (s) {
+                return item.label.toLowerCase().contains(s.toLowerCase()) && s.trim() != "";
+              }).isNotEmpty; 
+            },
+          ).toList();
     }
-    _onSearchChanged?.call(query);
+    try {
+      _onSearchChanged?.call(query);
+    } catch (e) {
+      print(e);
+    }
+    
     try {
       notifyListeners();
     } catch(e) {}

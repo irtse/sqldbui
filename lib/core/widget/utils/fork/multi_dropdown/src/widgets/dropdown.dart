@@ -73,8 +73,7 @@ class _Dropdown<T> extends StatelessWidget {
         DirectionalFocusIntent(TraversalDirection.up),
   };
 
-  @override Widget build(BuildContext context) {
-  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+  @override Widget build(BuildContext context) {  return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
       }
@@ -274,6 +273,10 @@ class SearchFieldState extends State<SearchField> {
     });
   }
   @override Widget build(BuildContext context) {
+  Future.delayed(Duration(milliseconds: 500), (){
+    widget.onChanged(search[widget.label] ?? []);
+  });
+  
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
         return a.data!;
@@ -308,7 +311,7 @@ class SearchFieldState extends State<SearchField> {
         onChanged: (String v) {
           search[widget.label] = ((searchCtrl[widget.label]?.text ?? "").trim()).split(" ");
           if (widget.changeFunction != null) {
-            Future.delayed(Duration(seconds: 1), () {
+            Future.delayed(Duration(milliseconds: 500), () {
               if (searchCtrl[widget.label]?.text == v) {
                 widget.changeFunction!(searchCtrl[widget.label]?.text ?? "");
                 widget.onChanged(search[widget.label] ??  []);

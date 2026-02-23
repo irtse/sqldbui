@@ -438,9 +438,11 @@ class SubDropDownState extends State<SubDropDownWidget> {
             if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
               ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
             }
-            gk.currentState?.setState(() {
-              gk.currentState?.widget.items = ctrls.items;
-            });
+            Future.delayed(Duration(milliseconds: 500), () {
+              gk.currentState?.setState(() {
+                gk.currentState?.widget.items = ctrls.items;
+              });
+            }); 
         } : null,
                         controller: ctrls,
                         singleSelect: true,
@@ -580,8 +582,10 @@ class SubDropDownState extends State<SubDropDownWidget> {
             }
           }
     } 
-    gk.currentState?.setState(() {
-      gk.currentState?.widget.items = ctrls.items;
-    });
+    Future.delayed(Duration(milliseconds: 500), () {
+      gk.currentState?.setState(() {
+        gk.currentState?.widget.items = ctrls.items;
+      });
+    }); 
   }
 }

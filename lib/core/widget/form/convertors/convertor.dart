@@ -698,12 +698,10 @@ class Convertor {
   String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls, 
   Map<String, model.Shallowed> mapped, String label, GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
-    var found = false;
       var e = await APIService().get<model.Shallowed>("$url$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {
             if (items.where( (e) => e.value == "${item.id}").isEmpty) {
-              found = true;
               var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
               try {
                 if (item.translatable) {
@@ -712,13 +710,15 @@ class Convertor {
               } catch(e) {}
               mapped["${item.id}"]=item;
               items.add(DropdownItem<String>(value: "${item.id}", label: v, selected: false));
+              print("VVV $v ${gk.currentState}");
               ctrls.addItem(items.last);
+              
             }
           }
+      gk.currentState?.setState(() {
+        gk.currentState?.widget.items = ctrls.items;
+      });
     } 
-    gk.currentState?.setState( () {
-      gk.currentState?.widget.items = ctrls.items;
-    });
   }
 }
 

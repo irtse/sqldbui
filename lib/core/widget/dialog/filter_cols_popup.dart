@@ -333,9 +333,11 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                 ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
               }
               widget.items = ctrls.items;
-              gk.currentState?.setState(() {
-                gk.currentState?.widget.items = widget.items;
-              });
+              Future.delayed(Duration(milliseconds: 500), () {
+                gk.currentState?.setState(() {
+                  gk.currentState?.widget.items = ctrls.items;
+                });
+              }); 
               setState(() {});
             },
             controller: ctrls,

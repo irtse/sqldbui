@@ -76,14 +76,14 @@ class GridRowWidgetState extends State<GridRowWidget> {
           return Container();
         })]),
         if (widget.sharedTo.isNotEmpty)
-          Positioned(left: 65, top: 30, child: FutureBuilder(future: getOnFlow("shared to :"), builder: (a,s) {
+          Positioned(left: 45, top: 30, child: FutureBuilder(future: getOnFlow("shared to :"), builder: (a,s) {
             if(s.data != null) {
               return Tooltip( message: "${s.data} ${widget.sharedTo.join(",")}", child: Icon(Icons.share, color: Theme.of(context).primaryColor));
             }
             return Tooltip( message:  widget.sharedTo.join(","), child: Icon(Icons.share, color: Theme.of(context).primaryColor));
           }) ),
         if (widget.sharedBy.isNotEmpty)
-           Positioned(left: 65, top: 30, child: FutureBuilder(future: getOnFlow("shared by :"), builder: (a,s) {
+           Positioned(left: 45, top: 30, child: FutureBuilder(future: getOnFlow("shared by :"), builder: (a,s) {
             if(s.data != null) {
               return Tooltip( message: "${s.data} ${widget.sharedBy.join(",")}", child: Icon(Icons.share, color: Colors.grey));
             }
