@@ -106,7 +106,7 @@ class GridRowWidgetState extends State<GridRowWidget> {
       if (textLines < 1) {
         textLines = 1;
       }
-      h = h + ((textLines * 1.1) * (e.fontSize + 4));
+      h = h + ((textLines * 1.4) * (e.fontSize + 4.1));
       if (maxheight < h) { maxheight = h; }
     }    
     var first = true;

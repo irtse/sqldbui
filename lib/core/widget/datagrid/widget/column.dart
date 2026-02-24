@@ -93,7 +93,9 @@ class GridColumnWidget extends StatefulWidget {
 }
 
 class GridColumnWidgetState extends State<GridColumnWidget> {
-  double height = 100; bool orderASC = true; bool delayed = false;
+  double height = 100; 
+  bool orderASC = true; 
+  bool delayed = false;
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
