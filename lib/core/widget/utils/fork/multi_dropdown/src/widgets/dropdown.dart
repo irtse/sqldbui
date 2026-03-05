@@ -152,6 +152,10 @@ class _Dropdown<T> extends StatelessWidget {
   }
 
   Widget _buildOption(int index, ThemeData theme) {
+    if (index >= items.length) {
+      return Container();
+    }
+
     final option = items[index];
 
     if (itemBuilder != null) {
