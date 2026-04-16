@@ -651,7 +651,6 @@ class MultiDropdownState<T extends Object> extends State<MultiDropdown<T>> {
         scrollDirection: Axis.horizontal,
         itemCount: selectedOptions.length,
         itemBuilder: (context, index) {
-          print("${selectedOptions.length} ${index}");
           final option = selectedOptions[index];
           return _buildChip(option, chipDecoration);
         },

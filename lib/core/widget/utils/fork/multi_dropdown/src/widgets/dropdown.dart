@@ -151,12 +151,12 @@ class _Dropdown<T> extends StatelessWidget {
     return child;
   }
 
-  Widget _buildOption(int index, ThemeData theme) {
-    if (index >= items.length) {
+  Widget _buildOption(List<DropdownItem<T>> it, int index, ThemeData theme) {
+    if (index >= it.length) {
       return Container();
     }
 
-    final option = items[index];
+    final option = it[index];
 
     if (itemBuilder != null) {
       return itemBuilder!(option, index, () => onItemTap(option));
@@ -218,7 +218,7 @@ Map<String, List<String>> alreadySearch = {};
 
 class OptionsList<T>  extends StatefulWidget {
   List<DropdownItem<T>> items;
-  Widget Function(int, ThemeData) buildOption;
+  Widget Function(List<DropdownItem<T>>, int, ThemeData) buildOption;
   ThemeData theme;
   Widget? itemSeparator;
 
@@ -237,7 +237,7 @@ class OptionsListState extends State<OptionsList> {
                       widget.itemSeparator ?? const SizedBox.shrink(),
                   shrinkWrap: true,
                   itemCount: widget.items.length,
-                  itemBuilder: (_, int index) => widget.buildOption(index, widget.theme),
+                  itemBuilder: (_, int index) => widget.buildOption(widget.items, index, widget.theme),
                 ),
               );
   }

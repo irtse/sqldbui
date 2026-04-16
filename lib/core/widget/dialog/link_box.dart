@@ -293,7 +293,6 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                           return;
                         }
                         widget.sharing!.body[key] = int.parse(widget.values[widget.name] ?? "");
-                        print("${widget.isDelete} ${widget.sharing!.sharePath!}&$key=${widget.values[widget.name] ?? ""}");
                         (widget.isDelete ? APIService().delete<model.Shallowed>(
                           "${widget.sharing!.sharePath!}&$key=${widget.values[widget.name] ?? ""}", context
                         ) : APIService().post<model.Shallowed>(

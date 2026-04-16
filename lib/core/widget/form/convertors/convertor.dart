@@ -718,7 +718,6 @@ class Convertor {
       gk.currentState?.setState(() {
         gk.currentState?.widget.items = ctrls.items;
       });
-      
     } 
   }
 }

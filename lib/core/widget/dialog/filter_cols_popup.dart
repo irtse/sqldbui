@@ -1,6 +1,6 @@
-import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
+import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/model/response.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -10,7 +10,8 @@ import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
-import 'package:sqldbui2/page/translate.dart';
+import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
+import 'package:uuid/uuid.dart';
 
 // ignore: must_be_immutable
 bool setLatest = false;
@@ -157,6 +158,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     await APIService().put<model.View>(currentView!.filterPath.replaceAll("rows=all", 
                       "rows=${filterView[viewID]}"), <String, dynamic> { "is_selected" : false }, null);
                       widget.value = "";
+                      filterView.remove(viewID);
                       filterOrderView.remove(viewID);
                       filterTempOrderView.remove(viewID);  
                       globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);    
@@ -222,6 +224,17 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
       return Container();
     });
   }
+
+  bool isValidUUID(String value) {
+  final regex = RegExp(
+    r'^[0-9a-fA-F]{8}-'
+    r'[0-9a-fA-F]{4}-'
+    r'[1-5][0-9a-fA-F]{3}-'
+    r'[89abAB][0-9a-fA-F]{3}-'
+    r'[0-9a-fA-F]{12}$',
+  );
+  return regex.hasMatch(value);
+}
   Future<Widget> futureBuild(BuildContext context) async {
     String? fView;
     if (filterView[viewID] != null) {
@@ -328,14 +341,13 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
               for (var e in ctrls.items) {
                 e.selected = false;
               }
-              filterRestr[viewID] = value; 
-              if (ctrls.items.where( (i) => i.value.toString() == value).isEmpty) {
-                ctrls.addItem(DropdownItem<String>(value: value, label: value, selected: true));
+              filterView[viewID] = value; 
+              if (widget.items.where( (i) => i.value.toString() == value).isEmpty) {
+                widget.items.add(DropdownItem<String>(value: value, label: value, selected: true));
               }
-              widget.items = ctrls.items;
               Future.delayed(Duration(milliseconds: 500), () {
                 gk.currentState?.setState(() {
-                  gk.currentState?.widget.items = ctrls.items;
+                  gk.currentState?.widget.items = widget.items;
                 });
               }); 
               setState(() {});
@@ -403,6 +415,9 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                 },
                 onSelectionChange: (values) async {
                   widget.comp.widget.value = values[0];
+                  if (int.tryParse(values[0]) == null) {
+                    return;
+                  }
                   await APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
                             "rows=all", "rows=${values[0]}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
                             globalOffset = 0; 
@@ -430,11 +445,19 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       }
                       widget.comp.force = true;
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
-                      var body = <String, dynamic>{  "name" : filterView[viewID], "link" : currentView!.schemaName, "view_fields" : fields  };
-                      APIService().put<model.View>(currentView!.filterPath.replaceAll(
-                        "rows=all", "rows=${filterView[viewID]}"), body, null).then((value) {
-                          globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                      if (int.tryParse(filterView[viewID] ?? "") == null) {
+                        var body = <String, dynamic>{  "name" : filterView[viewID], "link" : currentView!.schemaName, "view_fields" : fields  };
+                        APIService().post<model.View>(currentView!.filterPath, body, null).then((value) {
+                            globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                         });
+                      } else {
+                        var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
+                        APIService().put<model.View>(currentView!.filterPath.replaceAll(
+                          "rows=all", "rows=${filterView[viewID]}"), body, null).then((value) {
+                            globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                        });
+                      }
+                     
                     }, icon: const Icon(Icons.save), color: Theme.of(context).secondaryHeaderColor),
                     IconButton(onPressed: () { 
                       showDialog(context: context, builder: (builder) => ConfirmBoxWidget(purpose: "delete filter", validate: () {
