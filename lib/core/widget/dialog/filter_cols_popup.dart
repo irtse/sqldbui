@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/page/translate.dart';
@@ -71,7 +72,9 @@ class FutureMenuColsPopUpState extends State<FutureMenuColsPopUpWidget> {
           }
           if (i.selected && (i.label ?? i.name) == filterView[viewID]) { 
             for (var field in i.fields) {
-              if (filterTempOrderView[viewID] == null) { filterTempOrderView[viewID] = []; }
+              if (filterTempOrderView[viewID] == null) { 
+                filterTempOrderView[viewID] = []; 
+              }
               if (rects[viewID] == null) { rects[viewID] = {}; }
               filterTempOrderView[viewID]!.add(field.column);
               if (field.width != null) { rects[viewID]![field.column!] = Rect.fromCenter(
@@ -446,10 +449,29 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                       widget.comp.force = true;
                       filterOrderView[viewID] = filterTempOrderView[viewID]!;
                       if (int.tryParse(filterView[viewID] ?? "") == null) {
-                        var body = <String, dynamic>{  "name" : filterView[viewID], "link" : currentView!.schemaName, "view_fields" : fields  };
+                        var body = <String, dynamic>{  "name" : filterView[viewID], "link" : currentView!.schemaName, "view_fields" : fields, };
                         APIService().post<model.View>(currentView!.filterPath, body, null).then((value) {
+                          if (value.data == null && value.data!.isEmpty) {
+                            return;
+                          }
+                          print(value.data!.first.id);
+                          APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
+                            "rows=all", "rows=${value.data?.first.id}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
+                            globalOffset = 0; 
+                            filterView[viewID] = "${value.data!.first.id}";
+                            filterTempOrderView.remove(viewID);
+                            noSelection=false;
+                            if (v.data != null && v.data!.isNotEmpty) { 
+                              filterTempOrderView[viewID] = v.data![0].fields.map((e) => e.column ?? "id").toList();
+                              filterOrderView[viewID] = filterTempOrderView[viewID]!;
+                            } 
+                            setState((){});
+                            widget.comp.setState((){});
+                            context.pop();
                             globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
+                          });
                         });
+                         
                       } else {
                         var body = <String, dynamic>{ "link" : currentView!.schemaName, "view_fields" : fields  };
                         APIService().put<model.View>(currentView!.filterPath.replaceAll(

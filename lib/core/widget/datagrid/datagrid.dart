@@ -163,7 +163,7 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
     if (schema == null) { return {}; }
     bool isMath =modeIndex[viewID]  == 1 && editMode[viewID] == "math";
     List<String> seen = [];
-    if (!(filterTempOrderView[viewID] != null && modeIndex[viewID]  == 1 && editMode[viewID] == "math")
+    if (!(filterTempOrderView[viewID] == null && modeIndex[viewID]  == 1 && editMode[viewID] == "math")
     && filterOrderView[viewID] == null) {
       var newOrder = schema.keys.where( (e) {
         return schema[e]?.inResume != null; 
@@ -182,7 +182,7 @@ Map<String,String> realOrderMap( List<dynamic>? ord, Map<String, model.SchemaFie
       if ((ord ?? []).contains("type") && !newOrder.contains("type")) {
         newOrder = ["type", ...newOrder];
       }
-      filterTempOrderView[viewID] = newOrder;
+      filterTempOrderView[viewID] = filterTempOrderView[viewID] ?? newOrder;
     }
     var order = filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? ord ?? [];
     List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
@@ -211,7 +211,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     var schema = view.schema;
     bool isMath = forceMath || (modeIndex[viewID]  == 1 && editMode[viewID] == "math");
     List<String> seen = [];
-    if (filterTempOrderView[viewID] != null  && filterOrderView[viewID] == null) {
+    if (filterTempOrderView[viewID] == null  && filterOrderView[viewID] == null) {
       var newOrder = view.schema.keys.where( (e) {
         return view.schema[e]?.inResume != null; 
       }).toList();
@@ -232,7 +232,10 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
         if (view.order.contains("type") && !newOrder.contains("type")) {
           newOrder = ["type", ...newOrder];
         }
-        filterTempOrderView[viewID] = forceOrder ?? newOrder;
+        if ((forceOrder ?? []).isEmpty) {
+          forceOrder = null;
+        }
+        filterTempOrderView[viewID] = forceOrder ??  newOrder ?? filterTempOrderView[viewID] ?? [];
       }
     }
 
