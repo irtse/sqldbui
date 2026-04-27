@@ -4,7 +4,7 @@ import 'package:translator/translator.dart';
 
 class TranslateConstants {
   static String inserImage = "insert image from desktop";
-  static String errorRequire = "you must fill in the required fields *";
+  static String errorRequire = "please fill in the required fields *";
   static String searchInfoMake = "make a search to find others.";
   static String searchInfo = "items were found, they may be partially displayed.";
   static String addNewEntry = "add new entry";
@@ -22,7 +22,7 @@ class TranslateConstants {
   static String back = "backspace";
   static String forward = "forward";
 
-  static String disconnect = "disconnect your account";
+  static String disconnect = "disconnect account";
   static String logout = "logout";
   static String tutorial = "tutorial";
   static String notifications = "notifications";
@@ -130,7 +130,7 @@ class TranslateConstants {
   static String draftT = "DRAFT";
   static String lost = "Seems pretty lost... go on another page please :)";
   static String sure = "Do we confirm?";
-  static String undoAction = "You will not able to undo this action.";
+  static String undoAction = "It is impossible to undo this action afterwards.";
   static String noWorkflow = "no workflow related !";
   static String nextOpt = "optional next steps:";
 
@@ -139,21 +139,21 @@ class TranslateConstants {
   static String howToReq = "How to access my requests ?";
   static String howToFilter = "How to filter by columns in a view list ? [ALPHA]";
   static String howToProgress = "How to track progress of a workflow ?";
-  static String needAccess = "you need to access <submit page> from home page, \"MENU -> GENERAL -> SUBMIT DATAS\", or from any shortcut on pages.";
-  static String needRule1 = "-> then you will access to a formulary selector, that will show the data formulary depending the selected one.";
-  static String needRule2 = "-> fill, at least, all required fields and then you only have to submit ! if any workflow is engaged, it will triggered on submition.";
-  static String needRule3 = "you need to access <assigned activity page> from home page, \"MENU -> ACTIVITY -> ASSIGNED ACTIVITY\". notifications will allows you a quick access to your unread activities.";
-  static String needRule4 = "-> assigned activities concerns all your action to realise in the purpose of a current workflow, on closure, workflow will go to next activity (activity for you or another actor).";
+  static String needAccess = "we need to access <submit page> from home page, \"MENU -> GENERAL -> SUBMIT DATAS\", or from any shortcut on pages.";
+  static String needRule1 = "-> then we will access to a formulary selector, that will show the data formulary depending the selected one.";
+  static String needRule2 = "-> fill, at least, all required fields and then we only have to submit ! if any workflow is engaged, it will triggered on submition.";
+  static String needRule3 = "we need to access <assigned activity page> from home page, \"MENU -> ACTIVITY -> ASSIGNED ACTIVITY\". notifications will allows we a quick access to your unread activities.";
+  static String needRule4 = "-> assigned activities concerns all your action to realise in the purpose of a current workflow, on closure, workflow will go to next activity (activity for we or another actor).";
   static String needRule5 = "-> an activity can be stated as <pending,progressing,dismiss,completed>. completion will close it as successful. dismiss will close it as failed. when closed an activity can't be reopenned without superadmin action.";
-  static String needRule6 = "-> requests concerns all your request or your hierarchical subordinate. you can monitor where your requests are stated. notification will warn you on closure";
+  static String needRule6 = "-> requests concerns all your request or your hierarchical subordinate. we can monitor where your requests are stated. notification will warn we on closure";
   static String needRule7 = "-> an request can be stated as <pending,progressing,dismiss,completed>. completion will close it as successful. dismiss will close it as rejected. when closed an activity can't be reopenned without superadmin action.";
   static String needRule8 = "-> filter showed column by tapping on the <gear> icon to open a popup panel to choose columns. filter can be saved. [ALPHA] only register state on session.";
   static String needRule9 = "-> filter on column by hovering column label and tapping <filter> icon to open a popup panel to filter by value column. filter multiple columns is allowed as 'and' connector. [ALPHA] only register state on session && does not adapt by column types only text considers.";
   static String needRule10 = "-> filter on full table by using top bar <filter> icon. [ALPHA] actually not working, only visually sets up.";
-  static String needRule11 = "-> tap on a line of a list to acces its formulary. a form gives you state allowed depending your rights and actions available such as <save, delete>.";
+  static String needRule11 = "-> tap on a line of a list to acces its formulary. a form gives we state allowed depending your rights and actions available such as <save, delete>.";
   static String needRule12 = "-> [ACCESS] enter in top search bar in the middle of the screen, app path to the form. (can also be use to access a list view)";
   static String needRule13 = "-> only request, task shows workflow completion, on top of their forms. it consists of a simple bar declining steps with a list of parrallel subtask depending on step.";
-  static String needRule14 = "-> grey color define not reached step, vivid color step is done or currently doing, icons in subtask will give you its current state (done or doing). task can show you a optionnal hub under main workflow, by this you can choose wich are the next step to launch.";
+  static String needRule14 = "-> grey color define not reached step, vivid color step is done or currently doing, icons in subtask will give we its current state (done or doing). task can show we a optionnal hub under main workflow, by this we can choose wich are the next step to launch.";
 
   static String showMenu = "open menu";
   static String showFilter = "open filter";
@@ -171,7 +171,7 @@ class TranslateConstants {
   static String writeNumber = "write a number";
   static String writePath = "write a path";
 
-  static String commentary = "write your commentary";
+  static String commentary = "write a commentary";
   static String enterProper = "enter a proper value.";
   static String dataFormulary = "fill formulary";
   static String formulary = "form";

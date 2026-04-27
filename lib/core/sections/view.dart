@@ -141,14 +141,7 @@ class ViewWidgetState extends State<ViewWidget> {
         width: currentWidth - menuSize > 0 ? currentWidth - menuSize : 0, 
         height: currentHeigth - 65 > 0 ? currentHeigth - 65 : 0, 
         decoration: BoxDecoration(color: Colors.grey.shade300),
-        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : [
-           /*Center( child: FutureBuilder(future: getOnFlow("loading... but if you read this, you are probably lost."), builder: (a,s) {
-              if (s.data != null) {
-                return Text(s.data!, style: TextStyle(fontSize: 50, color: Colors.white), textAlign: TextAlign.center);
-              }
-              return Text("loading... but if you read this, you are probably lost.", textAlign: TextAlign.center, style: TextStyle(fontSize: 50, color: Colors.white ));
-            }))*/
-        ]))),
+        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children : []))),
       ActionBarWidget(key: globalActionBar, view: widget.view), ...comps]); 
   }
 }
