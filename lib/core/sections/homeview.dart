@@ -151,8 +151,12 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
         Padding(padding: const EdgeInsets.all(10), child: Wrap(alignment: WrapAlignment.center, children: views,))
       ],)));
     }
-    var goto = await getOnFlow(TranslateConstants.goto);
-    var dash = await getOnFlow(TranslateConstants.dashboard);
+    final trad0 = await Future.wait([
+      getOnFlow(TranslateConstants.goto),
+      getOnFlow(TranslateConstants.dashboard),
+    ]);
+    var goto = trad0[0];
+    var dash = trad0[1];
 
     return FutureBuilder<APIResponse<Shallowed>>(future:APIService().get<Shallowed>(
       "${APIConstants.genericEndpost}/dbview?rows=all&shallow=enable&shortcut_on_main=true", false, context), 

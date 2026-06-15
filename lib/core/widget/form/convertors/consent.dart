@@ -49,7 +49,8 @@ class ConsentState extends State<ConsentWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    return Padding( 
+    final consentLabel = (await getOnFlow(widget.consent.name)).toLowerCase();
+    return Padding(
       padding: EdgeInsets.only(left: 30, right: 30), 
       child: 
       Stack(
@@ -74,11 +75,11 @@ class ConsentState extends State<ConsentWidget> {
               },
             ),
           ),
-          Container( padding: EdgeInsets.only(left: 40), 
-            child: Tooltip( message: (await getOnFlow(widget.consent.name)).toLowerCase(),
-              child: Text( "${(await getOnFlow(widget.consent.name)).toLowerCase()}${widget.consent.optionnal ? "" : "*"}", 
+          Container( padding: EdgeInsets.only(left: 40),
+            child: Tooltip( message: consentLabel,
+              child: Text( "$consentLabel${widget.consent.optionnal ? "" : "*"}",
                 softWrap: true,
-                style: TextStyle( color:  error ? Colors.red : Colors.black)
+                style: TextStyle( color: error ? Colors.red : Colors.black)
               )
             )
           ),

@@ -77,17 +77,24 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           )))
       );
     }
+    final tradBtn = await Future.wait([
+      getOnFlow(TranslateConstants.send),
+      getOnFlow(TranslateConstants.filterCancel),
+      getOnFlow(widget.triggers[widget.index].name ?? ""),
+      getOnFlow(widget.triggers[widget.index].description ?? ""),
+    ]);
+    if (!context.mounted) return Container();
     try {
     return AlertWidget(
       widget: SingleChildScrollView( child: Column(
-      mainAxisSize: MainAxisSize.min, 
+      mainAxisSize: MainAxisSize.min,
       children: [
-      Padding(padding: EdgeInsets.only(top:20, left: 20, right:20), 
-        child :  Text(widget.triggers[widget.index].name == null ? "" : (await getOnFlow(widget.triggers[widget.index].name ?? "")).toUpperCase(), overflow: TextOverflow.ellipsis,
+      Padding(padding: EdgeInsets.only(top:20, left: 20, right:20),
+        child :  Text(widget.triggers[widget.index].name == null ? "" : tradBtn[2].toUpperCase(), overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor))),
       if (widget.triggers[widget.index].description != null && widget.triggers[widget.index].description != "")
-        Padding(padding: EdgeInsets.only(left: 20, right:20), 
-            child :  Text((await getOnFlow(widget.triggers[widget.index].description ?? "")).toLowerCase(), overflow: TextOverflow.ellipsis,
+        Padding(padding: EdgeInsets.only(left: 20, right:20),
+            child :  Text(tradBtn[3].toLowerCase(), overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 15, color: Colors.grey))),
       Padding( 
         padding: EdgeInsets.symmetric(vertical: 10),
@@ -115,28 +122,35 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             if (!(formKey.currentState?.validate() ?? false)) {
               return;
             }
+            // ignore: use_build_context_synchronously
             var body = await ActionService.getBody("POST", {...b }, {}, trigger.schema, {}, context);
+            if (!context.mounted) return;
             var files = await ActionService.getFiles("POST", {...b }, trigger.schema, context);
+            if (!context.mounted) return;
             for (var bb in widget.triggers[widget.index].body.keys) {
               if (body[bb] == null) {
                 body[bb] =  widget.triggers[widget.index].body[bb];
               }
             }
             for (var pathFile in files.keys) {
+              // ignore: use_build_context_synchronously
               await submitFile(pathFile, files[pathFile]!, context);
+              if (!context.mounted) return;
             }
+            // ignore: use_build_context_synchronously
             await APIService().post<model.View>(widget.triggers[widget.index].actionPath, body, context).then( (e) {
                 if (e.data != null && e.data!.isNotEmpty) {
+                  // ignore: use_build_context_synchronously
                   ActionService.onSuccessMethod("POST", e.data!.first, body, trigger.schema, context);
                 }
               }).catchError( (e) {});
+            if (!context.mounted) return;
             if (widget.isCached) {
               TriggerCacheService.deleteTriggers(widget.index);
             }
-            try{
+            try {
               widget.triggers.removeAt(widget.index);
-            } catch(e) {}
-            
+            } catch(e) { /* ignore */ }
             widget.index = 0;
             if (widget.triggers.isEmpty) {
               isTriggerOpen = false;
@@ -145,8 +159,8 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
               setState(() {});
             }
         },
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
-          child: Text((await getOnFlow(TranslateConstants.send)).toUpperCase(), 
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(tradBtn[0].toUpperCase(),
           style: TextStyle(color: Colors.white, fontSize: 15))))),
         TextButton(
           style: TextButton.styleFrom(
@@ -162,8 +176,8 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
             navigate = true;
             confirmCache = {};
         },
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
-          child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(tradBtn[1].toUpperCase(),
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
     ])));

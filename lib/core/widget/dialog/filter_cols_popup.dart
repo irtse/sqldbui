@@ -127,10 +127,6 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    var title = await getOnFlow(TranslateConstants.filterTitle);
-    var apply = await getOnFlow(TranslateConstants.filterApply);
-    var cancel = await getOnFlow(TranslateConstants.filterCancel);
-    var save = await getOnFlow(TranslateConstants.filterSave);
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 20),
       child: StatefulBuilder(
@@ -139,7 +135,9 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
             Padding( 
               padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10), 
               child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ const Padding( padding: EdgeInsets.only(right: 10), child: Icon(Icons.list)), 
-                    Text(title.toUpperCase(), style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor)) ])),
+                    FutureBuilder(future: getOnFlow(TranslateConstants.filterTitle), builder: (a, s) {
+                      return Text((s.data ?? TranslateConstants.filterTitle).toUpperCase(), style: TextStyle(fontSize: 15, color: Theme.of(context).primaryColor));
+                    }) ])),
                   Divider(color: Theme.of(context).splashColor),
                   // select all
                   ColsPopUpWidget(schema: widget.schema, items: widget.items, comp: this),
@@ -154,7 +152,9 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       }
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                     child: Padding( padding: EdgeInsets.all(10), 
-                      child: Text(apply.toUpperCase(), style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12))))),
+                      child: FutureBuilder(future: getOnFlow(TranslateConstants.filterApply), builder: (a, s) {
+                        return Text((s.data ?? TranslateConstants.filterApply).toUpperCase(), style: TextStyle(color: Color.fromRGBO(255, 255, 255, 1), fontSize: 12));
+                      })))),
                   filterView[viewID] != null && filterView[viewID] != "" ? 
                   Padding( padding: const EdgeInsets.only(right: 10), 
                     child: TextButton(onPressed: () async { 
@@ -171,7 +171,9 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                       });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), 
-                  child: Text(cancel.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12))),))
+                  child: FutureBuilder(future: getOnFlow(TranslateConstants.filterCancel), builder: (a, s) {
+                    return Text((s.data ?? TranslateConstants.filterCancel).toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 12));
+                  })),))
                   : TextButton(onPressed: () {
                     List<Map<String, dynamic>> fields = [];
                     for (var (index, fieldName) in filterTempOrderView[viewID]!.indexed) {
@@ -198,8 +200,9 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
                     });
                   }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
                   child: Padding( padding: EdgeInsets.all(10), 
-                  child: Text(save.toUpperCase(), 
-                    style: const TextStyle(color: Colors.white, fontSize: 12))),) ])
+                  child: FutureBuilder(future: getOnFlow(TranslateConstants.filterSave), builder: (a, s) {
+                    return Text((s.data ?? TranslateConstants.filterSave).toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 12));
+                  })),) ])
       ]); } ) );
   }
 }
@@ -396,15 +399,14 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
               maxHeight: 400,
               header: Padding(
                 padding: EdgeInsets.all(8),
-                  child: Text(
-                    "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                child: FutureBuilder(future: getOnFlow(TranslateConstants.selectValue), builder: (a, s) {
+                  return Text(
+                    "       ${(s.data ?? TranslateConstants.selectValue).toLowerCase()}",
                     textAlign: TextAlign.start,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  );
+                }),
+              ),
               ),
               dropdownItemDecoration: DropdownItemDecoration(
                 backgroundColor: Theme.of(context).highlightColor,
@@ -454,7 +456,6 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                           if (value.data == null && value.data!.isEmpty) {
                             return;
                           }
-                          print(value.data!.first.id);
                           APIService().put<model.Shallowed>(currentView!.filterPath.replaceAll(
                             "rows=all", "rows=${value.data?.first.id}"), <String, dynamic> { "is_selected" : true }, null).then((v) {
                             globalOffset = 0; 

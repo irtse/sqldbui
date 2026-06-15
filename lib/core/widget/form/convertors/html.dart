@@ -79,12 +79,16 @@ class HTMLState extends State<HTMLWidget> {
       saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
     }
     val = val?.replaceAll("''", "'");
+    final htmlTrad = await Future.wait([
+      getOnFlow(TranslateConstants.empty),
+      getOnFlow('Start writing your notes...'),
+    ]);
     if (val == null) {
-      val = widget.readOnly ? (await getOnFlow(TranslateConstants.empty)) : null;
+      val = widget.readOnly ? htmlTrad[0] : null;
     } else if (widget.translatable) {
       val = await getOnFlow(val);
     }
-    var placeholder = await getOnFlow('Start writing your notes...');
+    var placeholder = htmlTrad[1];
     return FormField<String>(
       validator: (value) {
         value = _controller.document.toPlainText().trim();

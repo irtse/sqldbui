@@ -129,24 +129,24 @@ class DropDownState extends State<DropDownWidget> {
         widget.value = widget.value.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
       }
       var values = widget.type.replaceAll("enum__", "").split("_");
-      for (var item in values) { 
-        if (items.where((element) => element.value == item).isEmpty) {
-          var v = item;
-          if (widget.name == "state") {
-            v = v.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
-          }
-          if (widget.translatable) {
-            try {
-              v = await getOnFlow(item);
-              if (v.toUpperCase() == v) {
-                v = v.toUpperCase();
-              } else {
-                v = v.toLowerCase();
-              }
-            } catch(e) {}
-          }
-          items.add(DropdownMenuItem<String>(value: item, child:  Text(v, overflow: TextOverflow.ellipsis)));
+      var enumToTranslate = values.where((item) => items.where((e) => e.value == item).isEmpty).toList();
+      List<String> enumTranslated;
+      try {
+        enumTranslated = widget.translatable
+          ? await Future.wait(enumToTranslate.map((item) => getOnFlow(item)))
+          : enumToTranslate.toList();
+      } catch(e) {
+        enumTranslated = enumToTranslate.toList();
+      }
+      for (var (i, item) in enumToTranslate.indexed) {
+        var v = enumTranslated[i];
+        if (widget.name == "state") {
+          v = v.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
         }
+        if (widget.translatable) {
+          v = v.toUpperCase() == v ? v.toUpperCase() : v.toLowerCase();
+        }
+        items.add(DropdownMenuItem<String>(value: item, child: Text(v, overflow: TextOverflow.ellipsis)));
       }
       return Stack( children: [
          DropdownButtonFormField<String>( 
@@ -378,46 +378,59 @@ class SubDropDownState extends State<SubDropDownWidget> {
     var l = widget.datas.toList();
     int max = l.isNotEmpty ? l.first.max : 0;
     ctrls = MultiSelectController<String>();
+    // Pass 1 : collecter les items éligibles sans traduire
+    List<(model.Shallowed, String, bool)> toProcess = [];
     for (var item in l) {
       var v = (item.label ?? item.name ?? "${item.id}").replaceAll("db", "").replaceAll("_", " ");
       v = v.replaceAll("''", "'");
-      var t = items.where((e) => e.value.toString() == "${item.id}"); 
-      if (!mapped.containsKey(v) && t.isEmpty){
-        mapped["${item.id}"]=item;
-        if((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
+      var t = items.where((e) => e.value.toString() == "${item.id}");
+      if (!mapped.containsKey(v) && t.isEmpty) {
+        mapped["${item.id}"] = item;
+        if ((widget.component!.widget.view!.isEmpty || !(widget.component!.widget.view!.isEmpty && !item.actions.contains("post")))) {
           var vv = v;
           bool select = false;
           if ("${widget.form[widget.name] ?? widget.value ?? widget.autofill ?? ""}" == "${item.id}") {
             saveChange(widget.component?.widget.view, widget.form, widget.name, widget.form[widget.name] ?? widget.value ?? widget.autofill);
             select = true;
             if (widget.url != null) {
-                Future.delayed(Duration(seconds: 1), () {
-                  widget.wrappers?.currentState?.setState( () { 
-                    widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
-                  });
+              Future.delayed(Duration(seconds: 1), () {
+                widget.wrappers?.currentState?.setState(() {
+                  widget.wrappers?.currentState?.wrappersURL[widget.name] = widget.url!.replaceAll("rows=all", "rows=${item.id}");
                 });
-                
+              });
             }
           }
           if (widget.name == "state") {
             vv = vv.toString().replaceAll(" (pending)", "").replaceAll(" (running)", "").replaceAll(" (completed)", "").replaceAll(" (dismiss)", "").replaceAll(" (refused)", "");
           }
-          try {
-            if (widget.translatable) {
-              vv = (await getOnFlow(vv));
-              if (vv.toUpperCase() == vv) {
-                vv = vv.toUpperCase();
-              } else {
-                vv = vv.toLowerCase();
-              }
-            }
-          } catch(e) {  }
-          items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
-          //ctrls.addItem(items.last);
+          toProcess.add((item, vv, select));
         }
       }
     }
+    // Pass 2 : traduire tous les labels en parallèle
+    List<String> translatedLabels;
+    try {
+      translatedLabels = widget.translatable
+        ? await Future.wait(toProcess.map((p) => getOnFlow(p.$2)))
+        : toProcess.map((p) => p.$2).toList();
+    } catch(e) {
+      translatedLabels = toProcess.map((p) => p.$2).toList();
+    }
+    // Pass 3 : construire les items
+    for (var (i, (item, _, select)) in toProcess.indexed) {
+      var vv = translatedLabels[i];
+      if (widget.translatable) {
+        vv = vv.toUpperCase() == vv ? vv.toUpperCase() : vv.toLowerCase();
+      }
+      items.add(DropdownItem<String>(value: "${item.id}", label: vv, selected: select));
+    }
     var gk = GlobalKey<OptionsListState>();
+    final uiTrad = await Future.wait([
+      getOnFlow(TranslateConstants.selectValue),
+      getOnFlow(TranslateConstants.search),
+    ]);
+    final selectValueText = uiTrad[0].toLowerCase();
+    final searchHintText = "       ${uiTrad[1].toLowerCase()}";
     return Stack( children: [
       MultiDropdown<String>(
         gk: gk,
@@ -463,7 +476,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           backgroundColor: widget.readOnly ? Theme.of(context).splashColor 
                                      : ( widget.isDark ? Theme.of(context).primaryColorLight : Colors.white ),
                           labelStyle: TextStyle(color: widget.isDark ? Theme.of(context).splashColor : Theme.of(context).secondaryHeaderColor),
-                          hintText: (await getOnFlow(TranslateConstants.selectValue)).toLowerCase(),
+                          hintText: selectValueText,
                           hintStyle: TextStyle(overflow: TextOverflow.ellipsis,fontSize: 12, color: Colors.grey),
                           prefixIcon: Icon(Icons.list, color: Colors.grey.shade200),
                           showClearIcon: false,
@@ -479,7 +492,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           ),
                         ),
                         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+                          hintText: searchHintText,
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -495,7 +508,7 @@ class SubDropDownState extends State<SubDropDownWidget> {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                              "       $selectValueText",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,
@@ -566,6 +579,10 @@ class SubDropDownState extends State<SubDropDownWidget> {
 
   Future<void> load(int start, int interval, String filter, String? value, List<DropdownItem<String>> items, GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
+      if (widget.mainUrl.contains("&filter_line=")) {
+          widget.mainUrl.replaceAll("&filter_line=", "$filter+");
+          filter = "";
+        }
       var e = await APIService().get<model.Shallowed>("${widget.mainUrl}$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {

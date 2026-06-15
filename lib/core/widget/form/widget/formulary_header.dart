@@ -64,60 +64,70 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
     List<Widget> title = [];    
     name = (widget.view.label ?? widget.view.name).toUpperCase().replaceAll("DB", "").replaceAll("_", " ");
     var scheme = widget.schema["name"];
+    description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
+    var name2Raw = (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null)
+        ? widget.refItem.values["name"].toUpperCase() as String
+        : null;
     if (scheme?.translatable ?? true) {
       try {
-        name = await getOnFlow(name);
+        final nameTrad = await Future.wait([
+          getOnFlow(name),
+          if (name2Raw != null) getOnFlow(name2Raw),
+        ]);
+        name = nameTrad[0];
+        if (name2Raw != null) name2Raw = nameTrad[1];
       } catch(e) {}
     }
-    description = widget.view.description.toLowerCase().replaceAll("db", "").replaceAll("_", " ");
-    var name2 = "";
-    if (widget.refItem.values.containsKey("name") && widget.refItem.values["name"] != null) { 
-      name2 = widget.refItem.values["name"].toUpperCase(); 
-      if (scheme?.translatable ?? true) {
-        try {
-          name2 = await getOnFlow(name2);
-        } catch(e) {}
-      } 
-    }
+    var name2 = name2Raw ?? "";
     List<String> desc = [];
-    if (widget.refItem.values.containsKey("description") && widget.refItem.values["description"] != null) { 
-      description = widget.refItem.values["description"].toLowerCase(); 
-      for (var d in description.split(":")) {
-        try { desc.add(await getOnFlow(d));
-        } catch(e) { }
-      } 
+    if (widget.refItem.values.containsKey("description") && widget.refItem.values["description"] != null) {
+      description = widget.refItem.values["description"].toLowerCase();
+      final descParts = description.split(":");
+      try {
+        desc = (await Future.wait(descParts.map((d) => getOnFlow(d).catchError((_) => d)))).toList();
+      } catch(e) { }
     }
+    final stateValue = widget.refItem.values["state"] != null
+        ? (widget.refItem.valuesShallow["state"]?.label ?? widget.refItem.valuesShallow["state"]?.name ?? widget.refItem.values["state"]).toString().replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "")
+        : null;
+    final headerTrad = await Future.wait([
+      getOnFlow(TranslateConstants.draftT),
+      getOnFlow("created : "),
+      getOnFlow("by"),
+      getOnFlow("last update : "),
+      if (stateValue != null) getOnFlow(stateValue),
+    ]);
     if (widget.refItem.isDraft) {
       states.add(Padding(
-        padding: const EdgeInsets.only(top: 3, left: 12), 
+        padding: const EdgeInsets.only(top: 3, left: 12),
         child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-          decoration: BoxDecoration( 
-            borderRadius: BorderRadius.circular(30), 
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
             color: Colors.grey
           ),
-          child: Text((await getOnFlow(TranslateConstants.draftT)).toLowerCase(), 
+          child: Text(headerTrad[0].toLowerCase(),
             style: const TextStyle(color: Colors.white, fontSize: 10)))
         )
       );
     }
-    if (widget.refItem.values["state"] != null) {
-      var value = (widget.refItem.valuesShallow["state"]?.label ?? widget.refItem.valuesShallow["state"]?.name ?? widget.refItem.values["state"]).toString().replaceAll(" (pending)", "").replaceAll(" (completed)", "").replaceAll(" (refused)", "").replaceAll(" (running)", "");;
+    if (stateValue != null) {
       states.add(Padding(
-        padding: const EdgeInsets.only(top: 3, left: 12), 
+        padding: const EdgeInsets.only(top: 3, left: 12),
         child: Container( padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-          decoration: BoxDecoration( 
-            borderRadius: BorderRadius.circular(30), 
-            color: value == "completed" ? Colors.green : (value == "dismiss" ? Colors.red : Colors.orange)),
-          child: Text((await getOnFlow(value)).toLowerCase(), style: const TextStyle(color: Colors.white, fontSize: 10)))
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            color: stateValue == "completed" ? Colors.green : (stateValue == "dismiss" ? Colors.red : Colors.orange)),
+          child: Text(headerTrad[4].toLowerCase(), style: const TextStyle(color: Colors.white, fontSize: 10)))
         )
       );
     }
-    title.add(Container( 
-      padding: const EdgeInsets.only(left: 53), 
-      child: Row( 
-        children: [ 
+    final metaTrad = [headerTrad[1], headerTrad[2], headerTrad[3]];
+    title.add(Container(
+      padding: const EdgeInsets.only(left: 53),
+      child: Row(
+        children: [
            if (widget.refItem.sharedTo.isNotEmpty)
-            Padding(  padding: const EdgeInsets.only(right: 10), 
+            Padding(  padding: const EdgeInsets.only(right: 10),
               child: FutureBuilder(future: getOnFlow("shared to "), builder: (a,s) {
                 if (s.data != null) {
                    return Tooltip( message: "${s.data} ${widget.refItem.sharedTo.join(",")}", child: Icon(Icons.share, size: 18, color: Theme.of(context).primaryColor));
@@ -125,18 +135,18 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
                 return  Tooltip( message: widget.refItem.sharedTo.join(","), child: Icon(Icons.share, size: 18, color: Theme.of(context).primaryColor));
               })),
           if (widget.refItem.sharedBy.isNotEmpty)
-            Padding(  padding: const EdgeInsets.only(right: 10), 
+            Padding(  padding: const EdgeInsets.only(right: 10),
               child: FutureBuilder(future: getOnFlow("shared by "), builder: (a,s) {
                 if (s.data != null) {
-                   return Tooltip( message: "${s.data} ${widget.refItem.sharedBy.join(",")}", child: Icon(Icons.share, size: 18, color: Colors.grey)); 
+                   return Tooltip( message: "${s.data} ${widget.refItem.sharedBy.join(",")}", child: Icon(Icons.share, size: 18, color: Colors.grey));
                 }
                 return  Tooltip( message: widget.refItem.sharedBy.join(","), child: Icon(Icons.share, size: 18, color: Colors.grey));
               })),
-          Container( constraints:  BoxConstraints(maxWidth: widget.width / 2), 
+          Container( constraints:  BoxConstraints(maxWidth: widget.width / 2),
           child : Text( name.toUpperCase(), overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: _theme.primaryColor, 
+            style: TextStyle(color: _theme.primaryColor,
               fontWeight: FontWeight.bold,
-              fontSize: widget.subForm ? 30 : 19))), 
+              fontSize: widget.subForm ? 30 : 19))),
           /*widget.canUpdate ? Padding(
             padding: EdgeInsets.only(left: 10),
             child: InkWell( onTap: () => setState(() {
@@ -146,26 +156,26 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
           ) : Container(),*/
           ...states,
           if (!widget.view.isEmpty)
-            SizedBox(  width: widget.width / 3, 
+            SizedBox(  width: widget.width / 3,
             child: Column( crossAxisAlignment: CrossAxisAlignment.start, children: [
-              widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row( 
-            children: [ 
+              widget.refItem.metadata?.creationUser == "" ? Container() : Padding( padding: const EdgeInsets.only(left: 20), child: Row(
+            children: [
               if (widget.refItem.metadata != null)
-                Text("${await getOnFlow("created : ")} ${widget.refItem.metadata!.creationDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.creationUser}".toLowerCase(), 
-                    overflow: TextOverflow.ellipsis,  
+                Text("${metaTrad[0]} ${widget.refItem.metadata!.creationDate} ${metaTrad[1]} ${widget.refItem.metadata!.creationUser}".toLowerCase(),
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: Colors.grey, fontSize: 11))
               ] )),
-              widget.refItem.metadata?.updateUser == "" ? Container() 
-              : Padding( 
-                padding: const EdgeInsets.only(left: 20), 
-                child: Row( 
-                  children: [ 
+              widget.refItem.metadata?.updateUser == "" ? Container()
+              : Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Row(
+                  children: [
                     if (widget.refItem.metadata != null)
-                      Text("${await getOnFlow("last update : ")} ${widget.refItem.metadata!.updateDate} ${await getOnFlow("by")} ${widget.refItem.metadata!.updateUser}".toLowerCase(), 
-                          overflow: TextOverflow.ellipsis,  
+                      Text("${metaTrad[2]} ${widget.refItem.metadata!.updateDate} ${metaTrad[1]} ${widget.refItem.metadata!.updateUser}".toLowerCase(),
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(color: Colors.grey, fontSize: 11))
-                    
-                  ] 
+
+                  ]
                 )
               )
             ]))
@@ -185,49 +195,50 @@ class FormularyHeaderWidgetState extends State<FormularyHeaderWidget> {
               
         ] )));
     } 
+    try {
+      final actionTrad = await Future.wait([
+        getOnFlow(TranslateConstants.draft),
+        getOnFlow(TranslateConstants.publish),
+        getOnFlow(TranslateConstants.update),
+        getOnFlow(TranslateConstants.delete),
+      ]);
+      TranslateConstants.draft = actionTrad[0];
+      TranslateConstants.publish = actionTrad[1];
+      TranslateConstants.update = actionTrad[2];
+      TranslateConstants.delete = actionTrad[3];
+    } catch (e) {}
     List<Widget> actions = [];
     if (!widget.subForm) {
       if (!widget.view.readOnly) {
         if ((widget.view.actions.contains("post") && widget.view.isEmpty) || widget.view.actions.contains("put")) {
           if (widget.view.actions.contains("post") && widget.view.isEmpty ) {
-            try {  TranslateConstants.draft = await getOnFlow(TranslateConstants.draft);
-          } catch (e) {}
-            actions.add(ButtonWidget( method: "post", 
+            actions.add(ButtonWidget( method: "post",
               text: (TranslateConstants.draft).toUpperCase(), color: Colors.grey, isDraft: true, explicitDraft: true, avoidConsent: true));
           }
-          try {
-            TranslateConstants.publish = await getOnFlow(TranslateConstants.publish);
-          } catch (e) {}
           if (widget.view.items.isNotEmpty && widget.view.items[0].isDraft) {
             actions.add(ButtonWidget(method: "put",
               text: TranslateConstants.publish.toUpperCase(), color: Colors.grey, explicitDraft: true, avoidConsent: false));
           }
           if (!widget.onlyDraft) {
-            try {
-              TranslateConstants.update = await getOnFlow(TranslateConstants.update);
-            } catch (e) {}
             actions.add(ButtonWidget(
-              method: !widget.view.actions.contains("put") || widget.view.isEmpty ? "post" : "put", 
+              method: !widget.view.actions.contains("put") || widget.view.isEmpty ? "post" : "put",
               text: (!widget.view.actions.contains("put") || widget.view.isEmpty ? TranslateConstants.publish
-                  : TranslateConstants.update).toUpperCase(), 
+                  : TranslateConstants.update).toUpperCase(),
                   // ignore: use_build_context_synchronously
-              color: _theme.primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft, 
+              color: _theme.primaryColor, isDraft: widget.view.items.isNotEmpty && widget.view.items[0].isDraft,
               avoidConsent: !(!widget.view.actions.contains("put") || widget.view.isEmpty), noRedirection: !widget.view.isEmpty));
           }
         }
         if ((widget.view.actions.contains("delete") || widget.view.actions.contains("put") && (currentView?.schemaName ?? "" ).contains("task")) && !widget.view.isEmpty) {
           if (!((currentView?.workflow?.isClose ?? false) || (currentView?.items.first.workflow?.isClose ?? false))) {
-            try {
-              TranslateConstants.delete = await getOnFlow(TranslateConstants.delete);
-            } catch (e) {}
             actions.add(ButtonWidget(
-              method: "delete", 
-              text: (TranslateConstants.delete).toUpperCase(), 
-              color: Colors.red, 
+              method: "delete",
+              text: (TranslateConstants.delete).toUpperCase(),
+              color: Colors.red,
               avoidConsent: true));
           }
-        } 
-      }   
+        }
+      }
       widgets.add( 
           Container( 
             width: widget.width, 

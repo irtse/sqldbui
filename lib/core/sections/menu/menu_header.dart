@@ -50,6 +50,11 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    final trad = await Future.wait([
+      getOnFlow(TranslateConstants.filterMenu),
+      getOnFlow(TranslateConstants.all),
+      getOnFlow(TranslateConstants.favorites),
+    ]);
     return Column( children: menuSize <= 0 && !noMenu ? [] : <Widget>[
       Container(
         decoration: BoxDecoration(
@@ -80,15 +85,15 @@ class MenuHeaderWidgetState extends State<MenuHeaderWidget> {
                 fillColor: Theme.of(context).primaryColorLight,
                 iconColor: Theme.of(context).highlightColor,
                 prefixIcon: Icon(Icons.filter_alt, size: 20, color: Theme.of(context).splashColor,),
-                hintText:  (await getOnFlow(TranslateConstants.filterMenu)).toLowerCase(),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                hintText:  trad[0].toLowerCase(),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0),
                                            borderSide: BorderSide(color: Theme.of(context).primaryColor)) )
         ),
-      ))), 
+      ))),
       Row(children: [
-        getSlotMenu(2, 0, Icons.all_inbox,  (await getOnFlow(TranslateConstants.all)).toLowerCase(), () => MenuConstants.isFavorite, () { MenuConstants.isFavorite = false; }),
-        getSlotMenu(2, 1, Icons.favorite_border,  (await getOnFlow(TranslateConstants.favorites)).toLowerCase(), () => !MenuConstants.isFavorite, () { 
-            MenuConstants.isFavorite = true; 
+        getSlotMenu(2, 0, Icons.all_inbox,  trad[1].toLowerCase(), () => MenuConstants.isFavorite, () { MenuConstants.isFavorite = false; }),
+        getSlotMenu(2, 1, Icons.favorite_border,  trad[2].toLowerCase(), () => !MenuConstants.isFavorite, () {
+            MenuConstants.isFavorite = true;
         }),
       ])
     ]);

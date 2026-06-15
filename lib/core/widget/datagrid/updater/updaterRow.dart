@@ -137,11 +137,23 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
     } else if (widget.widget.widget.beforeColumn.length > widget.depth + 1) {
        widget.widget.widget.beforeColumn.sublist(0, widget.depth + 1);
     }
+    final schemaEntries = widget.schema.entries.where((e) => order.contains(e.key)).where((o) => !o.value.readonly).toList();
+    final results = await Future.wait([
+      Future.wait(schemaEntries.map((o) => getOnFlow(o.value.label))),
+      Future.wait([
+        getOnFlow("select an option"),
+        getOnFlow(TranslateConstants.search),
+        getOnFlow(TranslateConstants.selectValue),
+        getOnFlow(TranslateConstants.colNullFilter),
+      ]),
+    ]);
+    final schemaLabels = results[0];
+    final updTrad = results[1];
     MultiSelectController<String> ctrls = MultiSelectController<String>();
     List<DropdownItem<String>> items = [];
-    for (var o in widget.schema.entries.where((e) => order.contains(e.key)).where( (o) => !o.value.readonly )) {
+    for (var (i, o) in schemaEntries.indexed) {
       if (items.where( (e) => e.value == o.key).isEmpty) {
-          items.add(DropdownItem<String>(value: o.key, label: await getOnFlow(o.value.label), selected: widget.columnName == o.key));
+          items.add(DropdownItem<String>(value: o.key, label: schemaLabels[i], selected: widget.columnName == o.key));
           ctrls.addItem(items.last);
       }
     }
@@ -173,7 +185,7 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
                           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
                           backgroundColor: Theme.of(context).secondaryHeaderColor,
                           labelStyle: TextStyle(fontSize: 0),
-                          hintText: (await getOnFlow("select an option")).toLowerCase(),
+                          hintText: updTrad[0].toLowerCase(),
                           hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
                           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
                           showClearIcon: false,
@@ -181,7 +193,7 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
                           focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+                          hintText: "       ${updTrad[1].toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -197,7 +209,7 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                              "       ${updTrad[2].toLowerCase()}",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,
@@ -236,7 +248,7 @@ class UpdaterSubRowWidgetState extends State<UpdaterSubRowWidget> {
                 widget.isNull ? DropdownButtonFormField<String>( items: const [
                       DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis)),
                       DropdownMenuItem<String>(value: "NOT NULL", child: Text("NOT NULL", overflow: TextOverflow.ellipsis))], 
-                    value: cacheChanges[widget.columnName ?? ""], hint: Text((await getOnFlow(TranslateConstants.colNullFilter)).toLowerCase(), overflow: TextOverflow.ellipsis, 
+                    value: cacheChanges[widget.columnName ?? ""], hint: Text(updTrad[3].toLowerCase(), overflow: TextOverflow.ellipsis,
                     style: TextStyle(color: Theme.of(context).splashColor)),
                     isExpanded: true, style: TextStyle(fontSize: 14, color: Theme.of(context).highlightColor),
                     validator: (value) { if (value == null) { return ""; } return null; },

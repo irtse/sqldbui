@@ -42,6 +42,11 @@ class _LoginWidgetState extends State<LoginScreen> {
       });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    final loginTrad = await Future.wait([
+      getOnFlow('username/email'),
+      getOnFlow('password'),
+      getOnFlow('LOGIN'),
+    ]);
     return Stack( children: [ FlutterLogin(
         title: '',
         userValidator: (value) {
@@ -54,9 +59,9 @@ class _LoginWidgetState extends State<LoginScreen> {
         onLogin: _authUser,
         onSignup: null,
         messages: LoginMessages(
-          userHint: (await getOnFlow('username/email')).toLowerCase(),
-          passwordHint: (await getOnFlow('password')).toLowerCase(),
-          loginButton: (await getOnFlow('LOGIN')).toUpperCase(),
+          userHint: loginTrad[0].toLowerCase(),
+          passwordHint: loginTrad[1].toLowerCase(),
+          loginButton: loginTrad[2].toUpperCase(),
           forgotPasswordButton: '',
           recoverPasswordButton: '',
         ),

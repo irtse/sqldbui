@@ -178,9 +178,20 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
     }
     MultiSelectController<String> ctrls = MultiSelectController<String>();
     List<DropdownItem<String>> items = [];
-    for (var o in widget.schema.entries.where((e) => order.contains(e.key))) {
+    final schemaEntries = widget.schema.entries.where((e) => order.contains(e.key)).toList();
+    final results = await Future.wait([
+      Future.wait(schemaEntries.map((o) => getOnFlow(o.value.label))),
+      Future.wait([
+        getOnFlow("select a field"),
+        getOnFlow(TranslateConstants.search),
+        getOnFlow(TranslateConstants.selectValue),
+      ]),
+    ]);
+    final schemaLabels = results[0];
+    final dropTrad = results[1];
+    for (var (i, o) in schemaEntries.indexed) {
       if (items.where( (e) => e.value == o.key).isEmpty) {
-          items.add(DropdownItem<String>(value: o.key, label: await getOnFlow(o.value.label), selected: o.key == widget.columnName ));
+          items.add(DropdownItem<String>(value: o.key, label: schemaLabels[i], selected: o.key == widget.columnName ));
       }
     }
     List<DropdownMenuItem<String>> conn = [];
@@ -227,7 +238,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           labelStyle: TextStyle(fontSize: 0),
-          hintText: (await getOnFlow("select a field")).toLowerCase(),
+          hintText: dropTrad[0].toLowerCase(),
           hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
           showClearIcon: false,
@@ -235,7 +246,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
           focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
-          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+          hintText: "       ${dropTrad[1].toLowerCase()}",
           border : const OutlineInputBorder(
             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -252,7 +263,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
           header: Padding(
             padding: EdgeInsets.all(8),
               child: Text(
-                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                "       ${dropTrad[2].toLowerCase()}",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 16,

@@ -41,12 +41,9 @@ class NotificationDrawerWidgetState extends State<NotificationDrawerWidget> {
     for ( var notif in AuthService.user!.notifications ) {
         var name = notif.name;
         var desc = notif.description;
-        List<String> d = [];
-        for (var dd in desc.split(":")) {
-          try { 
-            d.add(await getOnFlow(dd));
-          } catch(e) {}
-        }
+        final descParts = desc.split(":");
+        final translated = await Future.wait(descParts.map((dd) => getOnFlow(dd).catchError((_) => dd)));
+        List<String> d = translated.toList();
         notifs.add(Stack( alignment: Alignment.center, children : [ 
           Padding(padding: const EdgeInsets.only(bottom: 10), 
           child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [ Container(

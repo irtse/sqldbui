@@ -410,7 +410,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
     rows = buildRows(getDatas());
     if (allSelected && selectedGrid.isEmpty) { 
       for (var row in rows) { 
-        selectedGrid.add(row.cellID); 
+        selectedGrid.add("${row.cellID}--${row.schemaID}"); 
         row.isSelected = true;
       }
     }
@@ -545,7 +545,7 @@ class SubGridWidgetState extends State<SubGridWidget> {
 
   List<GridRowWidget> buildRows(List<Value> datas) {
     return datas.map<GridRowWidget>((mapped) {
-      bool found = selectedGrid.where((cellID) => cellID == mapped.values["id"]).isNotEmpty;
+      bool found = selectedGrid.where((cellID) => cellID.split("--")[0] == mapped.values["id"]).isNotEmpty;
       return GridRowWidget( 
         schemaID: mapped.schemaID,
         news: mapped.isNew,

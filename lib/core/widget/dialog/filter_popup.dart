@@ -50,10 +50,16 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     StateSetter? stateSort;
     StateSetter? stateFilter;
-    var apply = (await getOnFlow(TranslateConstants.filterApply));
-    var filter = await getOnFlow(TranslateConstants.filterCancel);
-    var asc = await getOnFlow(TranslateConstants.sortASC);
-    var desc = await getOnFlow(TranslateConstants.sortDesc);
+    final trad = await Future.wait([
+      getOnFlow(TranslateConstants.filterApply),
+      getOnFlow(TranslateConstants.filterCancel),
+      getOnFlow(TranslateConstants.sortASC),
+      getOnFlow(TranslateConstants.sortDesc),
+    ]);
+    var apply = trad[0];
+    var filter = trad[1];
+    var asc = trad[2];
+    var desc = trad[3];
     return PopupMenuButton(
       tooltip: (await getOnFlow(TranslateConstants.showFilter)).toLowerCase(),
       color: Colors.white,
@@ -307,10 +313,13 @@ class FilterSearchState extends State<FilterSearchWidget> {
     if (widget.type.contains("onetomany") && widget.schema[widget.columnName] != null) {
       MultiSelectController<String> ctrls = MultiSelectController<String>();
       List<DropdownItem<String>> items = [];
-      for (var o in widget.schema[widget.columnName]!.schema.entries.where( (e) => !e.value.hidden)) {
-        items.add(DropdownItem<String>(value: o.key, 
-        label: await getOnFlow(o.value.label), 
-        selected: widget.subName.length > widget.depth && o.key == widget.subName[widget.depth] ));
+      final entries = widget.schema[widget.columnName]!.schema.entries.where((e) => !e.value.hidden).toList();
+      final entryLabels = await Future.wait(entries.map((o) => getOnFlow(o.value.label)));
+      if (!context.mounted) return Container();
+      for (var (i, o) in entries.indexed) {
+        items.add(DropdownItem<String>(value: o.key,
+          label: entryLabels[i],
+          selected: widget.subName.length > widget.depth && o.key == widget.subName[widget.depth]));
         ctrls.addItem(items.last);
       }
       Widget w = Container();
@@ -328,6 +337,12 @@ class FilterSearchState extends State<FilterSearchWidget> {
             innerIndex: widget.innerIndex, 
             schema: widget.schema[widget.columnName]?.schema ?? {});
       }
+      final uiTrad = await Future.wait([
+        getOnFlow("select a field"),
+        getOnFlow(TranslateConstants.search),
+        getOnFlow(TranslateConstants.selectValue),
+      ]);
+      if (!context.mounted) return Container();
       return Column( children: [
         Padding( padding: EdgeInsets.only(bottom: 20), child: MultiDropdown<String>(
         controller: ctrls,
@@ -349,7 +364,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           backgroundColor: Colors.white,
           labelStyle: TextStyle(fontSize: 0),
-          hintText: (await getOnFlow("select a field")).toLowerCase(),
+          hintText: uiTrad[0].toLowerCase(),
           hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Colors.grey),
           showClearIcon: false,
@@ -357,7 +372,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
           focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
-          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+          hintText: "       ${uiTrad[1].toLowerCase()}",
           border : const OutlineInputBorder(
             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -374,7 +389,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
           header: Padding(
             padding: EdgeInsets.all(8),
               child: Text(
-                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                "       ${uiTrad[2].toLowerCase()}",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 16,

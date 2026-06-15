@@ -41,14 +41,20 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
+    final trad = await Future.wait([
+      getOnFlow(TranslateConstants.send),
+      getOnFlow(TranslateConstants.filterCancel),
+    ]);
+    if (!context.mounted) return Container();
     List<Widget> widgets = [];
     var w = await Convertor.formFieldByType(
-      widget.cache, context, "", widget.schema, 
-      widget.field.type, widget.label, widget.field.label, 
-      widget.field.description, widget.field.require, widget.field.readonly, 
-      null, widget.field.actionPath, widget.field.valuesPath, 
+      widget.cache, context, "", widget.schema,
+      widget.field.type, widget.label, widget.field.label,
+      widget.field.description, widget.field.require, widget.field.readonly,
+      null, widget.field.actionPath, widget.field.valuesPath,
       "", null, currentView?.isEmpty ?? false, widget.field.autoFill,  widget.field.translatable, null);
-      widgets.add(
+    if (!context.mounted) return Container();
+    widgets.add(
         Container( 
           width: currentWidth / 1.5,
           padding: EdgeInsets.all(10),
@@ -69,7 +75,7 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
       )))),
       Padding( padding: EdgeInsets.only(top: 20), 
       child: Row( mainAxisAlignment: MainAxisAlignment.center, children: [
-        Padding( padding: EdgeInsets.only(right: 10), 
+        Padding( padding: EdgeInsets.only(right: 10),
         child: TextButton(
           style: TextButton.styleFrom(
             backgroundColor: Theme.of(context).primaryColor,
@@ -78,8 +84,8 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
             ),
           ),
           onPressed: widget.call,
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
-          child: Text((await getOnFlow(TranslateConstants.send)).toUpperCase(), 
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(trad[0].toUpperCase(),
           style: TextStyle(color: Colors.white, fontSize: 15))))),
         TextButton(
           style: TextButton.styleFrom(
@@ -92,8 +98,8 @@ class CommentBoxWidgetState extends State<CommentBoxWidget> {
             context.pop();
             confirmCache = {};
         },
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), 
-          child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(trad[1].toUpperCase(),
           style: TextStyle(color: Colors.white, fontSize: 15))))
       ]))
     ])));

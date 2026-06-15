@@ -310,11 +310,19 @@ class ActionBarState extends State<ActionBarWidget> {
           }
         }
         if (currentView != null && (subViewID ?? "") != "") {
+            final subTrad = await Future.wait([
+              getOnFlow(currentView!.label ?? currentView!.name),
+              currentView!.items.isNotEmpty ? getOnFlow(currentView!.items.first.values["name"] ?? "data") : Future.value(""),
+            ]);
             items.add(DropdownItem<String>( selected: true,
-              value: "@${currentView!.id}${ currentView!.items.isNotEmpty ? ":${currentView!.items.first.values["id"]}" : "" }", 
-              label: "${(await getOnFlow(currentView!.label ?? currentView!.name)).replaceAll("_", "").replaceAll("db", "")} -> ${ 
-                currentView!.items.isNotEmpty ? await getOnFlow(currentView!.items.first.values["name"] ?? "data") : ""}".toLowerCase()));
+              value: "@${currentView!.id}${ currentView!.items.isNotEmpty ? ":${currentView!.items.first.values["id"]}" : "" }",
+              label: "${subTrad[0].replaceAll("_", "").replaceAll("db", "")} -> ${subTrad[1]}".toLowerCase()));
         }
+        final dpTrad = await Future.wait([
+          getOnFlow(TranslateConstants.url.toLowerCase()),
+          getOnFlow(TranslateConstants.search),
+          getOnFlow(TranslateConstants.selectValue),
+        ]);
         var dp = MultiDropdown<String>(
         controller: navigatorCtrls,
         enabled: true,
@@ -335,19 +343,19 @@ class ActionBarState extends State<ActionBarWidget> {
                           padding: const EdgeInsets.all(1),
                           backgroundColor: _theme.secondaryHeaderColor,
                           labelStyle: TextStyle(fontSize: 0),
-                          hintText: await getOnFlow(TranslateConstants.url.toLowerCase()),
+                          hintText: dpTrad[0],
                           hintStyle: TextStyle(overflow: TextOverflow.ellipsis, color: _theme.splashColor, fontSize: 15),
                           prefixIcon: Icon(Icons.account_tree, size: 18,  color: _theme.splashColor),
                           showClearIcon: false,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0),
                             // ignore: use_build_context_synchronously
                             borderSide: BorderSide(color: _theme.primaryColor)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0), 
+                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0),
                             // ignore: use_build_context_synchronously
                             borderSide: BorderSide(color: _theme.primaryColor)),
         ),
         searchDecoration: SearchFieldDecoration(
-                          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+                          hintText: "       ${dpTrad[1].toLowerCase()}",
                           border : const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -363,7 +371,7 @@ class ActionBarState extends State<ActionBarWidget> {
                           header: Padding(
                             padding: EdgeInsets.all(8),
                             child: Text(
-                              "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                              "       ${dpTrad[2].toLowerCase()}",
                               textAlign: TextAlign.start,
                               style: TextStyle(
                                 fontSize: 16,
@@ -440,7 +448,7 @@ class ActionBarState extends State<ActionBarWidget> {
         decoration: BoxDecoration(
           // ignore: use_build_context_synchronously
           color: _theme.secondaryHeaderColor,
-          boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+          boxShadow: [  BoxShadow(color: Colors.black.withValues(alpha: 0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: rows)); 
     } catch(e) {

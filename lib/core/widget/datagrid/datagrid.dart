@@ -142,16 +142,18 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if (!schemeItems.containsKey(viewID)) {
       schemeItems[viewID ?? ""] = [];
       fastTranslation[viewID ?? ""] = {};
-      for (var o in ["id", ...order]) {
+      final allKeys = ["id", ...order];
+      final translated = await Future.wait(allKeys.map((o) {
         var scheme = widget.view?.schema[o];
-    
         var t = scheme?.label ?? o;
-        if (scheme?.translatable ?? false) {
-          t = (await getOnFlow(t)).toLowerCase();
-        }
-        fastTranslation[viewID ?? ""]?[scheme?.label ?? o] = t;
+        return (scheme?.translatable ?? false) ? getOnFlow(t) : Future.value(t);
+      }));
+      for (var (i, o) in allKeys.indexed) {
+        var scheme = widget.view?.schema[o];
+        var t = (scheme?.translatable ?? false) ? translated[i] : translated[i];
+        fastTranslation[viewID ?? ""]?[scheme?.label ?? o] = '$t'.toLowerCase();
         if (schemeItems[viewID ?? ""]!.where( (e) => e.value == o ).isEmpty) {
-          schemeItems[viewID ?? ""]?.add(DropdownMenuItem<String>(value: o, child: Text(t, overflow: TextOverflow.ellipsis)));
+          schemeItems[viewID ?? ""]?.add(DropdownMenuItem<String>(value: o, child: Text('$t'.toLowerCase(), overflow: TextOverflow.ellipsis)));
         }
       }
     }

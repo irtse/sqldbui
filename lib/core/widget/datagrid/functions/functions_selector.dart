@@ -39,27 +39,34 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async {
     var toggles = [TranslateConstants.edit.toLowerCase(), "math"];
-    var togglesLabels = [(await getOnFlow(TranslateConstants.edit)).toLowerCase(), (await getOnFlow("math")).toLowerCase()];
+    final funcTrad = await Future.wait([
+      getOnFlow(TranslateConstants.edit),
+      getOnFlow("math"),
+      getOnFlow(TranslateConstants.mathValuePlaceholder),
+      getOnFlow(TranslateConstants.mathError),
+      getOnFlow(TranslateConstants.mathPlaceholder),
+    ]);
+    var togglesLabels = [funcTrad[0].toLowerCase(), funcTrad[1].toLowerCase()];
     Map<String, model.SchemaField> fields = {};
-    if (mathColName[viewID] == null) { mathColName[viewID] = TranslateConstants.total.toLowerCase(); 
+    if (mathColName[viewID] == null) { mathColName[viewID] = TranslateConstants.total.toLowerCase();
     } else { widget.value = mathColName[viewID] ?? TranslateConstants.total.toLowerCase(); }
     if (editMode[viewID] == null) { editMode[viewID] = TranslateConstants.edit.toLowerCase(); }
     if (editMode[viewID] == "math") {
       for (var item in (schemeItems[viewID] ?? [])) {
-        if (currentView!.schema[item.value] != null) { fields[item.value!] = currentView!.schema[item.value]!; 
+        if (currentView!.schema[item.value] != null) { fields[item.value!] = currentView!.schema[item.value]!;
         } else if (item.value != null) { fields[item.value!] = model.SchemaField(label: item.value!); }
       }
       fields[mathColName[viewID] ?? TranslateConstants.total.toLowerCase()] = model.SchemaField(label: mathColName[viewID] ?? TranslateConstants.total.toLowerCase());
       if (functionMathRowsWidget.isEmpty) {
         functionMathRowsWidget.add(FunctionMathRowWidget());
         Future.delayed(const Duration(milliseconds: 100), () { globalGridWidgetKey.currentState?.setState(() { }); });
-      } 
-    } 
+      }
+    }
     GlobalKey<FormFieldState> formKey = GlobalKey<FormFieldState>();
     if (showFunctions[viewID] == null) { showFunctions[viewID] = false; }
     var o = realOrder(currentView, false, true, null, null);
-    var mathValue = (await getOnFlow(TranslateConstants.mathValuePlaceholder));
-    var mathError = (await getOnFlow(TranslateConstants.mathError));
+    var mathValue = funcTrad[2];
+    var mathError = funcTrad[3];
     return Row( crossAxisAlignment: CrossAxisAlignment.center, children: [ 
       o.isNotEmpty && editMode[viewID] == "math" ? Padding( padding: const EdgeInsets.only(top: 2), 
         child: InkWell( mouseCursor: SystemMouseCursors.click,
@@ -108,7 +115,7 @@ class FunctionsSelectorWidgetState extends State<FunctionsSelectorWidget> {
             filled: true, fillColor: Theme.of(context).secondaryHeaderColor,
             contentPadding: const EdgeInsets.only(left: 20.0, right: 20.0),
             suffixIcon: const Icon(Icons.text_fields), 
-            hintText: (await getOnFlow(TranslateConstants.mathPlaceholder)).toLowerCase(),  
+            hintText: funcTrad[4].toLowerCase(),
             labelText: "",
             errorStyle: const TextStyle(fontSize: 0,),
           ),

@@ -61,7 +61,7 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
             children: [ 
               const SizedBox( height: 32, ),
               CircularPercentIndicator( radius: 50.0, lineWidth: 10.0,
-                percent: APIService.downloadProgressNotifier.value / 100,
+                percent: (APIService.downloadProgressNotifier.value / 100).clamp(0.0, 1.0),
                 center: Text(
                   "${APIService.downloadProgressNotifier.value}%",
                   style: TextStyle( fontSize: 20.0, fontWeight: FontWeight.w600, color: Theme.of(context).highlightColor),
@@ -151,17 +151,23 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
         if (!(filterOrderView[viewID]?.contains(scheme) ?? false) && !(filterTempOrderView[viewID]?.contains(scheme) ?? false)) {
           continue;
         }
-        var f = TextWidget(form : newCacheEntry, 
-          schemaName: currentView!.schemaName, 
-          name: scheme, 
-          readOnly: false, 
-          value: await getOnFlow(schema[scheme]!.label), 
-          label: "${schema[scheme]!.label} ${await getOnFlow("as label")}", 
-          translatable: false,
-          require: false, 
-          type: "varchar", 
-          component: null, 
-          isDark: true);
+        var f = FutureBuilder(
+          future: Future.wait([getOnFlow(schema[scheme]!.label), getOnFlow("as label")]),
+          builder: (a, s) {
+            var labelTranslated = s.data?[0] ?? schema[scheme]!.label;
+            var bef = s.data?[1] ?? "as label";
+            return TextWidget(form: newCacheEntry,
+            schemaName: currentView!.schemaName,
+            name: scheme,
+            readOnly: false,
+            value: labelTranslated,
+            label: "${schema[scheme]!.label} $bef",
+            translatable: false,
+            require: false,
+            type: "varchar",
+            component: null,
+            isDark: true);
+          });
         mapping.add(Padding(padding: const EdgeInsets.only(bottom: 10), 
                     child: Container( width: 300,
                     decoration: BoxDecoration( borderRadius: BorderRadius.circular(10),
@@ -176,14 +182,23 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               child: Icon(widget.isExport ? Icons.download : Icons.upload, 
                 color: Theme.of(context).splashColor, 
                 size: 30)),
-            Text((await getOnFlow("${widget.isExport ? "Export" : "Import" } data with custom mapping")).toLowerCase(),
-              style: TextStyle(color: Theme.of(context).highlightColor, 
-              fontSize: 20, 
-              fontWeight: FontWeight.bold)),
-            Padding( padding: const EdgeInsets.only(left: 20, top: 5), 
-            child: Text( widget.isExport && !isWeb ? "${(await getOnFlow(TranslateConstants.savedFolder)).toLowerCase()} : $directory" 
-            : "${(await getOnFlow(TranslateConstants.allowedFormat)).toLowerCase()} : ${widget.importFormat.join(",")}",
-              style: TextStyle(color: Theme.of(context).splashColor, fontSize: 12))), 
+            FutureBuilder(future: getOnFlow("${widget.isExport ? "Export" : "Import" } data with custom mapping"), builder: (a,s) {
+              return Text(( s.data ?? "${widget.isExport ? "Export" : "Import" } data with custom mapping").toLowerCase(),
+                style: TextStyle(color: Theme.of(context).highlightColor, 
+                fontSize: 20, 
+                fontWeight: FontWeight.bold));
+            }),
+            
+            Padding( padding: const EdgeInsets.only(left: 20, top: 5),
+            child: FutureBuilder(
+              future: widget.isExport && !isWeb ? getOnFlow(TranslateConstants.savedFolder) : getOnFlow(TranslateConstants.allowedFormat),
+              builder: (a, s) {
+                return Text(
+                  widget.isExport && !isWeb
+                    ? "${(s.data ?? TranslateConstants.savedFolder).toLowerCase()} : $directory"
+                    : "${(s.data ?? TranslateConstants.allowedFormat).toLowerCase()} : ${widget.importFormat.join(",")}",
+                  style: TextStyle(color: Theme.of(context).splashColor, fontSize: 12));
+              })),
             widget.isExport && !isWeb ? Padding( padding: const EdgeInsets.only(left: 5, top: 5), 
             child: IconButton( icon: Icon(Icons.folder, color: Theme.of(context).splashColor, size: 20), 
               onPressed: () async {
@@ -200,34 +215,45 @@ class MappingPopUpState extends State<MappingPopUpWidget> {
               child: SingleChildScrollView(scrollDirection: Axis.vertical,
                 child: Wrap(alignment: WrapAlignment.center, children: mapping)))])),
         Padding( padding: const EdgeInsets.only(top: 10), child: Row( mainAxisAlignment: MainAxisAlignment.end, children : isLoading ? [] : <Widget>[
-              Padding( padding: const EdgeInsets.only(bottom: 10), 
+              Padding( padding: const EdgeInsets.only(bottom: 10),
               child: TextButton(style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
-                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10), 
-                child: Text((await getOnFlow(TranslateConstants.filterCancel)).toUpperCase(), 
-                  style: TextStyle(color: Theme.of(context).splashColor))), onPressed: () { Navigator.of(context).pop(); } )),
+                child: Padding( padding: const EdgeInsets.only(right: 10, left: 10),
+                child: FutureBuilder(future: getOnFlow(TranslateConstants.filterCancel), builder: (a, s) {
+                  return Text((s.data ?? TranslateConstants.filterCancel).toUpperCase(),
+                    style: TextStyle(color: Theme.of(context).splashColor));
+                })), onPressed: () { Navigator.of(context).pop(); } )),
               Padding( padding: const EdgeInsets.only(right: 20, bottom: 10), 
               child: TextButton( style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge, backgroundColor: Theme.of(context).primaryColor),
-                child: Padding( 
-                  padding: const EdgeInsets.only(right: 10, left: 10), 
-                  child: Text((await getOnFlow(widget.isExport ? "Export" : "Import")).toUpperCase(), 
-                style: TextStyle(color: Theme.of(context).highlightColor))), 
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10, left: 10),
+                  child: FutureBuilder(future: getOnFlow(widget.isExport ? "Export" : "Import"), builder: (a, s) {
+                    return Text((s.data ?? (widget.isExport ? "Export" : "Import")).toUpperCase(),
+                      style: TextStyle(color: Theme.of(context).highlightColor));
+                  })),
                 onPressed: () async { 
                   if (widget.isExport && formKey.currentState!.validate()) {
                     formKey.currentState!.save();
                     var path = currentView!.exportPath;
+                   
                     if (!globalGridKey.currentState!.widget.isSelected && selectedGrid.isNotEmpty) {
                       try {
-                        var ids = selectedGrid.join(",");
-                        path = path.replaceAll("rows=all", "rows=$ids");
+                       path += "&filter_line=id_scheme%3A";
+                      var params = "";
+                      List<String> ids = [];
+                      for (var row in selectedGrid) {
+                        ids.add(row);
+                      }
+                      params += ids.join(",");
+                      path += params;
                       } catch (e) { /* */ } 
                     } else if (globalGridKey.currentState!.widget.isSelected && unselectedGrid.isNotEmpty) {
-                      path += "&filter_line=";
+                      path += "&filter_line=id_scheme%3C%3E";
                       var params = "";
                       List<String> ids = [];
                       for (var row in unselectedGrid) {
-                        ids.add("id%3C%3E$row");
+                        ids.add(row);
                       }
-                      params += ids.join("+");
+                      params += ids.join(",");
                       path += params;
                     }
                     if (globalGridKey.currentState!.widget.isSelected || selectedGrid.isNotEmpty) {

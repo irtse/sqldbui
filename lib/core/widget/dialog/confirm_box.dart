@@ -48,16 +48,23 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
       );
     }
    
+    final trad = await Future.wait([
+      getOnFlow(TranslateConstants.sure),
+      getOnFlow("Do we really want to"),
+      getOnFlow(widget.purpose),
+      getOnFlow(TranslateConstants.undoAction),
+    ]);
+    if (!context.mounted) return Container();
     return AlertWidget(
         widget:  SingleChildScrollView( child:  Column(mainAxisSize: MainAxisSize.min, children: [
-      Center(child: Padding( padding: EdgeInsets.only(bottom: 10), 
+      Center(child: Padding( padding: EdgeInsets.only(bottom: 10),
         child: Icon(Icons.help_outline_outlined, size: 80, color: Colors.grey))),
-      Center(child: Text((await getOnFlow(TranslateConstants.sure)).toUpperCase(), 
+      Center(child: Text(trad[0].toUpperCase(),
         style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor),)),
       Wrap( alignment: WrapAlignment.center, children : [
-        Text("${(await getOnFlow("Do we really want to")).toLowerCase()} ${(await getOnFlow(widget.purpose)).toUpperCase()} ? ", 
+        Text("${trad[1].toLowerCase()} ${trad[2].toUpperCase()} ? ",
         style: const TextStyle(fontSize: 12.5, color: Colors.grey)),
-        Text(await getOnFlow(TranslateConstants.undoAction), 
+        Text(trad[3],
         style: TextStyle(fontSize: 12.5, color: Colors.grey))
       ]),
       widgets.isEmpty ? Container() : Center( child: SingleChildScrollView( child: SizedBox( height: currentHeigth / 5, child: Row(children: widgets)))),
@@ -66,14 +73,16 @@ class ConfirmBoxWidgetState extends State<ConfirmBoxWidget> {
           widget.validate();
           context.pop();
         }, style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Theme.of(context).primaryColor)), 
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(
-          (await getOnFlow(TranslateConstants.yes)).toUpperCase(), 
-          style: TextStyle(color: Colors.white, fontSize: 15),)))),
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: FutureBuilder( future: getOnFlow(TranslateConstants.yes), builder: (a,s) {
+          return Text( (s.data ?? TranslateConstants.yes).toUpperCase(), 
+          style: TextStyle(color: Colors.white, fontSize: 15),);
+        })))),
         TextButton(onPressed: () => context.pop(), 
           style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Colors.grey)), 
-        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child: Text(
-          (await getOnFlow(TranslateConstants.no)).toUpperCase(), 
-          style: TextStyle(color: Colors.white, fontSize: 15),)))]))
+        child: Padding( padding: EdgeInsets.symmetric(horizontal: 20), child:  FutureBuilder( future: getOnFlow(TranslateConstants.no), builder: (a,s) {
+          return Text( (s.data ?? TranslateConstants.no).toUpperCase(), 
+          style: TextStyle(color: Colors.white, fontSize: 15),);
+          })))]))
     ])));
   }
 }

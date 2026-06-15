@@ -215,6 +215,10 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       child: FutureBuilder(future: getOnFlow(TranslateConstants.filterApplyT), builder: (a, s) {
                         return FilterSelectorButtonWidget(function: () async {
                         if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
+                        globalGridKey.currentState!.setState(() {
+                          globalGridKey.currentState!.widget.isSelected = true;
+                        });
+                          
                           globalOffset = 0;
                           globalFilter[viewID] = Filters(); // empty filter to refill with new
                           for (var filter in filterRowsWidget[viewID] ?? []) {
@@ -363,11 +367,7 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
   }
 
   Future<List<String>> getLabels(List<String> toogles) async {
-    List<String> labels = [];
-    for (var t in toogles) {
-      labels.add(await getOnFlow(t));
-    }
-    return labels;
+    return Future.wait(toogles.map((t) => getOnFlow(t)));
   }
 }
 
@@ -419,11 +419,16 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
         } catch(e) { }
         
       }
+      final subTrad = await Future.wait([
+        getOnFlow("select a saved filter"),
+        getOnFlow(TranslateConstants.search),
+        getOnFlow(TranslateConstants.selectValue),
+      ]);
       var gk = GlobalKey<OptionsListState>();
       return Container(
         padding: EdgeInsets.only(left: 10),
-        height: 25,  
-        width: (MediaQuery.of(context).size.width - menuSize) / 3.5, 
+        height: 25,
+        width: (MediaQuery.of(context).size.width - menuSize) / 3.5,
         child: MultiDropdown<String>(
           gk: gk,
         label: "drp",
@@ -460,7 +465,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
           backgroundColor: Theme.of(context).secondaryHeaderColor,
           labelStyle: TextStyle(fontSize: 0),
-          hintText: (await getOnFlow("select a saved filter")).toLowerCase(),
+          hintText: subTrad[0].toLowerCase(),
           hintStyle: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 13, color:Theme.of(context).splashColor, fontWeight: FontWeight.w300),
           prefixIcon: Icon(Icons.list, color: Theme.of(context).splashColor),
           showClearIcon: false,
@@ -468,7 +473,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           focusedBorder:  OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).secondaryHeaderColor, width: 1.0)),
         ),
         searchDecoration: SearchFieldDecoration(
-          hintText: "       ${(await getOnFlow(TranslateConstants.search)).toLowerCase()}",
+          hintText: "       ${subTrad[1].toLowerCase()}",
           border : const OutlineInputBorder(
             borderSide: BorderSide(color: Color(0xFFE0E0E0)),
             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -485,7 +490,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           header: Padding(
             padding: EdgeInsets.all(8),
               child: Text(
-                "       ${(await getOnFlow(TranslateConstants.selectValue)).toLowerCase()}",
+                "       ${subTrad[2].toLowerCase()}",
                 textAlign: TextAlign.start,
                 style: TextStyle(
                   fontSize: 16,

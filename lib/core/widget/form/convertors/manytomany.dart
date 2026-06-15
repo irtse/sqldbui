@@ -168,6 +168,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     try { l = await getOnFlow(widget.label);
     } catch(e) {}
     int max = 0;
+
     if (widget.datas != null) {
       for (var item in widget.datas!) {
         if (items.where( (e) => "${e.value["id"]}" == "${item.id}").isNotEmpty) {
@@ -235,7 +236,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               }
             }
             if (widget.readOnly) {
-              if (widget.value == null) {
+              if (widget.value == null || widget.value.isEmpty) {
                 return Container();
               }
               return SizedBox(width: 400, height: 30, 
@@ -387,6 +388,10 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
     if (filter == "") { return; }
     var found = false;
     try {
+      if (widget.url!.contains("&filter_line=")) {
+          widget.url?.replaceAll("&filter_line=", "$filter+");
+          filter = "";
+        }
       var e = await APIService().get<model.Shallowed>("${widget.url}$filter&offset=$start&limit=$interval", filter != "", null);
       if (e.data != null) {
         for (var item in e.data!) {

@@ -49,7 +49,13 @@ class PageWidgetState extends State<PageWidget> {
     noMenu = currentWidth - menuSize < 600;
     menuSize = isMenu && !noMenu ? (250 <= currentWidth ? (
               menuSize == 0 ? 250 : (menuSize <= (currentWidth / 2) ? menuSize : (currentWidth / 2))) : currentWidth) : 0;
-    var menu = await getOnFlow(TranslateConstants.menu);
+    final pageTrad = await Future.wait([
+      getOnFlow(TranslateConstants.menu),
+      getOnFlow(TranslateConstants.notifications),
+      getOnFlow(TranslateConstants.tutorial),
+      getOnFlow(TranslateConstants.logout),
+    ]);
+    var menu = pageTrad[0];
     return Scaffold(
       key: scaffoldKey,
       drawer: buildDrawer(),
@@ -78,7 +84,7 @@ class PageWidgetState extends State<PageWidget> {
         actions: <Widget>[
           Stack( children: [
             Tooltip(
-             message: (await getOnFlow(TranslateConstants.notifications)).toLowerCase(),
+             message: pageTrad[1].toLowerCase(),
              child: IconButton(icon: const Icon(Icons.notifications, color: Colors.white, size: 25,),
              onPressed: () { 
               scaffoldKey.currentState!.openEndDrawer();
@@ -94,11 +100,11 @@ class PageWidgetState extends State<PageWidget> {
                 : launchUrl(Uri( path: "${const String.fromEnvironment('HOST', defaultValue: 'http://capitalisation.irt-aese.local')}/assets/pdf/tutorial.pdf"), mode: LaunchMode.externalApplication) // Opens in new tab), 
             )
           ),*/
-          DialogButtonWidget(icon: Icons.info_outline, onChanged: kIsWeb ? openPdf : null, widget: !kIsWeb ? TutorialPopUpWidget(): null, tooltip: (await getOnFlow(TranslateConstants.tutorial)).toLowerCase(), left: 12.5),
+          DialogButtonWidget(icon: Icons.info_outline, onChanged: kIsWeb ? openPdf : null, widget: !kIsWeb ? TutorialPopUpWidget(): null, tooltip: pageTrad[2].toLowerCase(), left: 12.5),
           Container( 
             padding: EdgeInsets.only(right: 50, left: 12.5),
             child: Tooltip(
-             message: (await getOnFlow(TranslateConstants.logout)).toLowerCase(),
+             message: pageTrad[3].toLowerCase(),
              child: IconButton(icon: const Icon(Icons.logout_outlined, color: Colors.white, size: 25,),
              onPressed: () { 
               _authProvider.logOut(context);

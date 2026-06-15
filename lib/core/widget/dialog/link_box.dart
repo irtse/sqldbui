@@ -127,11 +127,19 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
         d.add(Column(children: additionnal));
       }
     }
-    var title = (await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.shareToUser));
-    var tooltip =(await getOnFlow(widget.isDelete ?  TranslateConstants.unshare :  TranslateConstants.share));
+    final tradBase = await Future.wait([
+      getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.shareToUser),
+      getOnFlow(widget.isDelete ? TranslateConstants.unshare : TranslateConstants.share),
+    ]);
+    var title = tradBase[0];
+    var tooltip = tradBase[1];
     if (widget.sharing != null && widget.sharing!.shallowPath.isNotEmpty && !widget.sharing!.shallowPath.keys.first.contains("share")) {
-      tooltip = (await getOnFlow(widget.isDelete ?  TranslateConstants.undelegate :  TranslateConstants.delegate));
-      title = (await getOnFlow(widget.isDelete ? TranslateConstants.userDelegated : TranslateConstants.delegateToUser));
+      final tradDelegate = await Future.wait([
+        getOnFlow(widget.isDelete ? TranslateConstants.undelegate : TranslateConstants.delegate),
+        getOnFlow(widget.isDelete ? TranslateConstants.userDelegated : TranslateConstants.delegateToUser),
+      ]);
+      tooltip = tradDelegate[0];
+      title = tradDelegate[1];
     }
 
     return PopupMenuButton(
@@ -180,9 +188,15 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownItem<String>> dpItems = [];
     MultiSelectController<String> ctrls = MultiSelectController<String>();
-    var shared = await getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.filterPlaceholder);
-    var search = await getOnFlow(TranslateConstants.search);
-    var select = await getOnFlow(TranslateConstants.selectValue);
+    final tradDrop = await Future.wait([
+      getOnFlow(widget.isDelete ? TranslateConstants.userShared : TranslateConstants.filterPlaceholder),
+      getOnFlow(TranslateConstants.search),
+      getOnFlow(TranslateConstants.selectValue),
+    ]);
+    var shared = tradDrop[0];
+    var search = tradDrop[1];
+    var select = tradDrop[2];
+    if (!context.mounted) return Container();
     return FutureBuilder(
         future: APIService().get<model.Shallowed>("${widget.url}&shallow=enable", true, context),
         builder: (a,s) {
@@ -317,6 +331,10 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
 
   Future<void> load(String url, int start, int interval, String filter, String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls,  GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
+    if (url.contains("&filter_line=")) {
+      url.replaceAll("&filter_line=", "$filter+");
+      filter = "";
+    }
       var e = await APIService().get<model.Shallowed>("$url$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {
@@ -326,7 +344,7 @@ class LinkDropWidgetState extends State<LinkDropWidget> {
                 if (item.translatable) {
                   v = await getOnFlow(v);
                 }
-              } catch(e) {}
+              } catch(e) { /* ignore */ }
               items.add(DropdownItem<String>(value: "${item.id}", label: v, selected: false));
               ctrls.addItem(items.last);
             }

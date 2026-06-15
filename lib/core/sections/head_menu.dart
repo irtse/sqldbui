@@ -32,15 +32,16 @@ class HeadMenuWidgetState extends State<HeadMenuWidget> {
         Icons.close,
         Icons.check,
     ];
-    
+
+    final homeTooltip = (await getOnFlow(TranslateConstants.home)).toLowerCase();
     return Padding(
-      padding: EdgeInsets.only(left: noMenu ? 0 : 50, right: 50), 
+      padding: EdgeInsets.only(left: noMenu ? 0 : 50, right: 50),
       child: SizedBox(
         child: Row(children: [
           currentWidth > 400 ? RouterWidget(key: routerKey) : Container(),
-          Tooltip( message: (await getOnFlow(TranslateConstants.home)).toLowerCase(), child: InkWell( onTap: () { clear(); },  
+          Tooltip( message: homeTooltip, child: InkWell( onTap: () { clear(); },
             child: Image(image: const AssetImage('assets/images/logo.png'), width: currentWidth > 600 ? 60 : 0,))),
-          Tooltip( message: (await getOnFlow(TranslateConstants.home)).toLowerCase(), child:  InkWell( onTap: () { clear(); }, 
+          Tooltip( message: homeTooltip, child:  InkWell( onTap: () { clear(); },
             child:Container(
               padding: EdgeInsets.only(left: currentWidth > 600 ? 30 : 0), 
               child: currentWidth > 1000 ? Row( children: [ Text(BuildInfo.appName.toUpperCase(), overflow: TextOverflow.ellipsis,

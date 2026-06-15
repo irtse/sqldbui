@@ -123,13 +123,13 @@ class GridRowWidgetState extends State<GridRowWidget> {
             onChanged: (value) {
             widget.isSelected=value ?? false;
             if (widget.isSelected) { 
-              selectedGrid.add(cellID);
+              selectedGrid.add("$cellID--${widget.schemaID}");
               if (globalGridWidgetKey.currentState!.widget.isSelected) { 
-                unselectedGrid.removeWhere((e) => e == cellID);
+                unselectedGrid.removeWhere((e) => e == "$cellID--${widget.schemaID}");
               } else { unselectedGrid = []; }
             } else {  
-              selectedGrid.removeWhere( (e) => e == cellID); 
-              if (globalGridWidgetKey.currentState!.widget.isSelected) { unselectedGrid.add(cellID); 
+              selectedGrid.removeWhere( (e) => e == "$cellID--${widget.schemaID}"); 
+              if (globalGridWidgetKey.currentState!.widget.isSelected) { unselectedGrid.add("$cellID--${widget.schemaID}"); 
               } else { unselectedGrid = []; }
             }
             setState(() {});
@@ -144,19 +144,23 @@ class GridRowWidgetState extends State<GridRowWidget> {
         break;
       }
     }
+    final rowTrad = await Future.wait([
+      getOnFlow(TranslateConstants.newT),
+      getOnFlow(TranslateConstants.draftT),
+    ]);
     List<Widget> bs = [];
     for (var e in widget.cells) {
       bool readOnly = currentView?.schema[e.columnName] != null && (currentView?.schema[e.columnName]?.readonly ?? false);
       if (notNew[viewID] != null && notNew[viewID]!.contains(cellID)) { first = false; }
-      
-      
+
+
       if (first) {
         if (widget.news) {
           bs.add(Container(
             margin: EdgeInsets.only(right: 10),
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Theme.of(context).primaryColor),
-            child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-              child: Text((await getOnFlow(TranslateConstants.newT)).toLowerCase(), 
+            child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2),
+              child: Text(rowTrad[0].toLowerCase(),
                 style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
               )
             )
@@ -166,8 +170,8 @@ class GridRowWidgetState extends State<GridRowWidget> {
           bs.add(Container(
             margin: EdgeInsets.only(right: 10),
             decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(20)), color: Colors.grey),
-            child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2), 
-              child: Text((await getOnFlow(TranslateConstants.draftT)).toLowerCase(), 
+            child: Padding( padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 2),
+              child: Text(rowTrad[1].toLowerCase(),
                 style: TextStyle(fontSize: 10, color: Theme.of(context).highlightColor )
               )
             )

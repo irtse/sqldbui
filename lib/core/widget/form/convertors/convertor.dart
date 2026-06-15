@@ -698,6 +698,10 @@ class Convertor {
   String value, List<DropdownItem<String>> items, MultiSelectController<String> ctrls, 
   Map<String, model.Shallowed> mapped, String label, GlobalKey<OptionsListState> gk) async {
     if (filter == "") { return; }
+      if (url.contains("&filter_line=")) {
+        url.replaceAll("&filter_line=", "$filter+");
+        filter = "";
+      }
       var e = await APIService().get<model.Shallowed>("$url$filter&offset=$start&limit=$interval", filter != "", null);
         if (e.data != null) {
           for (var item in e.data!) {
