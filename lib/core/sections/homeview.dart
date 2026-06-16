@@ -15,6 +15,7 @@ import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
 import 'package:web/web.dart' if (kIsWeb) '' as web;
 import 'dart:ui_web' if (kIsWeb) '' as ui_web;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
+String? grafanaURL;
 
 // ignore: must_be_immutable
 GlobalKey<HomeViewWidgetState> globalHomeViewKey = GlobalKey<HomeViewWidgetState>();
@@ -44,9 +45,8 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            if (grafanaURL == null) {
-              grafanaURL ??= v.values["url"];
-            }
+            grafanaURL ??= v.values["url"];
+          
             
             return GrafanaFrame(key: htmlKey);
             /*return html.HtmlWidget( 
@@ -266,7 +266,6 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
   }  
 }
 
-String? grafanaURL;
 class GrafanaFrame extends StatefulWidget {
   const GrafanaFrame({
     super.key,
@@ -287,7 +286,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
       const Duration(seconds: 1),
       (_) {
         try {
-          grafanaURL = iframe.contentWindow?.location.href;
+          grafanaURL = iframe.contentWindow?.location.href ?? grafanaURL;
           print("GRAFAN : $grafanaURL");
         } catch (e) {
           print('Impossible de lire l\'URL: $e');
