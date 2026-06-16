@@ -12,7 +12,8 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
-
+import 'package:web/web.dart' if (kIsWeb) '' as web;
+import 'dart:ui_web' if (kIsWeb) '' as ui_web;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
 
 // ignore: must_be_immutable
@@ -43,12 +44,13 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            return html.HtmlWidget( 
+            return GrafanaFrame(key: htmlKey, url: v.values["url"]!);
+            /*return html.HtmlWidget( 
               key: htmlKey,
               '''
                 <iframe src="${ v.values["url"]! }"</iframe>
               ''',
-            );
+            );*/
           }
           return SizedBox(
             width: currentWidth - menuSize,
@@ -258,4 +260,65 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
       ]);
     }); 
   }  
+}
+
+
+class GrafanaFrame extends StatefulWidget {
+  final String url;
+
+  const GrafanaFrame({
+    super.key,
+    required this.url,
+  });
+
+  @override
+  State<GrafanaFrame> createState() => _GrafanaFrameState();
+}
+
+class _GrafanaFrameState extends State<GrafanaFrame> {
+  late final web.HTMLIFrameElement iframe;
+  late final String viewType;
+
+  Timer? timer;
+
+  void startPolling() {
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) {
+        try {
+          final href = iframe.contentWindow?.location.href;
+          print(href);
+        } catch (e) {
+          print('Impossible de lire l\'URL: $e');
+        }
+      },
+    );
+  }
+
+  void stopPolling() {
+    timer?.cancel();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    viewType = 'grafana-${DateTime.now().millisecondsSinceEpoch}';
+
+    iframe = web.HTMLIFrameElement()
+      ..src = widget.url
+      ..style.border = '0'
+      ..style.width = '100%'
+      ..style.height = '100%';
+
+    ui_web.platformViewRegistry.registerViewFactory(
+      viewType,
+      (int id) => iframe,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return HtmlElementView(viewType: viewType);
+  }
 }
