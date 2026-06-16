@@ -294,6 +294,11 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
       },
     );
   }
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
 
   void stopPolling() {
     timer?.cancel();
@@ -302,7 +307,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
   @override
   void initState() {
     super.initState();
-
+   
     viewType = 'grafana-${DateTime.now().millisecondsSinceEpoch}';
 
     iframe = web.HTMLIFrameElement()
@@ -319,6 +324,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
 
   @override
   Widget build(BuildContext context) {
+    startPolling();
     return HtmlElementView(viewType: viewType);
   }
 }
