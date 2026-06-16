@@ -44,7 +44,10 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            grafanaURL ??= v.values["url"];
+            if (grafanaURL == null) {
+              grafanaURL ??= v.values["url"];
+            }
+            
             return GrafanaFrame(key: htmlKey);
             /*return html.HtmlWidget( 
               key: htmlKey,
@@ -285,6 +288,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
       (_) {
         try {
           grafanaURL = iframe.contentWindow?.location.href;
+          print("GRAFAN : $grafanaURL");
         } catch (e) {
           print('Impossible de lire l\'URL: $e');
         }
