@@ -280,7 +280,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
               v = v.toLowerCase();
             }
           }
-        } catch(e) { print("qldsl $e"); }
+        } catch(e) { print("$e"); }
         items.add(DropdownItem<Map<String, dynamic>>(value:ser, label:v, selected: select));
       }
     }

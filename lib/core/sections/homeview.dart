@@ -44,7 +44,8 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
           if (a.data?.data != null && a.data!.data!.isNotEmpty 
           && a.data!.data![0].items.isNotEmpty && (a.data?.data?[0].items[0].values["url"] ?? "") != "") {
             var v = a.data!.data![0].items[0];
-            return GrafanaFrame(key: htmlKey, url: v.values["url"]!);
+            grafanaURL ??= v.values["url"];
+            return GrafanaFrame(key: htmlKey);
             /*return html.HtmlWidget( 
               key: htmlKey,
               '''
@@ -262,13 +263,10 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
   }  
 }
 
-
+String? grafanaURL;
 class GrafanaFrame extends StatefulWidget {
-  final String url;
-
   const GrafanaFrame({
     super.key,
-    required this.url,
   });
 
   @override
@@ -286,8 +284,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
       const Duration(seconds: 1),
       (_) {
         try {
-          final href = iframe.contentWindow?.location.href;
-          print(href);
+          grafanaURL = iframe.contentWindow?.location.href;
         } catch (e) {
           print('Impossible de lire l\'URL: $e');
         }
@@ -311,7 +308,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
     viewType = 'grafana-${DateTime.now().millisecondsSinceEpoch}';
 
     iframe = web.HTMLIFrameElement()
-      ..src = widget.url
+      ..src = grafanaURL ?? ""
       ..style.border = '0'
       ..style.width = '100%'
       ..style.height = '100%';

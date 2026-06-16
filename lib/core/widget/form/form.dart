@@ -85,7 +85,6 @@ class FormWidgetState extends State<DataFormWidget> {
         widget.wrappers = [];
         additionnal = [];
         widget.wrappersGlobalKey = [];
-        print("DATA ${refItem.dataPath}");
         if (!widget.noSub) {
           additionnal.add(SubFormularyWidget( 
             key: widget.subKey, 

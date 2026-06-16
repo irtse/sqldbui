@@ -249,7 +249,7 @@ class APIService {
           }
         }
         var response = await request(url, method, body, options);     
-        print("$url $filter $response");   
+        //print("$url $filter $response");   
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
@@ -354,7 +354,6 @@ class APIService {
     for (var key in cache.keys) {
       if (!asLabel.contains(key)) { asLabel += "&${key}_aslabel=${cache[key]!}"; }
     }
-    print("url $url");
     try { mainDownload(url, format, "get", true, 
       "${ format != "" ? "&export=$format" : ""}$asLabel", savePath, isWeb, context);
     } catch (e) { developer.log('LOG ERR PATH $e', name: 'my.app.category'); }
