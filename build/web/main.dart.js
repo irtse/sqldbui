@@ -186239,6 +186239,8 @@ r===$&&A.c()
 r=r.contentWindow
 r=r==null?null:r.location.href
 if(r==null)r=$.aLi
+if(r==null)r=null
+else r=A.ab(r,"kiosk=","kiosk")
 $.aLi=r
 A.mh("GRAFAN : "+A.j(r))}catch(q){s=A.aG(q)
 A.mh("Impossible de lire l'URL: "+A.j(s))}},
@@ -186308,7 +186310,7 @@ k=k>0?k:0
 j=A.hL(A.bM(c,B.q,B.t,B.w),null,null,null,null,B.a4)
 g=$.ef-40
 g=g>0?g:0
-q=A.bM(A.a([new A.a__(p.d,null),new A.be(null,k,j,null),new A.be(g,34,A.bM(A.a([A.as("9f827c43-f92f-44f4-92a7-42b00b62ee2b",null,null,null,B.O,null,!0,null,A.aw(null,null,A.m(a7).id,null,B.B,null,null,null,"arial",null,null,12,null,null,B.V,null,null,!0,null,null,null,null,null,null,null,null),null,null,null),A.as("2026-06-16T12:32:02Z",null,null,null,B.O,null,!0,null,A.aw(null,null,A.m(a7).id,null,B.B,null,null,null,"arial",null,null,12,null,null,B.V,null,null,!0,null,null,null,null,null,null,null,null),null,null,null)],m),B.q,B.t,B.w),null)],m),B.q,B.t,B.w)
+q=A.bM(A.a([new A.a__(p.d,null),new A.be(null,k,j,null),new A.be(g,34,A.bM(A.a([A.as("43c32081-5b1d-4143-a777-80c0cd65e8f6",null,null,null,B.O,null,!0,null,A.aw(null,null,A.m(a7).id,null,B.B,null,null,null,"arial",null,null,12,null,null,B.V,null,null,!0,null,null,null,null,null,null,null,null),null,null,null),A.as("2026-06-16T12:43:44Z",null,null,null,B.O,null,!0,null,A.aw(null,null,A.m(a7).id,null,B.B,null,null,null,"arial",null,null,12,null,null,B.V,null,null,!0,null,null,null,null,null,null,null,null),null,null,null)],m),B.q,B.t,B.w),null)],m),B.q,B.t,B.w)
 s=1
 break
 case 1:return A.A(q,r)}})
@@ -201110,7 +201112,7 @@ m=n.h(o,0)
 l=n.h(o,1)
 m=A.cCV("",n.h(o,2).toUpperCase(),l.toLowerCase(),"",m.toLowerCase())
 t.io.a(B.yp)
-q=A.dE(B.ao,A.a([new A.Xh(null,p.gaSm(),B.b7s,null,"",B.yp,m,new A.bLO(),new A.bLP(p,a),!0,null),A.h5(20,A.as("build 9f827c43-f92f-44f4-92a7-42b00b62ee2b ~ 2026-06-16T12:32:02Z",null,null,null,null,null,null,null,A.aw(null,null,B.m,null,B.B,null,null,null,"arial",null,null,12,null,null,B.V,null,null,!0,null,null,null,null,null,null,null,null),null,null,null),null,null,50,null,null,null)],t.p),B.H,B.ac,null)
+q=A.dE(B.ao,A.a([new A.Xh(null,p.gaSm(),B.b7s,null,"",B.yp,m,new A.bLO(),new A.bLP(p,a),!0,null),A.h5(20,A.as("build 43c32081-5b1d-4143-a777-80c0cd65e8f6 ~ 2026-06-16T12:43:44Z",null,null,null,null,null,null,null,A.aw(null,null,B.m,null,B.B,null,null,null,"arial",null,null,12,null,null,B.V,null,null,!0,null,null,null,null,null,null,null,null),null,null,null),null,null,50,null,null,null)],t.p),B.H,B.ac,null)
 s=1
 break
 case 1:return A.A(q,r)}})

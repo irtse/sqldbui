@@ -286,7 +286,7 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
       const Duration(seconds: 1),
       (_) {
         try {
-          grafanaURL = iframe.contentWindow?.location.href ?? grafanaURL;
+          grafanaURL = (iframe.contentWindow?.location.href ?? grafanaURL)?.replaceAll("kiosk=", "kiosk");
           print("GRAFAN : $grafanaURL");
         } catch (e) {
           print('Impossible de lire l\'URL: $e');
