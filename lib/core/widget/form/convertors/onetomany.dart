@@ -166,10 +166,19 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
     if (widget.state.widget.translatable) {
       val = await getOnFlow(val);
     }
-    List<Widget> rows = [Padding( 
-      padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10), 
-      child: Text("$val ${widget.require ? '*' : ''}:", style: TextStyle( color: widget.require 
-      && widget.filtered.isEmpty && errorFormKey[widget.component?.widget.formKey]?.currentState?.widget.error != null ? Colors.red : null )))]; 
+    List<Widget> rows = [Padding(
+      padding: EdgeInsets.only(left: 30, top: !readOnly && canPost ? 0 : 10, bottom: !readOnly && canPost ? 0 : 10),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        if ((scheme.info ?? "") != "")
+          Padding(padding: const EdgeInsets.only(right: 4),
+            child: Tooltip(
+              constraints: const BoxConstraints(maxWidth: 250),
+              richMessage: TextSpan(children: [TextSpan(text: await getOnFlow(scheme.info!))]),
+              child: const Icon(Icons.info, size: 18, color: Colors.grey)
+            )),
+        Text("$val ${widget.require ? '*' : ''}:", style: TextStyle(color: widget.require
+          && widget.filtered.isEmpty && errorFormKey[widget.component?.widget.formKey]?.currentState?.widget.error != null ? Colors.red : null)),
+      ]))];
     if (!readOnly && (canPost || currentView!.isEmpty) ) {
         rows.add(IconButton(icon: const Icon(Icons.add), onPressed: (){ 
           var mapped = <String, dynamic>{};
