@@ -23,6 +23,7 @@ import 'package:sqldbui2/core/widget/form/widget/error_formulary.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/page/translate.dart';
 
+bool canDialog = false;
 List<String> errors = [];
 @lazySingleton
 class ActionService {
@@ -181,6 +182,7 @@ class ActionService {
         }
         await APIService().call<model.View>(path, method, body, true, null).then((value) async {
           if(value.data != null && (value.data ?? []).isNotEmpty) {
+            canDialog = true;
             views.add(value.data!.first);
             bool killConsent = false;
             if ((consentCache[viewID]?[form.view?.name]?.length ?? 0) > 0 && !avoidConsent) {

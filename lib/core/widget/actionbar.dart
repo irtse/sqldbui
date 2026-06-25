@@ -1,3 +1,5 @@
+import 'package:sqldbui2/core/services/action.dart';
+import 'package:sqldbui2/core/services/trigger_cache.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/datagrid_button.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/dialog/link_box.dart';
@@ -78,6 +80,7 @@ class ActionBarState extends State<ActionBarWidget> {
   }
   Future<Widget> futureBuild(BuildContext context) async{
     try {
+      
       List<Widget> actions = <Widget>[];
       if (viewID != null && widget.view != null) {
         if (widget.view!.isList) {
@@ -173,6 +176,17 @@ class ActionBarState extends State<ActionBarWidget> {
                 }
               }
               if (tt.isNotEmpty) {
+                if (canDialog && !isTriggerOpen && ( widget.view?.items.length == 1 && !(widget.view?.items.first.isDraft ?? true))) {
+                  isTriggerOpen = true;
+                  canDialog = false;
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    // ignore: use_build_context_synchronously
+                    showDialog(context: context, barrierDismissible: true,
+                    builder: (builder) => TriggerBoxWidget(triggers: tt, isCached: true));
+                  });
+                } else {
+                  Future.delayed(Duration(seconds: 2), () => TriggerCacheService.triggers = []);
+                }
                 actions.add(getIconOffset((await getOnFlow(TranslateConstants.sendMail)).toLowerCase(), 
                   Icons.mail, 20, () {
                     showDialog(
