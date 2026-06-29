@@ -154,7 +154,7 @@ class DropDownState extends State<DropDownWidget> {
           isExpanded: true,
           hint: Text((await getOnFlow(TranslateConstants.selectValue)).toLowerCase(), style: TextStyle(fontSize: 12, color: Colors.grey),
             overflow: TextOverflow.ellipsis, softWrap: true),
-          value: widget.value ??  "${widget.autofill}",
+          initialValue: widget.value ??  "${widget.autofill}",
           style: TextStyle(fontSize: 14, 
             color: widget.isDark ? Theme.of(context).highlightColor : Colors.black, 
             overflow: TextOverflow.ellipsis),

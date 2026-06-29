@@ -44,9 +44,11 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
         var scheme = widget.triggers.first.schema[k];
         if (!scheme!.readonly) {
           try {
+            dynamic val = widget.triggers[widget.index].body[k];
             var w = await Convertor.formFieldByType(
               b, context, "", widget.triggers[widget.index].schema, scheme.type, k, scheme.label, 
-              scheme.description, scheme.require, scheme.readonly, widget.triggers[widget.index].body[k] == "" ? null : widget.triggers[widget.index].body[k], 
+              scheme.description, scheme.require, scheme.readonly, 
+              val == "" ? null : val, 
               scheme.actionPath, scheme.valuesPath, 
               "", null, currentView?.isEmpty ?? false, scheme.autoFill, scheme.translatable, null);
               widgets.add(
@@ -55,7 +57,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
                   padding: EdgeInsets.all(10),
                   child: w)
               );
-          } catch(e) {}
+          } catch(e) { print("FAILURE $e"); }
         }
       }
     }

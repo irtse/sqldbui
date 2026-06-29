@@ -67,7 +67,7 @@ class ManyToManyState extends State<ManyToManyWidget> {
                     schemaName: widget.schemaName,
                     name: widget.name,
                     readOnly: readOnly,
-                    value: widget.value,
+                    value: s.data?.data,
                     component: widget.component,
                     datas: snap.data!.data!..addAll(s.data?.data ?? []),
                     require: widget.require,
@@ -162,7 +162,7 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
   Future<Widget> futureBuild(BuildContext context) async {
     List<DropdownItem<Map<String, dynamic>>> items = <DropdownItem<Map<String, dynamic>>>[];
     ctrls = MultiSelectController<Map<String, dynamic>>();
-    widget.value = (widget.form[widget.name]) ?? widget.value ?? []; 
+    widget.value = (widget.form[widget.name]?.isNotEmpty ?? false) ? widget.form[widget.name] : widget.value ?? []; 
     saveChange(widget.component?.widget.view, widget.form, widget.name, widget.value);
     var l = widget.label;
     try { l = await getOnFlow(widget.label);
@@ -192,36 +192,36 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 return Container();
               }
               return GestureDetector( onLongPress:  () {
-          copyToClipboard("${widget.value}", context);
-        }, child:  Tooltip( message: "${widget.value ?? ""}", child: SizedBox(width: 400, height: 30, 
-                child: TextFormField(
-                  readOnly: true,
-                  initialValue: widget.value,
-                  style: TextStyle(fontSize: 14, color: Colors.black),
-                  decoration: InputDecoration(
-                    focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
-                    errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
-                    enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                    disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                    border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
-                    isDense: true,
-                    suffixIconColor: Theme.of(context).primaryColor,
-                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                    filled: true,
-                    fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
-                    contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
-                      top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
-                      bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
-                    suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
-                    hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
-                    labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
-                    labelText: l.toLowerCase(),
-                    errorStyle: const TextStyle(fontSize: 0,),
-                  ),
-                )))
-              );
-            }
+              copyToClipboard("${widget.value}", context);
+            }, child:  Tooltip( message: "${widget.value ?? ""}", child: SizedBox(width: 400, height: 30, 
+                    child: TextFormField(
+                      readOnly: true,
+                      initialValue: widget.value,
+                      style: TextStyle(fontSize: 14, color: Colors.black),
+                      decoration: InputDecoration(
+                        focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.red , width: 1.0)),
+                        errorBorder: OutlineInputBorder(borderSide: BorderSide(color:Colors.red, width: 1.0)),
+                        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                        disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                        border: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).splashColor, width: 1.0)),
+                        isDense: true,
+                        suffixIconColor: Theme.of(context).primaryColor,
+                        hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        filled: true,
+                        fillColor: widget.readOnly ? Theme.of(context).splashColor : (Colors.white),
+                        contentPadding: EdgeInsets.only(left: 20.0, right: 20.0, 
+                          top: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0,
+                          bottom: widget.type.contains("text") && !widget.label.contains("password") ? 20 : 0),
+                        suffixIcon: Icon(Icons.text_fields, color: Theme.of(context).secondaryHeaderColor),
+                        hintText: (await getOnFlow(TranslateConstants.writeValue)).toLowerCase(),
+                        labelStyle: TextStyle(color: Theme.of(context).secondaryHeaderColor),
+                        labelText: l.toLowerCase(),
+                        errorStyle: const TextStyle(fontSize: 0,),
+                      ),
+                    )))
+                  );
+                }
           } else {
             for (var val in widget.value ?? []) {
               val = val as model.Shallowed;
@@ -229,7 +229,6 @@ class _SubManyToManyState extends State<SubManyToManyWidget> {
                 if (items.where( (e)  => e.value["name"] == val.name).isEmpty) {
                   items.add(DropdownItem<Map<String, dynamic>>(value: val.serialize(), label:val.label ?? val.name ?? "", selected: true));
                 }
-                
               } else if (val.id == item.id) {
                 select = true;
                 break;
