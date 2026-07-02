@@ -96,7 +96,7 @@ class TriggerBoxWidgetState extends State<TriggerBoxWidget> {
           style: TextStyle(fontSize: 25, color: Theme.of(context).primaryColor))),
       if (widget.triggers[widget.index].description != null && widget.triggers[widget.index].description != "")
         Padding(padding: EdgeInsets.only(left: 20, right:20),
-            child :  Text(tradBtn[3].toLowerCase(), overflow: TextOverflow.ellipsis,
+            child :  Text(tradBtn[3].toLowerCase(),
               style: TextStyle(fontSize: 15, color: Colors.grey))),
       Padding( 
         padding: EdgeInsets.symmetric(vertical: 10),
