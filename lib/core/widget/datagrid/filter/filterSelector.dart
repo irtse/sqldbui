@@ -20,20 +20,47 @@ import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 
 // ignore: must_be_immutable
+GlobalKey<FilterSelectorWidgetState> selectorKey = GlobalKey<FilterSelectorWidgetState>();
 class FilterSelectorWidget extends StatefulWidget {
   Filters? filterMain;
   String schemaName;
   model.View view;
   Map<String, model.SchemaField> schema = {};
-  FilterSelectorWidget ({ super.key, required this.filterMain, 
+  FilterSelectorWidget ({ required this.filterMain, 
   required this.view,
   required this.schema, required this.schemaName
-});
+}) : super(key: selectorKey);
   @override FilterSelectorWidgetState createState() => FilterSelectorWidgetState();
 }
 bool check = true;
 bool forceFilter = false;
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
+  apply() {
+    if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
+                        globalGridKey.currentState!.setState(() {
+                          globalGridKey.currentState!.widget.isSelected = true;
+                        });
+                          
+                          globalOffset = 0;
+                          globalFilter[viewID] = Filters(); // empty filter to refill with new
+                          for (var filter in filterRowsWidget[viewID] ?? []) {
+                            if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
+                              return; 
+                            }
+                            globalFilter[viewID]?.add("${filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName}", Filter(
+                              column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, 
+                              realName: filter.beforeColumn.join("."),
+                              label: filter.label ?? filter.columnName,
+                              type: filter.type, 
+                              value: filter.value, 
+                              index: filter.index, 
+                              connector: filter.connector, 
+                              comparator: filter.comparator));
+                          }
+                          noFilterRetrieval = true;
+                          confirmCache = {};
+  }
+
   @override Widget build(BuildContext context) {
     if (filterRestr[viewID] != null && !tempRemoval && check) {
       check = false;
@@ -80,7 +107,11 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
     var toggles = ["new", "old", "draft"];
     var togglesShare = ["shared_by", "shared_to"];
     var togglesShareIcons = [Icons.share, Icons.folder_shared];
-
+    Future.delayed(Duration(seconds: 1), () {
+      if ((filterRowsWidget[viewID] ?? []).isNotEmpty) {
+        apply();
+      } 
+    });
     return Column( children : [ 
       Stack( children: [ 
             currentWidth > 1000 ? 
@@ -214,30 +245,9 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
                       Padding(padding: const EdgeInsets.only(left: 5), 
                       child: FutureBuilder(future: getOnFlow(TranslateConstants.filterApplyT), builder: (a, s) {
                         return FilterSelectorButtonWidget(function: () async {
-                        if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
-                        globalGridKey.currentState!.setState(() {
-                          globalGridKey.currentState!.widget.isSelected = true;
-                        });
-                          
-                          globalOffset = 0;
-                          globalFilter[viewID] = Filters(); // empty filter to refill with new
-                          for (var filter in filterRowsWidget[viewID] ?? []) {
-                            if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
-                              return; 
-                            }
-                            globalFilter[viewID]?.add("${filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName}", Filter(
-                              column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, 
-                              realName: filter.beforeColumn.join("."),
-                              label: filter.label ?? filter.columnName,
-                              type: filter.type, 
-                              value: filter.value, 
-                              index: filter.index, 
-                              connector: filter.connector, 
-                              comparator: filter.comparator));
-                          }
-                          noFilterRetrieval = true;
-                          confirmCache = {};
-                      }, icon: Icons.check, tooltip: (s.data ?? TranslateConstants.filterApplyT).toLowerCase(), parent: this);
+                          apply();
+                        }, icon: Icons.check, 
+                        tooltip: (s.data ?? TranslateConstants.filterApplyT).toLowerCase(), parent: this);
                     })),
                     (filterRowsWidget[viewID]?.isNotEmpty ?? false) || (filterRestr[viewID] != null && filterRestr[viewID] != "" )  ? Padding(padding: const EdgeInsets.only(left: 5), 
                     child: FutureBuilder(future: getOnFlow(TranslateConstants.filterResetT), builder: (a, s) {

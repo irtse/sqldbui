@@ -591,7 +591,9 @@ class Convertor {
       );
     } else if (type.contains("bool")) {
       if (form[name] != null) { value = form[name]; }
-      return BooleanWidget(
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 100),
+        child: BooleanWidget(
         form: form, 
         type: type, 
         schemaName: schemaName, 
@@ -602,7 +604,7 @@ class Convertor {
         label: label, 
         component: comp,
         autofill: autofill,
-      );
+      ));
     } else if (type.contains("time") || type.contains("date")) { 
         return DateWidget(
           form: form, 

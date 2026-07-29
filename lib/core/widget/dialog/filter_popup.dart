@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/src/multi_dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/text_button.dart';
@@ -207,8 +208,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
                       }
                       stateSort!(() {}); stateFilter!(() {});
                     }
-                    noFilterRetrieval = true;  
-                    navigate = true;
+                    noFilterRetrieval = true;
                     confirmCache = {};
                     globalMainViewKey.currentState?.refresh(viewID, subViewID, null, true);
                     Navigator.of(context).pop();
@@ -484,7 +484,9 @@ class FilterSearchState extends State<FilterSearchWidget> {
         });  
       })),
       Form( key: widget.globalKey, child: Row( children : [
-        SizedBox( width: 255, child: Padding(
+        Padding(
+          padding: EdgeInsets.only(left: widget.type.contains("bool") ? 57.5 : 0, right: widget.type.contains("bool") ? 32.5 : 0), 
+          child: SizedBox( width: widget.type.contains("bool") ? 144 : 255, child: Padding(
           padding: const EdgeInsets.only(left: 20, right: 20 , bottom: 20.0), 
           child: isNull ? DropdownButtonFormField<String>( items: const [
                   DropdownMenuItem<String>(value: "NULL", child: Text("NULL", overflow: TextOverflow.ellipsis,)),
@@ -492,7 +494,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                 ], isExpanded: true,
                 hint: Text("${(await getOnFlow(TranslateConstants.select)).toLowerCase()} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...".toLowerCase(), 
                   overflow: TextOverflow.ellipsis, softWrap: true ),
-                value: widget.value == "NULL" ? "NULL" : "NOT NULL",
+                initialValue: widget.value == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return ""; } return null; },
                 style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
                 onChanged: (value) { widget.value = value; }, 
@@ -508,7 +510,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                   fillColor:Colors.white, hintStyle: TextStyle(fontSize: 12, color: Theme.of(context).splashColor),
                   border: const OutlineInputBorder(),contentPadding: const EdgeInsets.only(top: 17, left: 20.0, right: 20.0),
                   labelText: "${(await getOnFlow(TranslateConstants.value.toLowerCase())).toLowerCase()} ${widget.comparator.toUpperCase()}",
-                )) : w)) 
+                )) :  w ))) 
       ])), 
       isNull ? Container() : Container( margin: const EdgeInsets.only(bottom: 20),  child: ToggleSwitch(
         initialLabelIndex: toggles.indexWhere((element) => element.toLowerCase() == (widget.comparator.toLowerCase() == "not like" ? "!like" : widget.comparator)),
@@ -520,7 +522,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Padding( padding: const EdgeInsets.only(right: 10), child: await connectorButton("and")),
                   await connectorButton("or"), ...additionnal
-      ],), 
+      ]), 
     ]); 
   }
 }
