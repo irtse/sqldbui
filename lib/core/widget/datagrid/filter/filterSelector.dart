@@ -17,6 +17,7 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterRow.dart';
 
 // ignore: must_be_immutable
@@ -35,33 +36,75 @@ class FilterSelectorWidget extends StatefulWidget {
 bool check = true;
 bool forceFilter = false;
 class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
+  // The toolbar renders a dozen+ individually-translated tooltips/labels; on
+  // a cold cache they used to pop in one at a time as each resolved. Prime
+  // them as a single batch and show one clean loading bar instead — this
+  // widget is keyed globally and stays mounted for the app's lifetime, so
+  // this only ever runs once per session (instantly if already cached).
+  bool _barReady = false;
+  List<String> get _barStrings => [
+    TranslateConstants.filterHide,
+    TranslateConstants.filterShow,
+    TranslateConstants.filterSaveT,
+    TranslateConstants.filterDeleteT,
+    TranslateConstants.filterNew,
+    TranslateConstants.filterRM,
+    TranslateConstants.filterApplyT,
+    TranslateConstants.filterResetT,
+    "<state> quick filter",
+    "new", "old", "draft",
+  ];
+
+  @override void initState() {
+    super.initState();
+    _primeBarTranslations();
+  }
+
+  Future<void> _primeBarTranslations() async {
+    final strings = _barStrings;
+    if (strings.every((s) => TranslateConstants.onFlowTrad.containsKey(s))) {
+      _barReady = true;
+      return;
+    }
+    try {
+      await Future.wait(strings.map(getOnFlow)).timeout(const Duration(seconds: 15));
+    } catch (e) {
+      // Fall through and show the bar anyway, with English fallback labels.
+    }
+    if (mounted) {
+      setState(() { _barReady = true; });
+    }
+  }
+
   apply() {
     if (filterRestr[viewID] == null) { filterRestr[viewID] = ""; }
-                        globalGridKey.currentState!.setState(() {
-                          globalGridKey.currentState!.widget.isSelected = true;
-                        });
+    globalGridKey.currentState!.widget.isSelected = true;
                           
-                          globalOffset = 0;
-                          globalFilter[viewID] = Filters(); // empty filter to refill with new
-                          for (var filter in filterRowsWidget[viewID] ?? []) {
-                            if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
-                              return; 
-                            }
-                            globalFilter[viewID]?.add("${filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName}", Filter(
-                              column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, 
-                              realName: filter.beforeColumn.join("."),
-                              label: filter.label ?? filter.columnName,
-                              type: filter.type, 
-                              value: filter.value, 
-                              index: filter.index, 
-                              connector: filter.connector, 
-                              comparator: filter.comparator));
-                          }
-                          noFilterRetrieval = true;
-                          confirmCache = {};
+    globalOffset = 0;
+    globalFilter[viewID] = Filters(); // empty filter to refill with new
+    for (var filter in filterRowsWidget[viewID] ?? []) {
+      if (filter.formKey.currentState == null || !filter.formKey.currentState!.validate()) {
+        return; 
+      }
+    globalFilter[viewID]?.add("${filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName}", 
+    Filter(
+      column: filter.beforeColumn.isNotEmpty ? filter.beforeColumn.first : filter.columnName, 
+      realName: filter.beforeColumn.join("."),
+      label: filter.label ?? filter.columnName,
+      type: filter.type, 
+      value: filter.value, 
+      index: filter.index, 
+      connector: filter.connector, 
+      comparator: filter.comparator));
+    }
+    noFilterRetrieval = true;
+    confirmCache = {};
   }
 
   @override Widget build(BuildContext context) {
+    if (!_barReady) {
+      return const LoadingBarWidget(height: 40);
+    }
     if (filterRestr[viewID] != null && !tempRemoval && check) {
       check = false;
       if ((globalFilter[viewID]?.filters ?? {}).isNotEmpty) {
@@ -355,24 +398,46 @@ class FilterSelectorWidgetState extends State<FilterSelectorWidget> {
     ]);
   }
   Future<void> resetList() async {
-    var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
-    var e = await APIService().getWithOffset<model.View>(globalGridKey.currentState?.widget.view?.linkPath ?? defaultPath, true, context);
-    globalGridKey.currentState?.widget.view?.items = [];
-    for (var view in e.data ?? []) { 
-      globalGridKey.currentState?.widget.view?.max = view?.max;
-      for (var item in view.items) { 
-        if ((globalGridKey.currentState?.widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) { 
-          globalGridKey.currentState?.widget.view?.items.add(item); 
+    // Use a paired begin/end counter (not a plain bool) so an overlapping
+    // resetList() call (auto-apply racing with a button click) can't have one
+    // call's `end` hide the loader while the other call is still in flight,
+    // and wrap the fetch in try/finally so `end` always fires even on error
+    // or if the grid happens to be unmounted mid-flight.
+    beginExplicitGridReload();
+    // Target the rows only (globalSubGridKey), not the whole grid
+    // (globalGridKey) — GridWidgetState.build() unconditionally rebuilds
+    // `columns` from scratch, and a filter reload never changes which
+    // columns exist, only which rows are shown.
+    globalSubGridKey.currentState?.setState(() {});
+    try {
+      var defaultPath = viewID != null ? "${APIConstants.genericEndpost}${subViewID != null ? viewID!.substring(1) : "dbview"}?rows=${subViewID != null ? "$subViewID" : viewID!.substring(1)}" : "";
+      // Dio here has no connect/receive timeout, so a stalled request would
+      // otherwise leave this reload (and its loader) stuck forever.
+      var e = await APIService().getWithOffset<model.View>(globalGridKey.currentState?.widget.view?.linkPath ?? defaultPath, true, context)
+          .timeout(const Duration(seconds: 30));
+      globalGridKey.currentState?.widget.view?.items = [];
+      for (var view in e.data ?? []) {
+        globalGridKey.currentState?.widget.view?.max = view?.max;
+        for (var item in view.items) {
+          if ((globalGridKey.currentState?.widget.view?.items.where((element) => element.values['id'] == item.values['id']) ?? []).isEmpty) {
+            globalGridKey.currentState?.widget.view?.items.add(item);
+          }
         }
       }
+    } catch (e) {
+      // Swallow here: this reload is fired without being awaited by its
+      // callers, so an unhandled timeout/network error would surface as an
+      // uncaught async exception instead of just leaving the view as-is.
+    } finally {
+      endExplicitGridReload();
     }
     Future.delayed(Duration(seconds: 1), () {
       globalActionBar.currentState?.setState(() {
         globalActionBar.currentState?.widget.view = globalGridKey.currentState?.widget.view;
       });
-    }); 
+    });
     confirmCache = {};
-    globalGridKey.currentState?.setState(() { });
+    globalSubGridKey.currentState?.setState(() {});
     setState(() { });
   }
 
@@ -414,7 +479,7 @@ class SubFilterSelectorWidgetState extends State<SubFilterSelectorWidget> {
           }
           if ((i.selected && ( widget.filterMain == null || widget.filterMain!.isEmpty) && filterRestr[viewID] != ""
             && filterRestr[viewID] != null && !noFilterRetrieval)
-            || ((filterRowsWidget[viewID]?.isNotEmpty ?? false)  && i.fields.isNotEmpty && filterRestr[viewID] != "" && filterRestr[viewID] != null)) { 
+            || ((filterRowsWidget[viewID]?.isNotEmpty ?? false)  && i.fields.isNotEmpty && filterRestr[viewID] != "" && filterRestr[viewID] != null && !noFilterRetrieval)) {
               globalNew[viewID] = i.elder;
               refreshFilter(i.fields);
               check = true;

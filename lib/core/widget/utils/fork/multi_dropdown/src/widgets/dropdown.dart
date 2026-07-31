@@ -181,6 +181,7 @@ class _Dropdown<T> extends StatelessWidget {
       child: ListTile(
         title: Text(option.label),
         trailing: trailing,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         dense: true,
         enabled: !option.disabled,
         selected: option.selected,

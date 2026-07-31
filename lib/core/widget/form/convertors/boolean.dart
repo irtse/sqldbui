@@ -104,7 +104,7 @@ class _BooleanState extends State<BooleanWidget> {
           activeColor: Colors.green, inactiveColor: Colors.grey,
           activeChild: Text("$label${widget.require ? '*' : ''}".toLowerCase()), 
           inactiveChild: Text("$label${widget.require ? '*' : ''}".toLowerCase()), 
-          borderRadius:  const BorderRadius.all(Radius.circular(15)),
+          // borderRadius:  const BorderRadius.all(Radius.circular(15)),
           height: 30.0, disabledOpacity: 0.5,
           onChanged: (value) {
             saveChange(widget.component?.widget.view, widget.form, widget.name, value);

@@ -126,6 +126,7 @@ class TranslateConstants {
   static String funcColErr = "no column function";
   static String colCompFilter = "please select a comparator to filter...";
   static String emptyData = "EMPTY DATA";
+  static String noColumns = "NO COLUMNS";
   static String newT = "NEW";
   static String draftT = "DRAFT";
   static String lost = "Seems pretty lost... go on another page please :)";
@@ -225,7 +226,7 @@ setTranslateCookie() async {
 }
 
 translate( String addTranslation) async {
-  if (TranslateConstants.onFlowTrad[addTranslation] == null) {
+  if (TranslateConstants.onFlowTrad[addTranslation] != null) {
     return;
   }
   GoogleTranslator().translate(addTranslation, to: TranslateConstants.lang).then( (e) {
@@ -389,6 +390,7 @@ Future<void> setUpTranslate() async {
   translate(TranslateConstants.funcColErr);
   translate(TranslateConstants.placeHolderValue);
   translate(TranslateConstants.emptyData);
+  translate(TranslateConstants.noColumns);
   translate(TranslateConstants.newT);
   translate(TranslateConstants.lost);
   translate(TranslateConstants.undoAction);

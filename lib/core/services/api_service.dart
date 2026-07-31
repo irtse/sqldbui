@@ -198,7 +198,7 @@ class APIService {
           } else if (f.comparator == ">=") { filter += "${f.realName ?? f.column}%3E%3A${f.value}";
           } else if (f.comparator == "in file") { filter += "${f.realName ?? f.column}~~${f.value}";
           } else { filter += "${f.realName ?? f.column}${f.comparator == "<" ? "%3C" : "%3E"}${f.value}"; }
-          filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "");
+          filter += f.connector == "and" ? "+" : ( f.connector == "or" ? "|" : "+");
         }
       }
       if (globalNew[viewID] != null && globalNew[viewID] != "all") { 
@@ -248,8 +248,8 @@ class APIService {
             return cache[url]! as APIResponse<T>;
           }
         }
-        var response = await request(url, method, body, options);     
-        //print("$url $filter $response");   
+        var response = await request(url, method, body, options);    
+        print("$url");   
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:sqldbui2/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sqldbui2/model/filter.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/page/translate.dart';
 import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/model/view.dart' as model;
@@ -80,7 +81,6 @@ class DatagridWidget extends StatefulWidget {
 bool showMore = true;
 class DatagridWidgetState extends State<DatagridWidget> {
   List<DropdownMenuItem<String>> dpItems = <DropdownMenuItem<String>>[];
-
   @override Widget build(BuildContext context) {
     if (filterRowsWidget[viewID] == null) {
       filterRowsWidget[viewID!] = [];
@@ -142,12 +142,20 @@ class DatagridWidgetState extends State<DatagridWidget> {
     if (!schemeItems.containsKey(viewID)) {
       schemeItems[viewID ?? ""] = [];
       fastTranslation[viewID ?? ""] = {};
-      final allKeys = ["id", ...order];
-      final translated = await Future.wait(allKeys.map((o) {
-        var scheme = widget.view?.schema[o];
-        var t = scheme?.label ?? o;
-        return (scheme?.translatable ?? false) ? getOnFlow(t) : Future.value(t);
-      }));
+      final List<String> allKeys = ["id", ...order.map((e) => "$e")];
+      List<String> translated;
+      try {
+        // The translation API client has no built-in timeout either; bound it
+        // so a stalled translation call can't hang the grid's first paint
+        // forever. Fall back to the raw (untranslated) labels on timeout.
+        translated = await Future.wait<String>(allKeys.map((o) {
+          var scheme = widget.view?.schema[o];
+          String t = scheme?.label ?? o;
+          return (scheme?.translatable ?? false) ? getOnFlow(t) : Future.value(t);
+        })).timeout(const Duration(seconds: 20));
+      } catch (e) {
+        translated = allKeys.map((o) => widget.view?.schema[o]?.label ?? o).toList();
+      }
       for (var (i, o) in allKeys.indexed) {
         var scheme = widget.view?.schema[o];
         var t = (scheme?.translatable ?? false) ? translated[i] : translated[i];
@@ -213,7 +221,7 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
     var schema = view.schema;
     bool isMath = forceMath || (modeIndex[viewID]  == 1 && editMode[viewID] == "math");
     List<String> seen = [];
-    if (filterTempOrderView[viewID] == null  && filterOrderView[viewID] == null) {
+    if ((filterTempOrderView[viewID] == null || filterTempOrderView[viewID]!.isEmpty) && filterOrderView[viewID] == null) {
       var newOrder = view.schema.keys.where( (e) {
         return view.schema[e]?.inResume != null; 
       }).toList();
@@ -240,9 +248,15 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
         filterTempOrderView[viewID] = forceOrder ??  newOrder ?? filterTempOrderView[viewID] ?? [];
       }
     }
-
+    if ((forceOrder ?? []).isEmpty) {
+      forceOrder = null;
+    }
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
-    List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {    
+    print("ORD ${forceOrder} ${filterTempOrderView[viewID]} ${filterOrderView[viewID]} ${view.order}");
+    if (order.isEmpty) {
+      order = view.order;
+    }
+    List<dynamic> o = [  ...order.where( (e) => e != "id")].where( (f) {
       String type = f == null ? "float" : (f == "id" ? "integer" : schema[f]?.type ?? "varchar");
       bool ok = (f == "id" && !subtable) || !seen.contains(f) && (f != "description" && schema[f] != null
           && ((isMath && ["float", "double", "int", "money", "decimal"].contains(type)) || !isMath));

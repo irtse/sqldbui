@@ -39,7 +39,7 @@ class WorkflowPanelWidgetState extends State<WorkflowPanelWidget> {
               inactiveColor: Colors.grey,
               activeChild: Text(hub.name),
               inactiveChild: Text(hub.name), 
-              borderRadius:  const BorderRadius.all(Radius.circular(15)),
+              // borderRadius:  const BorderRadius.all(Radius.circular(15)),
               width: hub.name.length * 10,
               height: 30.0,
               disabledOpacity: 0.5,

@@ -58,22 +58,34 @@ class GridRowWidget extends StatefulWidget {
   @override GridRowWidgetState createState() => GridRowWidgetState();
 }
 class GridRowWidgetState extends State<GridRowWidget> {
-  @override Widget build(BuildContext context) { 
+  Widget? _lastCells;
+  Widget _cellsFallback() {
+    if (_lastCells != null) { return _lastCells!; }
+    // Deliberately invisible — no border, no spinner. Each row already
+    // awaits its own cell content independently (the FutureBuilder in
+    // build() below), so this is only ever on screen for a very short,
+    // variable window; giving it its own visible shape/spinner just reads
+    // as rows flickering into a different look before settling.
+    return SizedBox(height: 50, width: widget.contextWidth);
+  }
+  @override Widget build(BuildContext context) {
     widget.state = this;
     return modeIndex[viewID]  == 1 ? Row(children: [ FutureBuilder( future: getCellsContent(context), builder: (a, s) {
       if (s.data != null) {
+        _lastCells = s.data!;
         return s.data!;
       }
-      return Container();
+      return _cellsFallback();
     }) ]) : MouseRegion(
       onEnter: (b) { setState(() { widget.isHovered = true; }); },
       onExit: (b) { setState(() { widget.isHovered = false; }); },
-      child: Stack( alignment: Alignment.center, children: [ 
+      child: Stack( alignment: Alignment.center, children: [
         Row(children: [FutureBuilder( future: getCellsContent(context), builder: (a, s) {
           if (s.data != null) {
+            _lastCells = s.data!;
             return s.data!;
           }
-          return Container();
+          return _cellsFallback();
         })]),
         if (widget.sharedTo.isNotEmpty)
           Positioned(left: 45, top: 0, bottom: 0, child: Center(child: FutureBuilder(future: getOnFlow("shared to :"), builder: (a,s) {

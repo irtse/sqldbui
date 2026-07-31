@@ -52,7 +52,7 @@ class LinkBoxWidgetState extends State<LinkBoxWidget> {
           additionnal.add(Padding( padding: EdgeInsets.only(top: 10), child: AdvancedSwitch(
                   initialValue: widget.sharing?.body[add] ?? false,
                   activeColor: Theme.of(context).primaryColor,  inactiveColor: Colors.grey,
-                  borderRadius:  const BorderRadius.all(Radius.circular(15)),
+                  // borderRadius:  const BorderRadius.all(Radius.circular(15)),
                   activeChild: FutureBuilder(future: getOnFlow(add.replaceAll("_", " ")), builder: (a,s) {
                     if (s.data != null) {
                       return Text(s.data!.toLowerCase());

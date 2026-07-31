@@ -16,12 +16,90 @@ import 'package:sqldbui2/core/widget/datagrid/widget/cell.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/value.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/column.dart';
 import 'package:sqldbui2/core/widget/dialog/filter_cols_popup.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/core/widget/datagrid/widget/bottom_column.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 
 String? isNew;
 double refWidth = 0;
 double maxWidth = 0;
+
+// Two independent sources can be reloading the grid at once: the main view
+// fetch driven by MainViewWidgetState, and an explicit filter-apply driven by
+// FilterSelectorWidgetState.resetList(). They're tracked separately so one
+// finishing early can never clobber the other's still-in-flight state for the
+// safety-valve timer below. But only the explicit source drives GridWidget's
+// own nested overlay (see `if (_explicitReloadCount > 0)` further down):
+// while the main view is reloading, MainViewWidgetState already covers the
+// whole view with its own overlay, and that one must win — showing this
+// nested one on top of it would double it up.
+bool _mainViewReloading = false;
+int _explicitReloadCount = 0;
+
+// Safety valve: whatever chain of rebuilds/retriggers is keeping the grid in
+// a "reloading" state, it should never take more than a couple seconds for a
+// single reload to actually land. If it's still "on" after that, force it
+// off rather than let the loader stay stuck — this is a backstop independent
+// of tracking down every possible retrigger path.
+Timer? _gridReloadSafety;
+void _armGridReloadSafety() {
+  if (_gridReloadSafety != null) { return; }
+  _gridReloadSafety = Timer(const Duration(seconds: 2, milliseconds: 500), () {
+    _gridReloadSafety = null;
+    _mainViewReloading = false;
+    _explicitReloadCount = 0;
+    // ignore: invalid_use_of_protected_member
+    globalGridKey.currentState?.setState(() {});
+  });
+}
+void _disarmGridReloadSafetyIfIdle() {
+  if (!_mainViewReloading && _explicitReloadCount == 0) {
+    _gridReloadSafety?.cancel();
+    _gridReloadSafety = null;
+  }
+}
+void setMainViewReloading(bool value) {
+  _mainViewReloading = value;
+  if (value) { _armGridReloadSafety(); } else { _disarmGridReloadSafetyIfIdle(); }
+}
+void beginExplicitGridReload() {
+  _explicitReloadCount++;
+  _armGridReloadSafety();
+}
+void endExplicitGridReload() {
+  if (_explicitReloadCount > 0) {
+    _explicitReloadCount--;
+  }
+  _disarmGridReloadSafetyIfIdle();
+}
+
+// Predictive flag: MainViewWidgetState (view.dart) sets this the moment its
+// own fetch starts, since — if the resolved view turns out to be a list —
+// the GridWidget it hands off to will freshly mount SubGridWidget, which
+// runs its own local FutureBuilder and briefly shows a differently-styled
+// standalone loader while it does. Holding the main overlay up until that
+// settles avoids the flicker of the main loader disappearing to reveal that
+// other loader for a frame before final content. Cleared by
+// SubGridWidgetState once it has real content, or by MainViewWidgetState
+// itself when the resolved view isn't going to mount a grid at all (nothing
+// would ever clear it in that case).
+bool _gridInitialLoading = false;
+bool get gridInitialLoading => _gridInitialLoading;
+Timer? _gridInitialLoadSafety;
+void setGridInitialLoading(bool value) {
+  _gridInitialLoading = value;
+  _gridInitialLoadSafety?.cancel();
+  _gridInitialLoadSafety = null;
+  if (value) {
+    _gridInitialLoadSafety = Timer(const Duration(seconds: 3), () {
+      _gridInitialLoadSafety = null;
+      _gridInitialLoading = false;
+      // ignore: invalid_use_of_protected_member
+      globalMainLoaderKey.currentState?.setState(() {});
+    });
+  }
+}
+
 Map<String?, Map<String, String>?> colFunction = {};
 Map<String, int> modeIndex  = {};
 Map<String?, List<String>> notNew = {};
@@ -81,7 +159,24 @@ class GridWidgetState extends State<GridWidget> {
    bool _isMouseDown = false;
   Offset _mousePosition = Offset.zero;
   final ScrollController _horizontal = ScrollController();
-  
+  // realOrder()/columns are computed synchronously from whatever widget.view
+  // holds at this exact build. If the columns/schema for this view are still
+  // being filled in by something async and arrive a bit later, nothing
+  // otherwise forces GridWidgetState to re-check — it would show "no
+  // columns" forever even once real columns exist. Re-check a few times.
+  int _columnsRecheckAttempts = 0;
+  bool _columnsRecheckScheduled = false;
+  // Keyed by columnName and reused across rebuilds (a filter-only reload
+  // calls setState() on this same State, but getColumn() below rebuilds
+  // `columns` from scratch every time) — without this, every
+  // GridColumnWidget got a brand new GlobalKey each rebuild, which Flutter
+  // has no choice but to treat as a brand new column: full teardown and
+  // remount of every header, even though only the rows actually changed.
+  final Map<String, GlobalKey<GridColumnWidgetState>> _columnKeys = {};
+  GlobalKey<GridColumnWidgetState> _keyForColumn(String columnName) {
+    return _columnKeys.putIfAbsent(columnName, () => GlobalKey<GridColumnWidgetState>());
+  }
+
   void _startAutoScroll() {
     const scrollSpeed = 10.0;
     const edgeThreshold = 50.0;
@@ -137,12 +232,62 @@ class GridWidgetState extends State<GridWidget> {
     }
     if (columns.isNotEmpty) {
       lastWidth = rects[viewID]?[columns.last.columnName]?.width ?? columns.last.width;
+      _columnsRecheckAttempts = 0;
+    } else if (!_columnsRecheckScheduled && _columnsRecheckAttempts < 5) {
+      _columnsRecheckScheduled = true;
+      _columnsRecheckAttempts++;
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _columnsRecheckScheduled = false;
+        if (mounted) { setState(() {}); }
+      });
     }
-    
 
     List<Widget> bottomColumns = [];
     List<Widget> additionnalContent = [];
     var subSize = showMore ? ((filterRowsWidget[viewID] ?? []).length * 45 < 138 ? (filterRowsWidget[viewID] ?? []).length * 45 : 138) : (!(editMode[viewID] == "math") ? 0 : 138);
+    
+    if (columns.isEmpty) {
+      if (_columnsRecheckAttempts < 5) {
+        // Still retrying — deliberately blank, not a loader of our own.
+        // Whatever overlay is already active (the main one, or the grid's
+        // explicit-reload one) covers this state when one applies; showing
+        // our own spinner here instead pops in and back out on every
+        // 500ms retry pass, which reads as flickering on its own.
+        return SizedBox(
+          height: widget.subTable ? null : currentHeigth - (120 + subSize) > 0 ?  currentHeigth - (120 + subSize) : 0,
+          width: (currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0),
+        );
+      }
+      if (gridInitialLoading) {
+        setGridInitialLoading(false);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // ignore: invalid_use_of_protected_member
+          globalMainLoaderKey.currentState?.setState(() {});
+        });
+      }
+      // A dedicated, simple screen for "no columns at all" instead of routing
+      // through SubGridWidget's column-measurement pipeline (col.prefetch(),
+      // maxWidth, rects...), which assumes at least one column and was the
+      // source of the loader getting stuck with nothing to measure.
+      return Container(
+        height: widget.subTable ? null : currentHeigth - (120 + subSize) > 0 ?  currentHeigth - (120 + subSize) : 0,
+        width: (currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0),
+        // highlightColor for the whole area (matching the header's normal
+        // background), with splashColor only below a header-sized margin —
+        // same proportions as the "no data" placeholder (SubGridWidget),
+        // instead of covering the full area with splashColor (a translucent
+        // tint), which reads noticeably darker over that much surface.
+        decoration: BoxDecoration(color: Theme.of(context).highlightColor),
+        child: Container(
+          decoration: BoxDecoration(color: Theme.of(context).splashColor),
+          alignment: Alignment.center,
+          child: FutureBuilder(future: getOnFlow(TranslateConstants.noColumns), builder: (a, s) {
+            return Text((s.data ?? TranslateConstants.noColumns).toLowerCase(),
+              style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor));
+          }),
+        ),
+      );
+    }
 
     if (widget.showCheckboxColumn) {
       allSelected = widget.isSelected;
@@ -216,6 +361,7 @@ class GridWidgetState extends State<GridWidget> {
                       radius: const Radius.circular(10),
                     ),
                     child: SubGridWidget(
+                        key: globalSubGridKey,
                         scroll: widget.scroll,
                         view: widget.view, schema: widget.schema, subWidthSize: widget.subWidthSize, schemaID: widget.schemaID,
                         contextWidth: widget.contextWidth, isSelected: widget.isSelected, showCheckboxColumn: widget.showCheckboxColumn,
@@ -226,13 +372,15 @@ class GridWidgetState extends State<GridWidget> {
                     
                 )
               ),
-              Container(  
+              Container(
+                height: 55,
+                width: (currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0),
                 decoration: BoxDecoration(
                   color: Theme.of(context).highlightColor,
                   boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 0, 
+                            spreadRadius: 0,
                             blurRadius: 3,
                             offset: const Offset(0, 3), // changes position of shadow
                           ),
@@ -257,10 +405,16 @@ class GridWidgetState extends State<GridWidget> {
     if (toggles.length <= (modeIndex[viewID ?? ""] ?? 0) ) {
       modeIndex[viewID ?? ""]  = 0;
     }
-      var w = Padding( 
-      padding: const EdgeInsets.only(right: 10), 
-      child: Tooltip( message: "mode", child: ToggleSwitch( 
-        icons: toggles, 
+      var w = Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Tooltip( message: "mode", child: ToggleSwitch(
+        // The package caches totalSwitches in initState() and never revisits
+        // it on prop updates, so a switch away from a view with the same
+        // ToggleSwitchState but a different icon count (delete action
+        // present/absent) crashes on an out-of-range icon lookup. Force a
+        // fresh state whenever the icon count changes instead of updating one.
+        key: ValueKey('mode-toggle-${toggles.length}'),
+        icons: toggles,
         minHeight: 27.5, 
         minWidth: 50, 
         fontSize: 12, 
@@ -330,16 +484,18 @@ class GridWidgetState extends State<GridWidget> {
     var realLabel = fastTranslation[viewID ?? ""]?[label] ?? label;
     schemeItems.add(DropdownMenuItem<String>(value: fieldName, child: Text(
       realLabel.toLowerCase(), overflow: TextOverflow.ellipsis)));
+      var resolvedColumnName = fieldName ?? mathColName[viewID] ?? TranslateConstants.total.toLowerCase();
       columns.add( GridColumnWidget(
+        key: _keyForColumn(resolvedColumnName),
         schema: widget.view?.schema ?? <String, model.SchemaField>{},
         view: widget.view!,
-        context: context, 
+        context: context,
         width: double.nan,
-        items: schemeItems, 
+        items: schemeItems,
         maxLength: order.length + (modeIndex[viewID]  == 1 && editMode[viewID] == "math" ? 1 : 0),
-        borderColor: Theme.of(context).splashColor, 
+        borderColor: Theme.of(context).splashColor,
         allowSorting: datas.isNotEmpty,
-        columnName: fieldName ??  mathColName[viewID] ?? TranslateConstants.total.toLowerCase(), 
+        columnName: resolvedColumnName,
         type:  schema[fieldName]?.schema != null && schema[fieldName]!.schema.isNotEmpty && type.contains("int") ? "link" : type,
         url: schema[fieldName]?.valuesPath != "" ? schema[fieldName]?.valuesPath : null,
         contextWidth: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
@@ -350,6 +506,12 @@ class GridWidgetState extends State<GridWidget> {
 }
 
 
+// Lets a pure row/filter reload (FilterSelectorWidgetState.resetList()) target
+// just the rows, bypassing GridWidgetState.build() entirely — which
+// unconditionally rebuilds `columns` from scratch (getColumn() gives every
+// header a fresh identity otherwise) even though a filter never changes
+// which columns exist, only which rows are shown.
+GlobalKey<SubGridWidgetState> globalSubGridKey = GlobalKey<SubGridWidgetState>();
 // ignore: must_be_immutable
 class SubGridWidget extends StatefulWidget {
   int subSize;
@@ -395,14 +557,41 @@ class SubGridWidget extends StatefulWidget {
 }
 class SubGridWidgetState extends State<SubGridWidget> {
   final ScrollController _vertical = ScrollController();
+  Widget? _lastBuilt;
+  int _buildGeneration = 0;
 
   @override Widget build(BuildContext context) {
-    return FutureBuilder(future: futureBuild(context), builder: (b,a) {
+    final int myGeneration = ++_buildGeneration;
+    final rowsContent = FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
+        _lastBuilt = a.data!;
+        // Only the most recent build's resolution reveals — an in-between
+        // one lags a rebuild that already superseded it (e.g. a
+        // column-width recheck), and would flash that outdated frame
+        // instead of letting the loader hold for the settled one.
+        if (gridInitialLoading && myGeneration == _buildGeneration) {
+          setGridInitialLoading(false);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            // ignore: invalid_use_of_protected_member
+            globalMainLoaderKey.currentState?.setState(() {});
+          });
+        }
         return a.data!;
       }
-      return Container();
+      if (_lastBuilt != null) {
+        return _lastBuilt!;
+      }
+      return SizedBox(
+        width: currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0,
+        height: currentHeigth - (178 + widget.subSize) > 0 ? currentHeigth - (178 + widget.subSize) : 0,
+        child: const LoadingOverlayWidget(standalone: true),
+      );
     });
+    // A filter-only reload (FilterSelectorWidgetState.resetList()) rebuilds
+    // just this State via globalSubGridKey, so its loader lives here too —
+    // scoped to the rows, not the whole grid (columns/header untouched).
+    if (_explicitReloadCount == 0) { return rowsContent; }
+    return Stack(children: [rowsContent, const LoadingOverlayWidget()]);
   }
   Future<Widget> futureBuild(BuildContext context) async {
     
@@ -449,8 +638,13 @@ class SubGridWidgetState extends State<SubGridWidget> {
           child: rows.isEmpty ? 
             Container(
               height: currentHeigth - (178 + t) > 0 ? currentHeigth - (178 + t) : 0,
-              decoration: BoxDecoration( color: Theme.of(context).splashColor), 
-              width: maxWidth +  widget.scroll + 86.5,
+              decoration: BoxDecoration( color: Theme.of(context).splashColor),
+              // When there are no columns at all (maxWidth stays 0), fall back
+              // to the available content width instead of collapsing to a
+              // sliver; otherwise keep the original column-driven width.
+              width: columns.isEmpty
+                  ? (currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0)
+                  : maxWidth + widget.scroll + 86.5,
               child: Center(
                 child: Text((await getOnFlow(TranslateConstants.emptyData)).toLowerCase(), 
                   style: TextStyle(fontSize: 70, color: Theme.of(context).highlightColor))
@@ -597,7 +791,8 @@ class MainCheckWidgetState extends State<MainCheckWidget>  {
   
   @override Widget build(BuildContext context) { 
     return Container(
-          width: 57, height: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
+          width: 57, 
+          height: modeIndex[viewID]  == 1 && showFunctions[viewID] == true ? 90 : 50, alignment: Alignment.center,
           decoration: BoxDecoration(border: Border(right: BorderSide( 
             color:  globalGridKey.currentState?.widget.borderColor ?? Colors.grey, 
             width:  globalGridKey.currentState?.widget.borderWidth ?? 1 ))),

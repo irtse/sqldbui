@@ -13,6 +13,7 @@ import 'package:sqldbui2/core/widget/actionbar.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 import 'package:sqldbui2/core/widget/datagrid/functions/functions_selector.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -173,8 +174,8 @@ class GridCellWidgetState extends State<GridCellWidget> {
           if (b.data != null) {
             return Center( child: b.data! );
           }
-          return Container();
-        })) : 
+          return const InlineLoaderWidget(size: 16);
+        })) :
       ListTile( 
         mouseCursor: modeIndex[viewID]  == 1 || !widget.isLink ? MouseCursor.defer : null, 
         enabled: !widget.cell.type.contains("enum") && !(currentView?.isEnum ?? false), 

@@ -10,6 +10,7 @@ import 'package:sqldbui2/core/sections/view.dart';
 import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/core/widget/form/convertors/convertor.dart';
 
 
@@ -61,26 +62,30 @@ class FilterRowWidgetState extends State<FilterRowWidget> {
     return Form( 
       key: widget.formKey, 
       autovalidateMode: AutovalidateMode.always, 
-      child: SizedBox(height: 45, child: Row(children: [
-              Padding(  padding: const EdgeInsets.only(left: 37, right: 10, top: 0), 
-                child: Text("${widget.index}", style : TextStyle( color: Theme.of(context).splashColor, fontSize: 15))),
-              Padding( padding: const EdgeInsets.only(left: 0, right: 20, top: 0), child: Icon(Icons.circle, color: Theme.of(context).splashColor, size: 15)),
-              FilterSubRowWidget(
-                view: widget.view,
-                widget: this,
-                schema: widget.schema,
-                label: widget.label,
-                type: widget.type, 
-                ref: widget.ref,  
-                comparator: widget.comparator,  
-                dir: widget.dir,   
-                columnName: widget.columnName,    
-                value: widget.value, 
-                connector: widget.connector, 
-              )
-            ])
+      child: Container(height: 45, 
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Theme.of(context).secondaryHeaderColor)),
+        ),
+        child: Row(children: [
+          Padding(  padding: const EdgeInsets.only(left: 37, right: 10, top: 0), 
+            child: Text("${widget.index}", style : TextStyle( color: Theme.of(context).splashColor, fontSize: 15))),
+          Padding( padding: const EdgeInsets.only(left: 0, right: 20, top: 0), child: Icon(Icons.circle, color: Theme.of(context).splashColor, size: 15)),
+          FilterSubRowWidget(
+            view: widget.view,
+            widget: this,
+            schema: widget.schema,
+            label: widget.label,
+            type: widget.type, 
+            ref: widget.ref,  
+            comparator: widget.comparator,  
+            dir: widget.dir,   
+            columnName: widget.columnName,    
+            value: widget.value, 
+            connector: widget.connector, 
           )
-        );
+        ])
+      )
+    );
   }
 }
 
@@ -124,12 +129,17 @@ class FilterSubRowWidget extends StatefulWidget implements ConvertorWidget {
 }
 
 class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
+  Widget? _lastBuilt;
   @override Widget build(BuildContext context) {
   return FutureBuilder(future: futureBuild(context), builder: (b,a) {
       if (a.hasData && a.data != null) {
+        _lastBuilt = a.data!;
         return a.data!;
       }
-      return Container();
+      if (_lastBuilt != null) {
+        return _lastBuilt!;
+      }
+      return const SizedBox(height: 45, child: InlineLoaderWidget(size: 16));
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
@@ -148,7 +158,7 @@ class FilterSubRowWidgetState extends State<FilterSubRowWidget> {
         if ((b.data != null)) {
           return b.data!;
         }
-        return Container();
+        return const InlineLoaderWidget(size: 14);
     });
     Widget? w2;
     List<dynamic> order = widget.isSub ? widget.schema.keys.toList() : realOrder(widget.view, false, false, null, widget.view!.max);

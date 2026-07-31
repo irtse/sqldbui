@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/src/multi_dropdown.dart';
@@ -45,7 +46,7 @@ class FilterPopUpState extends State<FilterPopUpWidget> {
       if (a.hasData && a.data != null) {
         return a.data!;
       }
-      return Container();
+      return const SizedBox(width: 15, height: 15, child: InlineLoaderWidget(size: 15));
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
@@ -306,7 +307,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
       if (a.hasData && a.data != null) {
         return a.data!;
       }
-      return Container();
+      return const SizedBox(width: 280, height: 180, child: InlineLoaderWidget(size: 24));
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {

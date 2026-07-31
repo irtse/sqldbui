@@ -40,23 +40,24 @@ class GridColumnWidget extends StatefulWidget {
   Color backgroundColor;
   Map<String, mod.SchemaField> schema;
 
-  GridColumnWidget ({ 
+  GridColumnWidget ({
+    Key? key,
     required this.view,
     required this.schema,
-    required this.columnName, 
-    required this.type, 
-    this.width = 300.0, 
+    required this.columnName,
+    required this.type,
+    this.width = 300.0,
     required this.context,
-    required this.items, 
-    this.allowSorting = false, 
-    required this.maxLength, 
+    required this.items,
+    this.allowSorting = false,
+    required this.maxLength,
     required this.contextWidth,
-    required this.label, 
-    this.borderWidth = 1, 
+    required this.label,
+    this.borderWidth = 1,
     this.iconColor = Colors.grey,
-    this.borderColor = Colors.grey, 
-    this.backgroundColor = Colors.transparent, 
-    this.url }): super(key: GlobalKey<GridColumnWidgetState>());
+    this.borderColor = Colors.grey,
+    this.backgroundColor = Colors.transparent,
+    this.url }): super(key: key ?? GlobalKey<GridColumnWidgetState>());
 
   @override
   GridColumnWidgetState createState() => GridColumnWidgetState();

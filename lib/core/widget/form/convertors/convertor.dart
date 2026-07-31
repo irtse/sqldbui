@@ -166,7 +166,8 @@ class Convertor {
           activeChild: Text((await getOnFlow(TranslateConstants.yes)).toLowerCase()), inactiveChild: Text(
             (await getOnFlow(TranslateConstants.no)).toLowerCase(), 
             style: TextStyle(color: Colors.white)),  
-          borderRadius:  const BorderRadius.all(Radius.circular(15)), height: 30.0, disabledOpacity: 0.5,
+          // borderRadius:  const BorderRadius.all(Radius.circular(15)), 
+          height: 30.0, disabledOpacity: 0.5,
           onChanged: (value) { 
             widget.value = value == true ? "true" : "false"; 
             if (id != "") {

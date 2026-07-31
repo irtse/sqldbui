@@ -1,3 +1,5 @@
+import 'package:sqldbui2/core/widget/datagrid/grid.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:sqldbui2/core/widget/dialog/trigger_box.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/services/trigger_cache.dart';
@@ -19,6 +21,27 @@ bool navigate = true;
 model.View? currentView;
 String? currentCat;
 GlobalKey<MainViewWidgetState> globalMainViewKey = GlobalKey<MainViewWidgetState>();
+// Untyped on purpose: only used to reach `setState()` on the private State
+// below from grid.dart, without exposing that private type across files.
+GlobalKey<State> globalMainLoaderKey = GlobalKey<State>();
+// Fully decoupled from the content it sits on top of: a plain sibling in
+// MainViewWidgetState's Stack, not a wrapper around it. Re-checks
+// `gridInitialLoading` (grid.dart) on its own rebuild and renders either the
+// overlay or nothing (a zero-size SizedBox) accordingly. Clearing the flag
+// only ever needs to touch this one small widget via its GlobalKey — never
+// MainViewWidgetState, whose FutureBuilder would refetch on every rebuild.
+class _MainLoaderWidget extends StatefulWidget {
+  const _MainLoaderWidget({super.key});
+  @override State<_MainLoaderWidget> createState() => _MainLoaderWidgetState();
+}
+class _MainLoaderWidgetState extends State<_MainLoaderWidget> {
+  @override Widget build(BuildContext context) {
+    if (gridInitialLoading) {
+      return const LoadingOverlayWidget(topMargin: 40);
+    }
+    return const SizedBox();
+  }
+}
 // ignore: must_be_immutable
 class MainViewWidget extends StatefulWidget{
   List<model.View>? views;
@@ -60,7 +83,11 @@ class MainViewWidgetState extends State<MainViewWidget> {
       future: isList ? APIService().getWithOffset<model.View>(widget.url ?? (view != null && view.linkPath != "" ? view.linkPath : defaultPath), navigate, context) : 
         APIService().get<model.View>(widget.url ?? (view != null && view.linkPath != "" ? view.linkPath : defaultPath),  navigate || widget.url != null, context), // a previously-obtained Future<String> or null
       builder: (BuildContext cont, AsyncSnapshot<APIResponse<model.View>> snap) {
-            Future.delayed(Duration(seconds: 2), () => navigate = false);
+            
+            Future.delayed(Duration(seconds: 2), () {
+              navigate = false;
+            });
+
             currentView = null;
             if (snap.data?.data != null && snap.data!.data!.isNotEmpty) { 
               currentView = snap.data!.data![0];               
@@ -71,16 +98,57 @@ class MainViewWidgetState extends State<MainViewWidget> {
               try { 
                 var v = widget.views?.firstWhere((element) => "${element.id}" == viewID?.substring(1));
                 if (v != null) { currentView?.readOnly = v.readOnly;  }
-              } catch(e) { /* */ }
-            } 
-            Future.delayed(const Duration(seconds:5), () { firstAPI = false; });
+              } catch(e) { /* */ }  
+            }
+            if (snap.connectionState == ConnectionState.waiting) {
+              setMainViewReloading(true);
+            } else {
+              setMainViewReloading(false);
+            }
+            Future.delayed(const Duration(seconds:5), () { 
+              firstAPI = false; 
+            });
             widget.url = null;
             selectedGrid = [];
             unselectedGrid = [];
-            return ViewWidget( 
-              view: viewID?.contains("${currentView?.id ?? 00000}") ?? false ? currentView : null, 
+            // Don't alter what gets returned here (view resolution/rebuild is
+            // correct now) — just lay a loading mask on top of it while this
+            // fetch is in flight, since a page change tears the whole
+            // ViewWidget subtree down to a blank placeholder and GridWidget's
+            // own overlay has nothing left to render on top of during that
+            // window. This is the "principal" overlay: it always wins over
+            // GridWidget's own nested one (see gridReloading in grid.dart,
+            // which deliberately ignores this same reload source).
+            // Exact match, not `.contains` — viewID "#12" would otherwise
+            // spuriously match a stale currentView of id "1", letting the
+            // previous view's (mismatched) columns render while the new
+            // view's data is still in flight.
+            bool viewMatches = currentView != null && viewID != null && "${currentView!.id}" == viewID!.substring(1);
+            var v = ViewWidget(
+              view: viewMatches ? currentView : null,
               views: widget.views
             );
+            if (snap.connectionState == ConnectionState.waiting) {
+              setGridInitialLoading(true);
+            } else {
+              // A grid is expected to mount fresh under `v` and run its own
+              // first (usually near-instant) local load — hold the loader
+              // until it clears the flag itself, instead of dropping it now
+              // and flashing its own differently-styled loader for a frame.
+              bool willMountGrid = (currentView?.isList ?? false) && subViewID == null;
+              if (!willMountGrid) {
+                setGridInitialLoading(false);
+              }
+            }
+            // `_MainLoaderWidget` is a plain sibling of `v`, not a wrapper
+            // around it, so toggling the loader (via globalMainLoaderKey,
+            // from grid.dart) only ever rebuilds that one small widget —
+            // never `v`, and never MainViewWidgetState itself. Rebuilding
+            // MainViewWidgetState would recreate the FutureBuilder's
+            // `future:` (it's built inline above, not memoized) and fire a
+            // brand new fetch — which would hit `ConnectionState.waiting`
+            // again, re-arm this same flag, and loop forever.
+            return Stack(children: [v, _MainLoaderWidget(key: globalMainLoaderKey)]);
         });
   }
   void refresh(String? id, String? subID, model.View? view, bool forceFirstAPI) {

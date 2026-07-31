@@ -9,6 +9,7 @@ import 'package:sqldbui2/core/widget/datagrid/grid.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/widget/datagrid/datagrid.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
+import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
 import 'package:flutter_advanced_switch/flutter_advanced_switch.dart';
 import 'package:sqldbui2/core/widget/datagrid/buttons/popup_button.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/multi_dropdown.dart';
@@ -123,7 +124,7 @@ class MenuColsPopUpState extends State<MenuColsPopUpWidget> {
       if (a.hasData && a.data != null) {
         return a.data!;
       }
-      return Container();
+      return const SizedBox(width: 300, height: 300, child: InlineLoaderWidget(size: 28));
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
@@ -227,7 +228,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
       if (a.hasData && a.data != null) {
         return a.data!;
       }
-      return Container();
+      return const SizedBox(width: 300, height: 250, child: InlineLoaderWidget(size: 24));
     });
   }
 
@@ -252,6 +253,69 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
       filterTempOrderView[viewID] = currentView != null ? currentView!.order : []; 
     }
     filterIndexOrderView[viewID] = filterIndexOrderView[viewID] ?? currentView!.order.where( (fieldName) => !(widget.schema[fieldName] == null)).toList();
+
+    var visibleFields = (filterIndexOrderView[viewID] ?? []).where( (el) => widget.schema[el] != null).toList();
+
+    // Column rows whose label is already translated (cached from a previous
+    // open, or already fetched by the grid's own fillSchemeItem()) render
+    // synchronously, no per-row wait. Only genuinely new labels fall back to
+    // an async FutureBuilder so a first-ever open doesn't block the whole
+    // dialog behind every column's translation call before showing anything.
+    Widget buildColRow(int index, String fieldName, String label) {
+      var isSelected = filterTempOrderView[viewID]!.contains(fieldName);
+      // Disable the switch instead of letting the user turn off the very
+      // last active column — that would leave the grid with nothing to
+      // display at all.
+      var isOnlyActive = isSelected && (filterTempOrderView[viewID]?.length ?? 0) <= 1;
+      return Center(
+          child: Padding( padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Row( children : [
+          index == 0 ? Container(width: 44) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
+            onTap: () {
+              var tmp = filterIndexOrderView[viewID]!;
+              var i = tmp.removeAt(index);
+              var b = tmp.sublist(0, index > 0 ? index - 1 : 0);
+              b.add(i);
+              b.addAll(tmp.sublist(index > 0 ? index - 1 : 0, tmp.length));
+              setState(() {
+                filterIndexOrderView[viewID] = b;
+                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+              });
+            }, child: const Icon(Icons.arrow_upward))),
+          Padding( padding: const EdgeInsets.only(right: 10),
+          child: Tooltip( message: label.toLowerCase(), child: AdvancedSwitch(
+              initialValue: isSelected,
+              enabled: !isOnlyActive,
+              activeColor: Colors.green, inactiveColor: Colors.grey,
+              activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text(label.toLowerCase(), overflow: TextOverflow.ellipsis)),
+              inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text(label.toLowerCase(), overflow: TextOverflow.ellipsis)),
+              // borderRadius:  const BorderRadius.all(Radius.circular(15)),
+              width: 165, height: 30.0, disabledOpacity: 0.5,
+              onChanged: (value) {
+                if (value) {
+                  filterTempOrderView[viewID]?.add(fieldName);
+                  filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+                } else {
+                  filterTempOrderView[viewID]?.remove(fieldName);
+                }
+                setState(() {});
+              }
+            ))
+          ),
+          index == visibleFields.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child: InkWell( onTap: () {
+              var tmp = filterIndexOrderView[viewID]!;
+              var i = tmp.removeAt(index);
+              var b = tmp.sublist(0, index + 1);
+              b.add(i);
+              b.addAll(tmp.sublist(index + 1, tmp.length));
+              setState(() {
+                filterIndexOrderView[viewID] = b;
+                filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
+              });
+          }, child: const Icon(Icons.arrow_downward))),
+        ])));
+    }
+
     if ("id".contains(widget.search ?? "")) {
       items.add(
         Center( 
@@ -264,7 +328,7 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
                 activeColor: Colors.green, inactiveColor: Colors.grey,
                 activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text("id", overflow: TextOverflow.ellipsis)), 
                 inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text("id", overflow: TextOverflow.ellipsis)), 
-                borderRadius:  const BorderRadius.all(Radius.circular(15)),
+                // borderRadius:  const BorderRadius.all(Radius.circular(15)),
                 width: 165, height: 30.0, disabledOpacity: 0.5,
                 onChanged: (value) { 
                   filterTempID[viewID] = value; 
@@ -274,59 +338,23 @@ class ColsPopUpState extends State<ColsPopUpWidget> {
           ]))));
     }
     
-    for (var (index,fieldName) in (filterIndexOrderView[viewID] ?? []).where( (el) => widget.schema[el] != null).indexed) {
-        if (widget.schema[fieldName] == null) { continue; }
-        var scheme =  widget.schema[fieldName]!; 
-        items.add(FutureBuilder(future: getOnFlow(scheme.label), builder: (a,s) { 
-          if (!(s.data ?? scheme.label).contains(widget.search ?? "")) {
-            return Container();
-          }
-          return Center( 
-            child: Padding( padding: const EdgeInsets.symmetric(vertical: 5), 
-            child: Row( children : [ 
-            index == 0 ? Container(width: 44) : Padding( padding: const EdgeInsets.symmetric(horizontal: 10), child: InkWell(
-              onTap: () {
-                var tmp = filterIndexOrderView[viewID]!;
-                var i = tmp.removeAt(index);
-                var b = tmp.sublist(0, index > 0 ? index - 1 : 0);
-                b.add(i);
-                b.addAll(tmp.sublist(index > 0 ? index - 1 : 0, tmp.length));
-                setState(() { 
-                  filterIndexOrderView[viewID] = b; 
-                  filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-                }); 
-              }, child: const Icon(Icons.arrow_upward))),
-            Padding( padding: const EdgeInsets.only(right: 10), 
-            child: Tooltip( message: (s.data ?? scheme.label).toLowerCase(), child: AdvancedSwitch(
-                initialValue: filterTempOrderView[viewID]!.contains(fieldName),
-                activeColor: Colors.green, inactiveColor: Colors.grey,
-                activeChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child: Text((s.data ?? scheme.label).toLowerCase(), overflow: TextOverflow.ellipsis)), 
-                inactiveChild: Padding( padding: EdgeInsets.symmetric(horizontal: 10), child:Text((s.data ?? scheme.label).toLowerCase(), overflow: TextOverflow.ellipsis)), 
-                borderRadius:  const BorderRadius.all(Radius.circular(15)),
-                width: 165, height: 30.0, disabledOpacity: 0.5,
-                onChanged: (value) { 
-                  if (value) { 
-                    filterTempOrderView[viewID]?.add(fieldName);      
-                    filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-                  } else { 
-                    filterTempOrderView[viewID]?.remove(fieldName); 
-                  }
-                }
-              ))
-            ),
-            index == filterIndexOrderView[viewID]!.length -1 ? Container() : Padding( padding: const EdgeInsets.only(right: 10), child: InkWell( onTap: () {
-                var tmp = filterIndexOrderView[viewID]!;
-                var i = tmp.removeAt(index);
-                var b = tmp.sublist(0, index + 1);
-                b.add(i);
-                b.addAll(tmp.sublist(index + 1, tmp.length));
-                setState(() { 
-                  filterIndexOrderView[viewID] = b; 
-                  filterTempOrderView[viewID] = filterIndexOrderView[viewID]?.where( (e) => filterTempOrderView[viewID]?.contains(e) ?? false).toList() ?? [];
-                }); 
-            }, child: const Icon(Icons.arrow_downward))),
-          ]))); 
-        }));
+    for (var (index,fieldName) in visibleFields.indexed) {
+        var scheme = widget.schema[fieldName]!;
+        var cachedLabel = TranslateConstants.onFlowTrad[scheme.label];
+        if (cachedLabel != null) {
+          if (!cachedLabel.contains(widget.search ?? "")) { continue; }
+          items.add(buildColRow(index, fieldName, cachedLabel));
+        } else {
+          items.add(FutureBuilder(future: getOnFlow(scheme.label), builder: (a, s) {
+            if (s.connectionState == ConnectionState.waiting) {
+              if (!scheme.label.contains(widget.search ?? "")) { return Container(); }
+              return const SizedBox(height: 40, child: InlineLoaderWidget(size: 18));
+            }
+            var label = s.data ?? scheme.label;
+            if (!label.contains(widget.search ?? "")) { return Container(); }
+            return buildColRow(index, fieldName, label);
+          }));
+        }
       }
     var ctrls = MultiSelectController<String>();
     for (var item in widget.items) {
