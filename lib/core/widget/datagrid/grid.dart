@@ -374,7 +374,9 @@ class GridWidgetState extends State<GridWidget> {
               ),
               Container(
                 height: 55,
-                width: (currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0),
+                constraints: BoxConstraints(
+                  minWidth: (currentWidth - widget.subWidthSize > 0 ? currentWidth - widget.subWidthSize : 0),
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).highlightColor,
                   boxShadow: [
