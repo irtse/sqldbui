@@ -139,6 +139,12 @@ class HomeScreenState extends State<HomeScreen> {
     } else {
       noReload = false;
     }
+    if (!AuthService.authCheckComplete) {
+      // Still verifying a possibly-stored session (token read + /auth/refresh
+      // round-trip) — show nothing rather than flashing the login screen for
+      // that whole window when the user actually is already logged in.
+      return const SizedBox();
+    }
     if (!AuthService.isLoggedIn) { return const LoginScreen(); }
     globalFilter = <String, Filters>{};
     rects = {};

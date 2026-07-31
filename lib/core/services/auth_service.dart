@@ -16,15 +16,29 @@ class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
   final service = APIService();
   factory AuthService() { return _instance; }
-  AuthService._internal() { 
+  AuthService._internal() {
     if (timeBomb == 60) {
       refresh(true).then((value) {
-        if (AuthService.isLoggedIn) {  homeKey.currentState!.refresh(null, null, false); }
-      }); 
-    } else { timer(); }
+        authCheckComplete = true;
+        if (AuthService.isLoggedIn) {
+          homeKey.currentState!.refresh(null, null, false);
+        } else {
+          // Genuinely not logged in (no/invalid stored token) — nothing else
+          // triggers a rebuild in this branch, so do it here to move past
+          // the "still checking" placeholder and reveal the login screen.
+          // ignore: invalid_use_of_protected_member
+          homeKey.currentState?.setState(() {});
+        }
+      });
+    } else { authCheckComplete = true; timer(); }
   }
 
   static bool _isAuthenticated = false;
+  // False until the initial stored-session check (refresh(true) above) has
+  // settled one way or the other. HomeScreenState uses this to avoid
+  // flashing the login screen for however long that check's network
+  // round-trip takes when the user actually does have a valid session.
+  static bool authCheckComplete = false;
   static User? user;
   String? error;
   static bool get isLoggedIn => _isAuthenticated;

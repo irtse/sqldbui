@@ -12,8 +12,9 @@ import 'package:sqldbui2/core/sections/menu/menu.dart';
 import 'package:sqldbui2/core/services/api_service.dart';
 import 'package:sqldbui2/core/sections/menu/redirect_button.dart';
 import 'package:sqldbui2/core/widget/form/convertors/consent.dart';
-// import 'dart:ui_web' if (kIsWeb) '' as ui_web;
-// import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
+import 'package:web/web.dart' if (kIsWeb) '' as web;
+import 'dart:ui_web' if (kIsWeb) '' as ui_web;
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart' if (kIsWeb) '' as html;
 String? grafanaURL;
 
 // ignore: must_be_immutable
@@ -33,7 +34,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     });
   }
   Future<Widget> futureBuild(BuildContext context) async {
-    //GlobalKey<html.HtmlWidgetState> htmlKey = GlobalKey<html.HtmlWidgetState>();
+    GlobalKey<html.HtmlWidgetState> htmlKey = GlobalKey<html.HtmlWidgetState>();
     List<Widget> comps = [];
     List<Widget> views = [];
     Widget? web;
@@ -46,8 +47,8 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
             var v = a.data!.data![0].items[0];
             grafanaURL ??= v.values["url"];
           
-            return Container();
-            // return GrafanaFrame(key: htmlKey);
+            
+            return GrafanaFrame(key: htmlKey);
             /*return html.HtmlWidget( 
               key: htmlKey,
               '''
@@ -264,7 +265,7 @@ class HomeViewWidgetState extends State<HomeViewWidget> {
     }); 
   }  
 }
-/*
+
 class GrafanaFrame extends StatefulWidget {
   const GrafanaFrame({
     super.key,
@@ -326,4 +327,4 @@ class _GrafanaFrameState extends State<GrafanaFrame> {
     startPolling();
     return HtmlElementView(viewType: viewType);
   }
-}*/
+}
