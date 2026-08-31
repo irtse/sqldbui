@@ -229,7 +229,7 @@ class DropDownState extends State<DropDownWidget> {
             return null;
           },
         ),
-        if (widget.form[widget.name] != null)
+        if (widget.form[widget.name] != null && !widget.readOnly)
            Positioned(right: 30, child: IconButton(
               onPressed: () => setState(() {
                 saveChange(widget.component?.widget.view, widget.form, widget.name, null); // PB FOR LINK ADD 

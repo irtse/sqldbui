@@ -252,7 +252,6 @@ List<dynamic> realOrder(model.View? view, bool subtable, bool forceMath, List<dy
       forceOrder = null;
     }
     var order = forceOrder ?? filterTempOrderView[viewID] ?? filterOrderView[viewID] ?? view.order;
-    print("ORD ${forceOrder} ${filterTempOrderView[viewID]} ${filterOrderView[viewID]} ${view.order}");
     if (order.isEmpty) {
       order = view.order;
     }

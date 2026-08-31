@@ -249,7 +249,7 @@ class APIService {
           }
         }
         var response = await request(url, method, body, options);    
-        print("$url");   
+        //print("$url");   
         if (response.statusCode == 302) {
           final locationHeader = response.headers.value('location');
           if (locationHeader != null) {
