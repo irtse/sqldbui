@@ -161,7 +161,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
                 var w = Padding( padding: EdgeInsets.only(left: 10.0, right: 10.0, top: field.type.contains("bool") && field.label.length > 10 ? 0 : 10, bottom: 10),
                 child: (field.info ?? "") != "" ? 
                 Stack(children: [  
-                      Padding(padding: EdgeInsetsGeometry.only(top: 8), child:
+                      Padding(padding: EdgeInsets.only(top: 8), child:
                       SizedBox( 
                         width: field.type.contains("bool") && field.label.length <= 10 ? 200 : (widget.subForm ? max - 50 : max), 
                         height: field.type.contains("text") ? 100 : ( 
@@ -174,7 +174,7 @@ class FormularyWidgetState extends State<FormularyWidget> {
                           left:field.type.contains("bool") ? 0 : null,
                           child: FutureBuilder(future: getOnFlow(field.info!), builder: (a,s) {
                             return Tooltip( 
-                            constraints: BoxConstraints(maxWidth: 250),
+                            //constraints: BoxConstraints(maxWidth: 250),
                             richMessage: TextSpan(
                               children: [
                                 TextSpan(

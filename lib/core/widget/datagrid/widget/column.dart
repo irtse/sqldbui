@@ -204,7 +204,7 @@ class GridColumnWidgetState extends State<GridColumnWidget> {
         height: showFunctions[viewID] == true ? 40 : 0, 
         padding: const EdgeInsets.all(10),
         child: dpItems.isEmpty ? null : DropdownButtonFormField<String>( 
-            initialValue: colFunction[viewID]?[widget.columnName],
+            value: colFunction[viewID]?[widget.columnName],
             alignment: Alignment.center, items: dpItems, 
             icon: Icon(Icons.functions, color: Theme.of(context).splashColor, size: 14,),
             hint: Opacity( opacity: .5,

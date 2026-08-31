@@ -172,7 +172,7 @@ class SubOneToManyState extends State<SubOneToManyWidget> {
         if ((scheme.info ?? "") != "")
           Padding(padding: const EdgeInsets.only(right: 4),
             child: Tooltip(
-              constraints: const BoxConstraints(maxWidth: 250),
+              //constraints: const BoxConstraints(maxWidth: 250),
               richMessage: TextSpan(children: [TextSpan(text: await getOnFlow(scheme.info!))]),
               child: const Icon(Icons.info, size: 18, color: Colors.grey)
             )),

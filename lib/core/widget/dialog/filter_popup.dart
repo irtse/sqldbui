@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqldbui2/core/widget/utils/loading_overlay.dart';
-import 'package:sqldbui2/core/widget/datagrid/filter/filterSelector.dart';
 import 'package:sqldbui2/core/widget/dialog/confirm_box.dart';
 import 'package:sqldbui2/core/widget/utils/fork/multi_dropdown/src/multi_dropdown.dart';
 import 'package:sqldbui2/core/widget/utils/text_button.dart';
@@ -495,7 +494,7 @@ class FilterSearchState extends State<FilterSearchWidget> {
                 ], isExpanded: true,
                 hint: Text("${(await getOnFlow(TranslateConstants.select)).toLowerCase()} ${await getOnFlow(widget.label.replaceAll("db", "").replaceAll("_", " "))}...".toLowerCase(), 
                   overflow: TextOverflow.ellipsis, softWrap: true ),
-                initialValue: widget.value == "NULL" ? "NULL" : "NOT NULL",
+                value: widget.value == "NULL" ? "NULL" : "NOT NULL",
                 validator: (values) { if (values == null) { return ""; } return null; },
                 style: TextStyle(fontSize: 14, color: Theme.of(context).secondaryHeaderColor, overflow: TextOverflow.ellipsis),
                 onChanged: (value) { widget.value = value; }, 

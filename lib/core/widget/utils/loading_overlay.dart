@@ -17,7 +17,7 @@ class LoadingOverlayWidget extends StatelessWidget {
   const LoadingOverlayWidget({super.key, this.standalone = false, this.topMargin = 0});
   @override Widget build(BuildContext context) {
     final content = Container(
-      color: Colors.black.withValues(alpha: 0.70),
+      color: Colors.black.withOpacity(0.7),
       alignment: Alignment.center,
       child: SpinKitCircle(color: Theme.of(context).primaryColor, size: 40),
     );

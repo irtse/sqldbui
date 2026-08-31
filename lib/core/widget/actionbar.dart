@@ -462,7 +462,7 @@ class ActionBarState extends State<ActionBarWidget> {
         decoration: BoxDecoration(
           // ignore: use_build_context_synchronously
           color: _theme.secondaryHeaderColor,
-          boxShadow: [  BoxShadow(color: Colors.black.withValues(alpha: 0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
+          boxShadow: [  BoxShadow(color: Colors.black.withOpacity(0.5), spreadRadius: 0, blurRadius: 3, offset: const Offset(0, 0)) ],
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: rows)); 
     } catch(e) {
